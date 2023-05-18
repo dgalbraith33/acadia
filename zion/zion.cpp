@@ -1,10 +1,8 @@
 #include <stdint.h>
 
-#define COM1 0x3f8
+#include "common/port.h"
 
-void outb(uint16_t port, uint8_t value) {
-  asm volatile("outb %0, %1" ::"a"(value), "Nd"(port));
-}
+#define COM1 0x3f8
 
 extern "C" void zion() {
   outb(COM1, 'a');
