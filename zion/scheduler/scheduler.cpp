@@ -49,8 +49,6 @@ class Scheduler {
     Process* root = Process::RootProcess();
     current_thread_ = root->GetThread(0);
     proc_list_.InsertProcess(Process::RootProcess());
-    // FIXME: Don't enqueue threads here.
-    Enqueue(root->CreateThread());
   }
   void Enable() { enabled_ = true; }
 
@@ -107,6 +105,8 @@ void InitScheduler() { gScheduler = new Scheduler(); }
 void EnableScheduler() { GetScheduler().Enable(); }
 
 void Yield() { GetScheduler().Yield(); }
+
+void EnqueueThread(Thread* thread) { GetScheduler().Enqueue(thread); }
 
 Process& CurrentProcess() { return GetScheduler().CurrentProcess(); }
 Thread& CurrentThread() { return GetScheduler().CurrentThread(); }

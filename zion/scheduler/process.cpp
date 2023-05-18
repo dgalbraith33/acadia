@@ -1,6 +1,7 @@
 #include "scheduler/process.h"
 
 #include "debug/debug.h"
+#include "scheduler/scheduler.h"
 #include "scheduler/thread.h"
 
 namespace {
@@ -22,7 +23,7 @@ Process* Process::RootProcess() {
   return proc;
 }
 
-Thread* Process::CreateThread() {
+void Process::CreateThread() {
   Thread* thread = new Thread(this, next_thread_id_++);
 
   ThreadEntry* entry = thread_list_front_;
@@ -33,7 +34,7 @@ Thread* Process::CreateThread() {
       .thread = thread,
       .next = nullptr,
   };
-  return thread;
+  sched::EnqueueThread(thread);
 }
 
 Thread* Process::GetThread(uint64_t tid) {

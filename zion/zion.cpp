@@ -18,6 +18,7 @@ extern "C" void zion() {
   phys_mem::InitPhysicalMemoryManager();
 
   sched::InitScheduler();
+  sched::CurrentProcess().CreateThread();
   sched::EnableScheduler();
   sched::Yield();
 

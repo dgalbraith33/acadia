@@ -14,7 +14,7 @@ class Process {
   uint64_t id() { return id_; }
   uint64_t cr3() { return cr3_; }
 
-  Thread* CreateThread();
+  void CreateThread();
   Thread* GetThread(uint64_t tid);
 
  private:
