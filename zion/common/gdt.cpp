@@ -80,7 +80,7 @@ void InitGdt() {
 
   GdtPointer gdtp{
       .size = sizeof(gGdtSegments) - 1,
-      .base = reinterpret_cast<uint64_t>(&gGdtSegments),
+      .base = reinterpret_cast<uint64_t>(gGdtSegments),
   };
 
   asm volatile("lgdt %0" ::"m"(gdtp));

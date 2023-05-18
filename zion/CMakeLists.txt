@@ -2,6 +2,8 @@ add_executable(zion
   common/gdt.cpp
   common/load_gdt.s
   debug/debug.cpp
+  interrupt/interrupt.cpp
+  interrupt/interrupt_enter.s
   zion.cpp)
 
 target_include_directories(zion

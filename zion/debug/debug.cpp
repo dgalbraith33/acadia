@@ -11,3 +11,11 @@ void dbgln(const char* str) {
   }
   outb(COM1, '\n');
 }
+
+void panic(const char* str) {
+  asm volatile("cli");
+  dbgln(str);
+  dbgln("PANIC");
+  while (1)
+    ;
+}
