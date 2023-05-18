@@ -12,6 +12,8 @@ add_executable(zion
   scheduler/process.cpp
   scheduler/scheduler.cpp
   scheduler/thread.cpp
+  syscall/syscall.cpp
+  syscall/syscall_enter.s
   zion.cpp)
 
 target_include_directories(zion

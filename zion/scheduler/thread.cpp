@@ -28,6 +28,7 @@ Thread::Thread(Process* proc, uint64_t tid) : process_(proc), id_(tid) {
   // 16: cr3
   *(stack_ptr - 16) = proc->cr3();
   rsp0_ = reinterpret_cast<uint64_t>(stack_ptr - 16);
+  rsp0_start_ = reinterpret_cast<uint64_t>(stack_ptr);
 }
 
 uint64_t Thread::pid() { return process_->id(); }
