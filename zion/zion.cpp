@@ -14,7 +14,8 @@ extern "C" void zion() {
 
   phys_mem::InitBootstrapPageAllocation();
   KernelHeap heap(0xFFFFFFFF'40000000, 0xFFFFFFFF'80000000);
-  heap.Allocate(1);
+  phys_mem::InitPhysicalMemoryManager();
+  heap.Allocate(0x2000);
 
   dbgln("Sleeping!");
   while (1)
