@@ -41,6 +41,39 @@ uint64_t ShiftForEntryIndexing(uint64_t addr, uint64_t offset) {
   return addr;
 }
 
+uint64_t* Pml4Entry(uint64_t addr) {
+  return reinterpret_cast<uint64_t*>(PML_RECURSE |
+                                     ShiftForEntryIndexing(addr, PML_OFFSET));
+}
+
+uint64_t* PageDirectoryPointerEntry(uint64_t addr) {
+  return reinterpret_cast<uint64_t*>(PDP_RECURSE |
+                                     ShiftForEntryIndexing(addr, PDP_OFFSET));
+}
+
+uint64_t* PageDirectoryEntry(uint64_t addr) {
+  return reinterpret_cast<uint64_t*>(PD_RECURSE |
+                                     ShiftForEntryIndexing(addr, PD_OFFSET));
+}
+
+uint64_t* PageTableEntry(uint64_t addr) {
+  return reinterpret_cast<uint64_t*>(PT_RECURSE |
+                                     ShiftForEntryIndexing(addr, PT_OFFSET));
+}
+
+bool PageDirectoryPointerLoaded(uint64_t addr) {
+  return *Pml4Entry(addr) & PRESENT_BIT;
+}
+
+bool PageDirectoryLoaded(uint64_t addr) {
+  return PageDirectoryPointerLoaded(addr) &&
+         (*PageDirectoryPointerEntry(addr) & PRESENT_BIT);
+}
+
+bool PageTableLoaded(uint64_t addr) {
+  return PageDirectoryLoaded(addr) && (*PageDirectoryEntry(addr) & PRESENT_BIT);
+}
+
 void MapPage(uint64_t virt, uint64_t phys) {
   if (PageLoaded(virt)) {
     panic("Allocating Over Existing Page: %m", virt);
@@ -95,39 +128,6 @@ void EnsureResident(uint64_t addr, uint64_t size) {
     }
     addr += 0x1000;
   }
-}
-
-uint64_t* Pml4Entry(uint64_t addr) {
-  return reinterpret_cast<uint64_t*>(PML_RECURSE |
-                                     ShiftForEntryIndexing(addr, PML_OFFSET));
-}
-
-uint64_t* PageDirectoryPointerEntry(uint64_t addr) {
-  return reinterpret_cast<uint64_t*>(PDP_RECURSE |
-                                     ShiftForEntryIndexing(addr, PDP_OFFSET));
-}
-
-uint64_t* PageDirectoryEntry(uint64_t addr) {
-  return reinterpret_cast<uint64_t*>(PD_RECURSE |
-                                     ShiftForEntryIndexing(addr, PD_OFFSET));
-}
-
-uint64_t* PageTableEntry(uint64_t addr) {
-  return reinterpret_cast<uint64_t*>(PT_RECURSE |
-                                     ShiftForEntryIndexing(addr, PT_OFFSET));
-}
-
-bool PageDirectoryPointerLoaded(uint64_t addr) {
-  return *Pml4Entry(addr) & PRESENT_BIT;
-}
-
-bool PageDirectoryLoaded(uint64_t addr) {
-  return PageDirectoryPointerLoaded(addr) &&
-         (*PageDirectoryPointerEntry(addr) & PRESENT_BIT);
-}
-
-bool PageTableLoaded(uint64_t addr) {
-  return PageDirectoryLoaded(addr) && (*PageDirectoryEntry(addr) & PRESENT_BIT);
 }
 
 bool PageLoaded(uint64_t addr) {
