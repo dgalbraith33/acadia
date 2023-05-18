@@ -44,9 +44,13 @@ extern "C" void interrupt_divide_by_zero(void* frame) { panic("DIV0"); }
 extern "C" void isr_protection_fault();
 extern "C" void interrupt_protection_fault(void* frame) { panic("GP"); }
 
+extern "C" void isr_page_fault();
+extern "C" void interrupt_page_fault(void* frame) { panic("PF"); }
+
 void InitIdt() {
   gIdt[0] = CreateDescriptor(isr_divide_by_zero);
   gIdt[13] = CreateDescriptor(isr_protection_fault);
+  gIdt[14] = CreateDescriptor(isr_page_fault);
   InterruptDescriptorTablePointer idtp{
       .size = sizeof(gIdt),
       .base = reinterpret_cast<uint64_t>(gIdt),

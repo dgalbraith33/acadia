@@ -54,3 +54,4 @@ isr_\name:
 
 isr_handler divide_by_zero
 isr_handler protection_fault,1
+isr_handler page_fault,1
