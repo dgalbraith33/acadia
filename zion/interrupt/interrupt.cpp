@@ -38,6 +38,30 @@ InterruptDescriptor CreateDescriptor(void isr(void)) {
   };
 }
 
+struct InterruptFrame {
+  uint64_t rax;
+  uint64_t rbx;
+  uint64_t rcx;
+  uint64_t rdx;
+  uint64_t rsi;
+  uint64_t rdi;
+  uint64_t r8;
+  uint64_t r9;
+  uint64_t r10;
+  uint64_t r11;
+  uint64_t r12;
+  uint64_t r13;
+  uint64_t r14;
+  uint64_t r15;
+  uint64_t rbp;
+  uint64_t error_code;
+  uint64_t rip;
+  uint64_t cs;
+  uint64_t eflags;
+  uint64_t rsp;
+  uint64_t ss;
+};
+
 extern "C" void isr_divide_by_zero();
 extern "C" void interrupt_divide_by_zero(void* frame) { panic("DIV0"); }
 
@@ -45,7 +69,31 @@ extern "C" void isr_protection_fault();
 extern "C" void interrupt_protection_fault(void* frame) { panic("GP"); }
 
 extern "C" void isr_page_fault();
-extern "C" void interrupt_page_fault(void* frame) { panic("PF"); }
+extern "C" void interrupt_page_fault(InterruptFrame* frame) {
+  dbgln("Page Fault:");
+  uint64_t err = frame->error_code;
+  if (err & 0x1) {
+    dbgln("Page Protection");
+  } else {
+    dbgln("Page Not Present");
+  }
+
+  if (err & 0x2) {
+    dbgln("Write");
+  } else {
+    dbgln("Read");
+  }
+
+  if (err & 0x8) {
+    dbgln("Instruction Fetch");
+  }
+
+  uint64_t cr2;
+  asm volatile("mov %%cr2, %0" : "=r"(cr2));
+  dbgln("rip:  %m", frame->rip);
+  dbgln("addr: %m", cr2);
+  panic("PF");
+}
 
 void InitIdt() {
   gIdt[0] = CreateDescriptor(isr_divide_by_zero);
