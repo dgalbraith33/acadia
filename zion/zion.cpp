@@ -5,10 +5,12 @@
 #include "common/gdt.h"
 #include "debug/debug.h"
 #include "interrupt/interrupt.h"
+#include "memory/paging_util.h"
 
 extern "C" void zion() {
   InitGdt();
   InitIdt();
+  InitPaging();
 
   const limine_memmap_response& resp = boot::GetMemoryMap();
   dbgln("Base,Length,Type");

@@ -5,6 +5,7 @@ add_executable(zion
   debug/debug.cpp
   interrupt/interrupt.cpp
   interrupt/interrupt_enter.s
+  memory/paging_util.cpp
   zion.cpp)
 
 target_include_directories(zion
