@@ -19,6 +19,11 @@ add_custom_command(
 )
 
 add_custom_target(qemu
-  COMMAND qemu-system-x86_64 -d guest_errors -m 1G -serial stdio -hda disk.img --boot c
+  COMMAND qemu-system-x86_64 -d guest_errors -m 1G -serial stdio -hda disk.img
+  DEPENDS disk.img
+  USES_TERMINAL)
+
+add_custom_target(qemu-dbg
+  COMMAND qemu-system-x86_64 -d guest_errors -m 1G -serial stdio -hda disk.img -S -s
   DEPENDS disk.img
   USES_TERMINAL)
