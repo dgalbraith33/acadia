@@ -1,6 +1,8 @@
 #include "scheduler/process.h"
 
 #include "debug/debug.h"
+#include "memory/paging_util.h"
+#include "memory/physical_memory.h"
 #include "scheduler/scheduler.h"
 #include "scheduler/thread.h"
 
@@ -23,17 +25,28 @@ Process* Process::RootProcess() {
   return proc;
 }
 
+Process::Process() : id_(gNextId++) {
+  cr3_ = phys_mem::AllocatePage();
+  InitializePml4(cr3_);
+  CreateThread();
+}
+
 void Process::CreateThread() {
   Thread* thread = new Thread(this, next_thread_id_++);
-
-  ThreadEntry* entry = thread_list_front_;
-  while (entry->next != nullptr) {
-    entry = entry->next;
-  }
-  entry->next = new ThreadEntry{
+  ThreadEntry* tentry = new ThreadEntry{
       .thread = thread,
       .next = nullptr,
   };
+
+  if (thread_list_front_ == nullptr) {
+    thread_list_front_ = tentry;
+  } else {
+    ThreadEntry* entry = thread_list_front_;
+    while (entry->next != nullptr) {
+      entry = entry->next;
+    }
+    entry->next = tentry;
+  }
   sched::EnqueueThread(thread);
 }
 

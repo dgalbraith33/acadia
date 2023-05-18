@@ -98,20 +98,37 @@ void MapPage(uint64_t virt, uint64_t phys) {
   *PageTableEntry(virt) = PageAlign(phys) | PRESENT_BIT | READ_WRITE_BIT;
   ZeroOutPage(reinterpret_cast<uint64_t*>(virt));
 }
+
+uint64_t Pml4Index(uint64_t addr) { return (addr >> PML_OFFSET) & 0x1FF; }
 }  // namespace
 
 void InitPaging() {
   uint64_t pml4_addr = 0;
   asm volatile("mov %%cr3, %0;" : "=r"(pml4_addr));
-  InitializePml4(pml4_addr);
+  uint64_t* pml4_virtual =
+      reinterpret_cast<uint64_t*>(boot::GetHigherHalfDirectMap() + pml4_addr);
+
+  uint64_t recursive_entry = pml4_addr | PRESENT_BIT | READ_WRITE_BIT;
+  pml4_virtual[0x1FE] = recursive_entry;
 }
 
 void InitializePml4(uint64_t pml4_physical_addr) {
   uint64_t* pml4_virtual = reinterpret_cast<uint64_t*>(
       boot::GetHigherHalfDirectMap() + pml4_physical_addr);
 
+  // Map the recursive entry.
   uint64_t recursive_entry = pml4_physical_addr | PRESENT_BIT | READ_WRITE_BIT;
   pml4_virtual[0x1FE] = recursive_entry;
+
+  // Map the kernel entry.
+  // This should contain the heap at 0xFFFFFFFF'40000000
+  uint64_t kernel_addr = 0xFFFFFFFF'80000000;
+  pml4_virtual[Pml4Index(kernel_addr)] = *Pml4Entry(kernel_addr);
+
+  // Map the HHDM.
+  // This is necessary to access values off of the kernel stack.
+  uint64_t hhdm = boot::GetHigherHalfDirectMap();
+  pml4_virtual[Pml4Index(hhdm)] = *Pml4Entry(hhdm);
 }
 
 void AllocatePage(uint64_t addr) {

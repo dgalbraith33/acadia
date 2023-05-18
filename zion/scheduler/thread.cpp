@@ -8,9 +8,8 @@ namespace {
 
 extern "C" void thread_init() {
   asm("sti");
-  dbgln("New Thread!");
-  sched::Yield();
-  panic("End of thread.");
+  sched::CurrentThread().Init();
+  panic("Reached end of thread.");
 }
 
 }  // namespace
@@ -32,3 +31,10 @@ Thread::Thread(Process* proc, uint64_t tid) : process_(proc), id_(tid) {
 }
 
 uint64_t Thread::pid() { return process_->id(); }
+
+void Thread::Init() {
+  while (true) {
+    dbgln("[%u.%u]", pid(), id_);
+    sched::Yield();
+  }
+}

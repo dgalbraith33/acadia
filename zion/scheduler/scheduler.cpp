@@ -77,7 +77,9 @@ class Scheduler {
     Thread* prev = current_thread_;
     current_thread_ = current_thread_->next_thread_;
     prev->next_thread_ = nullptr;
-    Enqueue(prev);
+    if (prev->pid() != 0) {
+      Enqueue(prev);
+    }
     context_switch(prev->Rsp0Ptr(), current_thread_->Rsp0Ptr());
 
     asm volatile("sti");

@@ -18,6 +18,9 @@ class Thread {
 
   uint64_t* Rsp0Ptr() { return &rsp0_; }
 
+  // Called the first time the thread starts up.
+  void Init();
+
   // FIXME: Probably make this private.
   Thread* next_thread_;
 
