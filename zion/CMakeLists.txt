@@ -7,6 +7,7 @@ add_executable(zion
   interrupt/interrupt_enter.s
   memory/kernel_heap.cpp
   memory/paging_util.cpp
+  memory/physical_memory.cpp
   zion.cpp)
 
 target_include_directories(zion

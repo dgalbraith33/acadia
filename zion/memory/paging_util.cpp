@@ -2,6 +2,7 @@
 
 #include "boot/boot_info.h"
 #include "debug/debug.h"
+#include "memory/physical_memory.h"
 
 #define PRESENT_BIT 0x1
 #define READ_WRITE_BIT 0x2
@@ -39,6 +40,31 @@ uint64_t ShiftForEntryIndexing(uint64_t addr, uint64_t offset) {
   addr <<= 3;
   return addr;
 }
+
+void MapPage(uint64_t virt, uint64_t phys) {
+  if (PageLoaded(virt)) {
+    panic("Allocating Over Existing Page: %m", virt);
+  }
+
+  if (!PageDirectoryPointerLoaded(virt)) {
+    uint64_t page = phys_mem::AllocatePage();
+    *Pml4Entry(virt) = page | PRESENT_BIT | READ_WRITE_BIT;
+    ZeroOutPage(PageDirectoryPointerEntry(virt));
+  }
+  if (!PageDirectoryLoaded(virt)) {
+    uint64_t page = phys_mem::AllocatePage();
+    *PageDirectoryPointerEntry(virt) = page | PRESENT_BIT | READ_WRITE_BIT;
+    ZeroOutPage(PageDirectoryEntry(virt));
+  }
+  if (!PageTableLoaded(virt)) {
+    uint64_t page = phys_mem::AllocatePage();
+    *PageDirectoryEntry(virt) = page | PRESENT_BIT | READ_WRITE_BIT;
+    ZeroOutPage(PageTableEntry(virt));
+  }
+
+  *PageTableEntry(virt) = PageAlign(phys) | PRESENT_BIT | READ_WRITE_BIT;
+  ZeroOutPage(reinterpret_cast<uint64_t*>(virt));
+}
 }  // namespace
 
 void InitPaging() {
@@ -55,10 +81,10 @@ void InitializePml4(uint64_t pml4_physical_addr) {
   pml4_virtual[0x1FE] = recursive_entry;
 }
 
-void AllocatePageDirectoryPointer(uint64_t addr);
-void AllocatePageDirectory(uint64_t addr);
-void AllocatePageTable(uint64_t addr);
-void AllocatePage(uint64_t addr) { panic("Page Allocation Not Implemented."); }
+void AllocatePage(uint64_t addr) {
+  uint64_t physical_page = phys_mem::AllocatePage();
+  MapPage(addr, physical_page);
+}
 
 void EnsureResident(uint64_t addr, uint64_t size) {
   uint64_t max = addr + size;
