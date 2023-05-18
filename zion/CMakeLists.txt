@@ -1,4 +1,6 @@
 add_executable(zion
+  common/gdt.cpp
+  common/load_gdt.s
   debug/debug.cpp
   zion.cpp)
 
@@ -7,20 +9,14 @@ target_include_directories(zion
   ${CMAKE_CURRENT_SOURCE_DIR}
   )
 
-# -c -- Don't run the linker.
+# -c -- Don't run the linker (only necessary for the assembler)
+# -ffreestanding
 # -nostdlib -- Don't include the standard library.
 # -mabi=sysv -- Explicitly specify the ABI since we will rely on it.
 # -mno-red-zone -- Don't put data below the stack pointer (clobbered by interrupts).
 # -mcmodel=kernel -- Assume the kernel code is running in the higher half.
 # -mgeneral-regs-only -- Prevent GCC from using a whole host of nonsense registers (that we have to enable).
-# Hopefully preceded by -mgeneral-regs-only
-# -mno-80387
-# -mno-mmx
-# -mno-3dnow
-# -mno-sse -mno-sse2
-# -MMD -- Something with the preprocessor?
-set(_Z_COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -ffreestanding -nostdlib -mabi=sysv -mno-red-zone -mcmodel=kernel -mgeneral-regs-only")
-# -mno-80387 -mno-mmx -mno-3dnow -mno-sse -mno-sse2 -MMD
+set(_Z_COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -c -ffreestanding -nostdlib -mabi=sysv -mno-red-zone -mcmodel=kernel -mgeneral-regs-only")
 
 set(_Z_LINK_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/linker.ld")
 
