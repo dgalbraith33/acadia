@@ -5,6 +5,7 @@ add_executable(zion
   debug/debug.cpp
   interrupt/interrupt.cpp
   interrupt/interrupt_enter.s
+  memory/kernel_heap.cpp
   memory/paging_util.cpp
   zion.cpp)
 
