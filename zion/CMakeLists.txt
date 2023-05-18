@@ -1,5 +1,11 @@
 add_executable(zion
+  debug/debug.cpp
   zion.cpp)
+
+target_include_directories(zion
+  PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  )
 
 # -c -- Don't run the linker.
 # -nostdlib -- Don't include the standard library.

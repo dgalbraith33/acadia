@@ -1,11 +1,9 @@
 #include <stdint.h>
 
-#include "common/port.h"
-
-#define COM1 0x3f8
+#include "debug/debug.h"
 
 extern "C" void zion() {
-  outb(COM1, 'a');
+  dbgln("Hello World!");
 
   while (1)
     ;
