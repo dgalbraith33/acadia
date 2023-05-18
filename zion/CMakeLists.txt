@@ -17,12 +17,14 @@ target_include_directories(zion
 
 # -c -- Don't run the linker (only necessary for the assembler)
 # -ffreestanding
+# -fno-rtti -- No runtime type information (might mess with polymorphism?)
+# -fno-exceptions -- Disable exceptions.
 # -nostdlib -- Don't include the standard library.
 # -mabi=sysv -- Explicitly specify the ABI since we will rely on it.
 # -mno-red-zone -- Don't put data below the stack pointer (clobbered by interrupts).
 # -mcmodel=kernel -- Assume the kernel code is running in the higher half.
 # -mgeneral-regs-only -- Prevent GCC from using a whole host of nonsense registers (that we have to enable).
-set(_Z_COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -c -ffreestanding -nostdlib -mabi=sysv -mno-red-zone -mcmodel=kernel -mgeneral-regs-only")
+set(_Z_COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -c -ffreestanding -fno-rtti -fno-exceptions -nostdlib -mabi=sysv -mno-red-zone -mcmodel=kernel -mgeneral-regs-only")
 
 set(_Z_LINK_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/linker.ld")
 
