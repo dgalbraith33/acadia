@@ -8,6 +8,9 @@ add_executable(zion
   memory/kernel_heap.cpp
   memory/paging_util.cpp
   memory/physical_memory.cpp
+  scheduler/process.cpp
+  scheduler/scheduler.cpp
+  scheduler/thread.cpp
   zion.cpp)
 
 target_include_directories(zion

@@ -6,6 +6,7 @@
 #include "memory/kernel_heap.h"
 #include "memory/paging_util.h"
 #include "memory/physical_memory.h"
+#include "scheduler/scheduler.h"
 
 extern "C" void zion() {
   InitGdt();
@@ -15,7 +16,8 @@ extern "C" void zion() {
   phys_mem::InitBootstrapPageAllocation();
   KernelHeap heap(0xFFFFFFFF'40000000, 0xFFFFFFFF'80000000);
   phys_mem::InitPhysicalMemoryManager();
-  heap.Allocate(0x2000);
+
+  sched::InitScheduler();
 
   dbgln("Sleeping!");
   while (1)
