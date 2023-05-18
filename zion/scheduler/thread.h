@@ -7,17 +7,27 @@ class Process;
 
 class Thread {
  public:
-  Thread(Process* proc, uint64_t thread_id) : process_(proc), id_(thread_id) {}
+  static Thread* RootThread(Process* root_proc);
+
+  explicit Thread(Process* proc, uint64_t tid);
 
   uint64_t tid() { return id_; };
   uint64_t pid();
 
   Process& process() { return *process_; }
 
+  uint64_t* Rsp0Ptr() { return &rsp0_; }
+
+  // FIXME: Probably make this private.
+  Thread* next_thread_;
+
  private:
+  // Special constructor for the root thread only.
+  Thread(Process* proc) : process_(proc), id_(0) {}
   Process* process_;
   uint64_t id_;
 
-  // Next task in queue for quick scheduling.
-  Thread* next_task_;
+  // Stack pointer to take on resume.
+  // Stack will contain the full thread context.
+  uint64_t rsp0_;
 };

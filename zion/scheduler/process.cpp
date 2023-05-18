@@ -14,12 +14,26 @@ Process* Process::RootProcess() {
   asm volatile("mov %%cr3, %0;" : "=r"(pml4_addr));
   Process* proc = new Process(0, pml4_addr);
   proc->thread_list_front_ = new ThreadEntry{
-      .thread = new Thread(proc, 0),
+      .thread = Thread::RootThread(proc),
       .next = nullptr,
   };
   proc->next_thread_id_ = 1;
 
   return proc;
+}
+
+Thread* Process::CreateThread() {
+  Thread* thread = new Thread(this, next_thread_id_++);
+
+  ThreadEntry* entry = thread_list_front_;
+  while (entry->next != nullptr) {
+    entry = entry->next;
+  }
+  entry->next = new ThreadEntry{
+      .thread = thread,
+      .next = nullptr,
+  };
+  return thread;
 }
 
 Thread* Process::GetThread(uint64_t tid) {

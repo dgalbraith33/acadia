@@ -8,6 +8,7 @@ add_executable(zion
   memory/kernel_heap.cpp
   memory/paging_util.cpp
   memory/physical_memory.cpp
+  scheduler/context_switch.s
   scheduler/process.cpp
   scheduler/scheduler.cpp
   scheduler/thread.cpp

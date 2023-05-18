@@ -31,5 +31,6 @@ void* KernelHeap::Allocate(uint64_t size) {
 }
 
 void* operator new(uint64_t size) { return GetKernelHeap().Allocate(size); }
+void* operator new[](uint64_t size) { return GetKernelHeap().Allocate(size); }
 
 void operator delete(void*, uint64_t) {}

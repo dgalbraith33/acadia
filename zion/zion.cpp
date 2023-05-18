@@ -18,6 +18,8 @@ extern "C" void zion() {
   phys_mem::InitPhysicalMemoryManager();
 
   sched::InitScheduler();
+  sched::EnableScheduler();
+  sched::Yield();
 
   dbgln("Sleeping!");
   while (1)

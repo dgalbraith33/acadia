@@ -5,6 +5,8 @@
 namespace sched {
 namespace {
 
+extern "C" void context_switch(uint64_t* current_esp, uint64_t* next_esp);
+
 // Simple linked list class with the intent of eventually replacing this with a
 // map.
 class ProcList {
@@ -47,13 +49,41 @@ class Scheduler {
     Process* root = Process::RootProcess();
     current_thread_ = root->GetThread(0);
     proc_list_.InsertProcess(Process::RootProcess());
+    // FIXME: Don't enqueue threads here.
+    Enqueue(root->CreateThread());
   }
   void Enable() { enabled_ = true; }
 
   Process& CurrentProcess() { return current_thread_->process(); }
   Thread& CurrentThread() { return *current_thread_; }
 
-  void Yield() {}
+  void Enqueue(Thread* thread) {
+    Thread* back = current_thread_;
+    while (back->next_thread_ != nullptr) {
+      back = back->next_thread_;
+    }
+    back->next_thread_ = thread;
+  }
+
+  void Yield() {
+    if (!enabled_) {
+      return;
+    }
+    asm volatile("cli");
+
+    if (current_thread_->next_thread_ == nullptr) {
+      dbgln("No next thread, continue");
+      return;
+    }
+
+    Thread* prev = current_thread_;
+    current_thread_ = current_thread_->next_thread_;
+    prev->next_thread_ = nullptr;
+    Enqueue(prev);
+    context_switch(prev->Rsp0Ptr(), current_thread_->Rsp0Ptr());
+
+    asm volatile("sti");
+  }
 
  private:
   bool enabled_ = false;

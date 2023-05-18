@@ -18,6 +18,8 @@ void Yield();
 // of the created process.
 void InsertProcess(Process* proc);
 
+void EnqueueThread(Thread* thread);
+
 Process& CurrentProcess();
 Thread& CurrentThread();
 
