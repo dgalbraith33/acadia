@@ -7,6 +7,14 @@ class Process;
 
 class Thread {
  public:
+  enum State {
+    UNSPECIFIED,
+    CREATED,
+    RUNNING,
+    RUNNABLE,
+    BLOCKED,
+    FINISHED,
+  };
   static Thread* RootThread(Process* root_proc);
 
   explicit Thread(Process* proc, uint64_t tid, uint64_t elf_ptr);
@@ -22,6 +30,11 @@ class Thread {
   // Called the first time the thread starts up.
   void Init();
 
+  // State Management.
+  State GetState() { return state_; };
+  void SetState(State state) { state_ = state; }
+  void Exit();
+
   // FIXME: Probably make this private.
   Thread* next_thread_;
 
@@ -30,6 +43,7 @@ class Thread {
   Thread(Process* proc) : process_(proc), id_(0) {}
   Process* process_;
   uint64_t id_;
+  State state_ = RUNNABLE;
 
   uint64_t elf_ptr_;
 

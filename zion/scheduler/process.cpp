@@ -25,7 +25,7 @@ Process* Process::RootProcess() {
   return proc;
 }
 
-Process::Process(uint64_t elf_ptr) : id_(gNextId++) {
+Process::Process(uint64_t elf_ptr) : id_(gNextId++), state_(RUNNING) {
   cr3_ = phys_mem::AllocatePage();
   InitializePml4(cr3_);
   CreateThread(elf_ptr);
@@ -59,4 +59,16 @@ Thread* Process::GetThread(uint64_t tid) {
   }
   panic("Bad thread access.");
   return nullptr;
+}
+
+void Process::CheckState() {
+  ThreadEntry* entry = thread_list_front_;
+
+  while (entry != nullptr) {
+    if (entry->thread->GetState() != Thread::FINISHED) {
+      return;
+    }
+    entry = entry->next;
+  }
+  state_ = FINISHED;
 }

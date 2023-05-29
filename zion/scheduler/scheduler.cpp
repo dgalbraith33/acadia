@@ -34,6 +34,15 @@ class ProcList {
     };
   }
 
+  void DumpProcessStates() {
+    ProcEntry* p = front_;
+    dbgln("Process States:");
+    while (p != nullptr) {
+      dbgln("%u: %u", p->proc->id(), p->proc->GetState());
+      p = p->next;
+    }
+  }
+
  private:
   struct ProcEntry {
     Process* proc;
@@ -71,16 +80,26 @@ class Scheduler {
     asm volatile("cli");
 
     if (current_thread_->next_thread_ == nullptr) {
-      dbgln("No next thread, continue");
-      return;
+      if (current_thread_->GetState() == Thread::RUNNING) {
+        dbgln("No next thread, continue");
+        return;
+      } else {
+        proc_list_.DumpProcessStates();
+        panic("FIXME: Implement Sleep");
+      }
     }
 
     Thread* prev = current_thread_;
     current_thread_ = current_thread_->next_thread_;
     prev->next_thread_ = nullptr;
-    if (prev->pid() != 0) {
+    if (prev->pid() != 0 && prev->GetState() == Thread::RUNNING) {
+      prev->SetState(Thread::RUNNABLE);
       Enqueue(prev);
     }
+    if (current_thread_->GetState() != Thread::RUNNABLE) {
+      panic("Non-runnable thread in the queue");
+    }
+    current_thread_->SetState(Thread::RUNNING);
     context_switch(prev->Rsp0Ptr(), current_thread_->Rsp0Ptr());
 
     asm volatile("sti");

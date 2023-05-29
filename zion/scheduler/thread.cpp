@@ -47,3 +47,10 @@ void Thread::Init() {
   SetRsp0(rsp0_start_);
   jump_user_space(rip, rsp);
 }
+
+void Thread::Exit() {
+  dbgln("[%u.%u] Exiting", pid(), id_);
+  state_ = FINISHED;
+  process_->CheckState();
+  sched::Yield();
+}

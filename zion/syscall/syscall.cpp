@@ -56,8 +56,12 @@ void InitSyscall() {
 extern "C" void SyscallHandler(uint64_t call_id, char* message) {
   Thread& thread = sched::CurrentThread();
   switch (call_id) {
+    case Z_THREAD_EXIT:
+      thread.Exit();
+      panic("Returned from thread exit");
+      break;
     case Z_DEBUG_PRINT:
-      dbgln("[%u.%u] %s", thread.pid(), thread.tid(), message);
+      dbgln("[%u.%u] [Debug] %s", thread.pid(), thread.tid(), message);
       break;
     default:
       panic("Unhandled syscall number: %u", call_id);
