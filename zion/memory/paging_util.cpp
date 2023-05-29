@@ -6,6 +6,7 @@
 
 #define PRESENT_BIT 0x1
 #define READ_WRITE_BIT 0x2
+#define USER_MODE_BIT 0x4;
 #define SIGN_EXT 0xFFFF0000'00000000
 #define RECURSIVE ((uint64_t)0x1FE)
 #define PML_OFFSET 39
@@ -79,23 +80,29 @@ void MapPage(uint64_t virt, uint64_t phys) {
     panic("Allocating Over Existing Page: %m", virt);
   }
 
+  uint64_t access_bits = PRESENT_BIT | READ_WRITE_BIT;
+  uint64_t higher_half = 0xffff8000'00000000;
+  if ((virt & higher_half) != higher_half) {
+    access_bits |= USER_MODE_BIT;
+  }
+
   if (!PageDirectoryPointerLoaded(virt)) {
     uint64_t page = phys_mem::AllocatePage();
-    *Pml4Entry(virt) = page | PRESENT_BIT | READ_WRITE_BIT;
+    *Pml4Entry(virt) = page | access_bits;
     ZeroOutPage(PageDirectoryPointerEntry(virt));
   }
   if (!PageDirectoryLoaded(virt)) {
     uint64_t page = phys_mem::AllocatePage();
-    *PageDirectoryPointerEntry(virt) = page | PRESENT_BIT | READ_WRITE_BIT;
+    *PageDirectoryPointerEntry(virt) = page | access_bits;
     ZeroOutPage(PageDirectoryEntry(virt));
   }
   if (!PageTableLoaded(virt)) {
     uint64_t page = phys_mem::AllocatePage();
-    *PageDirectoryEntry(virt) = page | PRESENT_BIT | READ_WRITE_BIT;
+    *PageDirectoryEntry(virt) = page | access_bits;
     ZeroOutPage(PageTableEntry(virt));
   }
 
-  *PageTableEntry(virt) = PageAlign(phys) | PRESENT_BIT | READ_WRITE_BIT;
+  *PageTableEntry(virt) = PageAlign(phys) | access_bits;
   ZeroOutPage(reinterpret_cast<uint64_t*>(virt));
 }
 
