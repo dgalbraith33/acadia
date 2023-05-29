@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include "debug/debug.h"
+#include "include/zcall.h"
 #include "scheduler/scheduler.h"
 
 #define EFER 0xC0000080
@@ -53,5 +54,12 @@ void InitSyscall() {
 }
 
 extern "C" void SyscallHandler(uint64_t call_id, char* message) {
-  dbgln(message);
+  Thread& thread = sched::CurrentThread();
+  switch (call_id) {
+    case Z_DEBUG_PRINT:
+      dbgln("[%u.%u] %s", thread.pid(), thread.tid(), message);
+      break;
+    default:
+      panic("Unhandled syscall number: %u", call_id);
+  }
 }
