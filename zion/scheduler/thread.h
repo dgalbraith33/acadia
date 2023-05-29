@@ -9,7 +9,7 @@ class Thread {
  public:
   static Thread* RootThread(Process* root_proc);
 
-  explicit Thread(Process* proc, uint64_t tid);
+  explicit Thread(Process* proc, uint64_t tid, uint64_t elf_ptr);
 
   uint64_t tid() { return id_; };
   uint64_t pid();
@@ -30,6 +30,8 @@ class Thread {
   Thread(Process* proc) : process_(proc), id_(0) {}
   Process* process_;
   uint64_t id_;
+
+  uint64_t elf_ptr_;
 
   // Stack pointer to take on resume.
   // Stack will contain the full thread context.

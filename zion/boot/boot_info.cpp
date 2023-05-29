@@ -25,4 +25,15 @@ uint64_t GetHigherHalfDirectMap() {
   return gHhdmRequest.response->offset;
 }
 
+static volatile struct limine_module_request gModuleRequest {
+  .id = LIMINE_MODULE_REQUEST, .revision = 0, .response = 0,
+};
+
+const limine_module_response& GetModules() {
+  if (!gModuleRequest.response) {
+    panic("No module response from limine");
+  }
+  return *gModuleRequest.response;
+}
+
 }  // namespace boot

@@ -5,6 +5,8 @@ add_executable(zion
   debug/debug.cpp
   interrupt/interrupt.cpp
   interrupt/interrupt_enter.s
+  loader/elf_loader.cpp
+  loader/init_loader.cpp
   memory/kernel_heap.cpp
   memory/paging_util.cpp
   memory/physical_memory.cpp
@@ -50,3 +52,17 @@ set_target_properties(zion
   COMPILE_FLAGS "${_Z_COMPILE_FLAGS}"
   LINK_FLAGS "${_Z_LINK_FLAGS}"
   )
+
+
+
+add_library(zion_lib STATIC
+  usr/crt0.s
+  usr/zcall.cpp)
+
+target_include_directories(zion_lib
+  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+set_target_properties(zion_lib
+  PROPERTIES
+  COMPILE_FLAGS "${_Z_COMPILE_FLAGS}")

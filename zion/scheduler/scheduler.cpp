@@ -55,6 +55,7 @@ class Scheduler {
   Process& CurrentProcess() { return current_thread_->process(); }
   Thread& CurrentThread() { return *current_thread_; }
 
+  void InsertProcess(Process* process) { proc_list_.InsertProcess(process); }
   void Enqueue(Thread* thread) {
     Thread* back = current_thread_;
     while (back->next_thread_ != nullptr) {
@@ -108,6 +109,7 @@ void EnableScheduler() { GetScheduler().Enable(); }
 
 void Yield() { GetScheduler().Yield(); }
 
+void InsertProcess(Process* process) { GetScheduler().InsertProcess(process); }
 void EnqueueThread(Thread* thread) { GetScheduler().Enqueue(thread); }
 
 Process& CurrentProcess() { return GetScheduler().CurrentProcess(); }

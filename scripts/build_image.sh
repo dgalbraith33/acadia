@@ -18,6 +18,7 @@ echo "Loopback device: ${dev}"
 cleanup() {
   umount efi
   rm -rf efi
+  losetup -d $dev
 }
 trap cleanup EXIT
 
@@ -35,5 +36,7 @@ cp /usr/share/limine/BOOTX64.EFI efi/EFI/BOOT
 cp /usr/share/limine/limine.sys efi/
 cp ../zion/boot/limine.cfg efi/
 cp zion/zion efi/
+mkdir -p efi/sys
+cp sys/test efi/sys/test
 
 chown drew:drew $1

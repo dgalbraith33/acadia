@@ -1,6 +1,7 @@
 #include "scheduler/thread.h"
 
 #include "debug/debug.h"
+#include "loader/elf_loader.h"
 #include "scheduler/process.h"
 #include "scheduler/scheduler.h"
 
@@ -16,7 +17,8 @@ extern "C" void thread_init() {
 
 Thread* Thread::RootThread(Process* root_proc) { return new Thread(root_proc); }
 
-Thread::Thread(Process* proc, uint64_t tid) : process_(proc), id_(tid) {
+Thread::Thread(Process* proc, uint64_t tid, uint64_t elf_ptr)
+    : process_(proc), id_(tid), elf_ptr_(elf_ptr) {
   uint64_t* stack = new uint64_t[512];
   uint64_t* stack_ptr = stack + 511;
   // 0: rip
@@ -34,6 +36,7 @@ Thread::Thread(Process* proc, uint64_t tid) : process_(proc), id_(tid) {
 uint64_t Thread::pid() { return process_->id(); }
 
 void Thread::Init() {
+  LoadElfProgram(elf_ptr_, 0);
   while (true) {
     dbgln("[%u.%u]", pid(), id_);
     sched::Yield();

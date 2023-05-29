@@ -25,14 +25,14 @@ Process* Process::RootProcess() {
   return proc;
 }
 
-Process::Process() : id_(gNextId++) {
+Process::Process(uint64_t elf_ptr) : id_(gNextId++) {
   cr3_ = phys_mem::AllocatePage();
   InitializePml4(cr3_);
-  CreateThread();
+  CreateThread(elf_ptr);
 }
 
-void Process::CreateThread() {
-  Thread* thread = new Thread(this, next_thread_id_++);
+void Process::CreateThread(uint64_t elf_ptr) {
+  Thread* thread = new Thread(this, next_thread_id_++, elf_ptr);
   ThreadEntry* tentry = new ThreadEntry{
       .thread = thread,
       .next = nullptr,

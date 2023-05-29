@@ -3,6 +3,7 @@
 #include "common/gdt.h"
 #include "debug/debug.h"
 #include "interrupt/interrupt.h"
+#include "loader/init_loader.h"
 #include "memory/kernel_heap.h"
 #include "memory/paging_util.h"
 #include "memory/physical_memory.h"
@@ -21,11 +22,9 @@ extern "C" void zion() {
   InitSyscall();
 
   sched::InitScheduler();
-  Process p1;
-  p1.CreateThread();
-  Process p2;
-  p2.CreateThread();
   sched::EnableScheduler();
+
+  LoadInitProgram();
   sched::Yield();
 
   dbgln("Sleeping!");

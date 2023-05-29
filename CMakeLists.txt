@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 
 add_subdirectory(zion)
+add_subdirectory(sys)
 
 add_custom_command(
   OUTPUT disk.img

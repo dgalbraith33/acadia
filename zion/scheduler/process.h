@@ -9,12 +9,12 @@ class Process {
  public:
   // Caller takes ownership of returned process.
   static Process* RootProcess();
-  Process();
+  Process(uint64_t elf_ptr);
 
   uint64_t id() { return id_; }
   uint64_t cr3() { return cr3_; }
 
-  void CreateThread();
+  void CreateThread(uint64_t elf_ptr);
   Thread* GetThread(uint64_t tid);
 
  private:
