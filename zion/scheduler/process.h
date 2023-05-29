@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+#include "lib/linked_list.h"
+
 // Forward decl due to cyclic dependency.
 class Thread;
 
@@ -37,10 +39,5 @@ class Process {
 
   uint64_t next_thread_id_ = 0;
 
-  // FIXME: Make a better data structure for this.
-  struct ThreadEntry {
-    Thread* thread;
-    ThreadEntry* next;
-  };
-  ThreadEntry* thread_list_front_;
+  LinkedList<Thread*> threads_;
 };

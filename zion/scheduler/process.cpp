@@ -16,10 +16,7 @@ Process* Process::RootProcess() {
   uint64_t pml4_addr = 0;
   asm volatile("mov %%cr3, %0;" : "=r"(pml4_addr));
   Process* proc = new Process(0, pml4_addr);
-  proc->thread_list_front_ = new ThreadEntry{
-      .thread = Thread::RootThread(proc),
-      .next = nullptr,
-  };
+  proc->threads_.PushBack(Thread::RootThread(proc));
   proc->next_thread_id_ = 1;
 
   return proc;
@@ -33,42 +30,29 @@ Process::Process(uint64_t elf_ptr) : id_(gNextId++), state_(RUNNING) {
 
 void Process::CreateThread(uint64_t elf_ptr) {
   Thread* thread = new Thread(this, next_thread_id_++, elf_ptr);
-  ThreadEntry* tentry = new ThreadEntry{
-      .thread = thread,
-      .next = nullptr,
-  };
-
-  if (thread_list_front_ == nullptr) {
-    thread_list_front_ = tentry;
-  } else {
-    ThreadEntry* entry = thread_list_front_;
-    while (entry->next != nullptr) {
-      entry = entry->next;
-    }
-    entry->next = tentry;
-  }
+  threads_.PushBack(thread);
   sched::EnqueueThread(thread);
 }
 
 Thread* Process::GetThread(uint64_t tid) {
-  ThreadEntry* entry = thread_list_front_;
-  while (entry != nullptr) {
-    if (entry->thread->tid() == tid) {
-      return entry->thread;
+  auto iter = threads_.begin();
+  while (iter != threads_.end()) {
+    if (iter->tid() == tid) {
+      return *iter;
     }
+    ++iter;
   }
   panic("Bad thread access.");
   return nullptr;
 }
 
 void Process::CheckState() {
-  ThreadEntry* entry = thread_list_front_;
-
-  while (entry != nullptr) {
-    if (entry->thread->GetState() != Thread::FINISHED) {
+  auto iter = threads_.begin();
+  while (iter != threads_.end()) {
+    if (iter->GetState() != Thread::FINISHED) {
       return;
     }
-    entry = entry->next;
+    ++iter;
   }
   state_ = FINISHED;
 }

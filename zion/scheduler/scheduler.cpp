@@ -13,7 +13,7 @@ void DumpProcessStates(LinkedList<Process*>& proc_list) {
   auto iter = proc_list.begin();
   while (iter != proc_list.end()) {
     dbgln("%u: %u", iter->id(), iter->GetState());
-    iter = iter.next();
+    ++iter;
   }
 }
 

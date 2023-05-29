@@ -76,6 +76,10 @@ class LinkedList {
     Iterator(ListItem* item) : item_(item) {}
 
     Iterator next() { return {item_->next}; }
+    Iterator& operator++() {
+      item_ = item_->next;
+      return *this;
+    }
 
     T& operator*() { return item_->item; }
     T& operator->() { return item_->item; }
