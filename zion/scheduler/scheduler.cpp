@@ -8,64 +8,28 @@ namespace {
 
 extern "C" void context_switch(uint64_t* current_esp, uint64_t* next_esp);
 
-// Simple linked list class with the intent of eventually replacing this with a
-// map.
-class ProcList {
- public:
-  ProcList() {}
-
-  // Takes ownership.
-  void InsertProcess(Process* proc) {
-    if (front_ == nullptr) {
-      front_ = new ProcEntry{
-          .proc = proc,
-          .next = nullptr,
-      };
-      return;
-    }
-
-    ProcEntry* back = front_;
-    while (back->next != nullptr) {
-      back = back->next;
-    }
-
-    back->next = new ProcEntry{
-        .proc = proc,
-        .next = nullptr,
-    };
+void DumpProcessStates(LinkedList<Process*>& proc_list) {
+  dbgln("Process States: %u", proc_list.size());
+  auto iter = proc_list.begin();
+  while (iter != proc_list.end()) {
+    dbgln("%u: %u", iter->id(), iter->GetState());
+    iter = iter.next();
   }
-
-  void DumpProcessStates() {
-    ProcEntry* p = front_;
-    dbgln("Process States:");
-    while (p != nullptr) {
-      dbgln("%u: %u", p->proc->id(), p->proc->GetState());
-      p = p->next;
-    }
-  }
-
- private:
-  struct ProcEntry {
-    Process* proc;
-    ProcEntry* next;
-  };
-
-  ProcEntry* front_ = nullptr;
-};
+}
 
 class Scheduler {
  public:
   Scheduler() {
     Process* root = Process::RootProcess();
     runnable_threads_.PushBack(root->GetThread(0));
-    proc_list_.InsertProcess(Process::RootProcess());
+    proc_list_.PushBack(Process::RootProcess());
   }
   void Enable() { enabled_ = true; }
 
   Process& CurrentProcess() { return CurrentThread().process(); }
   Thread& CurrentThread() { return *runnable_threads_.PeekFront(); }
 
-  void InsertProcess(Process* process) { proc_list_.InsertProcess(process); }
+  void InsertProcess(Process* process) { proc_list_.PushBack(process); }
   void Enqueue(Thread* thread) { runnable_threads_.PushBack(thread); }
 
   void Yield() {
@@ -85,7 +49,7 @@ class Scheduler {
     }
 
     if (runnable_threads_.size() == 0) {
-      proc_list_.DumpProcessStates();
+      DumpProcessStates(proc_list_);
       panic("FIXME: Implement Sleep");
     }
 
@@ -109,8 +73,8 @@ class Scheduler {
 
  private:
   bool enabled_ = false;
-  ProcList proc_list_;
-
+  // TODO: move this to a separate process manager class.
+  LinkedList<Process*> proc_list_;
   LinkedList<Thread*> runnable_threads_;
 };
 

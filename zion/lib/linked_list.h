@@ -11,7 +11,7 @@ class LinkedList {
 
   LinkedList(const LinkedList&) = delete;
 
-  uint64_t size() { return size_; }
+  uint64_t size() const { return size_; }
 
   void PushBack(const T& item) {
     size_++;
@@ -65,15 +65,32 @@ class LinkedList {
     return ret;
   }
 
-  T PeekFront() { return front_->item; }
-
- private:
-  uint64_t size_ = 0;
+  T PeekFront() const { return front_->item; }
 
   struct ListItem {
     T item;
     ListItem* next;
   };
+  class Iterator {
+   public:
+    Iterator(ListItem* item) : item_(item) {}
+
+    Iterator next() { return {item_->next}; }
+
+    T& operator*() { return item_->item; }
+    T& operator->() { return item_->item; }
+    bool operator==(const Iterator& other) { return item_ == other.item_; }
+    bool operator!=(const Iterator& other) { return item_ != other.item_; }
+
+   private:
+    ListItem* item_;
+  };
+
+  Iterator begin() { return {front_}; }
+  Iterator end() { return {nullptr}; }
+
+ private:
+  uint64_t size_ = 0;
 
   ListItem* front_ = nullptr;
 };
