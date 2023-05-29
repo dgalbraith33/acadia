@@ -35,9 +35,6 @@ class Thread {
   void SetState(State state) { state_ = state; }
   void Exit();
 
-  // FIXME: Probably make this private.
-  Thread* next_thread_;
-
  private:
   // Special constructor for the root thread only.
   Thread(Process* proc) : process_(proc), id_(0) {}

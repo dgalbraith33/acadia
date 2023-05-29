@@ -1,6 +1,7 @@
 #include "scheduler/scheduler.h"
 
 #include "debug/debug.h"
+#include "lib/linked_list.h"
 
 namespace sched {
 namespace {
@@ -56,22 +57,16 @@ class Scheduler {
  public:
   Scheduler() {
     Process* root = Process::RootProcess();
-    current_thread_ = root->GetThread(0);
+    runnable_threads_.PushBack(root->GetThread(0));
     proc_list_.InsertProcess(Process::RootProcess());
   }
   void Enable() { enabled_ = true; }
 
-  Process& CurrentProcess() { return current_thread_->process(); }
-  Thread& CurrentThread() { return *current_thread_; }
+  Process& CurrentProcess() { return CurrentThread().process(); }
+  Thread& CurrentThread() { return *runnable_threads_.PeekFront(); }
 
   void InsertProcess(Process* process) { proc_list_.InsertProcess(process); }
-  void Enqueue(Thread* thread) {
-    Thread* back = current_thread_;
-    while (back->next_thread_ != nullptr) {
-      back = back->next_thread_;
-    }
-    back->next_thread_ = thread;
-  }
+  void Enqueue(Thread* thread) { runnable_threads_.PushBack(thread); }
 
   void Yield() {
     if (!enabled_) {
@@ -79,28 +74,35 @@ class Scheduler {
     }
     asm volatile("cli");
 
-    if (current_thread_->next_thread_ == nullptr) {
-      if (current_thread_->GetState() == Thread::RUNNING) {
-        dbgln("No next thread, continue");
-        return;
-      } else {
-        proc_list_.DumpProcessStates();
-        panic("FIXME: Implement Sleep");
-      }
+    Thread* prev = nullptr;
+    if (CurrentThread().GetState() == Thread::RUNNING) {
+      prev = runnable_threads_.CycleFront();
+      prev->SetState(Thread::RUNNABLE);
+    } else {
+      // This technically is a memory operation but should only occur when a
+      // thread is blocking so may be ok?
+      prev = runnable_threads_.PopFront();
     }
 
-    Thread* prev = current_thread_;
-    current_thread_ = current_thread_->next_thread_;
-    prev->next_thread_ = nullptr;
-    if (prev->pid() != 0 && prev->GetState() == Thread::RUNNING) {
-      prev->SetState(Thread::RUNNABLE);
-      Enqueue(prev);
+    if (runnable_threads_.size() == 0) {
+      proc_list_.DumpProcessStates();
+      panic("FIXME: Implement Sleep");
     }
-    if (current_thread_->GetState() != Thread::RUNNABLE) {
+
+    Thread* next = runnable_threads_.PeekFront();
+    if (next->GetState() != Thread::RUNNABLE) {
       panic("Non-runnable thread in the queue");
     }
-    current_thread_->SetState(Thread::RUNNING);
-    context_switch(prev->Rsp0Ptr(), current_thread_->Rsp0Ptr());
+    // Needs to be before the next == prev check
+    // otherwise the active thread will be RUNNABLE instead of RUNNING.
+    next->SetState(Thread::RUNNING);
+
+    if (next == prev) {
+      dbgln("No next thread, continue");
+      return;
+    }
+
+    context_switch(prev->Rsp0Ptr(), next->Rsp0Ptr());
 
     asm volatile("sti");
   }
@@ -109,7 +111,7 @@ class Scheduler {
   bool enabled_ = false;
   ProcList proc_list_;
 
-  Thread* current_thread_;
+  LinkedList<Thread*> runnable_threads_;
 };
 
 static Scheduler* gScheduler = nullptr;
