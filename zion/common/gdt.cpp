@@ -90,3 +90,5 @@ void InitGdt() {
       "ltr %%ax;" ::
           : "rax");
 }
+
+void SetRsp0(uint64_t rsp0) { gTaskStateSegment.rsp0 = rsp0; }

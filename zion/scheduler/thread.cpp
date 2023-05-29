@@ -1,11 +1,15 @@
 #include "scheduler/thread.h"
 
+#include "common/gdt.h"
 #include "debug/debug.h"
 #include "loader/elf_loader.h"
+#include "memory/paging_util.h"
 #include "scheduler/process.h"
 #include "scheduler/scheduler.h"
 
 namespace {
+
+extern "C" void jump_user_space(uint64_t rip, uint64_t rsp);
 
 extern "C" void thread_init() {
   asm("sti");
@@ -36,9 +40,10 @@ Thread::Thread(Process* proc, uint64_t tid, uint64_t elf_ptr)
 uint64_t Thread::pid() { return process_->id(); }
 
 void Thread::Init() {
-  LoadElfProgram(elf_ptr_, 0);
-  while (true) {
-    dbgln("[%u.%u]", pid(), id_);
-    sched::Yield();
-  }
+  dbgln("[%u.%u]", pid(), id_);
+  uint64_t rip = LoadElfProgram(elf_ptr_, 0);
+  uint64_t rsp = 0x80000000;
+  EnsureResident(rsp - 1, 1);
+  SetRsp0(rsp0_start_);
+  jump_user_space(rip, rsp);
 }

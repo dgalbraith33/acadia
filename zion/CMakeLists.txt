@@ -11,6 +11,7 @@ add_executable(zion
   memory/paging_util.cpp
   memory/physical_memory.cpp
   scheduler/context_switch.s
+  scheduler/jump_user_space.s
   scheduler/process.cpp
   scheduler/scheduler.cpp
   scheduler/thread.cpp

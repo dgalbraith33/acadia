@@ -56,7 +56,7 @@ void badmemcpy(uint64_t base, uint64_t offset, uint64_t dest) {
 
 }  // namespace
 
-void LoadElfProgram(uint64_t base, uint64_t offset) {
+uint64_t LoadElfProgram(uint64_t base, uint64_t offset) {
   Elf64Header* header = reinterpret_cast<Elf64Header*>(base);
   dbgln("phoff: %u phnum: %u", header->phoff, header->phnum);
   Elf64ProgramHeader* programs =
@@ -71,4 +71,5 @@ void LoadElfProgram(uint64_t base, uint64_t offset) {
     EnsureResident(program.vaddr, program.memsz);
     badmemcpy(base + program.offset, program.filesz, program.vaddr);
   }
+  return header->entry;
 }

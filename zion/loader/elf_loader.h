@@ -2,4 +2,5 @@
 
 #include <stdint.h>
 
-void LoadElfProgram(uint64_t base, uint64_t length);
+// Loads the elf program and returns its entry point.
+uint64_t LoadElfProgram(uint64_t base, uint64_t length);
