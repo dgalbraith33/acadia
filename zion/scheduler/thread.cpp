@@ -19,9 +19,11 @@ extern "C" void thread_init() {
 
 }  // namespace
 
-Thread* Thread::RootThread(Process* root_proc) { return new Thread(root_proc); }
+SharedPtr<Thread> Thread::RootThread(Process* root_proc) {
+  return new Thread(root_proc);
+}
 
-Thread::Thread(Process* proc, uint64_t tid, uint64_t elf_ptr)
+Thread::Thread(const SharedPtr<Process>& proc, uint64_t tid, uint64_t elf_ptr)
     : process_(proc), id_(tid), elf_ptr_(elf_ptr) {
   uint64_t* stack = new uint64_t[512];
   uint64_t* stack_ptr = stack + 511;

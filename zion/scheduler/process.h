@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include "lib/linked_list.h"
+#include "lib/shared_ptr.h"
 
 // Forward decl due to cyclic dependency.
 class Thread;
@@ -15,15 +16,14 @@ class Process {
     RUNNING,
     FINISHED,
   };
-  // Caller takes ownership of returned process.
-  static Process* RootProcess();
+  static SharedPtr<Process> RootProcess();
   Process(uint64_t elf_ptr);
 
-  uint64_t id() { return id_; }
-  uint64_t cr3() { return cr3_; }
+  uint64_t id() const { return id_; }
+  uint64_t cr3() const { return cr3_; }
 
   void CreateThread(uint64_t elf_ptr);
-  Thread* GetThread(uint64_t tid);
+  SharedPtr<Thread> GetThread(uint64_t tid);
 
   // Checks the state of all child threads and transitions to
   // finished if all have finished.
@@ -39,5 +39,5 @@ class Process {
 
   uint64_t next_thread_id_ = 0;
 
-  LinkedList<Thread*> threads_;
+  LinkedList<SharedPtr<Thread>> threads_;
 };

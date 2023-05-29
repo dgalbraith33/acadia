@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+#include "lib/shared_ptr.h"
+
 // Forward decl due to cyclic dependency.
 class Process;
 
@@ -15,9 +17,10 @@ class Thread {
     BLOCKED,
     FINISHED,
   };
-  static Thread* RootThread(Process* root_proc);
+  static SharedPtr<Thread> RootThread(Process* root_proc);
 
-  explicit Thread(Process* proc, uint64_t tid, uint64_t elf_ptr);
+  explicit Thread(const SharedPtr<Process>& proc, uint64_t tid,
+                  uint64_t elf_ptr);
 
   uint64_t tid() { return id_; };
   uint64_t pid();
@@ -38,7 +41,7 @@ class Thread {
  private:
   // Special constructor for the root thread only.
   Thread(Process* proc) : process_(proc), id_(0) {}
-  Process* process_;
+  SharedPtr<Process> process_;
   uint64_t id_;
   State state_ = RUNNABLE;
 

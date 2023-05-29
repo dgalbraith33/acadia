@@ -8,7 +8,7 @@ namespace {
 
 extern "C" void context_switch(uint64_t* current_esp, uint64_t* next_esp);
 
-void DumpProcessStates(LinkedList<Process*>& proc_list) {
+void DumpProcessStates(LinkedList<SharedPtr<Process>>& proc_list) {
   dbgln("Process States: %u", proc_list.size());
   auto iter = proc_list.begin();
   while (iter != proc_list.end()) {
@@ -20,8 +20,9 @@ void DumpProcessStates(LinkedList<Process*>& proc_list) {
 class Scheduler {
  public:
   Scheduler() {
-    Process* root = Process::RootProcess();
-    runnable_threads_.PushBack(root->GetThread(0));
+    SharedPtr<Process> root = Process::RootProcess();
+    sleep_thread_ = root->GetThread(0);
+    runnable_threads_.PushBack(sleep_thread_);
     proc_list_.PushBack(Process::RootProcess());
   }
   void Enable() { enabled_ = true; }
@@ -38,7 +39,7 @@ class Scheduler {
     }
     asm volatile("cli");
 
-    Thread* prev = nullptr;
+    SharedPtr<Thread> prev;
     if (CurrentThread().GetState() == Thread::RUNNING) {
       prev = runnable_threads_.CycleFront();
       prev->SetState(Thread::RUNNABLE);
@@ -48,12 +49,14 @@ class Scheduler {
       prev = runnable_threads_.PopFront();
     }
 
+    SharedPtr<Thread> next;
     if (runnable_threads_.size() == 0) {
+      next = sleep_thread_;
       DumpProcessStates(proc_list_);
-      panic("FIXME: Implement Sleep");
+    } else {
+      next = runnable_threads_.PeekFront();
     }
 
-    Thread* next = runnable_threads_.PeekFront();
     if (next->GetState() != Thread::RUNNABLE) {
       panic("Non-runnable thread in the queue");
     }
@@ -74,8 +77,10 @@ class Scheduler {
  private:
   bool enabled_ = false;
   // TODO: move this to a separate process manager class.
-  LinkedList<Process*> proc_list_;
-  LinkedList<Thread*> runnable_threads_;
+  LinkedList<SharedPtr<Process>> proc_list_;
+  LinkedList<SharedPtr<Thread>> runnable_threads_;
+
+  SharedPtr<Thread> sleep_thread_;
 };
 
 static Scheduler* gScheduler = nullptr;

@@ -12,11 +12,11 @@ static uint64_t gNextId = 1;
 
 }
 
-Process* Process::RootProcess() {
+SharedPtr<Process> Process::RootProcess() {
   uint64_t pml4_addr = 0;
   asm volatile("mov %%cr3, %0;" : "=r"(pml4_addr));
-  Process* proc = new Process(0, pml4_addr);
-  proc->threads_.PushBack(Thread::RootThread(proc));
+  SharedPtr<Process> proc(new Process(0, pml4_addr));
+  proc->threads_.PushBack(Thread::RootThread(proc.ptr()));
   proc->next_thread_id_ = 1;
 
   return proc;
@@ -34,7 +34,7 @@ void Process::CreateThread(uint64_t elf_ptr) {
   sched::EnqueueThread(thread);
 }
 
-Thread* Process::GetThread(uint64_t tid) {
+SharedPtr<Thread> Process::GetThread(uint64_t tid) {
   auto iter = threads_.begin();
   while (iter != threads_.end()) {
     if (iter->tid() == tid) {
