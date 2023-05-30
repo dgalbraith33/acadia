@@ -69,7 +69,7 @@ uint64_t* PageTableEntry(uint64_t pt_phys, uint64_t addr) {
                                      ShiftForEntryIndexing(addr, PT_OFFSET));
 }
 
-bool IsPageResident(uint64_t cr3, uint64_t virt) {
+uint64_t PagePhysIfResident(uint64_t cr3, uint64_t virt) {
   uint64_t* pml4_entry = Pml4Entry(cr3, virt);
   if (!(*pml4_entry & PRESENT_BIT)) {
     return false;
@@ -86,10 +86,10 @@ bool IsPageResident(uint64_t cr3, uint64_t virt) {
   if (!(*pt_entry & PRESENT_BIT)) {
     return false;
   }
-  return true;
+  return *pt_entry & ~0xFFF;
 }
 
-void MapPage(uint64_t cr3, uint64_t virt) {
+uint64_t MapPage(uint64_t cr3, uint64_t virt) {
   uint64_t access_bits = PRESENT_BIT | READ_WRITE_BIT;
   uint64_t higher_half = 0xffff8000'00000000;
   if ((virt & higher_half) != higher_half) {
@@ -121,8 +121,10 @@ void MapPage(uint64_t cr3, uint64_t virt) {
     *pt_entry = PageAlign(phys) | access_bits;
     ZeroOutPage(reinterpret_cast<uint64_t*>(boot::GetHigherHalfDirectMap() +
                                             PageAlign(phys)));
+    return phys;
   } else {
     panic("Page already allocated.");
+    return 0;
   }
 }
 
@@ -152,14 +154,15 @@ void InitializePml4(uint64_t pml4_physical_addr) {
   pml4_virtual[Pml4Index(hhdm)] = *Pml4Entry(curr_cr3, hhdm);
 }
 
-void AllocatePageIfNecessary(uint64_t addr, uint64_t cr3) {
+uint64_t AllocatePageIfNecessary(uint64_t addr, uint64_t cr3) {
   if (cr3 == 0) {
     cr3 = CurrCr3();
   }
-  if (IsPageResident(cr3, addr)) {
-    return;
+  uint64_t phys = PagePhysIfResident(cr3, addr);
+  if (phys) {
+    return phys;
   }
-  MapPage(cr3, addr);
+  return MapPage(cr3, addr);
 }
 
 void EnsureResident(uint64_t addr, uint64_t size) {
@@ -168,5 +171,23 @@ void EnsureResident(uint64_t addr, uint64_t size) {
   while (addr < max) {
     AllocatePageIfNecessary(addr);
     addr += 0x1000;
+  }
+}
+
+void CopyIntoNonResidentProcess(uint64_t base, uint64_t size, uint64_t dest_cr3,
+                                uint64_t dest_virt) {
+  if (size > 0x1000) {
+    panic("Unimplemented NR copy > 1 page");
+  }
+  if (dest_virt & 0xFFF) {
+    panic("Unimplemented NR copy to non page aligned");
+  }
+  uint64_t phys = AllocatePageIfNecessary(dest_virt, dest_cr3);
+  uint8_t* src = reinterpret_cast<uint8_t*>(base);
+  uint8_t* dest =
+      reinterpret_cast<uint8_t*>(phys + boot::GetHigherHalfDirectMap());
+
+  for (uint64_t i = 0; i < size; i++) {
+    dest[i] = src[i];
   }
 }

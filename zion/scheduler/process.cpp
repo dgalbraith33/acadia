@@ -22,14 +22,13 @@ SharedPtr<Process> Process::RootProcess() {
   return proc;
 }
 
-Process::Process(uint64_t elf_ptr) : id_(gNextId++), state_(RUNNING) {
+Process::Process() : id_(gNextId++), state_(RUNNING) {
   cr3_ = phys_mem::AllocatePage();
   InitializePml4(cr3_);
-  CreateThread(elf_ptr);
 }
 
-void Process::CreateThread(uint64_t elf_ptr) {
-  Thread* thread = new Thread(this, next_thread_id_++, elf_ptr);
+void Process::CreateThread(uint64_t entry) {
+  Thread* thread = new Thread(this, next_thread_id_++, entry);
   threads_.PushBack(thread);
   gScheduler->Enqueue(thread);
 }

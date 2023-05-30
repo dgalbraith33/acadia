@@ -25,6 +25,11 @@ const limine_file& GetInitProgram() {
 void LoadInitProgram() {
   const limine_file& init_prog = GetInitProgram();
 
-  gProcMan->InsertProcess(
-      new Process(reinterpret_cast<uint64_t>(init_prog.address)));
+  SharedPtr<Process> proc = MakeShared<Process>();
+  gProcMan->InsertProcess(proc);
+
+  uint64_t entry =
+      LoadElfProgram(proc->cr3(), reinterpret_cast<uint64_t>(init_prog.address),
+                     init_prog.size);
+  proc->CreateThread(entry);
 }

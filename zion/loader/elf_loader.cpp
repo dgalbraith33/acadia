@@ -46,17 +46,9 @@ typedef struct {
   uint64_t align;
 } Elf64ProgramHeader;
 
-void badmemcpy(uint64_t base, uint64_t offset, uint64_t dest) {
-  uint8_t* ptr = reinterpret_cast<uint8_t*>(base);
-  uint8_t* dest_ptr = reinterpret_cast<uint8_t*>(dest);
-  for (uint64_t i = 0; i < offset; i++) {
-    dest_ptr[i] = ptr[i];
-  }
-}
-
 }  // namespace
 
-uint64_t LoadElfProgram(uint64_t base, uint64_t offset) {
+uint64_t LoadElfProgram(uint64_t cr3, uint64_t base, uint64_t offset) {
   Elf64Header* header = reinterpret_cast<Elf64Header*>(base);
   dbgln("phoff: %u phnum: %u", header->phoff, header->phnum);
   Elf64ProgramHeader* programs =
@@ -68,8 +60,8 @@ uint64_t LoadElfProgram(uint64_t base, uint64_t offset) {
         "filesz: %u, memsz: %u, align: %u",
         program.type, program.flags, program.offset, program.vaddr,
         program.paddr, program.filesz, program.memsz, program.align);
-    EnsureResident(program.vaddr, program.memsz);
-    badmemcpy(base + program.offset, program.filesz, program.vaddr);
+    CopyIntoNonResidentProcess(base + program.offset, program.filesz, cr3,
+                               program.vaddr);
   }
   return header->entry;
 }

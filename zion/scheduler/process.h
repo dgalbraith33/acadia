@@ -17,12 +17,12 @@ class Process {
     FINISHED,
   };
   static SharedPtr<Process> RootProcess();
-  Process(uint64_t elf_ptr);
+  Process();
 
   uint64_t id() const { return id_; }
   uint64_t cr3() const { return cr3_; }
 
-  void CreateThread(uint64_t elf_ptr);
+  void CreateThread(uint64_t entry);
   SharedPtr<Thread> GetThread(uint64_t tid);
 
   // Checks the state of all child threads and transitions to

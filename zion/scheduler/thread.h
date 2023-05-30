@@ -11,16 +11,13 @@ class Thread {
  public:
   enum State {
     UNSPECIFIED,
-    CREATED,
     RUNNING,
     RUNNABLE,
-    BLOCKED,
     FINISHED,
   };
   static SharedPtr<Thread> RootThread(Process* root_proc);
 
-  explicit Thread(const SharedPtr<Process>& proc, uint64_t tid,
-                  uint64_t elf_ptr);
+  explicit Thread(const SharedPtr<Process>& proc, uint64_t tid, uint64_t entry);
 
   uint64_t tid() { return id_; };
   uint64_t pid();
@@ -45,7 +42,8 @@ class Thread {
   uint64_t id_;
   State state_ = RUNNABLE;
 
-  uint64_t elf_ptr_;
+  // Startup Context for the thread.
+  uint64_t rip_;
 
   // Stack pointer to take on resume.
   // Stack will contain the full thread context.
