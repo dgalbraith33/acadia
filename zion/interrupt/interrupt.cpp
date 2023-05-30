@@ -4,6 +4,7 @@
 
 #include "common/port.h"
 #include "debug/debug.h"
+#include "scheduler/scheduler.h"
 
 #define IDT_INTERRUPT_GATE 0x8E
 
@@ -122,6 +123,7 @@ extern "C" void interrupt_timer(InterruptFrame*) {
     dbgln("timer: %us", cnt * 50 / 1000);
   }
   outb(PIC1_COMMAND, PIC_EOI);
+  sched::Yield();
 }
 
 void EnablePic() {
