@@ -22,7 +22,8 @@ extern "C" void zion() {
 
   InitSyscall();
 
-  SetFrequency(/* hertz= */ 2000);
+  // Schedule every 50ms.
+  SetFrequency(/* hertz= */ 20);
   sched::InitScheduler();
   sched::EnableScheduler();
 

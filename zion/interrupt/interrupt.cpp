@@ -118,8 +118,8 @@ uint64_t cnt = 0;
 extern "C" void isr_timer();
 extern "C" void interrupt_timer(InterruptFrame*) {
   cnt++;
-  if (cnt % 1000 == 0) {
-    dbgln("timer: %u", cnt);
+  if (cnt % 20 == 0) {
+    dbgln("timer: %us", cnt * 50 / 1000);
   }
   outb(PIC1_COMMAND, PIC_EOI);
 }
