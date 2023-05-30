@@ -17,9 +17,6 @@ extern "C" void zion() {
   InitGdt();
   InitIdt();
 
-  dbgln("[boot] Init Paging.");
-  InitPaging();
-
   dbgln("[boot] Init Physical Memory Manager.");
   phys_mem::InitBootstrapPageAllocation();
   KernelHeap heap(0xFFFFFFFF'40000000, 0xFFFFFFFF'80000000);

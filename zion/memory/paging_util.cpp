@@ -39,121 +39,134 @@ uint64_t ShiftForEntryIndexing(uint64_t addr, uint64_t offset) {
   addr &= ~0xFFFF0000'00000000;
   addr >>= offset;
   addr <<= 3;
-  return addr;
+  return addr & 0xFF8;
 }
 
-uint64_t* Pml4Entry(uint64_t addr) {
-  return reinterpret_cast<uint64_t*>(PML_RECURSE |
+uint64_t* Pml4Entry(uint64_t cr3, uint64_t addr) {
+  cr3 += boot::GetHigherHalfDirectMap();
+  return reinterpret_cast<uint64_t*>(cr3 |
                                      ShiftForEntryIndexing(addr, PML_OFFSET));
 }
 
-uint64_t* PageDirectoryPointerEntry(uint64_t addr) {
-  return reinterpret_cast<uint64_t*>(PDP_RECURSE |
+uint64_t* PageDirectoryPointerEntry(uint64_t pdp_phys, uint64_t addr) {
+  pdp_phys += boot::GetHigherHalfDirectMap();
+  pdp_phys &= ~0xFFF;
+  return reinterpret_cast<uint64_t*>(pdp_phys |
                                      ShiftForEntryIndexing(addr, PDP_OFFSET));
 }
 
-uint64_t* PageDirectoryEntry(uint64_t addr) {
-  return reinterpret_cast<uint64_t*>(PD_RECURSE |
+uint64_t* PageDirectoryEntry(uint64_t pd_phys, uint64_t addr) {
+  pd_phys += boot::GetHigherHalfDirectMap();
+  pd_phys &= ~0xFFF;
+  return reinterpret_cast<uint64_t*>(pd_phys |
                                      ShiftForEntryIndexing(addr, PD_OFFSET));
 }
 
-uint64_t* PageTableEntry(uint64_t addr) {
-  return reinterpret_cast<uint64_t*>(PT_RECURSE |
+uint64_t* PageTableEntry(uint64_t pt_phys, uint64_t addr) {
+  pt_phys += boot::GetHigherHalfDirectMap();
+  pt_phys &= ~0xFFF;
+  return reinterpret_cast<uint64_t*>(pt_phys |
                                      ShiftForEntryIndexing(addr, PT_OFFSET));
 }
 
-bool PageDirectoryPointerLoaded(uint64_t addr) {
-  return *Pml4Entry(addr) & PRESENT_BIT;
-}
-
-bool PageDirectoryLoaded(uint64_t addr) {
-  return PageDirectoryPointerLoaded(addr) &&
-         (*PageDirectoryPointerEntry(addr) & PRESENT_BIT);
-}
-
-bool PageTableLoaded(uint64_t addr) {
-  return PageDirectoryLoaded(addr) && (*PageDirectoryEntry(addr) & PRESENT_BIT);
-}
-
-void MapPage(uint64_t virt, uint64_t phys) {
-  if (PageLoaded(virt)) {
-    panic("Allocating Over Existing Page: %m", virt);
+bool IsPageResident(uint64_t cr3, uint64_t virt) {
+  uint64_t* pml4_entry = Pml4Entry(cr3, virt);
+  if (!(*pml4_entry & PRESENT_BIT)) {
+    return false;
   }
+  uint64_t* pdp_entry = PageDirectoryPointerEntry(*pml4_entry, virt);
+  if (!(*pdp_entry & PRESENT_BIT)) {
+    return false;
+  }
+  uint64_t* pd_entry = PageDirectoryEntry(*pdp_entry, virt);
+  if (!(*pd_entry & PRESENT_BIT)) {
+    return false;
+  }
+  uint64_t* pt_entry = PageTableEntry(*pd_entry, virt);
+  if (!(*pt_entry & PRESENT_BIT)) {
+    return false;
+  }
+  return true;
+}
 
+void MapPage(uint64_t cr3, uint64_t virt) {
   uint64_t access_bits = PRESENT_BIT | READ_WRITE_BIT;
   uint64_t higher_half = 0xffff8000'00000000;
   if ((virt & higher_half) != higher_half) {
     access_bits |= USER_MODE_BIT;
   }
 
-  if (!PageDirectoryPointerLoaded(virt)) {
+  uint64_t* pml4_entry = Pml4Entry(cr3, virt);
+  if (!(*pml4_entry & PRESENT_BIT)) {
     uint64_t page = phys_mem::AllocatePage();
-    *Pml4Entry(virt) = page | access_bits;
-    ZeroOutPage(PageDirectoryPointerEntry(virt));
+    *pml4_entry = page | access_bits;
+    ZeroOutPage(PageDirectoryPointerEntry(*pml4_entry, virt));
   }
-  if (!PageDirectoryLoaded(virt)) {
+  uint64_t* pdp_entry = PageDirectoryPointerEntry(*pml4_entry, virt);
+  if (!(*pdp_entry & PRESENT_BIT)) {
     uint64_t page = phys_mem::AllocatePage();
-    *PageDirectoryPointerEntry(virt) = page | access_bits;
-    ZeroOutPage(PageDirectoryEntry(virt));
+    *pdp_entry = page | access_bits;
+    ZeroOutPage(PageDirectoryEntry(*pdp_entry, virt));
   }
-  if (!PageTableLoaded(virt)) {
+  uint64_t* pd_entry = PageDirectoryEntry(*pdp_entry, virt);
+  if (!(*pd_entry & PRESENT_BIT)) {
     uint64_t page = phys_mem::AllocatePage();
-    *PageDirectoryEntry(virt) = page | access_bits;
-    ZeroOutPage(PageTableEntry(virt));
+    *(pd_entry) = page | access_bits;
+    ZeroOutPage(PageTableEntry(*pd_entry, virt));
   }
 
-  *PageTableEntry(virt) = PageAlign(phys) | access_bits;
-  ZeroOutPage(reinterpret_cast<uint64_t*>(virt));
+  uint64_t* pt_entry = PageTableEntry(*pd_entry, virt);
+  if (!(*pt_entry & PRESENT_BIT)) {
+    uint64_t phys = phys_mem::AllocatePage();
+    *pt_entry = PageAlign(phys) | access_bits;
+    ZeroOutPage(reinterpret_cast<uint64_t*>(boot::GetHigherHalfDirectMap() +
+                                            PageAlign(phys)));
+  } else {
+    panic("Page already allocated.");
+  }
 }
 
 uint64_t Pml4Index(uint64_t addr) { return (addr >> PML_OFFSET) & 0x1FF; }
-}  // namespace
 
-void InitPaging() {
+uint64_t CurrCr3() {
   uint64_t pml4_addr = 0;
   asm volatile("mov %%cr3, %0;" : "=r"(pml4_addr));
-  uint64_t* pml4_virtual =
-      reinterpret_cast<uint64_t*>(boot::GetHigherHalfDirectMap() + pml4_addr);
-
-  uint64_t recursive_entry = pml4_addr | PRESENT_BIT | READ_WRITE_BIT;
-  pml4_virtual[0x1FE] = recursive_entry;
+  return pml4_addr;
 }
+
+}  // namespace
 
 void InitializePml4(uint64_t pml4_physical_addr) {
   uint64_t* pml4_virtual = reinterpret_cast<uint64_t*>(
       boot::GetHigherHalfDirectMap() + pml4_physical_addr);
-
-  // Map the recursive entry.
-  uint64_t recursive_entry = pml4_physical_addr | PRESENT_BIT | READ_WRITE_BIT;
-  pml4_virtual[0x1FE] = recursive_entry;
+  uint64_t curr_cr3 = CurrCr3();
 
   // Map the kernel entry.
   // This should contain the heap at 0xFFFFFFFF'40000000
   uint64_t kernel_addr = 0xFFFFFFFF'80000000;
-  pml4_virtual[Pml4Index(kernel_addr)] = *Pml4Entry(kernel_addr);
+  pml4_virtual[Pml4Index(kernel_addr)] = *Pml4Entry(curr_cr3, kernel_addr);
 
   // Map the HHDM.
   // This is necessary to access values off of the kernel stack.
   uint64_t hhdm = boot::GetHigherHalfDirectMap();
-  pml4_virtual[Pml4Index(hhdm)] = *Pml4Entry(hhdm);
+  pml4_virtual[Pml4Index(hhdm)] = *Pml4Entry(curr_cr3, hhdm);
 }
 
-void AllocatePage(uint64_t addr) {
-  uint64_t physical_page = phys_mem::AllocatePage();
-  MapPage(addr, physical_page);
+void AllocatePageIfNecessary(uint64_t addr, uint64_t cr3) {
+  if (cr3 == 0) {
+    cr3 = CurrCr3();
+  }
+  if (IsPageResident(cr3, addr)) {
+    return;
+  }
+  MapPage(cr3, addr);
 }
 
 void EnsureResident(uint64_t addr, uint64_t size) {
   uint64_t max = addr + size;
   addr = PageAlign(addr);
   while (addr < max) {
-    if (!PageLoaded(addr)) {
-      AllocatePage(addr);
-    }
+    AllocatePageIfNecessary(addr);
     addr += 0x1000;
   }
-}
-
-bool PageLoaded(uint64_t addr) {
-  return PageTableLoaded(addr) && (*PageTableEntry(addr) & PRESENT_BIT);
 }
