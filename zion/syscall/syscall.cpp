@@ -30,7 +30,7 @@ extern "C" void syscall_enter();
 
 // Used by syscall_enter.s
 extern "C" uint64_t GetKernelRsp() {
-  return sched::CurrentThread().Rsp0Start();
+  return gScheduler->CurrentThread().Rsp0Start();
 }
 
 void InitSyscall() {
@@ -54,7 +54,7 @@ void InitSyscall() {
 }
 
 extern "C" void SyscallHandler(uint64_t call_id, char* message) {
-  Thread& thread = sched::CurrentThread();
+  Thread& thread = gScheduler->CurrentThread();
   switch (call_id) {
     case Z_THREAD_EXIT:
       thread.Exit();

@@ -13,7 +13,7 @@ extern "C" void jump_user_space(uint64_t rip, uint64_t rsp);
 
 extern "C" void thread_init() {
   asm("sti");
-  sched::CurrentThread().Init();
+  gScheduler->CurrentThread().Init();
   panic("Reached end of thread.");
 }
 
@@ -54,5 +54,5 @@ void Thread::Exit() {
   dbgln("[%u.%u] Exiting", pid(), id_);
   state_ = FINISHED;
   process_->CheckState();
-  sched::Yield();
+  gScheduler->Yield();
 }

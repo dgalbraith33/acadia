@@ -31,7 +31,7 @@ Process::Process(uint64_t elf_ptr) : id_(gNextId++), state_(RUNNING) {
 void Process::CreateThread(uint64_t elf_ptr) {
   Thread* thread = new Thread(this, next_thread_id_++, elf_ptr);
   threads_.PushBack(thread);
-  sched::EnqueueThread(thread);
+  gScheduler->Enqueue(thread);
 }
 
 SharedPtr<Thread> Process::GetThread(uint64_t tid) {

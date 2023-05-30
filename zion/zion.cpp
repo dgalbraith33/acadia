@@ -30,16 +30,16 @@ extern "C" void zion() {
 
   dbgln("[boot] Init scheduler.");
   ProcessManager::Init();
+  Scheduler::Init();
   // Schedule every 50ms.
   SetFrequency(/* hertz= */ 20);
-  sched::InitScheduler();
 
   dbgln("[boot] Loading sys init program.");
   LoadInitProgram();
 
   dbgln("[boot] Init finished, yielding.");
-  sched::EnableScheduler();
-  sched::Yield();
+  gScheduler->Enable();
+  gScheduler->Yield();
 
   dbgln("Sleeping!");
   while (1)

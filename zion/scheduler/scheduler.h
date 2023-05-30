@@ -3,27 +3,35 @@
 #include "scheduler/process.h"
 #include "scheduler/thread.h"
 
-namespace sched {
+class Scheduler {
+ public:
+  // Initializes the scheduler in a disabled state.
+  //
+  // Requires the process manager to have been initialized.
+  static void Init();
 
-// Create the scheduler object in a disabled state,
-// processes can be added but will not be scheduled.
-void InitScheduler();
+  void Enable() { enabled_ = true; }
 
-// Enables the scheduler such that processes will yield on ticks.
-void EnableScheduler();
+  Process& CurrentProcess() { return current_thread_->process(); }
+  Thread& CurrentThread() { return *current_thread_; }
 
-// Preempts the current thread and flags it as runnable in the queue.
-// Generally used by the timer to move to the next timeslice.
-void Preempt();
+  void Enqueue(const SharedPtr<Thread> thread) {
+    runnable_threads_.PushBack(thread);
+  }
 
-// Current thread yields and is not rescheduled until some external process
-// adds it.
-// Used when a thread blocks or exits.
-void Yield();
+  void Preempt();
+  void Yield();
 
-void EnqueueThread(Thread* thread);
+ private:
+  bool enabled_ = false;
 
-Process& CurrentProcess();
-Thread& CurrentThread();
+  SharedPtr<Thread> current_thread_;
+  LinkedList<SharedPtr<Thread>> runnable_threads_;
 
-}  // namespace sched
+  SharedPtr<Thread> sleep_thread_;
+
+  Scheduler();
+  void SwapToCurrent(Thread& prev);
+};
+
+extern Scheduler* gScheduler;
