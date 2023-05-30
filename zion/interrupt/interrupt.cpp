@@ -67,7 +67,21 @@ extern "C" void isr_divide_by_zero();
 extern "C" void interrupt_divide_by_zero(void* frame) { panic("DIV0"); }
 
 extern "C" void isr_protection_fault();
-extern "C" void interrupt_protection_fault(void* frame) { panic("GP"); }
+extern "C" void interrupt_protection_fault(InterruptFrame* frame) {
+  dbgln("General Protection Fault");
+  uint64_t err = frame->error_code;
+  if (err & 0x1) {
+    dbgln("External Source");
+  }
+  if (err & 0x2) {
+    dbgln("IDT");
+  } else {
+    dbgln("GDT");
+  }
+  dbgln("Index: %u", err >> 3);
+
+  panic("GP");
+}
 
 extern "C" void isr_page_fault();
 extern "C" void interrupt_page_fault(InterruptFrame* frame) {
