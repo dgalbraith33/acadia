@@ -44,16 +44,22 @@ class LinkedList {
     return ret;
   }
 
-  T CycleFront() {
+  /*
+   * Returns the front item in the list and pushes the passed item to the back.
+   *
+   * Done in one function to avoid a memory alloc/dealloc during scheduling.
+   **/
+  T CycleFront(const T& new_item) {
     if (size_ == 0 || front_ == nullptr) {
       panic("Cycling empty list");
     }
 
+    T ret = front_->item;
+    front_->item = new_item;
     if (size_ == 1) {
-      return front_->item;
+      return ret;
     }
 
-    T ret = front_->item;
     ListItem* old_front = front_;
     ListItem* iter = front_;
     front_ = front_->next;
