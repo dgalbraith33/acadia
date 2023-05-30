@@ -3,6 +3,7 @@
 #include "common/gdt.h"
 #include "debug/debug.h"
 #include "interrupt/interrupt.h"
+#include "interrupt/timer.h"
 #include "loader/init_loader.h"
 #include "memory/kernel_heap.h"
 #include "memory/paging_util.h"
@@ -21,6 +22,7 @@ extern "C" void zion() {
 
   InitSyscall();
 
+  SetFrequency(/* hertz= */ 2000);
   sched::InitScheduler();
   sched::EnableScheduler();
 

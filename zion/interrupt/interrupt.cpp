@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+#include "common/port.h"
 #include "debug/debug.h"
 
 #define IDT_INTERRUPT_GATE 0x8E
@@ -95,13 +96,37 @@ extern "C" void interrupt_page_fault(InterruptFrame* frame) {
   panic("PF");
 }
 
+#define PIC1_COMMAND 0x20
+#define PIC1_DATA 0x21
+#define PIC_EOI 0x20
+
+uint64_t cnt = 0;
+extern "C" void isr_timer();
+extern "C" void interrupt_timer(InterruptFrame*) {
+  cnt++;
+  if (cnt % 1000 == 0) {
+    dbgln("timer: %u", cnt);
+  }
+  outb(PIC1_COMMAND, PIC_EOI);
+}
+
+void EnablePic() {
+  outb(PIC1_COMMAND, 0x11);
+  outb(PIC1_DATA, 0x20);  // PIC1 offset.
+  outb(PIC1_DATA, 0x4);
+  outb(PIC1_DATA, 0x1);
+}
+
 void InitIdt() {
   gIdt[0] = CreateDescriptor(isr_divide_by_zero);
   gIdt[13] = CreateDescriptor(isr_protection_fault);
   gIdt[14] = CreateDescriptor(isr_page_fault);
+  gIdt[32] = CreateDescriptor(isr_timer);
   InterruptDescriptorTablePointer idtp{
       .size = sizeof(gIdt),
       .base = reinterpret_cast<uint64_t>(gIdt),
   };
   asm volatile("lidt %0" ::"m"(idtp));
+
+  EnablePic();
 }
