@@ -129,6 +129,9 @@ void EnablePic() {
   outb(PIC1_DATA, 0x20);  // PIC1 offset.
   outb(PIC1_DATA, 0x4);
   outb(PIC1_DATA, 0x1);
+
+  // Mask all except the timer.
+  outb(PIC1_DATA, 0xE);
 }
 
 void InitIdt() {
