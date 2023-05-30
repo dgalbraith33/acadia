@@ -123,7 +123,7 @@ extern "C" void interrupt_timer(InterruptFrame*) {
     dbgln("timer: %us", cnt * 50 / 1000);
   }
   outb(PIC1_COMMAND, PIC_EOI);
-  sched::Yield();
+  sched::Preempt();
 }
 
 void EnablePic() {
