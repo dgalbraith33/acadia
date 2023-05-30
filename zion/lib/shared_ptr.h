@@ -15,12 +15,13 @@ class SharedPtr {
   }
 
   SharedPtr(const SharedPtr<T>& other)
-      : ptr_(other.ptr_), ref_cnt_(other.ref_cnt_) {
+      : init_(other.init_), ptr_(other.ptr_), ref_cnt_(other.ref_cnt_) {
     (*ref_cnt_)++;
   }
 
   SharedPtr& operator=(const SharedPtr<T>& other) {
     Cleanup();
+    init_ = other.init_;
     ptr_ = other.ptr_;
     ref_cnt_ = other.ref_cnt_;
     (*ref_cnt_)++;
@@ -29,14 +30,33 @@ class SharedPtr {
 
   ~SharedPtr() { Cleanup(); }
 
-  T& operator*() { return *ptr_; }
-  const T& operator*() const { return *ptr_; }
-  T* operator->() { return ptr_; }
-  const T* operator->() const { return ptr_; }
+  T& operator*() {
+    CheckValid();
+    return *ptr_;
+  }
+  const T& operator*() const {
+    CheckValid();
+    return *ptr_;
+  }
+  T* operator->() {
+    CheckValid();
+    return ptr_;
+  }
+  const T* operator->() const {
+    CheckValid();
+    return ptr_;
+  }
 
-  T* ptr() { return ptr_; }
+  T* ptr() {
+    CheckValid();
+    return ptr_;
+  }
 
-  bool operator==(const SharedPtr<T>& other) { return ptr_ == other.ptr_; }
+  bool operator==(const SharedPtr<T>& other) {
+    CheckValid();
+    other.CheckValid();
+    return ptr_ == other.ptr_;
+  }
 
   bool empty() { return !init_; }
 
@@ -53,6 +73,12 @@ class SharedPtr {
       dbgln("Deleting shared ptr: %m", ptr_);
       delete ptr_;
       delete ref_cnt_;
+    }
+  }
+
+  void CheckValid() const {
+    if (!init_) {
+      panic("Accessing invalid shared ptr");
     }
   }
 };
