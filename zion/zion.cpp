@@ -8,6 +8,7 @@
 #include "memory/kernel_heap.h"
 #include "memory/paging_util.h"
 #include "memory/physical_memory.h"
+#include "scheduler/process_manager.h"
 #include "scheduler/scheduler.h"
 #include "syscall/syscall.h"
 
@@ -28,6 +29,7 @@ extern "C" void zion() {
   InitSyscall();
 
   dbgln("[boot] Init scheduler.");
+  ProcessManager::Init();
   // Schedule every 50ms.
   SetFrequency(/* hertz= */ 20);
   sched::InitScheduler();

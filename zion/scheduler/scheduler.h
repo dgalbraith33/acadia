@@ -21,10 +21,6 @@ void Preempt();
 // Used when a thread blocks or exits.
 void Yield();
 
-// Scheduler will take ownership
-// of the created process.
-void InsertProcess(Process* proc);
-
 void EnqueueThread(Thread* thread);
 
 Process& CurrentProcess();

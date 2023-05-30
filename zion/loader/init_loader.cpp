@@ -4,7 +4,7 @@
 #include "debug/debug.h"
 #include "loader/elf_loader.h"
 #include "scheduler/process.h"
-#include "scheduler/scheduler.h"
+#include "scheduler/process_manager.h"
 
 namespace {
 
@@ -25,6 +25,6 @@ const limine_file& GetInitProgram() {
 void LoadInitProgram() {
   const limine_file& init_prog = GetInitProgram();
 
-  sched::InsertProcess(
+  gProcMan->InsertProcess(
       new Process(reinterpret_cast<uint64_t>(init_prog.address)));
 }

@@ -2,36 +2,26 @@
 
 #include "debug/debug.h"
 #include "lib/linked_list.h"
+#include "scheduler/process_manager.h"
 
 namespace sched {
 namespace {
 
 extern "C" void context_switch(uint64_t* current_esp, uint64_t* next_esp);
 
-void DumpProcessStates(LinkedList<SharedPtr<Process>>& proc_list) {
-  dbgln("Process States: %u", proc_list.size());
-  auto iter = proc_list.begin();
-  while (iter != proc_list.end()) {
-    dbgln("%u: %u", iter->id(), iter->GetState());
-    ++iter;
-  }
-}
-
 class Scheduler {
  public:
   Scheduler() {
-    SharedPtr<Process> root = Process::RootProcess();
-    sleep_thread_ = root->GetThread(0);
+    Process& root = gProcMan->FromId(0);
+    sleep_thread_ = root.GetThread(0);
     // TODO: Implement a separate sleep thread?
     current_thread_ = sleep_thread_;
-    proc_list_.PushBack(root);
   }
   void Enable() { enabled_ = true; }
 
   Process& CurrentProcess() { return CurrentThread().process(); }
   Thread& CurrentThread() { return *current_thread_; }
 
-  void InsertProcess(Process* process) { proc_list_.PushBack(process); }
   void Enqueue(Thread* thread) { runnable_threads_.PushBack(thread); }
 
   void SwapToCurrent(Thread& prev) {
@@ -90,7 +80,7 @@ class Scheduler {
       if (runnable_threads_.size() == 0) {
         current_thread_ = sleep_thread_;
         dbgln("Sleeping");
-        DumpProcessStates(proc_list_);
+        gProcMan->DumpProcessStates();
       } else {
         // FIXME: Memory operation.
         current_thread_ = runnable_threads_.PopFront();
@@ -102,8 +92,6 @@ class Scheduler {
 
  private:
   bool enabled_ = false;
-  // TODO: move this to a separate process manager class.
-  LinkedList<SharedPtr<Process>> proc_list_;
 
   SharedPtr<Thread> current_thread_;
   LinkedList<SharedPtr<Thread>> runnable_threads_;
@@ -128,7 +116,6 @@ void EnableScheduler() { GetScheduler().Enable(); }
 void Preempt() { GetScheduler().Preempt(); }
 void Yield() { GetScheduler().Yield(); }
 
-void InsertProcess(Process* process) { GetScheduler().InsertProcess(process); }
 void EnqueueThread(Thread* thread) { GetScheduler().Enqueue(thread); }
 
 Process& CurrentProcess() { return GetScheduler().CurrentProcess(); }
