@@ -1,6 +1,7 @@
 #include "scheduler/process.h"
 
 #include "debug/debug.h"
+#include "include/cap_types.h"
 #include "memory/paging_util.h"
 #include "memory/physical_memory.h"
 #include "scheduler/scheduler.h"
@@ -25,6 +26,8 @@ Process::Process() : id_(gNextId++), state_(RUNNING) {}
 void Process::CreateThread(uint64_t entry) {
   Thread* thread = new Thread(*this, next_thread_id_++, entry);
   threads_.PushBack(thread);
+  caps_.PushBack(new Capability(this, Capability::PROCESS, next_cap_id_++,
+                                ZC_PROC_SPAWN_CHILD));
   gScheduler->Enqueue(thread);
 }
 
@@ -49,4 +52,16 @@ void Process::CheckState() {
     ++iter;
   }
   state_ = FINISHED;
+}
+
+SharedPtr<Capability> Process::GetCapability(uint64_t cid) {
+  auto iter = caps_.begin();
+  while (iter != caps_.end()) {
+    if (iter->id() == cid) {
+      return *iter;
+    }
+    ++iter;
+  }
+  dbgln("Bad cap access");
+  return {};
 }

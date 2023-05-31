@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+#include "capability/capability.h"
 #include "lib/linked_list.h"
 #include "lib/shared_ptr.h"
 #include "memory/virtual_memory.h"
@@ -26,6 +27,7 @@ class Process {
   void CreateThread(uint64_t entry);
   SharedPtr<Thread> GetThread(uint64_t tid);
 
+  SharedPtr<Capability> GetCapability(uint64_t cid);
   // Checks the state of all child threads and transitions to
   // finished if all have finished.
   void CheckState();
@@ -39,6 +41,8 @@ class Process {
   State state_;
 
   uint64_t next_thread_id_ = 0;
+  uint64_t next_cap_id_ = 0x100;
 
   LinkedList<SharedPtr<Thread>> threads_;
+  LinkedList<SharedPtr<Capability>> caps_;
 };

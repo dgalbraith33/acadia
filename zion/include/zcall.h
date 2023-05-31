@@ -12,8 +12,9 @@ uint64_t ZDebug(const char* message);
 
 // TODO: Move structs into an internal header.
 struct ZProcessSpawnReq {
+  uint64_t cap_id;
   uint64_t elf_base;
   uint64_t elf_size;
 };
 
-uint64_t ZProcessSpawn(uint64_t elf_base, uint64_t elf_size);
+uint64_t ZProcessSpawn(uint64_t cap_id, uint64_t elf_base, uint64_t elf_size);

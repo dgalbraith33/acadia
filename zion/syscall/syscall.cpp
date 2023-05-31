@@ -3,7 +3,9 @@
 #include <stdint.h>
 
 #include "debug/debug.h"
+#include "include/cap_types.h"
 #include "include/zcall.h"
+#include "include/zerrors.h"
 #include "loader/elf_loader.h"
 #include "scheduler/process.h"
 #include "scheduler/process_manager.h"
@@ -57,6 +59,18 @@ void InitSyscall() {
 }
 
 uint64_t ProcessSpawn(ZProcessSpawnReq* req) {
+  auto& curr_proc = gScheduler->CurrentProcess();
+  auto cap = curr_proc.GetCapability(req->cap_id);
+  if (cap.empty()) {
+    return ZE_NOT_FOUND;
+  }
+  if (!cap->CheckType(Capability::PROCESS)) {
+    return ZE_INVALID;
+  }
+
+  if (!cap->HasPermissions(ZC_PROC_SPAWN_CHILD)) {
+    return ZE_DENIED;
+  }
   dbgln("Proc spawn: %u:%u", req->elf_base, req->elf_size);
   SharedPtr<Process> proc = MakeShared<Process>();
   gProcMan->InsertProcess(proc);
