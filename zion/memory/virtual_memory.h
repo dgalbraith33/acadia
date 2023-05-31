@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include "debug/debug.h"
+#include "memory/user_stack_manager.h"
 
 // VirtualMemory class holds a memory space for an individual process.
 //
@@ -15,7 +16,7 @@
 // 0x00000010 00000000 - 0x0000001F FFFFFFFF : USER_HEAP (64 GiB)
 // 0x00000020 00000000 - 0x0000002F FFFFFFFF : MEM_MAP (64 GiB)
 // 0x00000040 00000000 - 0x0000004F FFFFFFFF : IPC_BUF (64 GiB)
-// 0x00007FFF 00000000 - 0x00007FFF FFFFFFFF : USER_STACK (64 GiB)
+// 0x00007FF0 00000000 - 0x00007FFF FFFFFFFF : USER_STACK (64 GiB)
 //
 // Kernel Regions (Shared across processes):
 // 0xFFFF8000 00000000 - 0xFFFF800F FFFFFFFF : HHDM (64 GiB)
@@ -46,14 +47,17 @@ class VirtualMemory {
 
   uint64_t cr3() { return cr3_; }
 
+  // User Mappings.
+  uint64_t AllocateUserStack();
   uint64_t GetNextMemMapAddr(uint64_t size);
 
-  // Kernel
+  // Kernel Mappings.
   uint64_t* AllocateKernelStack();
 
  private:
   VirtualMemory(uint64_t cr3) : cr3_(cr3) {}
   uint64_t cr3_ = 0;
 
+  UserStackManager user_stacks_;
   uint64_t next_memmap_addr_ = 0x20'00000000;
 };

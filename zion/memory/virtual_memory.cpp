@@ -17,8 +17,8 @@ VirtualMemory::VirtualMemory() {
   InitializePml4(cr3_);
 }
 
-uint64_t* VirtualMemory::AllocateKernelStack() {
-  return gKernelStackManager->AllocateKernelStack();
+uint64_t VirtualMemory::AllocateUserStack() {
+  return user_stacks_.NewUserStack();
 }
 
 uint64_t VirtualMemory::GetNextMemMapAddr(uint64_t size) {
@@ -28,4 +28,8 @@ uint64_t VirtualMemory::GetNextMemMapAddr(uint64_t size) {
     panic("OOM: Memmap");
   }
   return addr;
+}
+
+uint64_t* VirtualMemory::AllocateKernelStack() {
+  return gKernelStackManager->AllocateKernelStack();
 }

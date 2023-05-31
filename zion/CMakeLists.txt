@@ -12,6 +12,7 @@ add_executable(zion
   memory/kernel_stack_manager.cpp
   memory/paging_util.cpp
   memory/physical_memory.cpp
+  memory/user_stack_manager.cpp
   memory/virtual_memory.cpp
   scheduler/context_switch.s
   scheduler/jump_user_space.s

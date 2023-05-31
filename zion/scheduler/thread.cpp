@@ -26,7 +26,6 @@ SharedPtr<Thread> Thread::RootThread(Process& root_proc) {
 Thread::Thread(Process& proc, uint64_t tid, uint64_t entry)
     : process_(proc), id_(tid), rip_(entry) {
   uint64_t* stack_ptr = proc.vmm().AllocateKernelStack();
-  dbgln("Kernel Stack at: %m", stack_ptr);
   // 0: rip
   *(stack_ptr) = reinterpret_cast<uint64_t>(thread_init);
   // 1-4: rax, rcx, rdx, rbx
@@ -43,8 +42,7 @@ uint64_t Thread::pid() const { return process_.id(); }
 
 void Thread::Init() {
   dbgln("[%u.%u] thread start.", pid(), id_);
-  uint64_t rsp = 0x80000000;
-  EnsureResident(rsp - 1, 1);
+  uint64_t rsp = process_.vmm().AllocateUserStack();
   SetRsp0(rsp0_start_);
   jump_user_space(rip_, rsp);
 }
