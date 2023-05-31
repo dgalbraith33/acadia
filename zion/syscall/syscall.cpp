@@ -73,7 +73,7 @@ extern "C" uint64_t SyscallHandler(uint64_t call_id, char* message) {
       panic("Returned from thread exit");
       break;
     case Z_DEBUG_PRINT:
-      dbgln("[%u.%u] [Debug] %s", thread.pid(), thread.tid(), message);
+      dbgln("[Debug] %s", message);
       break;
     case Z_PROCESS_SPAWN:
       return ProcessSpawn(reinterpret_cast<ZProcessSpawnReq*>(message));

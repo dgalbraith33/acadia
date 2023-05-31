@@ -41,14 +41,14 @@ Thread::Thread(Process& proc, uint64_t tid, uint64_t entry)
 uint64_t Thread::pid() const { return process_.id(); }
 
 void Thread::Init() {
-  dbgln("[%u.%u] thread start.", pid(), id_);
+  dbgln("Thread start.", pid(), id_);
   uint64_t rsp = process_.vmm().AllocateUserStack();
   SetRsp0(rsp0_start_);
   jump_user_space(rip_, rsp);
 }
 
 void Thread::Exit() {
-  dbgln("[%u.%u] Exiting", pid(), id_);
+  dbgln("Exiting", pid(), id_);
   state_ = FINISHED;
   process_.CheckState();
   gScheduler->Yield();

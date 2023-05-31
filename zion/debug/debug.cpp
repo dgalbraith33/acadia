@@ -1,6 +1,7 @@
 #include "debug/debug.h"
 
 #include "common/port.h"
+#include "scheduler/scheduler.h"
 
 #define COM1 0x3f8
 
@@ -73,7 +74,14 @@ void MemToStr(uint64_t u, char* str) {
   str[18] = '\0';
 }
 
-void dbgln_internal(const char* fmt, va_list args) {
+void AddProcPrefix() {
+  if (gScheduler != nullptr) {
+    auto& t = gScheduler->CurrentThread();
+    dbg("[%u.%u] ", t.pid(), t.tid());
+  }
+}
+
+void dbg_internal(const char* fmt, va_list args) {
   for (; *fmt != '\0'; fmt++) {
     if (*fmt != '%') {
       dbgputchar(*fmt);
@@ -120,25 +128,34 @@ void dbgln_internal(const char* fmt, va_list args) {
       }
     }
   }
-  dbgputchar('\n');
 }
 
 }  // namespace
 
-void dbgln(const char* fmt, ...) {
+void dbg(const char* fmt, ...) {
   va_list arg;
   va_start(arg, fmt);
-  dbgln_internal(fmt, arg);
+  dbg_internal(fmt, arg);
   va_end(arg);
+}
+
+void dbgln(const char* fmt, ...) {
+  AddProcPrefix();
+  va_list arg;
+  va_start(arg, fmt);
+  dbg_internal(fmt, arg);
+  va_end(arg);
+  dbgputchar('\n');
 }
 
 void panic(const char* fmt, ...) {
   asm volatile("cli");
+  AddProcPrefix();
   va_list arg;
   va_start(arg, fmt);
-  dbgln_internal(fmt, arg);
+  dbg_internal(fmt, arg);
   va_end(arg);
-  dbgln("PANIC");
+  dbgln("\nPANIC");
   while (1)
     ;
 }
