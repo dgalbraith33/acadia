@@ -11,3 +11,11 @@ uint64_t SysCall1(uint64_t number, const void* first) {
 uint64_t ZDebug(const char* message) {
   return SysCall1(Z_DEBUG_PRINT, message);
 }
+
+uint64_t ZProcessSpawn(uint64_t elf_base, uint64_t elf_size) {
+  ZProcessSpawnReq req{
+      .elf_base = elf_base,
+      .elf_size = elf_size,
+  };
+  return SysCall1(Z_PROCESS_SPAWN, &req);
+}

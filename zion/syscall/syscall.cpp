@@ -4,6 +4,9 @@
 
 #include "debug/debug.h"
 #include "include/zcall.h"
+#include "loader/elf_loader.h"
+#include "scheduler/process.h"
+#include "scheduler/process_manager.h"
 #include "scheduler/scheduler.h"
 
 #define EFER 0xC0000080
@@ -53,7 +56,16 @@ void InitSyscall() {
   SetMSR(LSTAR, reinterpret_cast<uint64_t>(syscall_enter));
 }
 
-extern "C" void SyscallHandler(uint64_t call_id, char* message) {
+uint64_t ProcessSpawn(ZProcessSpawnReq* req) {
+  dbgln("Proc spawn: %u:%u", req->elf_base, req->elf_size);
+  SharedPtr<Process> proc = MakeShared<Process>();
+  gProcMan->InsertProcess(proc);
+  uint64_t entry = LoadElfProgram(proc->cr3(), req->elf_base, req->elf_size);
+  proc->CreateThread(entry);
+  return 0;
+}
+
+extern "C" uint64_t SyscallHandler(uint64_t call_id, char* message) {
   Thread& thread = gScheduler->CurrentThread();
   switch (call_id) {
     case Z_THREAD_EXIT:
@@ -63,7 +75,10 @@ extern "C" void SyscallHandler(uint64_t call_id, char* message) {
     case Z_DEBUG_PRINT:
       dbgln("[%u.%u] [Debug] %s", thread.pid(), thread.tid(), message);
       break;
+    case Z_PROCESS_SPAWN:
+      return ProcessSpawn(reinterpret_cast<ZProcessSpawnReq*>(message));
     default:
       panic("Unhandled syscall number: %u", call_id);
   }
+  return 1;
 }

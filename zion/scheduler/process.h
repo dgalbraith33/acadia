@@ -4,6 +4,7 @@
 
 #include "lib/linked_list.h"
 #include "lib/shared_ptr.h"
+#include "memory/virtual_memory.h"
 
 // Forward decl due to cyclic dependency.
 class Thread;
@@ -21,6 +22,7 @@ class Process {
 
   uint64_t id() const { return id_; }
   uint64_t cr3() const { return cr3_; }
+  VirtualMemory& vmm() { return vmm_; }
 
   void CreateThread(uint64_t entry);
   SharedPtr<Thread> GetThread(uint64_t tid);
@@ -34,6 +36,7 @@ class Process {
  private:
   Process(uint64_t id, uint64_t cr3) : id_(id), cr3_(cr3) {}
   uint64_t id_;
+  VirtualMemory vmm_;
   uint64_t cr3_;
   State state_;
 
