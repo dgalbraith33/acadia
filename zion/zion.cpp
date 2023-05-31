@@ -6,6 +6,7 @@
 #include "interrupt/timer.h"
 #include "loader/init_loader.h"
 #include "memory/kernel_heap.h"
+#include "memory/kernel_stack_manager.h"
 #include "memory/paging_util.h"
 #include "memory/physical_memory.h"
 #include "scheduler/process_manager.h"
@@ -21,6 +22,11 @@ extern "C" void zion() {
   phys_mem::InitBootstrapPageAllocation();
   KernelHeap heap(0xFFFFFFFF'40000000, 0xFFFFFFFF'80000000);
   phys_mem::InitPhysicalMemoryManager();
+
+  dbgln("[boot] Memory allocations available now.");
+
+  dbgln("[boot] Init Kernel Stack Manager.");
+  KernelStackManager::Init();
 
   dbgln("[boot] Init syscalls.");
   InitSyscall();

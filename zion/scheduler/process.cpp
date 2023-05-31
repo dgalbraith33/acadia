@@ -16,7 +16,7 @@ SharedPtr<Process> Process::RootProcess() {
   uint64_t pml4_addr = 0;
   asm volatile("mov %%cr3, %0;" : "=r"(pml4_addr));
   SharedPtr<Process> proc(new Process(0, pml4_addr));
-  proc->threads_.PushBack(Thread::RootThread(proc.ptr()));
+  proc->threads_.PushBack(Thread::RootThread(*proc));
   proc->next_thread_id_ = 1;
 
   return proc;
@@ -28,7 +28,7 @@ Process::Process() : id_(gNextId++), state_(RUNNING) {
 }
 
 void Process::CreateThread(uint64_t entry) {
-  Thread* thread = new Thread(this, next_thread_id_++, entry);
+  Thread* thread = new Thread(*this, next_thread_id_++, entry);
   threads_.PushBack(thread);
   gScheduler->Enqueue(thread);
 }

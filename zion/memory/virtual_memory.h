@@ -42,14 +42,10 @@ class VirtualMemory {
   VirtualMemory(const VirtualMemory&) = delete;
   VirtualMemory(VirtualMemory&&) = delete;
 
-  uint64_t GetNextMemMapAddr(uint64_t size) {
-    uint64_t addr = next_memmap_addr_;
-    next_memmap_addr_ += size;
-    if (next_memmap_addr_ >= 0x30'00000000) {
-      panic("OOM: Memmap");
-    }
-    return addr;
-  }
+  uint64_t GetNextMemMapAddr(uint64_t size);
+
+  // Kernel
+  uint64_t* AllocateKernelStack();
 
  private:
   uint64_t cr3_ = 0;

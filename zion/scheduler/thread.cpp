@@ -19,14 +19,14 @@ extern "C" void thread_init() {
 
 }  // namespace
 
-SharedPtr<Thread> Thread::RootThread(Process* root_proc) {
+SharedPtr<Thread> Thread::RootThread(Process& root_proc) {
   return new Thread(root_proc);
 }
 
-Thread::Thread(const SharedPtr<Process>& proc, uint64_t tid, uint64_t entry)
+Thread::Thread(Process& proc, uint64_t tid, uint64_t entry)
     : process_(proc), id_(tid), rip_(entry) {
-  uint64_t* stack = new uint64_t[512];
-  uint64_t* stack_ptr = stack + 511;
+  uint64_t* stack_ptr = proc.vmm().AllocateKernelStack();
+  dbgln("Kernel Stack at: %m", stack_ptr);
   // 0: rip
   *(stack_ptr) = reinterpret_cast<uint64_t>(thread_init);
   // 1-4: rax, rcx, rdx, rbx
@@ -34,12 +34,12 @@ Thread::Thread(const SharedPtr<Process>& proc, uint64_t tid, uint64_t entry)
   *(stack_ptr - 5) = reinterpret_cast<uint64_t>(stack_ptr + 1);
   // 6-15: rsi, rdi, r8, r9, r10, r11, r12, r13, r14, r15
   // 16: cr3
-  *(stack_ptr - 16) = proc->cr3();
+  *(stack_ptr - 16) = proc.cr3();
   rsp0_ = reinterpret_cast<uint64_t>(stack_ptr - 16);
   rsp0_start_ = reinterpret_cast<uint64_t>(stack_ptr);
 }
 
-uint64_t Thread::pid() { return process_->id(); }
+uint64_t Thread::pid() const { return process_.id(); }
 
 void Thread::Init() {
   dbgln("[%u.%u] thread start.", pid(), id_);
@@ -52,6 +52,6 @@ void Thread::Init() {
 void Thread::Exit() {
   dbgln("[%u.%u] Exiting", pid(), id_);
   state_ = FINISHED;
-  process_->CheckState();
+  process_.CheckState();
   gScheduler->Yield();
 }

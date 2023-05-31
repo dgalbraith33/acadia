@@ -15,14 +15,14 @@ class Thread {
     RUNNABLE,
     FINISHED,
   };
-  static SharedPtr<Thread> RootThread(Process* root_proc);
+  static SharedPtr<Thread> RootThread(Process& root_proc);
 
-  explicit Thread(const SharedPtr<Process>& proc, uint64_t tid, uint64_t entry);
+  Thread(Process& proc, uint64_t tid, uint64_t entry);
 
-  uint64_t tid() { return id_; };
-  uint64_t pid();
+  uint64_t tid() const { return id_; };
+  uint64_t pid() const;
 
-  Process& process() { return *process_; }
+  Process& process() { return process_; }
 
   uint64_t* Rsp0Ptr() { return &rsp0_; }
   uint64_t Rsp0Start() { return rsp0_start_; }
@@ -37,8 +37,8 @@ class Thread {
 
  private:
   // Special constructor for the root thread only.
-  Thread(Process* proc) : process_(proc), id_(0) {}
-  SharedPtr<Process> process_;
+  Thread(Process& proc) : process_(proc), id_(0) {}
+  Process& process_;
   uint64_t id_;
   State state_ = RUNNABLE;
 

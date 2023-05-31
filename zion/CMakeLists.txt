@@ -9,8 +9,10 @@ add_executable(zion
   loader/elf_loader.cpp
   loader/init_loader.cpp
   memory/kernel_heap.cpp
+  memory/kernel_stack_manager.cpp
   memory/paging_util.cpp
   memory/physical_memory.cpp
+  memory/virtual_memory.cpp
   scheduler/context_switch.s
   scheduler/jump_user_space.s
   scheduler/process.cpp
