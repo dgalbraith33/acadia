@@ -155,7 +155,8 @@ void panic(const char* fmt, ...) {
   va_start(arg, fmt);
   dbg_internal(fmt, arg);
   va_end(arg);
-  dbgln("\nPANIC");
+  dbgputchar('\n');
+  dbgln("PANIC");
   while (1)
     ;
 }
