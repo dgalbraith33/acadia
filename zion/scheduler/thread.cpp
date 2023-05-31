@@ -34,7 +34,7 @@ Thread::Thread(Process& proc, uint64_t tid, uint64_t entry)
   *(stack_ptr - 5) = reinterpret_cast<uint64_t>(stack_ptr + 1);
   // 6-15: rsi, rdi, r8, r9, r10, r11, r12, r13, r14, r15
   // 16: cr3
-  *(stack_ptr - 16) = proc.cr3();
+  *(stack_ptr - 16) = proc.vmm().cr3();
   rsp0_ = reinterpret_cast<uint64_t>(stack_ptr - 16);
   rsp0_start_ = reinterpret_cast<uint64_t>(stack_ptr);
 }

@@ -38,9 +38,13 @@ class VirtualMemory {
     KERNEL_STACK,
   };
 
-  VirtualMemory() {}
+  static VirtualMemory ForRoot();
+
+  VirtualMemory();
   VirtualMemory(const VirtualMemory&) = delete;
   VirtualMemory(VirtualMemory&&) = delete;
+
+  uint64_t cr3() { return cr3_; }
 
   uint64_t GetNextMemMapAddr(uint64_t size);
 
@@ -48,6 +52,7 @@ class VirtualMemory {
   uint64_t* AllocateKernelStack();
 
  private:
+  VirtualMemory(uint64_t cr3) : cr3_(cr3) {}
   uint64_t cr3_ = 0;
 
   uint64_t next_memmap_addr_ = 0x20'00000000;

@@ -43,12 +43,11 @@ void LoadInitProgram() {
   SharedPtr<Process> proc = MakeShared<Process>();
   gProcMan->InsertProcess(proc);
 
-  uint64_t entry =
-      LoadElfProgram(proc->cr3(), reinterpret_cast<uint64_t>(init_prog.address),
-                     init_prog.size);
+  uint64_t entry = LoadElfProgram(
+      *proc, reinterpret_cast<uint64_t>(init_prog.address), init_prog.size);
 
   CopyIntoNonResidentProcess(reinterpret_cast<uint64_t>(prog2.address),
-                             prog2.size, proc->cr3(),
+                             prog2.size, *proc,
                              proc->vmm().GetNextMemMapAddr(prog2.size));
 
   proc->CreateThread(entry);

@@ -21,7 +21,6 @@ class Process {
   Process();
 
   uint64_t id() const { return id_; }
-  uint64_t cr3() const { return cr3_; }
   VirtualMemory& vmm() { return vmm_; }
 
   void CreateThread(uint64_t entry);
@@ -34,10 +33,9 @@ class Process {
   State GetState() { return state_; }
 
  private:
-  Process(uint64_t id, uint64_t cr3) : id_(id), cr3_(cr3) {}
+  Process(uint64_t id) : id_(id), vmm_(VirtualMemory::ForRoot()) {}
   uint64_t id_;
   VirtualMemory vmm_;
-  uint64_t cr3_;
   State state_;
 
   uint64_t next_thread_id_ = 0;

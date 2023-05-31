@@ -60,7 +60,7 @@ uint64_t ProcessSpawn(ZProcessSpawnReq* req) {
   dbgln("Proc spawn: %u:%u", req->elf_base, req->elf_size);
   SharedPtr<Process> proc = MakeShared<Process>();
   gProcMan->InsertProcess(proc);
-  uint64_t entry = LoadElfProgram(proc->cr3(), req->elf_base, req->elf_size);
+  uint64_t entry = LoadElfProgram(*proc, req->elf_base, req->elf_size);
   proc->CreateThread(entry);
   return 0;
 }

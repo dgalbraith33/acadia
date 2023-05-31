@@ -174,15 +174,15 @@ void EnsureResident(uint64_t addr, uint64_t size) {
   }
 }
 
-void CopyIntoNonResidentProcess(uint64_t base, uint64_t size, uint64_t dest_cr3,
-                                uint64_t dest_virt) {
+void CopyIntoNonResidentProcess(uint64_t base, uint64_t size,
+                                Process& dest_proc, uint64_t dest_virt) {
   if (size > 0x1000) {
     panic("Unimplemented NR copy > 1 page");
   }
   if (dest_virt & 0xFFF) {
     panic("Unimplemented NR copy to non page aligned");
   }
-  uint64_t phys = AllocatePageIfNecessary(dest_virt, dest_cr3);
+  uint64_t phys = AllocatePageIfNecessary(dest_virt, dest_proc.vmm().cr3());
   uint8_t* src = reinterpret_cast<uint8_t*>(base);
   uint8_t* dest =
       reinterpret_cast<uint8_t*>(phys + boot::GetHigherHalfDirectMap());

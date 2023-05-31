@@ -13,19 +13,14 @@ static uint64_t gNextId = 1;
 }
 
 SharedPtr<Process> Process::RootProcess() {
-  uint64_t pml4_addr = 0;
-  asm volatile("mov %%cr3, %0;" : "=r"(pml4_addr));
-  SharedPtr<Process> proc(new Process(0, pml4_addr));
+  SharedPtr<Process> proc(new Process(0));
   proc->threads_.PushBack(Thread::RootThread(*proc));
   proc->next_thread_id_ = 1;
 
   return proc;
 }
 
-Process::Process() : id_(gNextId++), state_(RUNNING) {
-  cr3_ = phys_mem::AllocatePage();
-  InitializePml4(cr3_);
-}
+Process::Process() : id_(gNextId++), state_(RUNNING) {}
 
 void Process::CreateThread(uint64_t entry) {
   Thread* thread = new Thread(*this, next_thread_id_++, entry);
