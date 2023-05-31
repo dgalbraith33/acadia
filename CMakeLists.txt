@@ -12,6 +12,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 add_subdirectory(zion)
 add_subdirectory(sys)
 
+set(QEMU_CMD qemu-system-x86_64 -d guest_errors -m 1G -serial stdio -hda disk.img)
+
 add_custom_command(
   OUTPUT disk.img
   COMMAND sudo sh ../scripts/build_image.sh disk.img
@@ -20,11 +22,16 @@ add_custom_command(
 )
 
 add_custom_target(qemu
-  COMMAND qemu-system-x86_64 -d guest_errors -m 1G -serial stdio -hda disk.img
+  COMMAND ${QEMU_CMD}
   DEPENDS disk.img
   USES_TERMINAL)
 
 add_custom_target(qemu-dbg
-  COMMAND qemu-system-x86_64 -d guest_errors -m 1G -serial stdio -hda disk.img -S -s
+  COMMAND ${QEMU_CMD} -S -s
+  DEPENDS disk.img
+  USES_TERMINAL)
+
+add_custom_target(qemu-int
+  COMMAND ${QEMU_CMD} -d int
   DEPENDS disk.img
   USES_TERMINAL)
