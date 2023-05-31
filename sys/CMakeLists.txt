@@ -15,3 +15,15 @@ set_target_properties(test
   COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${_COMPILE_FLAGS}"
   LINK_FLAGS "${CMAKE_EXE_LINK_FLAGS} ${_LINK_FLAGS}"
   )
+
+add_executable(test2
+  test2.cpp)
+
+target_link_libraries(test2
+  zion_lib)
+
+set_target_properties(test2
+  PROPERTIES
+  COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${_COMPILE_FLAGS}"
+  LINK_FLAGS "${CMAKE_EXE_LINK_FLAGS} ${_LINK_FLAGS}"
+  )

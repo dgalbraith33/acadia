@@ -15,7 +15,7 @@ add_subdirectory(sys)
 add_custom_command(
   OUTPUT disk.img
   COMMAND sudo sh ../scripts/build_image.sh disk.img
-  DEPENDS zion test
+  DEPENDS zion test test2
   USES_TERMINAL
 )
 
