@@ -13,4 +13,6 @@ jump_user_space:
   pushf  # Can we just push 0 for flags?
   pushq $0x1B # cs
   pushq %rdi
+  mov %rdx, %rdi
+  mov %rcx, %rsi
   iretq

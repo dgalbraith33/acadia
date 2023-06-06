@@ -78,7 +78,47 @@ uint64_t ProcessSpawnElf(ZProcessSpawnElfReq* req) {
   return 0;
 }
 
-extern "C" uint64_t SyscallHandler(uint64_t call_id, char* message) {
+uint64_t ThreadCreate(ZThreadCreateReq* req, ZThreadCreateResp* resp) {
+  auto& curr_proc = gScheduler->CurrentProcess();
+  auto cap = curr_proc.GetCapability(req->proc_cap);
+  if (cap.empty()) {
+    return ZE_NOT_FOUND;
+  }
+  if (!cap->CheckType(Capability::PROCESS)) {
+    return ZE_INVALID;
+  }
+
+  if (!cap->HasPermissions(ZC_PROC_SPAWN_THREAD)) {
+    return ZE_DENIED;
+  }
+
+  Process& parent_proc = cap->obj<Process>();
+  auto thread = parent_proc.CreateThread();
+  resp->thread_cap = curr_proc.AddCapability(thread);
+
+  return Z_OK;
+}
+
+uint64_t ThreadStart(ZThreadStartReq* req) {
+  auto& curr_proc = gScheduler->CurrentProcess();
+  auto cap = curr_proc.GetCapability(req->thread_cap);
+  if (cap.empty()) {
+    return ZE_NOT_FOUND;
+  }
+  if (!cap->CheckType(Capability::THREAD)) {
+    return ZE_INVALID;
+  }
+
+  if (!cap->HasPermissions(ZC_WRITE)) {
+    return ZE_DENIED;
+  }
+
+  Thread& thread = cap->obj<Thread>();
+  // FIXME: validate entry point is in user space.
+  thread.Start(req->entry, req->arg1, req->arg2);
+}
+
+extern "C" uint64_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
   Thread& thread = gScheduler->CurrentThread();
   switch (call_id) {
     case Z_PROCESS_EXIT:
@@ -87,12 +127,21 @@ extern "C" uint64_t SyscallHandler(uint64_t call_id, char* message) {
       panic("Returned from thread exit");
       break;
     case Z_DEBUG_PRINT:
-      dbgln("[Debug] %s", message);
+      dbgln("[Debug] %s", req);
       break;
     case Z_PROCESS_SPAWN:
-      return ProcessSpawnElf(reinterpret_cast<ZProcessSpawnElfReq*>(message));
+      return ProcessSpawnElf(reinterpret_cast<ZProcessSpawnElfReq*>(req));
+    case Z_THREAD_CREATE:
+      return ThreadCreate(reinterpret_cast<ZThreadCreateReq*>(req),
+                          reinterpret_cast<ZThreadCreateResp*>(resp));
+    case Z_THREAD_START:
+      return ThreadStart(reinterpret_cast<ZThreadStartReq*>(req));
+    case Z_THREAD_EXIT:
+      thread.Exit();
+      panic("Returned from thread exit");
+      break;
     default:
-      panic("Unhandled syscall number: %u", call_id);
+      panic("Unhandled syscall number: %x", call_id);
   }
   return 1;
 }

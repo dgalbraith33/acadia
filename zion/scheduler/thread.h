@@ -11,6 +11,7 @@ class Thread {
  public:
   enum State {
     UNSPECIFIED,
+    CREATED,
     RUNNING,
     RUNNABLE,
     FINISHED,
@@ -27,6 +28,9 @@ class Thread {
   uint64_t* Rsp0Ptr() { return &rsp0_; }
   uint64_t Rsp0Start() { return rsp0_start_; }
 
+  // Switches the thread's state to runnable and enqueues it.
+  void Start(uint64_t entry, uint64_t arg1, uint64_t arg2);
+
   // Called the first time the thread starts up.
   void Init();
 
@@ -40,10 +44,12 @@ class Thread {
   Thread(Process& proc) : process_(proc), id_(0) {}
   Process& process_;
   uint64_t id_;
-  State state_ = RUNNABLE;
+  State state_ = CREATED;
 
   // Startup Context for the thread.
   uint64_t rip_;
+  uint64_t arg1_;
+  uint64_t arg2_;
 
   // Stack pointer to take on resume.
   // Stack will contain the full thread context.

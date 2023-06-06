@@ -24,10 +24,12 @@ class Process {
   uint64_t id() const { return id_; }
   VirtualMemory& vmm() { return vmm_; }
 
+  SharedPtr<Thread> CreateThread();
   void CreateThread(uint64_t entry);
   SharedPtr<Thread> GetThread(uint64_t tid);
 
   SharedPtr<Capability> GetCapability(uint64_t cid);
+  uint64_t AddCapability(SharedPtr<Thread>& t);
   // Checks the state of all child threads and transitions to
   // finished if all have finished.
   void CheckState();

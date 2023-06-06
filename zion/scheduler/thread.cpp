@@ -9,7 +9,8 @@
 
 namespace {
 
-extern "C" void jump_user_space(uint64_t rip, uint64_t rsp);
+extern "C" void jump_user_space(uint64_t rip, uint64_t rsp, uint64_t arg1,
+                                uint64_t arg2);
 
 extern "C" void thread_init() {
   asm("sti");
@@ -40,11 +41,20 @@ Thread::Thread(Process& proc, uint64_t tid, uint64_t entry)
 
 uint64_t Thread::pid() const { return process_.id(); }
 
+void Thread::Start(uint64_t entry, uint64_t arg1, uint64_t arg2) {
+  rip_ = entry;
+  arg1_ = arg1;
+  arg2_ = arg2;
+  state_ = RUNNABLE;
+  // Get from parent to avoid creating a new shared ptr.
+  gScheduler->Enqueue(process_.GetThread(id_));
+}
+
 void Thread::Init() {
   dbgln("Thread start.", pid(), id_);
   uint64_t rsp = process_.vmm().AllocateUserStack();
   SetRsp0(rsp0_start_);
-  jump_user_space(rip_, rsp);
+  jump_user_space(rip_, rsp, arg1_, arg2_);
 }
 
 void Thread::Exit() {

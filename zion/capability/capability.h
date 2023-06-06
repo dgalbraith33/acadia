@@ -5,12 +5,14 @@
 #include "debug/debug.h"
 
 class Process;
+class Thread;
 
 class Capability {
  public:
   enum Type {
     UNDEFINED,
     PROCESS,
+    THREAD,
   };
   Capability(void* obj, Type type, uint64_t id, uint64_t permissions)
       : obj_(obj), type_(type), id_(id), permissions_(permissions) {}
@@ -34,11 +36,3 @@ class Capability {
   uint64_t id_;
   uint64_t permissions_;
 };
-
-template <class Process>
-Process& Capability::obj() {
-  if (type_ != PROCESS) {
-    panic("Accessing %u cap as object.", type_);
-  }
-  return *static_cast<Process*>(obj_);
-}
