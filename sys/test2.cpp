@@ -1,7 +1,5 @@
-
-
-#include "zcall.h"
-#include "zerrors.h"
+#include "mammoth/debug.h"
+#include "mammoth/thread.h"
 
 #define CHECK(expr)       \
   {                       \
@@ -12,29 +10,19 @@
     }                     \
   }
 
-void thread_entry(char* a, char* b) {
-  ZDebug("In thread");
-  ZDebug(a);
-  ZDebug(b);
-
-  ZThreadExit();
+void thread_entry(void* a) {
+  dbgln("In thread");
+  dbgln(static_cast<const char*>(a));
 }
 
 int main() {
-  ZDebug("Testing");
-  uint64_t t1, t2;
-  CHECK(ZThreadCreate(Z_INIT_PROC_SELF, &t1));
-  CHECK(ZThreadCreate(Z_INIT_PROC_SELF, &t2));
+  dbgln("Main thread");
 
   const char* a = "a";
   const char* b = "bee";
   const char* c = "cee";
   const char* d = "dee";
-  CHECK(ZThreadStart(t1, reinterpret_cast<uint64_t>(thread_entry),
-                     reinterpret_cast<uint64_t>(a),
-                     reinterpret_cast<uint64_t>(b)));
-  CHECK(ZThreadStart(t2, reinterpret_cast<uint64_t>(thread_entry),
-                     reinterpret_cast<uint64_t>(c),
-                     reinterpret_cast<uint64_t>(d)));
+  Thread t1(thread_entry, a);
+  Thread t2(thread_entry, b);
   return 0;
 }

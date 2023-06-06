@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 
 add_subdirectory(zion)
+add_subdirectory(lib)
 add_subdirectory(sys)
 
 set(QEMU_CMD qemu-system-x86_64 -d guest_errors -m 1G -serial stdio -hda disk.img)
