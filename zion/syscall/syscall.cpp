@@ -74,7 +74,7 @@ uint64_t ProcessSpawnElf(ZProcessSpawnElfReq* req) {
   SharedPtr<Process> proc = MakeShared<Process>();
   gProcMan->InsertProcess(proc);
   uint64_t entry = LoadElfProgram(*proc, req->elf_base, req->elf_size);
-  proc->CreateThread(entry);
+  proc->CreateThread()->Start(entry, 0, 0);
   return 0;
 }
 

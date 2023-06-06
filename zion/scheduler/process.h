@@ -25,7 +25,6 @@ class Process {
   VirtualMemory& vmm() { return vmm_; }
 
   SharedPtr<Thread> CreateThread();
-  void CreateThread(uint64_t entry);
   SharedPtr<Thread> GetThread(uint64_t tid);
 
   SharedPtr<Capability> GetCapability(uint64_t cid);

@@ -21,21 +21,15 @@ SharedPtr<Process> Process::RootProcess() {
   return proc;
 }
 
-Process::Process() : id_(gNextId++), state_(RUNNING) {}
+Process::Process() : id_(gNextId++), state_(RUNNING) {
+  caps_.PushBack(new Capability(this, Capability::PROCESS, Z_INIT_PROC_SELF,
+                                ZC_PROC_SPAWN_PROC | ZC_PROC_SPAWN_THREAD));
+}
 
 SharedPtr<Thread> Process::CreateThread() {
   SharedPtr<Thread> thread{new Thread(*this, next_thread_id_++, 0)};
   threads_.PushBack(thread);
   return thread;
-}
-
-void Process::CreateThread(uint64_t entry) {
-  Thread* thread = new Thread(*this, next_thread_id_++, entry);
-  threads_.PushBack(thread);
-  caps_.PushBack(new Capability(this, Capability::PROCESS, Z_INIT_PROC_SELF,
-                                ZC_PROC_SPAWN_PROC | ZC_PROC_SPAWN_THREAD));
-  thread->SetState(Thread::RUNNABLE);
-  gScheduler->Enqueue(thread);
 }
 
 SharedPtr<Thread> Process::GetThread(uint64_t tid) {

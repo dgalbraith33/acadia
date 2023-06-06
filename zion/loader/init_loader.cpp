@@ -6,6 +6,7 @@
 #include "memory/paging_util.h"
 #include "scheduler/process.h"
 #include "scheduler/process_manager.h"
+#include "scheduler/thread.h"
 
 namespace {
 
@@ -58,5 +59,5 @@ void LoadInitProgram() {
                              prog2.size, *proc,
                              proc->vmm().GetNextMemMapAddr(prog2.size));
 
-  proc->CreateThread(entry);
+  proc->CreateThread()->Start(entry, 0, 0);
 }
