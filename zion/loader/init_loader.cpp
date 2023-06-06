@@ -23,12 +23,19 @@ bool streq(const char* a, const char* b) {
   }
 }
 
-const limine_file& GetInitProgram(const char* path) {
+void DumpModules() {
   const limine_module_response& resp = boot::GetModules();
-  dbgln("Dumping modules");
+  dbgln("[boot] Dumping bootloader modules.");
   for (uint64_t i = 0; i < resp.module_count; i++) {
     const limine_file& file = *resp.modules[i];
-    dbgln("%s,%m,%x", file.path, file.address, file.size);
+    dbgln("    %s,%m,%x", file.path, file.address, file.size);
+  }
+}
+
+const limine_file& GetInitProgram(const char* path) {
+  const limine_module_response& resp = boot::GetModules();
+  for (uint64_t i = 0; i < resp.module_count; i++) {
+    const limine_file& file = *resp.modules[i];
     if (streq(file.path, path)) return file;
   }
   panic("Program not found: %s", path);
@@ -37,6 +44,7 @@ const limine_file& GetInitProgram(const char* path) {
 }  // namespace
 
 void LoadInitProgram() {
+  DumpModules();
   const limine_file& init_prog = GetInitProgram("/sys/test");
   const limine_file& prog2 = GetInitProgram("/sys/test2");
 
