@@ -3,7 +3,6 @@
 #include <stdint.h>
 
 #include "debug/debug.h"
-#include "include/cap_types.h"
 #include "include/zcall.h"
 #include "include/zerrors.h"
 #include "loader/elf_loader.h"
@@ -58,7 +57,7 @@ void InitSyscall() {
   SetMSR(LSTAR, reinterpret_cast<uint64_t>(syscall_enter));
 }
 
-uint64_t ProcessSpawn(ZProcessSpawnReq* req) {
+uint64_t ProcessSpawnElf(ZProcessSpawnElfReq* req) {
   auto& curr_proc = gScheduler->CurrentProcess();
   auto cap = curr_proc.GetCapability(req->cap_id);
   if (cap.empty()) {
@@ -68,7 +67,7 @@ uint64_t ProcessSpawn(ZProcessSpawnReq* req) {
     return ZE_INVALID;
   }
 
-  if (!cap->HasPermissions(ZC_PROC_SPAWN_CHILD)) {
+  if (!cap->HasPermissions(ZC_PROC_SPAWN_PROC)) {
     return ZE_DENIED;
   }
   dbgln("Proc spawn: %u:%u", req->elf_base, req->elf_size);
@@ -82,7 +81,8 @@ uint64_t ProcessSpawn(ZProcessSpawnReq* req) {
 extern "C" uint64_t SyscallHandler(uint64_t call_id, char* message) {
   Thread& thread = gScheduler->CurrentThread();
   switch (call_id) {
-    case Z_THREAD_EXIT:
+    case Z_PROCESS_EXIT:
+      // FIXME: kill process here.
       thread.Exit();
       panic("Returned from thread exit");
       break;
@@ -90,7 +90,7 @@ extern "C" uint64_t SyscallHandler(uint64_t call_id, char* message) {
       dbgln("[Debug] %s", message);
       break;
     case Z_PROCESS_SPAWN:
-      return ProcessSpawn(reinterpret_cast<ZProcessSpawnReq*>(message));
+      return ProcessSpawnElf(reinterpret_cast<ZProcessSpawnElfReq*>(message));
     default:
       panic("Unhandled syscall number: %u", call_id);
   }

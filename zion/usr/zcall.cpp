@@ -12,8 +12,9 @@ uint64_t ZDebug(const char* message) {
   return SysCall1(Z_DEBUG_PRINT, message);
 }
 
-uint64_t ZProcessSpawn(uint64_t cap_id, uint64_t elf_base, uint64_t elf_size) {
-  ZProcessSpawnReq req{
+uint64_t ZProcessSpawnElf(uint64_t cap_id, uint64_t elf_base,
+                          uint64_t elf_size) {
+  ZProcessSpawnElfReq req{
       .cap_id = cap_id,
       .elf_base = elf_base,
       .elf_size = elf_size,

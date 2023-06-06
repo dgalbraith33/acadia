@@ -1,7 +1,7 @@
 #include "scheduler/process.h"
 
 #include "debug/debug.h"
-#include "include/cap_types.h"
+#include "include/zcall.h"
 #include "memory/paging_util.h"
 #include "memory/physical_memory.h"
 #include "scheduler/scheduler.h"
@@ -27,7 +27,7 @@ void Process::CreateThread(uint64_t entry) {
   Thread* thread = new Thread(*this, next_thread_id_++, entry);
   threads_.PushBack(thread);
   caps_.PushBack(new Capability(this, Capability::PROCESS, next_cap_id_++,
-                                ZC_PROC_SPAWN_CHILD));
+                                ZC_PROC_SPAWN_PROC));
   gScheduler->Enqueue(thread);
 }
 
