@@ -23,7 +23,7 @@ class Process : public KernelObject {
   static RefPtr<Process> Create();
 
   uint64_t id() const { return id_; }
-  RefPtr<AddressSpace> vmas() { return vmm_; }
+  RefPtr<AddressSpace> vmas() { return vmas_; }
 
   RefPtr<Thread> CreateThread();
   RefPtr<Thread> GetThread(uint64_t tid);
@@ -31,10 +31,10 @@ class Process : public KernelObject {
   SharedPtr<Capability> GetCapability(uint64_t cid);
   uint64_t AddCapability(const RefPtr<Thread>& t);
   uint64_t AddCapability(const RefPtr<Process>& p);
-  uint64_t AddCapability(const RefPtr<AddressSpace>& as);
-  uint64_t AddCapability(const RefPtr<MemoryObject>& mo);
+  uint64_t AddCapability(const RefPtr<AddressSpace>& vmas);
+  uint64_t AddCapability(const RefPtr<MemoryObject>& vmmo);
 
-  void AddCapability(uint64_t cap_id, const RefPtr<MemoryObject>& mo);
+  void AddCapability(uint64_t cap_id, const RefPtr<MemoryObject>& vmmo);
   // Checks the state of all child threads and transitions to
   // finished if all have finished.
   void CheckState();
@@ -44,9 +44,9 @@ class Process : public KernelObject {
  private:
   friend class MakeRefCountedFriend<Process>;
   Process();
-  Process(uint64_t id) : id_(id), vmm_(AddressSpace::ForRoot()) {}
+  Process(uint64_t id) : id_(id), vmas_(AddressSpace::ForRoot()) {}
   uint64_t id_;
-  RefPtr<AddressSpace> vmm_;
+  RefPtr<AddressSpace> vmas_;
   State state_;
 
   uint64_t next_thread_id_ = 0;

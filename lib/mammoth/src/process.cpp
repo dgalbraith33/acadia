@@ -1,6 +1,7 @@
 #include "include/mammoth/process.h"
 
 #include <zcall.h>
+#include <zerrors.h>
 
 #include "include/mammoth/debug.h"
 
@@ -68,7 +69,7 @@ uint64_t LoadElfProgram(uint64_t base, uint64_t as_cap) {
 
     dbgln("Map Local");
     uint64_t vaddr;
-    check(ZAddressSpaceMap(Z_INIT_AS_SELF, 0, mem_cap, &vaddr));
+    check(ZAddressSpaceMap(Z_INIT_VMAS_SELF, 0, mem_cap, &vaddr));
 
     dbgln("Copy");
     memcpy(base + program.offset, program.filesz, vaddr);
@@ -94,4 +95,6 @@ uint64_t SpawnProcessFromElfRegion(uint64_t program) {
 
   dbgln("Thread start");
   check(ZThreadStart(thread_cap, entry_point, 0, 0));
+
+  return Z_OK;
 }

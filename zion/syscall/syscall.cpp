@@ -72,7 +72,7 @@ uint64_t ProcessSpawn(ZProcessSpawnReq* req, ZProcessSpawnResp* resp) {
   gProcMan->InsertProcess(proc);
 
   resp->proc_cap = curr_proc.AddCapability(proc);
-  resp->as_cap = curr_proc.AddCapability(proc->vmas());
+  resp->vmas_cap = curr_proc.AddCapability(proc->vmas());
 
   return Z_OK;
 }
@@ -120,33 +120,34 @@ uint64_t ThreadStart(ZThreadStartReq* req) {
 
 uint64_t AddressSpaceMap(ZAddressSpaceMapReq* req, ZAddressSpaceMapResp* resp) {
   auto& curr_proc = gScheduler->CurrentProcess();
-  auto as_cap = curr_proc.GetCapability(req->as_cap);
-  auto mem_cap = curr_proc.GetCapability(req->mem_cap);
-  if (as_cap.empty() || mem_cap.empty()) {
+  auto vmas_cap = curr_proc.GetCapability(req->vmas_cap);
+  auto vmmo_cap = curr_proc.GetCapability(req->vmmo_cap);
+  if (vmas_cap.empty() || vmmo_cap.empty()) {
     return ZE_NOT_FOUND;
   }
-  if (!as_cap->CheckType(Capability::ADDRESS_SPACE) ||
-      !mem_cap->CheckType(Capability::MEMORY_OBJECT)) {
+  if (!vmas_cap->CheckType(Capability::ADDRESS_SPACE) ||
+      !vmmo_cap->CheckType(Capability::MEMORY_OBJECT)) {
     return ZE_INVALID;
   }
-  if (!as_cap->HasPermissions(ZC_WRITE) || !mem_cap->HasPermissions(ZC_WRITE)) {
+  if (!vmas_cap->HasPermissions(ZC_WRITE) ||
+      !vmmo_cap->HasPermissions(ZC_WRITE)) {
     return ZE_DENIED;
   }
-  auto as = as_cap->obj<AddressSpace>();
-  auto mo = mem_cap->obj<MemoryObject>();
+  auto vmas = vmas_cap->obj<AddressSpace>();
+  auto vmmo = vmmo_cap->obj<MemoryObject>();
   // FIXME: Validation necessary.
-  if (req->offset != 0) {
-    as->MapInMemoryObject(req->offset, mo);
-    resp->vaddr = req->offset;
+  if (req->vmas_offset != 0) {
+    vmas->MapInMemoryObject(req->vmas_offset, vmmo);
+    resp->vaddr = req->vmas_offset;
   } else {
-    resp->vaddr = as->MapInMemoryObject(mo);
+    resp->vaddr = vmas->MapInMemoryObject(vmmo);
   }
 }
 
 uint64_t MemoryObjectCreate(ZMemoryObjectCreateReq* req,
                             ZMemoryObjectCreateResp* resp) {
   auto& curr_proc = gScheduler->CurrentProcess();
-  resp->mem_cap =
+  resp->vmmo_cap =
       curr_proc.AddCapability(MakeRefCounted<MemoryObject>(req->size));
   return Z_OK;
 }

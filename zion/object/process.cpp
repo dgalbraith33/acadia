@@ -26,12 +26,12 @@ RefPtr<Process> Process::Create() {
       new Capability(proc, Capability::PROCESS, Z_INIT_PROC_SELF,
                      ZC_PROC_SPAWN_PROC | ZC_PROC_SPAWN_THREAD));
   proc->caps_.PushBack(new Capability(proc->vmas(), Capability::ADDRESS_SPACE,
-                                      Z_INIT_AS_SELF, ZC_WRITE));
+                                      Z_INIT_VMAS_SELF, ZC_WRITE));
   return proc;
 }
 
 Process::Process()
-    : id_(gNextId++), vmm_(MakeRefCounted<AddressSpace>()), state_(RUNNING) {}
+    : id_(gNextId++), vmas_(MakeRefCounted<AddressSpace>()), state_(RUNNING) {}
 
 RefPtr<Thread> Process::CreateThread() {
   RefPtr<Thread> thread = MakeRefCounted<Thread>(*this, next_thread_id_++);
@@ -87,20 +87,20 @@ uint64_t Process::AddCapability(const RefPtr<Process>& p) {
                                 ZC_WRITE | ZC_PROC_SPAWN_THREAD));
   return cap_id;
 }
-uint64_t Process::AddCapability(const RefPtr<AddressSpace>& as) {
+uint64_t Process::AddCapability(const RefPtr<AddressSpace>& vmas) {
   uint64_t cap_id = next_cap_id_++;
   caps_.PushBack(
-      new Capability(as, Capability::ADDRESS_SPACE, cap_id, ZC_WRITE));
+      new Capability(vmas, Capability::ADDRESS_SPACE, cap_id, ZC_WRITE));
   return cap_id;
 }
-uint64_t Process::AddCapability(const RefPtr<MemoryObject>& mo) {
+uint64_t Process::AddCapability(const RefPtr<MemoryObject>& vmmo) {
   uint64_t cap_id = next_cap_id_++;
   caps_.PushBack(
-      new Capability(mo, Capability::MEMORY_OBJECT, cap_id, ZC_WRITE));
+      new Capability(vmmo, Capability::MEMORY_OBJECT, cap_id, ZC_WRITE));
   return cap_id;
 }
 
-void Process::AddCapability(uint64_t cap_id, const RefPtr<MemoryObject>& mo) {
+void Process::AddCapability(uint64_t cap_id, const RefPtr<MemoryObject>& vmmo) {
   caps_.PushBack(
-      new Capability(mo, Capability::MEMORY_OBJECT, cap_id, ZC_WRITE));
+      new Capability(vmmo, Capability::MEMORY_OBJECT, cap_id, ZC_WRITE));
 }

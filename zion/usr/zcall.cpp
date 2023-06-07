@@ -30,14 +30,14 @@ void ZProcessExit(uint64_t code) {
 }
 
 uint64_t ZProcessSpawn(uint64_t proc_cap, uint64_t* new_proc_cap,
-                       uint64_t* new_as_cap) {
+                       uint64_t* new_vmas_cap) {
   ZProcessSpawnReq req{
       .proc_cap = proc_cap,
   };
   ZProcessSpawnResp resp;
   uint64_t ret = SysCall2(Z_PROCESS_SPAWN, &req, &resp);
   *new_proc_cap = resp.proc_cap;
-  *new_as_cap = resp.as_cap;
+  *new_vmas_cap = resp.vmas_cap;
   return ret;
 }
 
@@ -64,25 +64,25 @@ uint64_t ZThreadStart(uint64_t thread_cap, uint64_t entry, uint64_t arg1,
 
 void ZThreadExit() { SysCall0(Z_THREAD_EXIT); }
 
-uint64_t ZAddressSpaceMap(uint64_t as_cap, uint64_t offset, uint64_t mem_cap,
-                          uint64_t* vaddr) {
+uint64_t ZAddressSpaceMap(uint64_t vmas_cap, uint64_t vmas_offset,
+                          uint64_t vmmo_cap, uint64_t* vaddr) {
   ZAddressSpaceMapReq req{
-      .as_cap = as_cap,
-      .offset = offset,
-      .mem_cap = mem_cap,
+      .vmas_cap = vmas_cap,
+      .vmas_offset = vmas_offset,
+      .vmmo_cap = vmmo_cap,
   };
   ZAddressSpaceMapResp resp;
   uint64_t ret = SysCall2(Z_ADDRESS_SPACE_MAP, &req, &resp);
   *vaddr = resp.vaddr;
   return ret;
 }
-uint64_t ZMemoryObjectCreate(uint64_t size, uint64_t* mem_cap) {
+uint64_t ZMemoryObjectCreate(uint64_t size, uint64_t* vmmo_cap) {
   ZMemoryObjectCreateReq req{
       .size = size,
   };
   ZMemoryObjectCreateResp resp;
   uint64_t ret = SysCall2(Z_MEMORY_OBJECT_CREATE, &req, &resp);
-  *mem_cap = resp.mem_cap;
+  *vmmo_cap = resp.vmmo_cap;
   return ret;
 }
 

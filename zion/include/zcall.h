@@ -26,7 +26,7 @@
 #define Z_ADDRESS_SPACE_MAP 0x21
 #define Z_ADDRESS_SPACE_UNMAP 0x22
 
-#define Z_INIT_AS_SELF 0x20
+#define Z_INIT_VMAS_SELF 0x20
 
 #define Z_MEMORY_OBJECT_CREATE 0x30
 
@@ -38,7 +38,7 @@
 void ZProcessExit(uint64_t code);
 
 [[nodiscard]] uint64_t ZProcessSpawn(uint64_t proc_cap, uint64_t* new_proc_cap,
-                                     uint64_t* new_as_cap);
+                                     uint64_t* new_vmas_cap);
 
 // UNUSED for now, I think we can get away with just starting a thread.
 [[nodiscard]] uint64_t ZProcessStart(uint64_t proc_cap, uint64_t thread_cap,
@@ -52,8 +52,8 @@ void ZProcessExit(uint64_t code);
 
 void ZThreadExit();
 
-[[nodiscard]] uint64_t ZAddressSpaceMap(uint64_t as_cap, uint64_t offset,
-                                        uint64_t mem_cap, uint64_t* vaddr);
-[[nodiscard]] uint64_t ZMemoryObjectCreate(uint64_t size, uint64_t* mem_cap);
+[[nodiscard]] uint64_t ZAddressSpaceMap(uint64_t vmas_cap, uint64_t vmas_offset,
+                                        uint64_t vmmo_cap, uint64_t* vaddr);
+[[nodiscard]] uint64_t ZMemoryObjectCreate(uint64_t size, uint64_t* vmmo_cap);
 
 [[nodiscard]] uint64_t ZDebug(const char* message);

@@ -8,7 +8,7 @@ struct ZProcessSpawnReq {
 
 struct ZProcessSpawnResp {
   uint64_t proc_cap;
-  uint64_t as_cap;
+  uint64_t vmas_cap;
 };
 
 struct ZThreadCreateReq {
@@ -27,9 +27,9 @@ struct ZThreadStartReq {
 };
 
 struct ZAddressSpaceMapReq {
-  uint64_t as_cap;
-  uint64_t offset;
-  uint64_t mem_cap;
+  uint64_t vmas_cap;
+  uint64_t vmas_offset;
+  uint64_t vmmo_cap;
 };
 
 struct ZAddressSpaceMapResp {
@@ -41,5 +41,5 @@ struct ZMemoryObjectCreateReq {
 };
 
 struct ZMemoryObjectCreateResp {
-  uint64_t mem_cap;
+  uint64_t vmmo_cap;
 };
