@@ -62,10 +62,25 @@ void Process::CheckState() {
   state_ = FINISHED;
 }
 
+RefPtr<Capability> Process::ReleaseCapability(uint64_t cid) {
+  auto iter = caps_.begin();
+  while (iter != caps_.end()) {
+    if (*iter && iter->id() == cid) {
+      auto cap = *iter;
+      *iter = {nullptr};
+      return cap;
+    }
+    ++iter;
+  }
+  dbgln("Bad cap access");
+  dbgln("Num caps: %u", caps_.size());
+  return {};
+}
+
 RefPtr<Capability> Process::GetCapability(uint64_t cid) {
   auto iter = caps_.begin();
   while (iter != caps_.end()) {
-    if (iter->id() == cid) {
+    if (*iter && iter->id() == cid) {
       return *iter;
     }
     ++iter;
@@ -75,6 +90,11 @@ RefPtr<Capability> Process::GetCapability(uint64_t cid) {
   return {};
 }
 
+uint64_t Process::AddCapability(const RefPtr<Capability>& cap) {
+  cap->set_id(next_cap_id_++);
+  caps_.PushBack(cap);
+  return cap->id();
+}
 uint64_t Process::AddCapability(const RefPtr<Thread>& thread) {
   uint64_t cap_id = next_cap_id_++;
   caps_.PushBack(
@@ -98,6 +118,12 @@ uint64_t Process::AddCapability(const RefPtr<MemoryObject>& vmmo) {
   uint64_t cap_id = next_cap_id_++;
   caps_.PushBack(MakeRefCounted<Capability>(vmmo, Capability::MEMORY_OBJECT,
                                             cap_id, ZC_WRITE));
+  return cap_id;
+}
+uint64_t Process::AddCapability(const RefPtr<Channel>& chan) {
+  uint64_t cap_id = next_cap_id_++;
+  caps_.PushBack(MakeRefCounted<Capability>(chan, Capability::CHANNEL, cap_id,
+                                            ZC_WRITE | ZC_READ));
   return cap_id;
 }
 

@@ -5,3 +5,4 @@
 #define ZE_INVALID 0x2
 #define ZE_DENIED 0x4
 #define ZE_UNIMPLEMENTED 0x8
+#define ZE_BUFF_SIZE 0x10

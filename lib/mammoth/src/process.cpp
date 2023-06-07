@@ -83,10 +83,16 @@ uint64_t LoadElfProgram(uint64_t base, uint64_t as_cap) {
 }  // namespace
 
 uint64_t SpawnProcessFromElfRegion(uint64_t program) {
+  dbgln("Channel Create");
+  uint64_t local_chan;
+  uint64_t foreign_chan;
+  check(ZChannelCreate(&local_chan, &foreign_chan));
+
   dbgln("Spawn");
   uint64_t proc_cap;
   uint64_t as_cap;
-  check(ZProcessSpawn(Z_INIT_PROC_SELF, &proc_cap, &as_cap));
+  check(ZProcessSpawn(Z_INIT_PROC_SELF, foreign_chan, &proc_cap, &as_cap,
+                      &foreign_chan));
 
   uint64_t entry_point = LoadElfProgram(program, as_cap);
   dbgln("Thread Create");
@@ -94,7 +100,10 @@ uint64_t SpawnProcessFromElfRegion(uint64_t program) {
   check(ZThreadCreate(proc_cap, &thread_cap));
 
   dbgln("Thread start");
-  check(ZThreadStart(thread_cap, entry_point, 0, 0));
+  check(ZThreadStart(thread_cap, entry_point, foreign_chan, 0));
+
+  const uint8_t* msg = reinterpret_cast<const uint8_t*>("Hello!");
+  check(ZChannelSend(local_chan, 0, 7, msg, 0, 0));
 
   return Z_OK;
 }

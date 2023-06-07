@@ -14,6 +14,7 @@ add_executable(zion
   memory/physical_memory.cpp
   memory/user_stack_manager.cpp
   object/address_space.cpp
+  object/channel.cpp
   object/memory_object.cpp
   object/process.cpp
   object/thread.cpp

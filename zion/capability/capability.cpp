@@ -34,3 +34,11 @@ RefPtr<MemoryObject> Capability::obj<MemoryObject>() {
   }
   return StaticCastRefPtr<MemoryObject>(obj_);
 }
+
+template <>
+RefPtr<Channel> Capability::obj<Channel>() {
+  if (type_ != CHANNEL) {
+    panic("Accessing %u cap as object.", type_);
+  }
+  return StaticCastRefPtr<Channel>(obj_);
+}

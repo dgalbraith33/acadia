@@ -16,6 +16,7 @@ class Capability : public RefCounted<Capability> {
     THREAD,
     ADDRESS_SPACE,
     MEMORY_OBJECT,
+    CHANNEL,
   };
   Capability(const RefPtr<KernelObject>& obj, Type type, uint64_t id,
              uint64_t permissions)
@@ -30,6 +31,7 @@ class Capability : public RefCounted<Capability> {
   RefPtr<T> obj();
 
   uint64_t id() { return id_; }
+  void set_id(uint64_t id) { id_ = id; }
 
   bool CheckType(Type type) { return type_ == type; }
 

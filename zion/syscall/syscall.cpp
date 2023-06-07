@@ -5,6 +5,7 @@
 #include "debug/debug.h"
 #include "include/zcall.h"
 #include "include/zerrors.h"
+#include "object/channel.h"
 #include "object/process.h"
 #include "scheduler/process_manager.h"
 #include "scheduler/scheduler.h"
@@ -73,6 +74,15 @@ uint64_t ProcessSpawn(ZProcessSpawnReq* req, ZProcessSpawnResp* resp) {
 
   resp->proc_cap = curr_proc.AddCapability(proc);
   resp->vmas_cap = curr_proc.AddCapability(proc->vmas());
+
+  if (req->bootstrap_cap != 0) {
+    auto cap = curr_proc.ReleaseCapability(req->bootstrap_cap);
+    if (!cap) {
+      return ZE_NOT_FOUND;
+    }
+    // FIXME: Check permissions.
+    resp->bootstrap_cap = proc->AddCapability(cap);
+  }
 
   return Z_OK;
 }
@@ -153,6 +163,48 @@ uint64_t MemoryObjectCreate(ZMemoryObjectCreateReq* req,
   return Z_OK;
 }
 
+uint64_t ChannelCreate(ZChannelCreateResp* resp) {
+  auto& proc = gScheduler->CurrentProcess();
+  auto chan_pair = Channel::CreateChannelPair();
+  resp->chan_cap1 = proc.AddCapability(chan_pair.first());
+  resp->chan_cap2 = proc.AddCapability(chan_pair.second());
+  return Z_OK;
+}
+
+uint64_t ChannelSend(ZChannelSendReq* req) {
+  auto& proc = gScheduler->CurrentProcess();
+  auto chan_cap = proc.GetCapability(req->chan_cap);
+  if (!chan_cap) {
+    return ZE_NOT_FOUND;
+  }
+  if (!chan_cap->CheckType(Capability::CHANNEL)) {
+    return ZE_INVALID;
+  }
+  if (!chan_cap->HasPermissions(ZC_WRITE)) {
+    return ZE_DENIED;
+  }
+  auto chan = chan_cap->obj<Channel>();
+  chan->Write(req->message);
+  return Z_OK;
+}
+
+uint64_t ChannelRecv(ZChannelRecvReq* req) {
+  auto& proc = gScheduler->CurrentProcess();
+  auto chan_cap = proc.GetCapability(req->chan_cap);
+  if (!chan_cap) {
+    return ZE_NOT_FOUND;
+  }
+  if (!chan_cap->CheckType(Capability::CHANNEL)) {
+    return ZE_INVALID;
+  }
+  if (!chan_cap->HasPermissions(ZC_READ)) {
+    return ZE_DENIED;
+  }
+  auto chan = chan_cap->obj<Channel>();
+  chan->Read(req->message);
+  return Z_OK;
+}
+
 extern "C" uint64_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
   Thread& thread = gScheduler->CurrentThread();
   switch (call_id) {
@@ -182,6 +234,12 @@ extern "C" uint64_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
       return MemoryObjectCreate(
           reinterpret_cast<ZMemoryObjectCreateReq*>(req),
           reinterpret_cast<ZMemoryObjectCreateResp*>(resp));
+    case Z_CHANNEL_CREATE:
+      return ChannelCreate(reinterpret_cast<ZChannelCreateResp*>(resp));
+    case Z_CHANNEL_SEND:
+      return ChannelSend(reinterpret_cast<ZChannelSendReq*>(req));
+    case Z_CHANNEL_RECV:
+      return ChannelRecv(reinterpret_cast<ZChannelRecvReq*>(req));
     case Z_DEBUG_PRINT:
       dbgln("[Debug] %s", req);
       return Z_OK;
