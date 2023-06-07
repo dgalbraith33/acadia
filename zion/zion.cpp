@@ -1,5 +1,6 @@
 #include <stdint.h>
 
+#include "boot/acpi.h"
 #include "common/gdt.h"
 #include "debug/debug.h"
 #include "interrupt/interrupt.h"
@@ -24,6 +25,9 @@ extern "C" void zion() {
   phys_mem::InitPhysicalMemoryManager();
 
   dbgln("[boot] Memory allocations available now.");
+
+  dbgln("[boot] Probing Hardware");
+  ProbeRsdp();
 
   dbgln("[boot] Init Kernel Stack Manager.");
   KernelStackManager::Init();

@@ -9,4 +9,6 @@ uint64_t GetHigherHalfDirectMap();
 
 const limine_module_response& GetModules();
 
+void* GetRsdpAddr();
+
 }  // namespace boot

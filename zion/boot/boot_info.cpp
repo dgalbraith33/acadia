@@ -36,4 +36,15 @@ const limine_module_response& GetModules() {
   return *gModuleRequest.response;
 }
 
+static volatile struct limine_rsdp_request gRsdpRequest {
+  .id = LIMINE_RSDP_REQUEST, .revision = 0, .response = 0,
+};
+
+void* GetRsdpAddr() {
+  if (!gRsdpRequest.response) {
+    panic("No rsdp response from limine");
+  }
+  return gRsdpRequest.response->address;
+}
+
 }  // namespace boot

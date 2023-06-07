@@ -16,7 +16,8 @@ add_subdirectory(zion)
 add_subdirectory(lib)
 add_subdirectory(sys)
 
-set(QEMU_CMD qemu-system-x86_64 -d guest_errors -m 1G -serial stdio -hda disk.img)
+# Use machine q35 to access PCI devices.
+set(QEMU_CMD qemu-system-x86_64 -machine q35 -d guest_errors -m 1G -serial stdio -hda disk.img)
 
 add_custom_command(
   OUTPUT disk.img

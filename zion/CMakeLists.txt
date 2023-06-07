@@ -1,4 +1,5 @@
 add_executable(zion
+  boot/acpi.cpp
   boot/boot_info.cpp
   capability/capability.cpp
   common/gdt.cpp
