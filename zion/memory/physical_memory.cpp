@@ -25,6 +25,9 @@ class PhysicalMemoryManager {
     const limine_memmap_response& memmap = boot::GetMemoryMap();
     for (uint64_t i = 0; i < memmap.entry_count; i++) {
       const limine_memmap_entry& entry = *memmap.entries[i];
+#if K_PHYS_DEBUG
+      dbgln("Region(%u) at %m:%x", entry.type, entry.base, entry.length);
+#endif
       if (entry.type == 0) {
         uint64_t base = entry.base;
         uint64_t size = entry.length;
