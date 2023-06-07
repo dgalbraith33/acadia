@@ -142,6 +142,7 @@ uint64_t AddressSpaceMap(ZAddressSpaceMapReq* req, ZAddressSpaceMapResp* resp) {
   } else {
     resp->vaddr = vmas->MapInMemoryObject(vmmo);
   }
+  return Z_OK;
 }
 
 uint64_t MemoryObjectCreate(ZMemoryObjectCreateReq* req,
@@ -183,6 +184,7 @@ extern "C" uint64_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
           reinterpret_cast<ZMemoryObjectCreateResp*>(resp));
     case Z_DEBUG_PRINT:
       dbgln("[Debug] %s", req);
+      return Z_OK;
       break;
     default:
       panic("Unhandled syscall number: %x", call_id);
