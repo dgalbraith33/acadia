@@ -4,6 +4,7 @@
 
 #include "common/port.h"
 #include "debug/debug.h"
+#include "interrupt/apic.h"
 #include "memory/kernel_heap.h"
 #include "scheduler/scheduler.h"
 
@@ -124,10 +125,6 @@ extern "C" void interrupt_page_fault(InterruptFrame* frame) {
   panic("PF");
 }
 
-#define PIC1_COMMAND 0x20
-#define PIC1_DATA 0x21
-#define PIC_EOI 0x20
-
 uint64_t cnt = 0;
 extern "C" void isr_timer();
 extern "C" void interrupt_timer(InterruptFrame*) {
@@ -138,18 +135,8 @@ extern "C" void interrupt_timer(InterruptFrame*) {
     }
     dbgln("timer: %us", cnt * 50 / 1000);
   }
-  outb(PIC1_COMMAND, PIC_EOI);
+  SignalEOI();
   gScheduler->Preempt();
-}
-
-void EnablePic() {
-  outb(PIC1_COMMAND, 0x11);
-  outb(PIC1_DATA, 0x20);  // PIC1 offset.
-  outb(PIC1_DATA, 0x4);
-  outb(PIC1_DATA, 0x1);
-
-  // Mask all except the timer.
-  outb(PIC1_DATA, 0xE);
 }
 
 void InitIdt() {
@@ -163,5 +150,5 @@ void InitIdt() {
   };
   asm volatile("lidt %0" ::"m"(idtp));
 
-  EnablePic();
+  EnableApic();
 }

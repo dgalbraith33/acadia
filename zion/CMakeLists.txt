@@ -3,7 +3,9 @@ add_executable(zion
   capability/capability.cpp
   common/gdt.cpp
   common/load_gdt.s
+  common/msr.cpp
   debug/debug.cpp
+  interrupt/apic.cpp
   interrupt/interrupt.cpp
   interrupt/interrupt_enter.s
   interrupt/timer.cpp

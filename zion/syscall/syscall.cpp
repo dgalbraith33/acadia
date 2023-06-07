@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+#include "common/msr.h"
 #include "debug/debug.h"
 #include "include/zcall.h"
 #include "include/zerrors.h"
@@ -15,23 +16,7 @@
 #define STAR 0xC0000081
 #define LSTAR 0xC0000082
 
-namespace {
-
-uint64_t GetMSR(uint32_t msr) {
-  uint32_t lo, hi;
-  asm("rdmsr" : "=a"(lo), "=d"(hi) : "c"(msr));
-  return (static_cast<uint64_t>(hi) << 32) | lo;
-}
-
-void SetMSR(uint32_t msr, uint64_t val) {
-  uint32_t lo = static_cast<uint32_t>(val);
-  uint32_t hi = val >> 32;
-  asm("wrmsr" ::"a"(lo), "d"(hi), "c"(msr));
-}
-
 extern "C" void syscall_enter();
-
-}  // namespace
 
 // Used by syscall_enter.s
 extern "C" uint64_t GetKernelRsp() {
