@@ -1,5 +1,6 @@
 add_library(mammoth_lib STATIC
   src/debug.cpp
+  src/process.cpp
   src/thread.cpp
   )
 

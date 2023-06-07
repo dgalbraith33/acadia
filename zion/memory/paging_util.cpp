@@ -105,7 +105,7 @@ void CopyPageIntoNonResidentProcess(uint64_t base, uint64_t size,
   if (dest_virt & 0xFFF) {
     panic("NR copy to non page aligned");
   }
-  uint64_t phys = AllocatePageIfNecessary(dest_virt, dest_proc.vmm().cr3());
+  uint64_t phys = AllocatePageIfNecessary(dest_virt, dest_proc.vmas()->cr3());
   uint8_t* src = reinterpret_cast<uint8_t*>(base);
   uint8_t* dest =
       reinterpret_cast<uint8_t*>(phys + boot::GetHigherHalfDirectMap());

@@ -14,6 +14,8 @@ class Capability {
     UNDEFINED,
     PROCESS,
     THREAD,
+    ADDRESS_SPACE,
+    MEMORY_OBJECT,
   };
   Capability(const RefPtr<KernelObject>& obj, Type type, uint64_t id,
              uint64_t permissions)
@@ -25,7 +27,7 @@ class Capability {
   }
 
   template <typename T>
-  T& obj();
+  RefPtr<T> obj();
 
   uint64_t id() { return id_; }
 

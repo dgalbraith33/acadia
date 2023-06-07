@@ -29,7 +29,7 @@ RefPtr<Thread> Thread::Create(Process& proc, uint64_t tid) {
 }
 
 Thread::Thread(Process& proc, uint64_t tid) : process_(proc), id_(tid) {
-  uint64_t* stack_ptr = proc.vmm().AllocateKernelStack();
+  uint64_t* stack_ptr = proc.vmas()->AllocateKernelStack();
   // 0: rip
   *(stack_ptr) = reinterpret_cast<uint64_t>(thread_init);
   // 1-4: rax, rcx, rdx, rbx
@@ -37,7 +37,7 @@ Thread::Thread(Process& proc, uint64_t tid) : process_(proc), id_(tid) {
   *(stack_ptr - 5) = reinterpret_cast<uint64_t>(stack_ptr + 1);
   // 6-15: rsi, rdi, r8, r9, r10, r11, r12, r13, r14, r15
   // 16: cr3
-  *(stack_ptr - 16) = proc.vmm().cr3();
+  *(stack_ptr - 16) = proc.vmas()->cr3();
   rsp0_ = reinterpret_cast<uint64_t>(stack_ptr - 16);
   rsp0_start_ = reinterpret_cast<uint64_t>(stack_ptr);
 }
@@ -55,7 +55,7 @@ void Thread::Start(uint64_t entry, uint64_t arg1, uint64_t arg2) {
 
 void Thread::Init() {
   dbgln("Thread start.", pid(), id_);
-  uint64_t rsp = process_.vmm().AllocateUserStack();
+  uint64_t rsp = process_.vmas()->AllocateUserStack();
   SetRsp0(rsp0_start_);
   jump_user_space(rip_, rsp, arg1_, arg2_);
 }

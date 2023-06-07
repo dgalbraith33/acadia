@@ -34,7 +34,7 @@ struct GdtPointer {
   uint64_t base;
 } __attribute__((packed));
 
-static uint64_t gGdtSegments[7];
+static uint64_t gGdtSegments[8];
 static TaskStateSegment gTaskStateSegment;
 
 // Defined in load_gdt.s
@@ -70,13 +70,15 @@ void InitGdt() {
   // User CS
   gGdtSegments[3] =
       CreateSegment(default_bits | GDT_RING3 | GDT_EXECUTABLE, GDT_FLAGS);
+  // Copy for the sysret function.
+  gGdtSegments[5] = gGdtSegments[3];
 
   // User DS
   gGdtSegments[4] = CreateSegment(default_bits | GDT_RING3, GDT_FLAGS);
 
   gTaskStateSegment.iomap_base = sizeof(TaskStateSegment);
-  gGdtSegments[5] = CreateTssSegment(&gTaskStateSegment);
-  gGdtSegments[6] = reinterpret_cast<uint64_t>(&gTaskStateSegment) >> 32;
+  gGdtSegments[6] = CreateTssSegment(&gTaskStateSegment);
+  gGdtSegments[7] = reinterpret_cast<uint64_t>(&gTaskStateSegment) >> 32;
 
   GdtPointer gdtp{
       .size = sizeof(gGdtSegments) - 1,
@@ -86,7 +88,7 @@ void InitGdt() {
   asm volatile("lgdt %0" ::"m"(gdtp));
   ReloadSegments();
   asm volatile(
-      "mov $0x28, %%ax;"
+      "mov $0x30, %%ax;"
       "ltr %%ax;" ::
           : "rax");
 }

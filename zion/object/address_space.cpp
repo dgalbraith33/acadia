@@ -6,10 +6,10 @@
 
 extern KernelStackManager* gKernelStackManager;
 
-AddressSpace AddressSpace::ForRoot() {
+RefPtr<AddressSpace> AddressSpace::ForRoot() {
   uint64_t cr3 = 0;
   asm volatile("mov %%cr3, %0;" : "=r"(cr3));
-  return {cr3};
+  return MakeRefCounted<AddressSpace>(cr3);
 }
 
 AddressSpace::AddressSpace() {
@@ -22,6 +22,10 @@ uint64_t AddressSpace::AllocateUserStack() {
 }
 
 uint64_t AddressSpace::GetNextMemMapAddr(uint64_t size) {
+  if (size == 0) {
+    panic("Zero size memmap");
+  }
+  size = ((size - 1) & ~0xFFF) + 0x1000;
   uint64_t addr = next_memmap_addr_;
   next_memmap_addr_ += size;
   if (next_memmap_addr_ >= 0x30'00000000) {
@@ -33,6 +37,12 @@ uint64_t AddressSpace::GetNextMemMapAddr(uint64_t size) {
 void AddressSpace::MapInMemoryObject(uint64_t vaddr,
                                      const RefPtr<MemoryObject>& mem_obj) {
   memory_mappings_.PushBack({.vaddr = vaddr, .mem_obj = mem_obj});
+}
+
+uint64_t AddressSpace::MapInMemoryObject(const RefPtr<MemoryObject>& mem_obj) {
+  uint64_t vaddr = GetNextMemMapAddr(mem_obj->size());
+  memory_mappings_.PushBack({.vaddr = vaddr, .mem_obj = mem_obj});
+  return vaddr;
 }
 
 uint64_t* AddressSpace::AllocateKernelStack() {

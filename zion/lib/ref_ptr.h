@@ -1,5 +1,7 @@
 #pragma once
 
+#include "debug/debug.h"
+
 template <typename T>
 class RefPtr;
 
@@ -26,6 +28,7 @@ class RefPtr {
       ptr_->Acquire();
     }
     if (old && old->Release()) {
+      dbgln("Deleting obj %m", old);
       delete old;
     }
 

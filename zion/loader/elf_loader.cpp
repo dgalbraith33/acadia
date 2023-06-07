@@ -62,7 +62,7 @@ uint64_t LoadElfProgram(Process& dest_proc, uint64_t base, uint64_t offset) {
         program.paddr, program.filesz, program.memsz, program.align);
     auto mem_obj = MakeRefCounted<MemoryObject>(program.filesz);
     mem_obj->CopyBytesToObject(base + program.offset, program.filesz);
-    dest_proc.vmm().MapInMemoryObject(program.vaddr, mem_obj);
+    dest_proc.vmas()->MapInMemoryObject(program.vaddr, mem_obj);
   }
   return header->entry;
 }

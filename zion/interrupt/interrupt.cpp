@@ -80,6 +80,8 @@ extern "C" void interrupt_protection_fault(InterruptFrame* frame) {
     dbgln("GDT");
   }
   dbgln("Index: %u", err >> 3);
+  dbgln("RIP: %m", frame->rip);
+  dbgln("RSP: %m", frame->rsp);
 
   panic("GP");
 }
@@ -90,7 +92,7 @@ extern "C" void interrupt_page_fault(InterruptFrame* frame) {
   uint64_t cr2;
   asm volatile("mov %%cr2, %0" : "=r"(cr2));
 
-  if (gScheduler->CurrentProcess().vmm().HandlePageFault(cr2)) {
+  if (gScheduler->CurrentProcess().vmas()->HandlePageFault(cr2)) {
     dbgln("Handled");
     return;
   }

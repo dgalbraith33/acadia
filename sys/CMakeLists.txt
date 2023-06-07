@@ -8,7 +8,7 @@ add_executable(test
   )
 
 target_link_libraries(test
-  zion_lib)
+  mammoth_lib)
 
 set_target_properties(test
   PROPERTIES

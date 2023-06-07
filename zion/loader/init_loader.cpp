@@ -58,7 +58,7 @@ void LoadInitProgram() {
 
   CopyIntoNonResidentProcess(reinterpret_cast<uint64_t>(prog2.address),
                              prog2.size, *proc,
-                             proc->vmm().GetNextMemMapAddr(prog2.size));
+                             proc->vmas()->GetNextMemMapAddr(prog2.size));
 
   proc->CreateThread()->Start(entry, 0, 0);
 }

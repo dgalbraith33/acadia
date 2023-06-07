@@ -24,7 +24,7 @@
 // 0xFFFFFFFF 40000000 - 0xFFFFFFFF 7FFFFFFF : KERNEL_HEAP (1 GiB)
 // 0xFFFFFFFF 80000000 - 0xFFFFFFFF 80FFFFFF : KERNEL_CODE (16 MiB)
 // 0xFFFFFFFF 90000000 - 0xFFFFFFFF 9FFFFFFF : KERNEL_STACK (256 MiB)
-class AddressSpace {
+class AddressSpace : public KernelObject {
  public:
   enum MemoryType {
     UNSPECIFIED,
@@ -40,7 +40,7 @@ class AddressSpace {
     KERNEL_STACK,
   };
 
-  static AddressSpace ForRoot();
+  static RefPtr<AddressSpace> ForRoot();
 
   AddressSpace();
   AddressSpace(const AddressSpace&) = delete;
@@ -56,6 +56,8 @@ class AddressSpace {
   // Note this is unsafe for now as it may clobber other mappings.
   void MapInMemoryObject(uint64_t vaddr, const RefPtr<MemoryObject>& mem_obj);
 
+  uint64_t MapInMemoryObject(const RefPtr<MemoryObject>& mem_obj);
+
   // Kernel Mappings.
   uint64_t* AllocateKernelStack();
 
@@ -63,6 +65,7 @@ class AddressSpace {
   bool HandlePageFault(uint64_t vaddr);
 
  private:
+  friend class MakeRefCountedFriend<AddressSpace>;
   AddressSpace(uint64_t cr3) : cr3_(cr3) {}
   uint64_t cr3_ = 0;
 
