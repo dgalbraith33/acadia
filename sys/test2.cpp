@@ -1,15 +1,6 @@
+#include <mammoth/channel.h>
 #include <mammoth/debug.h>
 #include <mammoth/thread.h>
-#include <zcall.h>
-
-#define CHECK(expr)       \
-  {                       \
-    uint64_t code = expr; \
-    if (code != Z_OK) {   \
-      ZDebug("crash!");   \
-      return 1;           \
-    }                     \
-  }
 
 void thread_entry(void* a) {
   dbgln("In thread");
@@ -26,12 +17,11 @@ int main(uint64_t bootstrap_cap) {
   Thread t1(thread_entry, a);
   Thread t2(thread_entry, b);
 
-  uint64_t num_bytes = 10;
-  uint64_t num_caps;
-  uint8_t bytes[10];
-  uint64_t type;
-  check(ZChannelRecv(bootstrap_cap, num_bytes, bytes, 0, 0, &type, &num_bytes,
-                     &num_caps));
-  dbgln(reinterpret_cast<char*>(bytes));
+  uint64_t size = 10;
+  char buff[10];
+  Channel c1;
+  c1.adopt_cap(bootstrap_cap);
+  check(c1.ReadStr(buff, &size));
+  dbgln(buff);
   return 0;
 }

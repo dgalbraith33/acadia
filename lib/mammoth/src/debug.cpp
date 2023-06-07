@@ -29,3 +29,8 @@ void check(uint64_t code) {
   }
   ZProcessExit(code);
 }
+
+void crash(const char* str, uint64_t code) {
+  dbgln(str);
+  ZProcessExit(code);
+}

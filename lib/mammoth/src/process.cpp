@@ -1,9 +1,10 @@
-#include "include/mammoth/process.h"
+#include "mammoth/process.h"
 
 #include <zcall.h>
 #include <zerrors.h>
 
-#include "include/mammoth/debug.h"
+#include "mammoth/channel.h"
+#include "mammoth/debug.h"
 
 namespace {
 
@@ -83,16 +84,15 @@ uint64_t LoadElfProgram(uint64_t base, uint64_t as_cap) {
 }  // namespace
 
 uint64_t SpawnProcessFromElfRegion(uint64_t program) {
-  dbgln("Channel Create");
-  uint64_t local_chan;
-  uint64_t foreign_chan;
-  check(ZChannelCreate(&local_chan, &foreign_chan));
+  Channel local, foreign;
+  check(CreateChannels(local, foreign));
 
   dbgln("Spawn");
   uint64_t proc_cap;
   uint64_t as_cap;
-  check(ZProcessSpawn(Z_INIT_PROC_SELF, foreign_chan, &proc_cap, &as_cap,
-                      &foreign_chan));
+  uint64_t foreign_chan_id;
+  check(ZProcessSpawn(Z_INIT_PROC_SELF, foreign.release_cap(), &proc_cap,
+                      &as_cap, &foreign_chan_id));
 
   uint64_t entry_point = LoadElfProgram(program, as_cap);
   dbgln("Thread Create");
@@ -100,10 +100,9 @@ uint64_t SpawnProcessFromElfRegion(uint64_t program) {
   check(ZThreadCreate(proc_cap, &thread_cap));
 
   dbgln("Thread start");
-  check(ZThreadStart(thread_cap, entry_point, foreign_chan, 0));
+  check(ZThreadStart(thread_cap, entry_point, foreign_chan_id, 0));
 
-  const uint8_t* msg = reinterpret_cast<const uint8_t*>("Hello!");
-  check(ZChannelSend(local_chan, 0, 7, msg, 0, 0));
+  local.WriteStr("Hello!");
 
   return Z_OK;
 }

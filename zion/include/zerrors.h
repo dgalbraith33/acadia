@@ -7,7 +7,9 @@
 #define Z_ERR_INVALID 0x2
 #define Z_ERR_DENIED 0x3
 #define Z_ERR_UNIMPLEMENTED 0x4
-#define Z_ERR_BUFF_SIZE 0x05
+#define Z_ERR_BUFF_SIZE 005
+#define Z_ERR_NULL 0x6
+#define Z_ERR_EXISTS 0x7
 
 #define Z_ERR_CAP_NOT_FOUND 0x100
 #define Z_ERR_CAP_TYPE 0x101
