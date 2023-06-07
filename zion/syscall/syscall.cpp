@@ -57,18 +57,25 @@ void InitSyscall() {
   SetMSR(LSTAR, reinterpret_cast<uint64_t>(syscall_enter));
 }
 
-uint64_t ProcessSpawn(ZProcessSpawnReq* req, ZProcessSpawnResp* resp) {
+z_err_t ValidateCap(const RefPtr<Capability>& cap, Capability::Type type,
+                    uint64_t permissions) {
+  if (!cap) {
+    return Z_ERR_CAP_NOT_FOUND;
+  }
+  if (!cap->CheckType(type)) {
+    return Z_ERR_CAP_TYPE;
+  }
+  if (!cap->HasPermissions(permissions)) {
+    return Z_ERR_CAP_DENIED;
+  }
+  return Z_OK;
+}
+
+z_err_t ProcessSpawn(ZProcessSpawnReq* req, ZProcessSpawnResp* resp) {
   auto& curr_proc = gScheduler->CurrentProcess();
   auto cap = curr_proc.GetCapability(req->proc_cap);
-  if (!cap) {
-    return ZE_NOT_FOUND;
-  }
-  if (!cap->CheckType(Capability::PROCESS)) {
-    return ZE_INVALID;
-  }
-  if (!cap->HasPermissions(ZC_PROC_SPAWN_PROC)) {
-    return ZE_DENIED;
-  }
+  RET_ERR(ValidateCap(cap, Capability::PROCESS, ZC_PROC_SPAWN_PROC));
+
   RefPtr<Process> proc = Process::Create();
   gProcMan->InsertProcess(proc);
 
@@ -78,7 +85,7 @@ uint64_t ProcessSpawn(ZProcessSpawnReq* req, ZProcessSpawnResp* resp) {
   if (req->bootstrap_cap != 0) {
     auto cap = curr_proc.ReleaseCapability(req->bootstrap_cap);
     if (!cap) {
-      return ZE_NOT_FOUND;
+      return Z_ERR_CAP_NOT_FOUND;
     }
     // FIXME: Check permissions.
     resp->bootstrap_cap = proc->AddCapability(cap);
@@ -87,19 +94,10 @@ uint64_t ProcessSpawn(ZProcessSpawnReq* req, ZProcessSpawnResp* resp) {
   return Z_OK;
 }
 
-uint64_t ThreadCreate(ZThreadCreateReq* req, ZThreadCreateResp* resp) {
+z_err_t ThreadCreate(ZThreadCreateReq* req, ZThreadCreateResp* resp) {
   auto& curr_proc = gScheduler->CurrentProcess();
   auto cap = curr_proc.GetCapability(req->proc_cap);
-  if (!cap) {
-    return ZE_NOT_FOUND;
-  }
-  if (!cap->CheckType(Capability::PROCESS)) {
-    return ZE_INVALID;
-  }
-
-  if (!cap->HasPermissions(ZC_PROC_SPAWN_THREAD)) {
-    return ZE_DENIED;
-  }
+  RET_ERR(ValidateCap(cap, Capability::PROCESS, ZC_PROC_SPAWN_THREAD));
 
   auto parent_proc = cap->obj<Process>();
   auto thread = parent_proc->CreateThread();
@@ -108,19 +106,10 @@ uint64_t ThreadCreate(ZThreadCreateReq* req, ZThreadCreateResp* resp) {
   return Z_OK;
 }
 
-uint64_t ThreadStart(ZThreadStartReq* req) {
+z_err_t ThreadStart(ZThreadStartReq* req) {
   auto& curr_proc = gScheduler->CurrentProcess();
   auto cap = curr_proc.GetCapability(req->thread_cap);
-  if (!cap) {
-    return ZE_NOT_FOUND;
-  }
-  if (!cap->CheckType(Capability::THREAD)) {
-    return ZE_INVALID;
-  }
-
-  if (!cap->HasPermissions(ZC_WRITE)) {
-    return ZE_DENIED;
-  }
+  RET_ERR(ValidateCap(cap, Capability::THREAD, ZC_WRITE));
 
   auto thread = cap->obj<Thread>();
   // FIXME: validate entry point is in user space.
@@ -128,21 +117,13 @@ uint64_t ThreadStart(ZThreadStartReq* req) {
   return Z_OK;
 }
 
-uint64_t AddressSpaceMap(ZAddressSpaceMapReq* req, ZAddressSpaceMapResp* resp) {
+z_err_t AddressSpaceMap(ZAddressSpaceMapReq* req, ZAddressSpaceMapResp* resp) {
   auto& curr_proc = gScheduler->CurrentProcess();
   auto vmas_cap = curr_proc.GetCapability(req->vmas_cap);
   auto vmmo_cap = curr_proc.GetCapability(req->vmmo_cap);
-  if (!vmas_cap || !vmmo_cap) {
-    return ZE_NOT_FOUND;
-  }
-  if (!vmas_cap->CheckType(Capability::ADDRESS_SPACE) ||
-      !vmmo_cap->CheckType(Capability::MEMORY_OBJECT)) {
-    return ZE_INVALID;
-  }
-  if (!vmas_cap->HasPermissions(ZC_WRITE) ||
-      !vmmo_cap->HasPermissions(ZC_WRITE)) {
-    return ZE_DENIED;
-  }
+  RET_ERR(ValidateCap(vmas_cap, Capability::ADDRESS_SPACE, ZC_WRITE));
+  RET_ERR(ValidateCap(vmmo_cap, Capability::MEMORY_OBJECT, ZC_WRITE));
+
   auto vmas = vmas_cap->obj<AddressSpace>();
   auto vmmo = vmmo_cap->obj<MemoryObject>();
   // FIXME: Validation necessary.
@@ -155,15 +136,15 @@ uint64_t AddressSpaceMap(ZAddressSpaceMapReq* req, ZAddressSpaceMapResp* resp) {
   return Z_OK;
 }
 
-uint64_t MemoryObjectCreate(ZMemoryObjectCreateReq* req,
-                            ZMemoryObjectCreateResp* resp) {
+z_err_t MemoryObjectCreate(ZMemoryObjectCreateReq* req,
+                           ZMemoryObjectCreateResp* resp) {
   auto& curr_proc = gScheduler->CurrentProcess();
   resp->vmmo_cap =
       curr_proc.AddCapability(MakeRefCounted<MemoryObject>(req->size));
   return Z_OK;
 }
 
-uint64_t ChannelCreate(ZChannelCreateResp* resp) {
+z_err_t ChannelCreate(ZChannelCreateResp* resp) {
   auto& proc = gScheduler->CurrentProcess();
   auto chan_pair = Channel::CreateChannelPair();
   resp->chan_cap1 = proc.AddCapability(chan_pair.first());
@@ -171,41 +152,27 @@ uint64_t ChannelCreate(ZChannelCreateResp* resp) {
   return Z_OK;
 }
 
-uint64_t ChannelSend(ZChannelSendReq* req) {
+z_err_t ChannelSend(ZChannelSendReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto chan_cap = proc.GetCapability(req->chan_cap);
-  if (!chan_cap) {
-    return ZE_NOT_FOUND;
-  }
-  if (!chan_cap->CheckType(Capability::CHANNEL)) {
-    return ZE_INVALID;
-  }
-  if (!chan_cap->HasPermissions(ZC_WRITE)) {
-    return ZE_DENIED;
-  }
+  RET_ERR(ValidateCap(chan_cap, Capability::CHANNEL, ZC_WRITE));
+
   auto chan = chan_cap->obj<Channel>();
   chan->Write(req->message);
   return Z_OK;
 }
 
-uint64_t ChannelRecv(ZChannelRecvReq* req) {
+z_err_t ChannelRecv(ZChannelRecvReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto chan_cap = proc.GetCapability(req->chan_cap);
-  if (!chan_cap) {
-    return ZE_NOT_FOUND;
-  }
-  if (!chan_cap->CheckType(Capability::CHANNEL)) {
-    return ZE_INVALID;
-  }
-  if (!chan_cap->HasPermissions(ZC_READ)) {
-    return ZE_DENIED;
-  }
+  RET_ERR(ValidateCap(chan_cap, Capability::CHANNEL, ZC_READ));
+
   auto chan = chan_cap->obj<Channel>();
   chan->Read(req->message);
   return Z_OK;
 }
 
-extern "C" uint64_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
+extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
   Thread& thread = gScheduler->CurrentThread();
   switch (call_id) {
     case Z_PROCESS_EXIT:
@@ -247,5 +214,5 @@ extern "C" uint64_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
     default:
       panic("Unhandled syscall number: %x", call_id);
   }
-  return 1;
+  UNREACHABLE
 }

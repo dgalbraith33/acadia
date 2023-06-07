@@ -10,18 +10,18 @@ Pair<RefPtr<Channel>, RefPtr<Channel>> Channel::CreateChannelPair() {
   return {c1, c2};
 }
 
-uint64_t Channel::Write(const ZMessage& msg) {
+z_err_t Channel::Write(const ZMessage& msg) {
   return peer_->EnqueueMessage(msg);
 }
 
-uint64_t Channel::Read(ZMessage& msg) {
+z_err_t Channel::Read(ZMessage& msg) {
   if (pending_messages_.size() == 0) {
     dbgln("Unimplemented add blocking.");
-    return ZE_UNIMPLEMENTED;
+    return Z_ERR_UNIMPLEMENTED;
   }
   Message next_msg = pending_messages_.PeekFront();
   if (next_msg.num_bytes > msg.num_bytes) {
-    return ZE_BUFF_SIZE;
+    return Z_ERR_BUFF_SIZE;
   }
 
   msg.type = next_msg.type;
@@ -37,15 +37,15 @@ uint64_t Channel::Read(ZMessage& msg) {
   return Z_OK;
 }
 
-uint64_t Channel::EnqueueMessage(const ZMessage& msg) {
+z_err_t Channel::EnqueueMessage(const ZMessage& msg) {
   if (msg.num_caps > 0) {
     dbgln("Unimplemented passing caps on channel");
-    return ZE_UNIMPLEMENTED;
+    return Z_ERR_UNIMPLEMENTED;
   }
 
   if (msg.num_bytes > 0x1000) {
     dbgln("Large message size unimplemented: %x", msg.num_bytes);
-    return ZE_INVALID;
+    return Z_ERR_INVALID;
   }
 
   Message message{

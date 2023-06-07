@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+#include "zerrors.h"
+
 #define Z_INVALID 0x0
 
 #define ZC_WRITE 0x01
@@ -43,35 +45,35 @@
 
 void ZProcessExit(uint64_t code);
 
-[[nodiscard]] uint64_t ZProcessSpawn(uint64_t proc_cap, uint64_t bootstrap_cap,
-                                     uint64_t* new_proc_cap,
-                                     uint64_t* new_vmas_cap,
-                                     uint64_t* new_bootstrap_cap);
+[[nodiscard]] z_err_t ZProcessSpawn(uint64_t proc_cap, uint64_t bootstrap_cap,
+                                    uint64_t* new_proc_cap,
+                                    uint64_t* new_vmas_cap,
+                                    uint64_t* new_bootstrap_cap);
 
 // UNUSED for now, I think we can get away with just starting a thread.
-[[nodiscard]] uint64_t ZProcessStart(uint64_t proc_cap, uint64_t thread_cap,
-                                     uint64_t entry, uint64_t arg1,
-                                     uint64_t arg2);
+[[nodiscard]] z_err_t ZProcessStart(uint64_t proc_cap, uint64_t thread_cap,
+                                    uint64_t entry, uint64_t arg1,
+                                    uint64_t arg2);
 
-[[nodiscard]] uint64_t ZThreadCreate(uint64_t proc_cap, uint64_t* thread_cap);
+[[nodiscard]] z_err_t ZThreadCreate(uint64_t proc_cap, uint64_t* thread_cap);
 
-[[nodiscard]] uint64_t ZThreadStart(uint64_t thread_cap, uint64_t entry,
-                                    uint64_t arg1, uint64_t arg2);
+[[nodiscard]] z_err_t ZThreadStart(uint64_t thread_cap, uint64_t entry,
+                                   uint64_t arg1, uint64_t arg2);
 
 void ZThreadExit();
 
-[[nodiscard]] uint64_t ZAddressSpaceMap(uint64_t vmas_cap, uint64_t vmas_offset,
-                                        uint64_t vmmo_cap, uint64_t* vaddr);
-[[nodiscard]] uint64_t ZMemoryObjectCreate(uint64_t size, uint64_t* vmmo_cap);
+[[nodiscard]] z_err_t ZAddressSpaceMap(uint64_t vmas_cap, uint64_t vmas_offset,
+                                       uint64_t vmmo_cap, uint64_t* vaddr);
+[[nodiscard]] z_err_t ZMemoryObjectCreate(uint64_t size, uint64_t* vmmo_cap);
 
-[[nodiscard]] uint64_t ZChannelCreate(uint64_t* channel1, uint64_t* channel2);
-[[nodiscard]] uint64_t ZChannelSend(uint64_t chan_cap, uint64_t type,
-                                    uint64_t num_bytes, const uint8_t* bytes,
-                                    uint64_t num_caps, const uint64_t* caps);
-[[nodiscard]] uint64_t ZChannelRecv(uint64_t chan_cap, uint64_t num_bytes,
-                                    uint8_t* bytes, uint64_t num_caps,
-                                    uint64_t* caps, uint64_t* type,
-                                    uint64_t* actual_bytes,
-                                    uint64_t* actual_caps);
+[[nodiscard]] z_err_t ZChannelCreate(uint64_t* channel1, uint64_t* channel2);
+[[nodiscard]] z_err_t ZChannelSend(uint64_t chan_cap, uint64_t type,
+                                   uint64_t num_bytes, const uint8_t* bytes,
+                                   uint64_t num_caps, const uint64_t* caps);
+[[nodiscard]] z_err_t ZChannelRecv(uint64_t chan_cap, uint64_t num_bytes,
+                                   uint8_t* bytes, uint64_t num_caps,
+                                   uint64_t* caps, uint64_t* type,
+                                   uint64_t* actual_bytes,
+                                   uint64_t* actual_caps);
 
-[[nodiscard]] uint64_t ZDebug(const char* message);
+[[nodiscard]] z_err_t ZDebug(const char* message);

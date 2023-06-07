@@ -1,6 +1,7 @@
 #pragma once
 
 #include "capability/capability.h"
+#include "include/zerrors.h"
 #include "lib/linked_list.h"
 #include "lib/pair.h"
 #include "lib/ref_ptr.h"
@@ -13,8 +14,8 @@ class Channel : public KernelObject {
 
   RefPtr<Channel> peer() { return peer_; }
 
-  uint64_t Write(const ZMessage& msg);
-  uint64_t Read(ZMessage& msg);
+  z_err_t Write(const ZMessage& msg);
+  z_err_t Read(ZMessage& msg);
 
  private:
   // FIXME: We will likely never close the channel based on this
@@ -36,5 +37,5 @@ class Channel : public KernelObject {
   Channel() {}
   void SetPeer(const RefPtr<Channel>& peer) { peer_ = peer; }
 
-  uint64_t EnqueueMessage(const ZMessage& msg);
+  z_err_t EnqueueMessage(const ZMessage& msg);
 };

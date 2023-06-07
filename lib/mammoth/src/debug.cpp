@@ -12,17 +12,17 @@ void check(uint64_t code) {
   switch (code) {
     case Z_OK:
       return;
-    case ZE_NOT_FOUND:
-      dbgln("crash: NOT_FOUND");
-      break;
-    case ZE_INVALID:
-      dbgln("crash: INVALID");
-      break;
-    case ZE_DENIED:
-      dbgln("crash: DENIED");
-      break;
-    case ZE_UNIMPLEMENTED:
+    case Z_ERR_UNIMPLEMENTED:
       dbgln("crash: UNIMPLEMENTED");
+    case Z_ERR_CAP_NOT_FOUND:
+      dbgln("crash: missing capability");
+      break;
+    case Z_ERR_CAP_TYPE:
+      dbgln("crash: capability of the wrong type");
+      break;
+    case Z_ERR_CAP_DENIED:
+      dbgln("crash: capability permissions error");
+      break;
     default:
       dbgln("Unhandled code");
       break;
