@@ -5,7 +5,6 @@
 #include "capability/capability.h"
 #include "lib/linked_list.h"
 #include "lib/ref_ptr.h"
-#include "lib/shared_ptr.h"
 #include "object/address_space.h"
 
 // Forward decl due to cyclic dependency.
@@ -28,7 +27,7 @@ class Process : public KernelObject {
   RefPtr<Thread> CreateThread();
   RefPtr<Thread> GetThread(uint64_t tid);
 
-  SharedPtr<Capability> GetCapability(uint64_t cid);
+  RefPtr<Capability> GetCapability(uint64_t cid);
   uint64_t AddCapability(const RefPtr<Thread>& t);
   uint64_t AddCapability(const RefPtr<Process>& p);
   uint64_t AddCapability(const RefPtr<AddressSpace>& vmas);
@@ -53,5 +52,5 @@ class Process : public KernelObject {
   uint64_t next_cap_id_ = 0x100;
 
   LinkedList<RefPtr<Thread>> threads_;
-  LinkedList<SharedPtr<Capability>> caps_;
+  LinkedList<RefPtr<Capability>> caps_;
 };

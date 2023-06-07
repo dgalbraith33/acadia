@@ -59,7 +59,7 @@ void InitSyscall() {
 uint64_t ProcessSpawn(ZProcessSpawnReq* req, ZProcessSpawnResp* resp) {
   auto& curr_proc = gScheduler->CurrentProcess();
   auto cap = curr_proc.GetCapability(req->proc_cap);
-  if (cap.empty()) {
+  if (!cap) {
     return ZE_NOT_FOUND;
   }
   if (!cap->CheckType(Capability::PROCESS)) {
@@ -80,7 +80,7 @@ uint64_t ProcessSpawn(ZProcessSpawnReq* req, ZProcessSpawnResp* resp) {
 uint64_t ThreadCreate(ZThreadCreateReq* req, ZThreadCreateResp* resp) {
   auto& curr_proc = gScheduler->CurrentProcess();
   auto cap = curr_proc.GetCapability(req->proc_cap);
-  if (cap.empty()) {
+  if (!cap) {
     return ZE_NOT_FOUND;
   }
   if (!cap->CheckType(Capability::PROCESS)) {
@@ -101,7 +101,7 @@ uint64_t ThreadCreate(ZThreadCreateReq* req, ZThreadCreateResp* resp) {
 uint64_t ThreadStart(ZThreadStartReq* req) {
   auto& curr_proc = gScheduler->CurrentProcess();
   auto cap = curr_proc.GetCapability(req->thread_cap);
-  if (cap.empty()) {
+  if (!cap) {
     return ZE_NOT_FOUND;
   }
   if (!cap->CheckType(Capability::THREAD)) {
@@ -122,7 +122,7 @@ uint64_t AddressSpaceMap(ZAddressSpaceMapReq* req, ZAddressSpaceMapResp* resp) {
   auto& curr_proc = gScheduler->CurrentProcess();
   auto vmas_cap = curr_proc.GetCapability(req->vmas_cap);
   auto vmmo_cap = curr_proc.GetCapability(req->vmmo_cap);
-  if (vmas_cap.empty() || vmmo_cap.empty()) {
+  if (!vmas_cap || !vmmo_cap) {
     return ZE_NOT_FOUND;
   }
   if (!vmas_cap->CheckType(Capability::ADDRESS_SPACE) ||

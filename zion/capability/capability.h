@@ -8,7 +8,7 @@
 class Process;
 class Thread;
 
-class Capability {
+class Capability : public RefCounted<Capability> {
  public:
   enum Type {
     UNDEFINED,
