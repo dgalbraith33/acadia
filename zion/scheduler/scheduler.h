@@ -15,7 +15,7 @@ class Scheduler {
   Process& CurrentProcess() { return current_thread_->process(); }
   Thread& CurrentThread() { return *current_thread_; }
 
-  void Enqueue(const SharedPtr<Thread> thread) {
+  void Enqueue(const RefPtr<Thread>& thread) {
     runnable_threads_.PushBack(thread);
   }
 
@@ -25,10 +25,10 @@ class Scheduler {
  private:
   bool enabled_ = false;
 
-  SharedPtr<Thread> current_thread_;
-  LinkedList<SharedPtr<Thread>> runnable_threads_;
+  RefPtr<Thread> current_thread_;
+  LinkedList<RefPtr<Thread>> runnable_threads_;
 
-  SharedPtr<Thread> sleep_thread_;
+  RefPtr<Thread> sleep_thread_;
 
   Scheduler();
   void SwapToCurrent(Thread& prev);

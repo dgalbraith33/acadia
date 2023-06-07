@@ -20,8 +20,12 @@ extern "C" void thread_init() {
 
 }  // namespace
 
-SharedPtr<Thread> Thread::RootThread(Process& root_proc) {
-  return new Thread(root_proc);
+RefPtr<Thread> Thread::RootThread(Process& root_proc) {
+  return MakeRefCounted<Thread>(root_proc);
+}
+
+RefPtr<Thread> Thread::Create(Process& proc, uint64_t tid) {
+  return MakeRefCounted<Thread>(proc, tid);
 }
 
 Thread::Thread(Process& proc, uint64_t tid) : process_(proc), id_(tid) {

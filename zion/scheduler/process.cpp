@@ -26,13 +26,13 @@ Process::Process() : id_(gNextId++), state_(RUNNING) {
                                 ZC_PROC_SPAWN_PROC | ZC_PROC_SPAWN_THREAD));
 }
 
-SharedPtr<Thread> Process::CreateThread() {
-  SharedPtr<Thread> thread{new Thread(*this, next_thread_id_++)};
+RefPtr<Thread> Process::CreateThread() {
+  RefPtr<Thread> thread = MakeRefCounted<Thread>(*this, next_thread_id_++);
   threads_.PushBack(thread);
   return thread;
 }
 
-SharedPtr<Thread> Process::GetThread(uint64_t tid) {
+RefPtr<Thread> Process::GetThread(uint64_t tid) {
   auto iter = threads_.begin();
   while (iter != threads_.end()) {
     if (iter->tid() == tid) {
@@ -67,9 +67,9 @@ SharedPtr<Capability> Process::GetCapability(uint64_t cid) {
   return {};
 }
 
-uint64_t Process::AddCapability(SharedPtr<Thread>& thread) {
+uint64_t Process::AddCapability(RefPtr<Thread>& thread) {
   uint64_t cap_id = next_cap_id_++;
   caps_.PushBack(
-      new Capability(thread.ptr(), Capability::THREAD, cap_id, ZC_WRITE));
+      new Capability(thread.get(), Capability::THREAD, cap_id, ZC_WRITE));
   return cap_id;
 }

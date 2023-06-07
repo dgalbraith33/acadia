@@ -2,12 +2,13 @@
 
 #include <stdint.h>
 
-#include "lib/shared_ptr.h"
+#include "lib/ref_counted.h"
+#include "lib/ref_ptr.h"
 
 // Forward decl due to cyclic dependency.
 class Process;
 
-class Thread {
+class Thread : public RefCounted<Thread> {
  public:
   enum State {
     UNSPECIFIED,
@@ -16,9 +17,8 @@ class Thread {
     RUNNABLE,
     FINISHED,
   };
-  static SharedPtr<Thread> RootThread(Process& root_proc);
-
-  Thread(Process& proc, uint64_t tid);
+  static RefPtr<Thread> RootThread(Process& root_proc);
+  static RefPtr<Thread> Create(Process& proc, uint64_t tid);
 
   uint64_t tid() const { return id_; };
   uint64_t pid() const;
@@ -40,6 +40,8 @@ class Thread {
   void Exit();
 
  private:
+  friend class MakeRefCountedFriend<Thread>;
+  Thread(Process& proc, uint64_t tid);
   // Special constructor for the root thread only.
   Thread(Process& proc) : process_(proc), id_(0) {}
   Process& process_;
