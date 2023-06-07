@@ -3,6 +3,8 @@
 #include "boot/boot_info.h"
 #include "debug/debug.h"
 
+#define K_PHYS_DEBUG 0
+
 namespace phys_mem {
 namespace {
 
@@ -29,7 +31,9 @@ class PhysicalMemoryManager {
         if (base == gBootstrap.init_page) {
           base = gBootstrap.next_page;
           uint64_t bootstrap_used = gBootstrap.next_page - gBootstrap.init_page;
+#if K_PHYS_DEBUG
           dbgln("[PMM] Taking over from bootstrap, used: %x", bootstrap_used);
+#endif
           size -= bootstrap_used;
         }
         AddMemoryRegion(base, size);
@@ -109,7 +113,9 @@ uint64_t AllocatePage() {
     panic("No Bootstrap Memory Manager");
   }
 
+#if K_PHYS_DEBUG
   dbgln("[PMM] Boostrap Alloc!");
+#endif
 
   uint64_t page = gBootstrap.next_page;
   if (page == gBootstrap.max_page) {

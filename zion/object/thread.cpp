@@ -6,6 +6,8 @@
 #include "object/process.h"
 #include "scheduler/scheduler.h"
 
+#define K_THREAD_DEBUG 0
+
 namespace {
 
 extern "C" void jump_user_space(uint64_t rip, uint64_t rsp, uint64_t arg1,
@@ -53,14 +55,18 @@ void Thread::Start(uint64_t entry, uint64_t arg1, uint64_t arg2) {
 }
 
 void Thread::Init() {
+#if K_THREAD_DEBUG
   dbgln("Thread start.", pid(), id_);
+#endif
   uint64_t rsp = process_.vmas()->AllocateUserStack();
   SetRsp0(rsp0_start_);
   jump_user_space(rip_, rsp, arg1_, arg2_);
 }
 
 void Thread::Exit() {
-  dbgln("Exiting", pid(), id_);
+#if K_THREAD_DEBUG
+  dbgln("Exiting");
+#endif
   state_ = FINISHED;
   process_.CheckState();
   gScheduler->Yield();

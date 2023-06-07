@@ -4,10 +4,14 @@
 #include "debug/debug.h"
 #include "memory/physical_memory.h"
 
+#define K_MEM_DEBUG 0
+
 MemoryObject::MemoryObject(uint64_t size) : size_(size) {
   if ((size & 0xFFF) != 0) {
     size_ = (size & ~0xFFF) + 0x1000;
+#if K_MEM_DEBUG
     dbgln("MemoryObject: aligned %x to %x", size, size_);
+#endif
   }
   // FIXME: Do this lazily.
   uint64_t num_pages = size_ / 0x1000;
@@ -56,7 +60,9 @@ uint64_t MemoryObject::PageNumberToPhysAddr(uint64_t page_num) {
   }
 
   if (*iter == 0) {
+#if K_MEM_DEBUG
     dbgln("Allocating page num %u for mem object", page_num);
+#endif
     *iter = phys_mem::AllocatePage();
   }
   return *iter;

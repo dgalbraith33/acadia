@@ -4,6 +4,8 @@
 #include "memory/paging_util.h"
 #include "memory/physical_memory.h"
 
+#define K_VMAS_DEBUG 0
+
 extern KernelStackManager* gKernelStackManager;
 
 RefPtr<AddressSpace> AddressSpace::ForRoot() {
@@ -50,6 +52,9 @@ uint64_t* AddressSpace::AllocateKernelStack() {
 }
 
 bool AddressSpace::HandlePageFault(uint64_t vaddr) {
+#if K_VMAS_DEBUG
+  dbgln("[VMAS] Page Fault!");
+#endif
   MemoryMapping* mapping = GetMemoryMappingForAddr(vaddr);
   if (mapping == nullptr) {
     return false;
@@ -60,7 +65,9 @@ bool AddressSpace::HandlePageFault(uint64_t vaddr) {
     dbgln("WARN: Memory object returned invalid physical addr.");
     return false;
   }
-  dbgln("Mapping P(%m) at V(%m)", physical_addr, vaddr);
+#if K_VMAS_DEBUG
+  dbgln("[VMAS] Mapping P(%m) at V(%m)", physical_addr, vaddr);
+#endif
   MapPage(cr3_, vaddr, physical_addr);
   return true;
 }

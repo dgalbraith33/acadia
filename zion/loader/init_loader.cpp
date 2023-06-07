@@ -9,6 +9,8 @@
 #include "object/thread.h"
 #include "scheduler/process_manager.h"
 
+#define K_INIT_DEBUG 0
+
 namespace {
 
 typedef struct {
@@ -54,16 +56,20 @@ typedef struct {
 
 uint64_t LoadElfProgram(Process& dest_proc, uint64_t base, uint64_t offset) {
   Elf64Header* header = reinterpret_cast<Elf64Header*>(base);
+#if K_INIT_DEBUG
   dbgln("phoff: %u phnum: %u", header->phoff, header->phnum);
+#endif
   Elf64ProgramHeader* programs =
       reinterpret_cast<Elf64ProgramHeader*>(base + header->phoff);
   for (uint64_t i = 0; i < header->phnum; i++) {
     Elf64ProgramHeader& program = programs[i];
+#if K_INIT_DEBUG
     dbgln(
         "prog: type: %u, flags: %u, offset: %u\n  vaddr: %m, paddr: %m\n  "
         "filesz: %x, memsz: %x, align: %x",
         program.type, program.flags, program.offset, program.vaddr,
         program.paddr, program.filesz, program.memsz, program.align);
+#endif
     auto mem_obj = MakeRefCounted<MemoryObject>(program.filesz);
     mem_obj->CopyBytesToObject(base + program.offset, program.filesz);
     dest_proc.vmas()->MapInMemoryObject(program.vaddr, mem_obj);
@@ -86,12 +92,14 @@ bool streq(const char* a, const char* b) {
 }
 
 void DumpModules() {
+#if K_INIT_DEBUG
   const limine_module_response& resp = boot::GetModules();
   dbgln("[boot] Dumping bootloader modules.");
   for (uint64_t i = 0; i < resp.module_count; i++) {
     const limine_file& file = *resp.modules[i];
     dbgln("    %s,%m,%x", file.path, file.address, file.size);
   }
+#endif
 }
 
 const limine_file& GetInitProgram(const char* path) {
