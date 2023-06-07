@@ -18,7 +18,7 @@ class Thread {
   };
   static SharedPtr<Thread> RootThread(Process& root_proc);
 
-  Thread(Process& proc, uint64_t tid, uint64_t entry);
+  Thread(Process& proc, uint64_t tid);
 
   uint64_t tid() const { return id_; };
   uint64_t pid() const;

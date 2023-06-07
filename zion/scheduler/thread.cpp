@@ -24,8 +24,7 @@ SharedPtr<Thread> Thread::RootThread(Process& root_proc) {
   return new Thread(root_proc);
 }
 
-Thread::Thread(Process& proc, uint64_t tid, uint64_t entry)
-    : process_(proc), id_(tid), rip_(entry) {
+Thread::Thread(Process& proc, uint64_t tid) : process_(proc), id_(tid) {
   uint64_t* stack_ptr = proc.vmm().AllocateKernelStack();
   // 0: rip
   *(stack_ptr) = reinterpret_cast<uint64_t>(thread_init);

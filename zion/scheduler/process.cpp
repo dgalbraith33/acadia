@@ -27,7 +27,7 @@ Process::Process() : id_(gNextId++), state_(RUNNING) {
 }
 
 SharedPtr<Thread> Process::CreateThread() {
-  SharedPtr<Thread> thread{new Thread(*this, next_thread_id_++, 0)};
+  SharedPtr<Thread> thread{new Thread(*this, next_thread_id_++)};
   threads_.PushBack(thread);
   return thread;
 }
