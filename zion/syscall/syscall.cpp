@@ -71,7 +71,7 @@ uint64_t ProcessSpawnElf(ZProcessSpawnElfReq* req) {
     return ZE_DENIED;
   }
   dbgln("Proc spawn: %u:%u", req->elf_base, req->elf_size);
-  SharedPtr<Process> proc = MakeShared<Process>();
+  RefPtr<Process> proc = MakeRefCounted<Process>();
   gProcMan->InsertProcess(proc);
   uint64_t entry = LoadElfProgram(*proc, req->elf_base, req->elf_size);
   proc->CreateThread()->Start(entry, 0, 0);

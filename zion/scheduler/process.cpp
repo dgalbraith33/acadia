@@ -13,13 +13,14 @@ static uint64_t gNextId = 1;
 
 }
 
-SharedPtr<Process> Process::RootProcess() {
-  SharedPtr<Process> proc(new Process(0));
+RefPtr<Process> Process::RootProcess() {
+  RefPtr<Process> proc = MakeRefCounted<Process>(0);
   proc->threads_.PushBack(Thread::RootThread(*proc));
   proc->next_thread_id_ = 1;
 
   return proc;
 }
+RefPtr<Process> Process::Create() { return MakeRefCounted<Process>(); }
 
 Process::Process() : id_(gNextId++), state_(RUNNING) {
   caps_.PushBack(new Capability(this, Capability::PROCESS, Z_INIT_PROC_SELF,

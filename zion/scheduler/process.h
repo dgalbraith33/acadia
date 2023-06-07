@@ -4,6 +4,7 @@
 
 #include "capability/capability.h"
 #include "lib/linked_list.h"
+#include "lib/ref_counted.h"
 #include "lib/ref_ptr.h"
 #include "lib/shared_ptr.h"
 #include "memory/virtual_memory.h"
@@ -11,7 +12,7 @@
 // Forward decl due to cyclic dependency.
 class Thread;
 
-class Process {
+class Process : public RefCounted<Process> {
  public:
   enum State {
     UNSPECIFIED,
@@ -19,8 +20,8 @@ class Process {
     RUNNING,
     FINISHED,
   };
-  static SharedPtr<Process> RootProcess();
-  Process();
+  static RefPtr<Process> RootProcess();
+  static RefPtr<Process> Create();
 
   uint64_t id() const { return id_; }
   VirtualMemory& vmm() { return vmm_; }
@@ -37,6 +38,8 @@ class Process {
   State GetState() { return state_; }
 
  private:
+  friend class MakeRefCountedFriend<Process>;
+  Process();
   Process(uint64_t id) : id_(id), vmm_(VirtualMemory::ForRoot()) {}
   uint64_t id_;
   VirtualMemory vmm_;

@@ -2,6 +2,7 @@
 
 #include "boot/boot_info.h"
 #include "debug/debug.h"
+#include "lib/ref_ptr.h"
 #include "loader/elf_loader.h"
 #include "memory/paging_util.h"
 #include "scheduler/process.h"
@@ -49,7 +50,7 @@ void LoadInitProgram() {
   const limine_file& init_prog = GetInitProgram("/sys/test");
   const limine_file& prog2 = GetInitProgram("/sys/test2");
 
-  SharedPtr<Process> proc = MakeShared<Process>();
+  RefPtr<Process> proc = MakeRefCounted<Process>();
   gProcMan->InsertProcess(proc);
 
   uint64_t entry = LoadElfProgram(
