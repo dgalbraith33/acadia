@@ -107,7 +107,7 @@ const limine_file& GetInitProgram(const char* path) {
 
 void LoadInitProgram() {
   DumpModules();
-  const limine_file& init_prog = GetInitProgram("/sys/test");
+  const limine_file& init_prog = GetInitProgram("/sys/yellowstone");
 
   RefPtr<Process> proc = Process::Create();
   gProcMan->InsertProcess(proc);

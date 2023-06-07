@@ -21,7 +21,7 @@ set(QEMU_CMD qemu-system-x86_64 -d guest_errors -m 1G -serial stdio -hda disk.im
 add_custom_command(
   OUTPUT disk.img
   COMMAND sudo sh ../scripts/build_image.sh disk.img
-  DEPENDS zion test test2
+  DEPENDS zion yellowstone test2
   USES_TERMINAL
 )
 

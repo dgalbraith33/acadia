@@ -37,7 +37,7 @@ cp /usr/share/limine/limine.sys efi/
 cp ../zion/boot/limine.cfg efi/
 cp zion/zion efi/
 mkdir -p efi/sys
-cp sys/test efi/sys/test
+cp sys/yellowstone/yellowstone efi/sys/yellowstone
 cp sys/test2 efi/sys/test2
 
 chown drew:drew $1
