@@ -15,12 +15,12 @@ add_executable(zion
   memory/physical_memory.cpp
   memory/user_stack_manager.cpp
   memory/virtual_memory.cpp
+  object/process.cpp
+  object/thread.cpp
   scheduler/context_switch.s
   scheduler/jump_user_space.s
-  scheduler/process.cpp
   scheduler/process_manager.cpp
   scheduler/scheduler.cpp
-  scheduler/thread.cpp
   syscall/syscall.cpp
   syscall/syscall_enter.s
   zion.cpp)

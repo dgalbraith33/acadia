@@ -1,7 +1,7 @@
 #pragma once
 
-#include "scheduler/process.h"
-#include "scheduler/thread.h"
+#include "object/process.h"
+#include "object/thread.h"
 
 class Scheduler {
  public:

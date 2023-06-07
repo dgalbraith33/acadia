@@ -1,7 +1,7 @@
 #include "capability/capability.h"
 
-#include "scheduler/process.h"
-#include "scheduler/thread.h"
+#include "object/process.h"
+#include "object/thread.h"
 
 template <>
 Process& Capability::obj<Process>() {

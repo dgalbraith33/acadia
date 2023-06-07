@@ -2,7 +2,7 @@
 
 #include "lib/linked_list.h"
 #include "lib/ref_ptr.h"
-#include "scheduler/process.h"
+#include "object/process.h"
 
 class ProcessManager {
  public:

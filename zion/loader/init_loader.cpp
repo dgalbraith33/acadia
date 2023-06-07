@@ -5,9 +5,9 @@
 #include "lib/ref_ptr.h"
 #include "loader/elf_loader.h"
 #include "memory/paging_util.h"
-#include "scheduler/process.h"
+#include "object/process.h"
+#include "object/thread.h"
 #include "scheduler/process_manager.h"
-#include "scheduler/thread.h"
 
 namespace {
 

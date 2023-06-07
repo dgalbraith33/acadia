@@ -1,11 +1,11 @@
-#include "scheduler/process.h"
+#include "object/process.h"
 
 #include "debug/debug.h"
 #include "include/zcall.h"
 #include "memory/paging_util.h"
 #include "memory/physical_memory.h"
+#include "object/thread.h"
 #include "scheduler/scheduler.h"
-#include "scheduler/thread.h"
 
 namespace {
 

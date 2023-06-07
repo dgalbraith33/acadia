@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include "scheduler/process.h"
+#include "object/process.h"
 
 void InitializePml4(uint64_t pml4_physical_addr);
 
