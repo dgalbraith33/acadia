@@ -1,6 +1,7 @@
 #include <mammoth/channel.h>
 #include <mammoth/debug.h>
 #include <mammoth/thread.h>
+#include <stdlib.h>
 
 void thread_entry(void* a) {
   dbgln("In thread");
@@ -18,7 +19,7 @@ int main(uint64_t bootstrap_cap) {
   Thread t2(thread_entry, b);
 
   uint64_t size = 10;
-  char buff[10];
+  char* buff = (char*)malloc(size);
   Channel c1;
   c1.adopt_cap(bootstrap_cap);
   check(c1.ReadStr(buff, &size));
