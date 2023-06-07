@@ -1,0 +1,5 @@
+/* vim: syntax=cpp */
+
+#pragma once
+
+#include <stdint.h>

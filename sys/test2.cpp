@@ -19,7 +19,7 @@ int main(uint64_t bootstrap_cap) {
   Thread t2(thread_entry, b);
 
   uint64_t size = 10;
-  char* buff = (char*)malloc(size);
+  char* buff = new char[size];
   Channel c1;
   c1.adopt_cap(bootstrap_cap);
   check(c1.ReadStr(buff, &size));

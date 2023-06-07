@@ -20,7 +20,7 @@ add_executable(test2
   test2.cpp)
 
 target_link_libraries(test2
-  libc
+  libcxx
   mammoth_lib)
 
 set_target_properties(test2
