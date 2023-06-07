@@ -40,6 +40,9 @@ extern "C" void zion() {
   dbgln("[boot] Loading sys init program.");
   LoadInitProgram();
 
+  dbgln("[boot] Allocs during boot:");
+  heap.DumpDistribution();
+
   dbgln("[boot] Init finished, yielding.");
   gScheduler->Enable();
   gScheduler->Yield();

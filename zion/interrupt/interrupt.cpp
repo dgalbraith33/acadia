@@ -4,6 +4,7 @@
 
 #include "common/port.h"
 #include "debug/debug.h"
+#include "memory/kernel_heap.h"
 #include "scheduler/scheduler.h"
 
 #define IDT_INTERRUPT_GATE 0x8E
@@ -132,6 +133,9 @@ extern "C" void isr_timer();
 extern "C" void interrupt_timer(InterruptFrame*) {
   cnt++;
   if (cnt % 20 == 0) {
+    if (cnt == 20) {
+      KernelHeap::DumpDistribution();
+    }
     dbgln("timer: %us", cnt * 50 / 1000);
   }
   outb(PIC1_COMMAND, PIC_EOI);
