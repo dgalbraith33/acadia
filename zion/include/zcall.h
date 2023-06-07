@@ -16,7 +16,6 @@
 #define ZC_PROC_SPAWN_THREAD 0x101
 
 #define Z_INIT_PROC_SELF 0x1
-#define Z_INIT_AS_SELF 0x2
 
 // Thread Calls.
 #define Z_THREAD_CREATE 0x10
@@ -27,7 +26,11 @@
 #define Z_ADDRESS_SPACE_MAP 0x21
 #define Z_ADDRESS_SPACE_UNMAP 0x22
 
+#define Z_INIT_AS_SELF 0x20
+
 #define Z_MEMORY_OBJECT_CREATE 0x30
+
+#define Z_INIT_BOOT_VMMO 0x31
 
 // Debugging Calls.
 #define Z_DEBUG_PRINT 0x10000000

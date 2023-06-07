@@ -33,6 +33,8 @@ class Process : public KernelObject {
   uint64_t AddCapability(const RefPtr<Process>& p);
   uint64_t AddCapability(const RefPtr<AddressSpace>& as);
   uint64_t AddCapability(const RefPtr<MemoryObject>& mo);
+
+  void AddCapability(uint64_t cap_id, const RefPtr<MemoryObject>& mo);
   // Checks the state of all child threads and transitions to
   // finished if all have finished.
   void CheckState();

@@ -2,6 +2,7 @@
 
 #include "boot/boot_info.h"
 #include "debug/debug.h"
+#include "include/zcall.h"
 #include "lib/ref_ptr.h"
 #include "memory/paging_util.h"
 #include "object/process.h"
@@ -107,7 +108,6 @@ const limine_file& GetInitProgram(const char* path) {
 void LoadInitProgram() {
   DumpModules();
   const limine_file& init_prog = GetInitProgram("/sys/test");
-  const limine_file& prog2 = GetInitProgram("/sys/test2");
 
   RefPtr<Process> proc = Process::Create();
   gProcMan->InsertProcess(proc);
@@ -115,9 +115,11 @@ void LoadInitProgram() {
   uint64_t entry = LoadElfProgram(
       *proc, reinterpret_cast<uint64_t>(init_prog.address), init_prog.size);
 
-  CopyIntoNonResidentProcess(reinterpret_cast<uint64_t>(prog2.address),
-                             prog2.size, *proc,
-                             proc->vmas()->GetNextMemMapAddr(prog2.size));
+  const limine_file& prog2 = GetInitProgram("/sys/test2");
+  RefPtr<MemoryObject> prog2_vmmo = MakeRefCounted<MemoryObject>(prog2.size);
+  prog2_vmmo->CopyBytesToObject(reinterpret_cast<uint64_t>(prog2.address),
+                                prog2.size);
+  proc->AddCapability(Z_INIT_BOOT_VMMO, prog2_vmmo);
 
   proc->CreateThread()->Start(entry, 0, 0);
 }

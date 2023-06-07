@@ -97,22 +97,6 @@ uint64_t CurrCr3() {
   return pml4_addr;
 }
 
-void CopyPageIntoNonResidentProcess(uint64_t base, uint64_t size,
-                                    Process& dest_proc, uint64_t dest_virt) {
-  if (size > 0x1000) {
-    panic("NR copy > 1 page");
-  }
-  if (dest_virt & 0xFFF) {
-    panic("NR copy to non page aligned");
-  }
-  uint64_t phys = AllocatePageIfNecessary(dest_virt, dest_proc.vmas()->cr3());
-  uint8_t* src = reinterpret_cast<uint8_t*>(base);
-  uint8_t* dest =
-      reinterpret_cast<uint8_t*>(phys + boot::GetHigherHalfDirectMap());
-  for (uint64_t i = 0; i < size; i++) {
-    dest[i] = src[i];
-  }
-}
 }  // namespace
 
 void InitializePml4(uint64_t pml4_physical_addr) {
@@ -167,10 +151,8 @@ void MapPage(uint64_t cr3, uint64_t vaddr, uint64_t paddr) {
   }
 }
 
-uint64_t AllocatePageIfNecessary(uint64_t addr, uint64_t cr3) {
-  if (cr3 == 0) {
-    cr3 = CurrCr3();
-  }
+uint64_t AllocatePageIfNecessary(uint64_t addr) {
+  uint64_t cr3 = CurrCr3();
   uint64_t phys = PagePhysIfResident(cr3, addr);
   if (phys) {
     return phys;
@@ -189,18 +171,5 @@ void EnsureResident(uint64_t addr, uint64_t size) {
   while (addr < max) {
     AllocatePageIfNecessary(addr);
     addr += 0x1000;
-  }
-}
-
-void CopyIntoNonResidentProcess(uint64_t base, uint64_t size,
-                                Process& dest_proc, uint64_t dest_virt) {
-  while (size > 0) {
-    uint64_t to_copy = size > 0x1000 ? 0x1000 : size;
-
-    CopyPageIntoNonResidentProcess(base, to_copy, dest_proc, dest_virt);
-
-    size -= to_copy;
-    base += 0x1000;
-    dest_virt += 0x1000;
   }
 }

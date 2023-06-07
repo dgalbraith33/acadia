@@ -99,3 +99,8 @@ uint64_t Process::AddCapability(const RefPtr<MemoryObject>& mo) {
       new Capability(mo, Capability::MEMORY_OBJECT, cap_id, ZC_WRITE));
   return cap_id;
 }
+
+void Process::AddCapability(uint64_t cap_id, const RefPtr<MemoryObject>& mo) {
+  caps_.PushBack(
+      new Capability(mo, Capability::MEMORY_OBJECT, cap_id, ZC_WRITE));
+}
