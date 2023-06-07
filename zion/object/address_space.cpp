@@ -30,6 +30,41 @@ uint64_t AddressSpace::GetNextMemMapAddr(uint64_t size) {
   return addr;
 }
 
+void AddressSpace::MapInMemoryObject(uint64_t vaddr,
+                                     const RefPtr<MemoryObject>& mem_obj) {
+  memory_mappings_.PushBack({.vaddr = vaddr, .mem_obj = mem_obj});
+}
+
 uint64_t* AddressSpace::AllocateKernelStack() {
   return gKernelStackManager->AllocateKernelStack();
+}
+
+bool AddressSpace::HandlePageFault(uint64_t vaddr) {
+  MemoryMapping* mapping = GetMemoryMappingForAddr(vaddr);
+  if (mapping == nullptr) {
+    return false;
+  }
+  uint64_t offset = vaddr - mapping->vaddr;
+  uint64_t physical_addr = mapping->mem_obj->PhysicalPageAtOffset(offset);
+  if (physical_addr == 0) {
+    dbgln("WARN: Memory object returned invalid physical addr.");
+    return false;
+  }
+  dbgln("Mapping P(%m) at V(%m)", physical_addr, vaddr);
+  MapPage(cr3_, vaddr, physical_addr);
+  return true;
+}
+
+AddressSpace::MemoryMapping* AddressSpace::GetMemoryMappingForAddr(
+    uint64_t vaddr) {
+  auto iter = memory_mappings_.begin();
+  while (iter != memory_mappings_.end()) {
+    if ((vaddr >= (*iter).vaddr) &&
+        (vaddr < ((*iter).vaddr + (*iter).mem_obj->size()))) {
+      return &(*iter);
+    }
+    ++iter;
+  }
+
+  return 0;
 }

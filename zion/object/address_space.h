@@ -2,8 +2,9 @@
 
 #include <stdint.h>
 
-#include "debug/debug.h"
+#include "lib/ref_ptr.h"
 #include "memory/user_stack_manager.h"
+#include "object/memory_object.h"
 
 // VirtualMemory class holds a memory space for an individual process.
 //
@@ -51,8 +52,15 @@ class AddressSpace {
   uint64_t AllocateUserStack();
   uint64_t GetNextMemMapAddr(uint64_t size);
 
+  // Maps in a memory object at a specific address.
+  // Note this is unsafe for now as it may clobber other mappings.
+  void MapInMemoryObject(uint64_t vaddr, const RefPtr<MemoryObject>& mem_obj);
+
   // Kernel Mappings.
   uint64_t* AllocateKernelStack();
+
+  // Returns true if the page fault has been resolved.
+  bool HandlePageFault(uint64_t vaddr);
 
  private:
   AddressSpace(uint64_t cr3) : cr3_(cr3) {}
@@ -60,4 +68,12 @@ class AddressSpace {
 
   UserStackManager user_stacks_;
   uint64_t next_memmap_addr_ = 0x20'00000000;
+
+  struct MemoryMapping {
+    uint64_t vaddr;
+    RefPtr<MemoryObject> mem_obj;
+  };
+  LinkedList<MemoryMapping> memory_mappings_;
+
+  MemoryMapping* GetMemoryMappingForAddr(uint64_t vaddr);
 };

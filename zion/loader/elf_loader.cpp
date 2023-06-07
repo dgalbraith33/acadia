@@ -57,11 +57,12 @@ uint64_t LoadElfProgram(Process& dest_proc, uint64_t base, uint64_t offset) {
     Elf64ProgramHeader& program = programs[i];
     dbgln(
         "prog: type: %u, flags: %u, offset: %u\n  vaddr: %m, paddr: %m\n  "
-        "filesz: %u, memsz: %u, align: %u",
+        "filesz: %x, memsz: %x, align: %x",
         program.type, program.flags, program.offset, program.vaddr,
         program.paddr, program.filesz, program.memsz, program.align);
-    CopyIntoNonResidentProcess(base + program.offset, program.filesz, dest_proc,
-                               program.vaddr);
+    auto mem_obj = MakeRefCounted<MemoryObject>(program.filesz);
+    mem_obj->CopyBytesToObject(base + program.offset, program.filesz);
+    dest_proc.vmm().MapInMemoryObject(program.vaddr, mem_obj);
   }
   return header->entry;
 }

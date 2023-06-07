@@ -89,45 +89,6 @@ uint64_t PagePhysIfResident(uint64_t cr3, uint64_t virt) {
   return *pt_entry & ~0xFFF;
 }
 
-uint64_t MapPage(uint64_t cr3, uint64_t virt) {
-  uint64_t access_bits = PRESENT_BIT | READ_WRITE_BIT;
-  uint64_t higher_half = 0xffff8000'00000000;
-  if ((virt & higher_half) != higher_half) {
-    access_bits |= USER_MODE_BIT;
-  }
-
-  uint64_t* pml4_entry = Pml4Entry(cr3, virt);
-  if (!(*pml4_entry & PRESENT_BIT)) {
-    uint64_t page = phys_mem::AllocatePage();
-    *pml4_entry = page | access_bits;
-    ZeroOutPage(PageDirectoryPointerEntry(*pml4_entry, virt));
-  }
-  uint64_t* pdp_entry = PageDirectoryPointerEntry(*pml4_entry, virt);
-  if (!(*pdp_entry & PRESENT_BIT)) {
-    uint64_t page = phys_mem::AllocatePage();
-    *pdp_entry = page | access_bits;
-    ZeroOutPage(PageDirectoryEntry(*pdp_entry, virt));
-  }
-  uint64_t* pd_entry = PageDirectoryEntry(*pdp_entry, virt);
-  if (!(*pd_entry & PRESENT_BIT)) {
-    uint64_t page = phys_mem::AllocatePage();
-    *(pd_entry) = page | access_bits;
-    ZeroOutPage(PageTableEntry(*pd_entry, virt));
-  }
-
-  uint64_t* pt_entry = PageTableEntry(*pd_entry, virt);
-  if (!(*pt_entry & PRESENT_BIT)) {
-    uint64_t phys = phys_mem::AllocatePage();
-    *pt_entry = PageAlign(phys) | access_bits;
-    ZeroOutPage(reinterpret_cast<uint64_t*>(boot::GetHigherHalfDirectMap() +
-                                            PageAlign(phys)));
-    return phys;
-  } else {
-    panic("Page already allocated.");
-    return 0;
-  }
-}
-
 uint64_t Pml4Index(uint64_t addr) { return (addr >> PML_OFFSET) & 0x1FF; }
 
 uint64_t CurrCr3() {
@@ -170,6 +131,42 @@ void InitializePml4(uint64_t pml4_physical_addr) {
   pml4_virtual[Pml4Index(hhdm)] = *Pml4Entry(curr_cr3, hhdm);
 }
 
+void MapPage(uint64_t cr3, uint64_t vaddr, uint64_t paddr) {
+  vaddr = PageAlign(vaddr);
+  paddr = PageAlign(paddr);
+  uint64_t access_bits = PRESENT_BIT | READ_WRITE_BIT;
+  uint64_t higher_half = 0xffff8000'00000000;
+  if ((vaddr & higher_half) != higher_half) {
+    access_bits |= USER_MODE_BIT;
+  }
+
+  uint64_t* pml4_entry = Pml4Entry(cr3, vaddr);
+  if (!(*pml4_entry & PRESENT_BIT)) {
+    uint64_t page = phys_mem::AllocatePage();
+    *pml4_entry = page | access_bits;
+    ZeroOutPage(PageDirectoryPointerEntry(*pml4_entry, vaddr));
+  }
+  uint64_t* pdp_entry = PageDirectoryPointerEntry(*pml4_entry, vaddr);
+  if (!(*pdp_entry & PRESENT_BIT)) {
+    uint64_t page = phys_mem::AllocatePage();
+    *pdp_entry = page | access_bits;
+    ZeroOutPage(PageDirectoryEntry(*pdp_entry, vaddr));
+  }
+  uint64_t* pd_entry = PageDirectoryEntry(*pdp_entry, vaddr);
+  if (!(*pd_entry & PRESENT_BIT)) {
+    uint64_t page = phys_mem::AllocatePage();
+    *(pd_entry) = page | access_bits;
+    ZeroOutPage(PageTableEntry(*pd_entry, vaddr));
+  }
+
+  uint64_t* pt_entry = PageTableEntry(*pd_entry, vaddr);
+  if (!(*pt_entry & PRESENT_BIT)) {
+    *pt_entry = paddr | access_bits;
+  } else {
+    panic("Page already allocated.");
+  }
+}
+
 uint64_t AllocatePageIfNecessary(uint64_t addr, uint64_t cr3) {
   if (cr3 == 0) {
     cr3 = CurrCr3();
@@ -178,7 +175,12 @@ uint64_t AllocatePageIfNecessary(uint64_t addr, uint64_t cr3) {
   if (phys) {
     return phys;
   }
-  return MapPage(cr3, addr);
+  phys = phys_mem::AllocatePage();
+  // FIXME: Maybe move this to the physical memory allocator.
+  ZeroOutPage(
+      reinterpret_cast<uint64_t*>(boot::GetHigherHalfDirectMap() + phys));
+  MapPage(cr3, addr, phys);
+  return phys;
 }
 
 void EnsureResident(uint64_t addr, uint64_t size) {

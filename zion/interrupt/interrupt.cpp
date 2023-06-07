@@ -86,7 +86,15 @@ extern "C" void interrupt_protection_fault(InterruptFrame* frame) {
 
 extern "C" void isr_page_fault();
 extern "C" void interrupt_page_fault(InterruptFrame* frame) {
-  dbgln("Page Fault:");
+  dbgln("Page Fault - trying to resolve");
+  uint64_t cr2;
+  asm volatile("mov %%cr2, %0" : "=r"(cr2));
+
+  if (gScheduler->CurrentProcess().vmm().HandlePageFault(cr2)) {
+    dbgln("Handled");
+    return;
+  }
+  dbgln("Unable to handle:");
   uint64_t err = frame->error_code;
   if (err & 0x1) {
     dbgln("Page Protection");
@@ -100,12 +108,14 @@ extern "C" void interrupt_page_fault(InterruptFrame* frame) {
     dbgln("Read");
   }
 
-  if (err & 0x8) {
+  if (err & 0x4) {
+    dbgln("User Space");
+  }
+
+  if (err & 0x10) {
     dbgln("Instruction Fetch");
   }
 
-  uint64_t cr2;
-  asm volatile("mov %%cr2, %0" : "=r"(cr2));
   dbgln("rip:  %m", frame->rip);
   dbgln("addr: %m", cr2);
   panic("PF");
