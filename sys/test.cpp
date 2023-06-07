@@ -1,6 +1,5 @@
-
-#include "zcall.h"
-#include "zerrors.h"
+#include <zcall.h>
+#include <zerrors.h>
 
 constexpr uint64_t prog2 = 0x00000020'00000000;
 

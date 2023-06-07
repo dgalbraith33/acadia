@@ -1,6 +1,6 @@
 #include "include/mammoth/thread.h"
 
-#include "zcall.h"
+#include <zcall.h>
 
 namespace {
 

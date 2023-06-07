@@ -1,5 +1,5 @@
-#include "mammoth/debug.h"
-#include "mammoth/thread.h"
+#include <mammoth/debug.h>
+#include <mammoth/thread.h>
 
 #define CHECK(expr)       \
   {                       \
