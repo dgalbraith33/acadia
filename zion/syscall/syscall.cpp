@@ -5,7 +5,6 @@
 #include "debug/debug.h"
 #include "include/zcall.h"
 #include "include/zerrors.h"
-#include "loader/elf_loader.h"
 #include "object/process.h"
 #include "scheduler/process_manager.h"
 #include "scheduler/scheduler.h"

@@ -7,7 +7,6 @@ add_executable(zion
   interrupt/interrupt.cpp
   interrupt/interrupt_enter.s
   interrupt/timer.cpp
-  loader/elf_loader.cpp
   loader/init_loader.cpp
   memory/kernel_heap.cpp
   memory/kernel_stack_manager.cpp

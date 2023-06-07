@@ -2,7 +2,6 @@
 
 #include "common/gdt.h"
 #include "debug/debug.h"
-#include "loader/elf_loader.h"
 #include "memory/paging_util.h"
 #include "object/process.h"
 #include "scheduler/scheduler.h"
