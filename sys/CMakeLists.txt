@@ -1,5 +1,5 @@
 
-set(_COMPILE_FLAGS "-ffreestanding -mgeneral-regs-only")
+set(_COMPILE_FLAGS "-ffreestanding -fno-exceptions -mgeneral-regs-only")
 set(_LINK_FLAGS "-nostdlib")
 set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
 
