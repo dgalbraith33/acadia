@@ -12,10 +12,7 @@ target_include_directories(mammoth_lib
 target_link_libraries(mammoth_lib
   zion_lib)
 
-set(_COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -c -ffreestanding -fno-rtti -fno-exceptions -nostdlib -mabi=sysv -mgeneral-regs-only")
-set(_LINK_FLAGS "-nostdlib")
-
 set_target_properties(mammoth_lib PROPERTIES
-  COMPILE_FLAGS "${_COMPILE_FLAGS}"
-  LINK_FLAGS "${CMAKE_EXE_LINK_FLAGS} ${_LINK_FLAGS}"
+  COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${BASE_COMPILE_FLAGS}"
+  LINK_FLAGS "${CMAKE_EXE_LINK_FLAGS} ${BASE_LINK_FLAGS}"
   )

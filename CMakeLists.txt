@@ -9,6 +9,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 
+set(BASE_COMPILE_FLAGS "-ffreestanding -fno-exceptions -mgeneral-regs-only")
+set(BASE_LINK_FLAGS "-nostdlib")
+
 add_subdirectory(zion)
 add_subdirectory(lib)
 add_subdirectory(sys)
