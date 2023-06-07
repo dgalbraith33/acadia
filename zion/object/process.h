@@ -6,7 +6,7 @@
 #include "lib/linked_list.h"
 #include "lib/ref_ptr.h"
 #include "lib/shared_ptr.h"
-#include "memory/virtual_memory.h"
+#include "object/address_space.h"
 
 // Forward decl due to cyclic dependency.
 class Thread;
@@ -23,7 +23,7 @@ class Process : public KernelObject {
   static RefPtr<Process> Create();
 
   uint64_t id() const { return id_; }
-  VirtualMemory& vmm() { return vmm_; }
+  AddressSpace& vmm() { return vmm_; }
 
   RefPtr<Thread> CreateThread();
   RefPtr<Thread> GetThread(uint64_t tid);
@@ -39,9 +39,9 @@ class Process : public KernelObject {
  private:
   friend class MakeRefCountedFriend<Process>;
   Process();
-  Process(uint64_t id) : id_(id), vmm_(VirtualMemory::ForRoot()) {}
+  Process(uint64_t id) : id_(id), vmm_(AddressSpace::ForRoot()) {}
   uint64_t id_;
-  VirtualMemory vmm_;
+  AddressSpace vmm_;
   State state_;
 
   uint64_t next_thread_id_ = 0;

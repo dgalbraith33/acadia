@@ -23,7 +23,7 @@
 // 0xFFFFFFFF 40000000 - 0xFFFFFFFF 7FFFFFFF : KERNEL_HEAP (1 GiB)
 // 0xFFFFFFFF 80000000 - 0xFFFFFFFF 80FFFFFF : KERNEL_CODE (16 MiB)
 // 0xFFFFFFFF 90000000 - 0xFFFFFFFF 9FFFFFFF : KERNEL_STACK (256 MiB)
-class VirtualMemory {
+class AddressSpace {
  public:
   enum MemoryType {
     UNSPECIFIED,
@@ -39,11 +39,11 @@ class VirtualMemory {
     KERNEL_STACK,
   };
 
-  static VirtualMemory ForRoot();
+  static AddressSpace ForRoot();
 
-  VirtualMemory();
-  VirtualMemory(const VirtualMemory&) = delete;
-  VirtualMemory(VirtualMemory&&) = delete;
+  AddressSpace();
+  AddressSpace(const AddressSpace&) = delete;
+  AddressSpace(AddressSpace&&) = delete;
 
   uint64_t cr3() { return cr3_; }
 
@@ -55,7 +55,7 @@ class VirtualMemory {
   uint64_t* AllocateKernelStack();
 
  private:
-  VirtualMemory(uint64_t cr3) : cr3_(cr3) {}
+  AddressSpace(uint64_t cr3) : cr3_(cr3) {}
   uint64_t cr3_ = 0;
 
   UserStackManager user_stacks_;
