@@ -2,13 +2,13 @@
 
 #include <stdint.h>
 
-#include "lib/ref_counted.h"
 #include "lib/ref_ptr.h"
+#include "object/kernel_object.h"
 
 // Forward decl due to cyclic dependency.
 class Process;
 
-class Thread : public RefCounted<Thread> {
+class Thread : public KernelObject {
  public:
   enum State {
     UNSPECIFIED,

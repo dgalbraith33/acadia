@@ -4,7 +4,6 @@
 
 #include "capability/capability.h"
 #include "lib/linked_list.h"
-#include "lib/ref_counted.h"
 #include "lib/ref_ptr.h"
 #include "lib/shared_ptr.h"
 #include "memory/virtual_memory.h"
@@ -12,7 +11,7 @@
 // Forward decl due to cyclic dependency.
 class Thread;
 
-class Process : public RefCounted<Process> {
+class Process : public KernelObject {
  public:
   enum State {
     UNSPECIFIED,
@@ -30,7 +29,7 @@ class Process : public RefCounted<Process> {
   RefPtr<Thread> GetThread(uint64_t tid);
 
   SharedPtr<Capability> GetCapability(uint64_t cid);
-  uint64_t AddCapability(RefPtr<Thread>& t);
+  uint64_t AddCapability(const RefPtr<Thread>& t);
   // Checks the state of all child threads and transitions to
   // finished if all have finished.
   void CheckState();

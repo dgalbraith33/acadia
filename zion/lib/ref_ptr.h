@@ -6,6 +6,9 @@ class RefPtr;
 template <typename T>
 RefPtr<T> AdoptPtr(T* ptr);
 
+template <typename T, typename U>
+RefPtr<T> StaticCastRefPtr(const RefPtr<U>& ref);
+
 template <typename T>
 class RefPtr {
  public:
@@ -37,6 +40,11 @@ class RefPtr {
     other.ptr_ = ptr;
     return *this;
   }
+
+  enum DontAdoptTag {
+    DontAdopt,
+  };
+  RefPtr(T* ptr, DontAdoptTag) : ptr_(ptr) { ptr->Acquire(); }
 
   T* get() const { return ptr_; };
   T& operator*() const { return *ptr_; }
@@ -73,4 +81,9 @@ RefPtr<T> MakeRefCounted(Args&&... args) {
 template <typename T>
 RefPtr<T> AdoptPtr(T* ptr) {
   return RefPtr(ptr);
+}
+
+template <typename T, typename U>
+RefPtr<T> StaticCastRefPtr(const RefPtr<U>& ref) {
+  return RefPtr(static_cast<T*>(ref.get()), RefPtr<T>::DontAdopt);
 }

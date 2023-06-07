@@ -50,7 +50,7 @@ void LoadInitProgram() {
   const limine_file& init_prog = GetInitProgram("/sys/test");
   const limine_file& prog2 = GetInitProgram("/sys/test2");
 
-  RefPtr<Process> proc = MakeRefCounted<Process>();
+  RefPtr<Process> proc = Process::Create();
   gProcMan->InsertProcess(proc);
 
   uint64_t entry = LoadElfProgram(

@@ -20,12 +20,15 @@ RefPtr<Process> Process::RootProcess() {
 
   return proc;
 }
-RefPtr<Process> Process::Create() { return MakeRefCounted<Process>(); }
-
-Process::Process() : id_(gNextId++), state_(RUNNING) {
-  caps_.PushBack(new Capability(this, Capability::PROCESS, Z_INIT_PROC_SELF,
-                                ZC_PROC_SPAWN_PROC | ZC_PROC_SPAWN_THREAD));
+RefPtr<Process> Process::Create() {
+  auto proc = MakeRefCounted<Process>();
+  proc->caps_.PushBack(
+      new Capability(proc, Capability::PROCESS, Z_INIT_PROC_SELF,
+                     ZC_PROC_SPAWN_PROC | ZC_PROC_SPAWN_THREAD));
+  return proc;
 }
+
+Process::Process() : id_(gNextId++), state_(RUNNING) {}
 
 RefPtr<Thread> Process::CreateThread() {
   RefPtr<Thread> thread = MakeRefCounted<Thread>(*this, next_thread_id_++);
@@ -65,12 +68,12 @@ SharedPtr<Capability> Process::GetCapability(uint64_t cid) {
     ++iter;
   }
   dbgln("Bad cap access");
+  dbgln("Num caps: %u", caps_.size());
   return {};
 }
 
-uint64_t Process::AddCapability(RefPtr<Thread>& thread) {
+uint64_t Process::AddCapability(const RefPtr<Thread>& thread) {
   uint64_t cap_id = next_cap_id_++;
-  caps_.PushBack(
-      new Capability(thread.get(), Capability::THREAD, cap_id, ZC_WRITE));
+  caps_.PushBack(new Capability(thread, Capability::THREAD, cap_id, ZC_WRITE));
   return cap_id;
 }
