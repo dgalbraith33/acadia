@@ -1,6 +1,7 @@
 
 add_library(c STATIC
   src/malloc.cpp
+  src/stdio.cpp
   )
 
 target_include_directories(c
