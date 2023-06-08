@@ -38,6 +38,6 @@ cp ../zion/boot/limine.cfg efi/
 cp zion/zion efi/
 mkdir -p efi/sys
 cp sys/yellowstone/yellowstone efi/sys/yellowstone
-cp sys/test2 efi/sys/test2
+cp sys/denali/denali efi/sys/denali
 
 chown drew:drew $1

@@ -123,7 +123,7 @@ void LoadInitProgram() {
   uint64_t entry = LoadElfProgram(
       *proc, reinterpret_cast<uint64_t>(init_prog.address), init_prog.size);
 
-  const limine_file& prog2 = GetInitProgram("/sys/test2");
+  const limine_file& prog2 = GetInitProgram("/sys/denali");
   RefPtr<MemoryObject> prog2_vmmo = MakeRefCounted<MemoryObject>(prog2.size);
   prog2_vmmo->CopyBytesToObject(reinterpret_cast<uint64_t>(prog2.address),
                                 prog2.size);
