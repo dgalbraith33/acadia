@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <zerrors.h>
 
-void dbgln(const char*);
+void dbgln(const char* fmt, ...);
 
 // Checks that the code is ok.
 // if not exits the process.

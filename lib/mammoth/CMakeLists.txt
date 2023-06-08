@@ -10,6 +10,7 @@ target_include_directories(mammoth_lib
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 target_link_libraries(mammoth_lib
+  c
   zion_lib)
 
 set_target_properties(mammoth_lib PROPERTIES
