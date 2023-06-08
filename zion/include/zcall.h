@@ -32,6 +32,8 @@
 
 #define Z_MEMORY_OBJECT_CREATE 0x30
 
+#define Z_TEMP_PCIE_CONFIG_OBJECT_CREATE 0x3F
+
 #define Z_INIT_BOOT_VMMO 0x31
 
 // IPC Calls
@@ -65,6 +67,8 @@ void ZThreadExit();
 [[nodiscard]] z_err_t ZAddressSpaceMap(uint64_t vmas_cap, uint64_t vmas_offset,
                                        uint64_t vmmo_cap, uint64_t* vaddr);
 [[nodiscard]] z_err_t ZMemoryObjectCreate(uint64_t size, uint64_t* vmmo_cap);
+[[nodiscard]] z_err_t ZTempPcieConfigObjectCreate(uint64_t* vmmo_cap,
+                                                  uint64_t* vmmo_size);
 
 [[nodiscard]] z_err_t ZChannelCreate(uint64_t* channel1, uint64_t* channel2);
 [[nodiscard]] z_err_t ZChannelSend(uint64_t chan_cap, uint64_t type,

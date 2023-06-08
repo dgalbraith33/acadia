@@ -83,6 +83,14 @@ z_err_t ZMemoryObjectCreate(uint64_t size, uint64_t* vmmo_cap) {
   return ret;
 }
 
+z_err_t ZTempPcieConfigObjectCreate(uint64_t* vmmo_cap, uint64_t* vmmo_size) {
+  ZTempPcieConfigObjectCreateResp resp;
+  z_err_t ret = SysCall2(Z_TEMP_PCIE_CONFIG_OBJECT_CREATE, 0, &resp);
+  *vmmo_cap = resp.vmmo_cap;
+  *vmmo_size = resp.vmmo_size;
+  return ret;
+}
+
 z_err_t ZChannelCreate(uint64_t* channel1, uint64_t* channel2) {
   ZChannelCreateResp resp;
   z_err_t ret = SysCall2(Z_CHANNEL_CREATE, 0, &resp);

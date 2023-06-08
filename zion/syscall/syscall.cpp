@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+#include "boot/acpi.h"
 #include "common/msr.h"
 #include "debug/debug.h"
 #include "include/zcall.h"
@@ -129,6 +130,20 @@ z_err_t MemoryObjectCreate(ZMemoryObjectCreateReq* req,
   return Z_OK;
 }
 
+z_err_t TempPcieConfigObjectCreate(ZTempPcieConfigObjectCreateResp* resp) {
+  auto& curr_proc = gScheduler->CurrentProcess();
+  uint64_t pci_base, pci_size;
+  dbgln("Getting config");
+  RET_ERR(GetPciExtendedConfiguration(&pci_base, &pci_size));
+  dbgln("Making obj");
+  auto vmmo_ref = MakeRefCounted<FixedMemoryObject>(pci_base, pci_size);
+  dbgln("Adding cap");
+  resp->vmmo_cap =
+      curr_proc.AddCapability(StaticCastRefPtr<MemoryObject>(vmmo_ref));
+  resp->vmmo_size = pci_size;
+  return Z_OK;
+}
+
 z_err_t ChannelCreate(ZChannelCreateResp* resp) {
   auto& proc = gScheduler->CurrentProcess();
   auto chan_pair = Channel::CreateChannelPair();
@@ -186,6 +201,9 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
       return MemoryObjectCreate(
           reinterpret_cast<ZMemoryObjectCreateReq*>(req),
           reinterpret_cast<ZMemoryObjectCreateResp*>(resp));
+    case Z_TEMP_PCIE_CONFIG_OBJECT_CREATE:
+      return TempPcieConfigObjectCreate(
+          reinterpret_cast<ZTempPcieConfigObjectCreateResp*>(resp));
     case Z_CHANNEL_CREATE:
       return ChannelCreate(reinterpret_cast<ZChannelCreateResp*>(resp));
     case Z_CHANNEL_SEND:

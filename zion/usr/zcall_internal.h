@@ -46,6 +46,11 @@ struct ZMemoryObjectCreateResp {
   uint64_t vmmo_cap;
 };
 
+struct ZTempPcieConfigObjectCreateResp {
+  uint64_t vmmo_cap;
+  uint64_t vmmo_size;
+};
+
 struct ZChannelCreateResp {
   uint64_t chan_cap1;
   uint64_t chan_cap2;

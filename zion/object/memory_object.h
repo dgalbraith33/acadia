@@ -20,11 +20,28 @@ class MemoryObject : public KernelObject {
 
   void CopyBytesToObject(uint64_t source, uint64_t length);
 
+ protected:
+  // Hacky to avoid linked_list creation.
+  MemoryObject(uint64_t size, bool) : size_(size) {}
+
  private:
   // Always stores the full page-aligned size.
   uint64_t size_;
 
-  uint64_t PageNumberToPhysAddr(uint64_t page_num);
+  virtual uint64_t PageNumberToPhysAddr(uint64_t page_num);
 
   LinkedList<uint64_t> phys_page_list_;
+};
+
+class FixedMemoryObject : public MemoryObject {
+ public:
+  FixedMemoryObject(uint64_t physical_addr, uint64_t size)
+      : MemoryObject(size, true), physical_addr_(physical_addr) {}
+
+ private:
+  uint64_t physical_addr_;
+
+  uint64_t PageNumberToPhysAddr(uint64_t page_num) override {
+    return physical_addr_ + (0x1000 * page_num);
+  }
 };
