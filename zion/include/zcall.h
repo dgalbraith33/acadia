@@ -31,6 +31,7 @@
 #define Z_INIT_VMAS_SELF 0x20
 
 #define Z_MEMORY_OBJECT_CREATE 0x30
+#define Z_MEMORY_OBJECT_CREATE_PHYSICAL 0x31
 
 #define Z_TEMP_PCIE_CONFIG_OBJECT_CREATE 0x3F
 
@@ -67,6 +68,8 @@ void ZThreadExit();
 [[nodiscard]] z_err_t ZAddressSpaceMap(uint64_t vmas_cap, uint64_t vmas_offset,
                                        uint64_t vmmo_cap, uint64_t* vaddr);
 [[nodiscard]] z_err_t ZMemoryObjectCreate(uint64_t size, uint64_t* vmmo_cap);
+[[nodiscard]] z_err_t ZMemoryObjectCreatePhysical(uint64_t paddr, uint64_t size,
+                                                  uint64_t* vmmo_cap);
 [[nodiscard]] z_err_t ZTempPcieConfigObjectCreate(uint64_t* vmmo_cap,
                                                   uint64_t* vmmo_size);
 

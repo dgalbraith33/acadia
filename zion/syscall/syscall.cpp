@@ -130,14 +130,20 @@ z_err_t MemoryObjectCreate(ZMemoryObjectCreateReq* req,
   return Z_OK;
 }
 
+z_err_t MemoryObjectCreatePhysical(ZMemoryObjectCreatePhysicalReq* req,
+                                   ZMemoryObjectCreateResp* resp) {
+  auto& curr_proc = gScheduler->CurrentProcess();
+  auto vmmo_ref = MakeRefCounted<FixedMemoryObject>(req->paddr, req->size);
+  resp->vmmo_cap =
+      curr_proc.AddCapability(StaticCastRefPtr<MemoryObject>(vmmo_ref));
+  return Z_OK;
+}
+
 z_err_t TempPcieConfigObjectCreate(ZTempPcieConfigObjectCreateResp* resp) {
   auto& curr_proc = gScheduler->CurrentProcess();
   uint64_t pci_base, pci_size;
-  dbgln("Getting config");
   RET_ERR(GetPciExtendedConfiguration(&pci_base, &pci_size));
-  dbgln("Making obj");
   auto vmmo_ref = MakeRefCounted<FixedMemoryObject>(pci_base, pci_size);
-  dbgln("Adding cap");
   resp->vmmo_cap =
       curr_proc.AddCapability(StaticCastRefPtr<MemoryObject>(vmmo_ref));
   resp->vmmo_size = pci_size;
@@ -200,6 +206,10 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
     case Z_MEMORY_OBJECT_CREATE:
       return MemoryObjectCreate(
           reinterpret_cast<ZMemoryObjectCreateReq*>(req),
+          reinterpret_cast<ZMemoryObjectCreateResp*>(resp));
+    case Z_MEMORY_OBJECT_CREATE_PHYSICAL:
+      return MemoryObjectCreatePhysical(
+          reinterpret_cast<ZMemoryObjectCreatePhysicalReq*>(req),
           reinterpret_cast<ZMemoryObjectCreateResp*>(resp));
     case Z_TEMP_PCIE_CONFIG_OBJECT_CREATE:
       return TempPcieConfigObjectCreate(

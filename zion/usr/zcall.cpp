@@ -73,12 +73,25 @@ z_err_t ZAddressSpaceMap(uint64_t vmas_cap, uint64_t vmas_offset,
   *vaddr = resp.vaddr;
   return ret;
 }
+
 z_err_t ZMemoryObjectCreate(uint64_t size, uint64_t* vmmo_cap) {
   ZMemoryObjectCreateReq req{
       .size = size,
   };
   ZMemoryObjectCreateResp resp;
   z_err_t ret = SysCall2(Z_MEMORY_OBJECT_CREATE, &req, &resp);
+  *vmmo_cap = resp.vmmo_cap;
+  return ret;
+}
+
+z_err_t ZMemoryObjectCreatePhysical(uint64_t paddr, uint64_t size,
+                                    uint64_t* vmmo_cap) {
+  ZMemoryObjectCreatePhysicalReq req{
+      .paddr = paddr,
+      .size = size,
+  };
+  ZMemoryObjectCreateResp resp;
+  z_err_t ret = SysCall2(Z_MEMORY_OBJECT_CREATE_PHYSICAL, &req, &resp);
   *vmmo_cap = resp.vmmo_cap;
   return ret;
 }
