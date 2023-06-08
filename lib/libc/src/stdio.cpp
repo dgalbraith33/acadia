@@ -4,7 +4,7 @@
 
 namespace {
 
-uint32_t num_chars(uint32_t num, uint8_t base) {
+uint32_t num_chars(uint64_t num, uint8_t base) {
   uint32_t width = 0;
   while (num > 0) {
     num /= base;
@@ -13,7 +13,7 @@ uint32_t num_chars(uint32_t num, uint8_t base) {
   return width;
 }
 
-int sprint_base(char *str, uint32_t num, uint32_t base) {
+int sprint_base(char *str, uint64_t num, uint32_t base) {
   uint32_t width = num_chars(num, base);
   if (width == 0) {
     *str = '0';
@@ -58,6 +58,32 @@ int vsprintf(char *str, const char *format, va_list arg) {
         *(str++) = *(format++);
         chars++;
         break;
+      case 'l': {
+        switch (*(++format)) {
+          case 'x': {
+            int width = sprint_base(str, va_arg(arg, uint64_t), 16);
+            if (width == -1) {
+              return -1;
+            }
+            chars += width;
+            str += width;
+            format++;
+            break;
+          }
+          case 'u': {
+            int width = sprint_base(str, va_arg(arg, uint64_t), 10);
+            if (width == -1) {
+              return -1;
+            }
+            chars += width;
+            str += width;
+            format++;
+            break;
+          }
+        }
+        break;
+      }
+
       case 'x': {
         int width = sprint_base(str, va_arg(arg, uint32_t), 16);
         if (width == -1) {
