@@ -14,9 +14,12 @@
   push %rcx  # (Return Address)
   push %rbx
   push %rax
+  mov %cr2, %rax
+  push %rax
 .endm
 
 .macro interrupt_exit
+  add $8, %rsp
   pop %rax
   pop %rbx
   pop %rcx
@@ -26,11 +29,11 @@
   pop %r8
   pop %r9
   pop %r10
-  pop %r10
-  pop %r10
-  pop %r10
-  pop %r10
-  pop %r10
+  pop %r11
+  pop %r12
+  pop %r13
+  pop %r14
+  pop %r15
   pop %rbp
 
   add $8, %rsp # Remove error code.

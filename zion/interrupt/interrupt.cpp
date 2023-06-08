@@ -43,6 +43,7 @@ InterruptDescriptor CreateDescriptor(void isr(void)) {
 }
 
 struct InterruptFrame {
+  uint64_t cr2;
   uint64_t rax;
   uint64_t rbx;
   uint64_t rcx;
@@ -90,14 +91,14 @@ extern "C" void interrupt_protection_fault(InterruptFrame* frame) {
 
 extern "C" void isr_page_fault();
 extern "C" void interrupt_page_fault(InterruptFrame* frame) {
-  uint64_t cr2;
-  asm volatile("mov %%cr2, %0" : "=r"(cr2));
-
-  if (gScheduler->CurrentProcess().vmas()->HandlePageFault(cr2)) {
-    return;
+  uint64_t err = frame->error_code;
+  if ((err & 0x1) == 0) {
+    // Page not present error may be resolveable.
+    if (gScheduler->CurrentProcess().vmas()->HandlePageFault(frame->cr2)) {
+      return;
+    }
   }
   dbgln("Unhandled Page Fault:");
-  uint64_t err = frame->error_code;
   if (err & 0x1) {
     dbgln("Page Protection");
   } else {
@@ -119,7 +120,7 @@ extern "C" void interrupt_page_fault(InterruptFrame* frame) {
   }
 
   dbgln("rip:  %m", frame->rip);
-  dbgln("addr: %m", cr2);
+  dbgln("addr: %m", frame->cr2);
   panic("PF");
 }
 
