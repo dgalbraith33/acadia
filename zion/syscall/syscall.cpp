@@ -138,7 +138,7 @@ z_err_t MemoryObjectCreatePhysical(ZMemoryObjectCreatePhysicalReq* req,
   auto& curr_proc = gScheduler->CurrentProcess();
   uint64_t paddr = req->paddr;
   if (paddr == 0) {
-    paddr = phys_mem::AllocateContinuous((req->size - 1 / 0x1000) + 1);
+    paddr = phys_mem::AllocateContinuous(((req->size - 1) / 0x1000) + 1);
   }
   auto vmmo_ref = MakeRefCounted<FixedMemoryObject>(paddr, req->size);
   resp->vmmo_cap =

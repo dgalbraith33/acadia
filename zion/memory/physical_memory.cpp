@@ -61,6 +61,9 @@ class PhysicalMemoryManager {
       front_ = front_->next;
       delete temp;
     }
+#if K_PHYS_DEBUG
+    dbgln("Single %m", page);
+#endif
     return page;
   }
   uint64_t AllocateContinuous(uint64_t num_pages) {
@@ -89,6 +92,9 @@ class PhysicalMemoryManager {
       front_ = front_->next;
       delete temp;
     }
+#if K_PHYS_DEBUG
+    dbgln("Continuous %m:%u", page, num_pages);
+#endif
     return page;
   }
   void FreePage(uint64_t page) { AddMemoryRegion(page, 0x1000); }

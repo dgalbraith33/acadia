@@ -24,7 +24,8 @@ KernelHeap::KernelHeap(uint64_t lower_bound, uint64_t upper_bound)
 
 void* KernelHeap::Allocate(uint64_t size) {
   if (next_addr_ + size >= upper_bound_) {
-    panic("Kernel Heap Overrun");
+    panic("Kernel Heap Overrun (next, size, max): %m, %x, %m", next_addr_, size,
+          upper_bound_);
   }
 #if K_HEAP_DEBUG
   RecordSize(size);
