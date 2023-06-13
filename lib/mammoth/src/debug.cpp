@@ -30,6 +30,7 @@ void check(uint64_t code) {
       return;
     case Z_ERR_UNIMPLEMENTED:
       dbgln("crash: UNIMPLEMENTED");
+      break;
     case Z_ERR_CAP_NOT_FOUND:
       dbgln("crash: missing capability");
       break;
