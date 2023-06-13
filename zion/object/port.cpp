@@ -1,5 +1,7 @@
 #include "object/port.h"
 
+#include "scheduler/scheduler.h"
+
 Port::Port() {}
 
 z_err_t Port::Write(const ZMessage& msg) {
@@ -21,16 +23,26 @@ z_err_t Port::Write(const ZMessage& msg) {
   for (uint64_t i = 0; i < msg.num_bytes; i++) {
     message.bytes[i] = msg.bytes[i];
   }
+
+  MutexHolder lock(mutex_);
   pending_messages_.PushBack(message);
+  if (blocked_threads_.size() > 0) {
+    gScheduler->Enqueue(blocked_threads_.PopFront());
+  }
   return Z_OK;
 }
 
 z_err_t Port::Read(ZMessage& msg) {
-  if (pending_messages_.size() < 1) {
-    dbgln("Implement blocking");
-    return Z_ERR_UNIMPLEMENTED;
+  mutex_.Lock();
+  while (pending_messages_.size() < 1) {
+    blocked_threads_.PushBack(gScheduler->CurrentThread());
+    mutex_.Unlock();
+    gScheduler->Yield();
+    mutex_.Lock();
   }
+  mutex_.Unlock();
 
+  MutexHolder lock(mutex_);
   Message next_msg = pending_messages_.PeekFront();
   if (next_msg.num_bytes > msg.num_bytes) {
     return Z_ERR_BUFF_SIZE;

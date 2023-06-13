@@ -76,8 +76,8 @@ void MemToStr(uint64_t u, char* str) {
 
 void AddProcPrefix() {
   if (gScheduler != nullptr) {
-    auto& t = gScheduler->CurrentThread();
-    dbg("[%u.%u] ", t.pid(), t.tid());
+    auto t = gScheduler->CurrentThread();
+    dbg("[%u.%u] ", t->pid(), t->tid());
   }
 }
 

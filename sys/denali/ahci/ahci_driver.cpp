@@ -13,7 +13,6 @@ const uint64_t kGhc_InteruptEnable = 0x2;
 
 void interrupt_thread(void* void_driver) {
   AhciDriver* driver = static_cast<AhciDriver*>(void_driver);
-  dbgln("this %lx", driver);
 
   driver->InterruptLoop();
 
@@ -132,7 +131,6 @@ void AhciDriver::DumpPorts() {
 }
 
 void AhciDriver::InterruptLoop() {
-  dbgln("this %lx", this);
   while (true) {
     uint64_t type, bytes, caps;
     check(ZPortRecv(irq_port_cap_, 0, 0, 0, 0, &type, &bytes, &caps));
@@ -189,7 +187,6 @@ z_err_t AhciDriver::RegisterIrq() {
   }
   uint64_t irq_num = Z_IRQ_PCI_BASE + pci_device_header_->interrupt_pin - 1;
   RET_ERR(ZIrqRegister(irq_num, &irq_port_cap_));
-  dbgln("this %lx", this);
   irq_thread_ = Thread(interrupt_thread, this);
   return Z_OK;
 }

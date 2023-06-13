@@ -4,6 +4,7 @@
 
 #include "capability/capability.h"
 #include "lib/linked_list.h"
+#include "lib/mutex.h"
 #include "lib/ref_ptr.h"
 #include "object/address_space.h"
 #include "object/channel.h"
@@ -51,6 +52,9 @@ class Process : public KernelObject {
   friend class MakeRefCountedFriend<Process>;
   Process();
   Process(uint64_t id) : id_(id), vmas_(AddressSpace::ForRoot()) {}
+
+  Mutex mutex_{"Process"};
+
   uint64_t id_;
   RefPtr<AddressSpace> vmas_;
   State state_;

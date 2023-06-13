@@ -34,12 +34,14 @@ Process::Process()
     : id_(gNextId++), vmas_(MakeRefCounted<AddressSpace>()), state_(RUNNING) {}
 
 RefPtr<Thread> Process::CreateThread() {
+  MutexHolder lock(mutex_);
   RefPtr<Thread> thread = MakeRefCounted<Thread>(*this, next_thread_id_++);
   threads_.PushBack(thread);
   return thread;
 }
 
 RefPtr<Thread> Process::GetThread(uint64_t tid) {
+  MutexHolder lock(mutex_);
   auto iter = threads_.begin();
   while (iter != threads_.end()) {
     if (iter->tid() == tid) {
@@ -52,6 +54,7 @@ RefPtr<Thread> Process::GetThread(uint64_t tid) {
 }
 
 void Process::CheckState() {
+  MutexHolder lock(mutex_);
   auto iter = threads_.begin();
   while (iter != threads_.end()) {
     if (iter->GetState() != Thread::FINISHED) {
@@ -63,6 +66,7 @@ void Process::CheckState() {
 }
 
 RefPtr<Capability> Process::ReleaseCapability(uint64_t cid) {
+  MutexHolder lock(mutex_);
   auto iter = caps_.begin();
   while (iter != caps_.end()) {
     if (*iter && iter->id() == cid) {
@@ -78,6 +82,7 @@ RefPtr<Capability> Process::ReleaseCapability(uint64_t cid) {
 }
 
 RefPtr<Capability> Process::GetCapability(uint64_t cid) {
+  MutexHolder lock(mutex_);
   auto iter = caps_.begin();
   while (iter != caps_.end()) {
     if (*iter && iter->id() == cid) {
@@ -91,11 +96,13 @@ RefPtr<Capability> Process::GetCapability(uint64_t cid) {
 }
 
 uint64_t Process::AddCapability(const RefPtr<Capability>& cap) {
+  MutexHolder lock(mutex_);
   cap->set_id(next_cap_id_++);
   caps_.PushBack(cap);
   return cap->id();
 }
 uint64_t Process::AddCapability(const RefPtr<Thread>& thread) {
+  MutexHolder lock(mutex_);
   uint64_t cap_id = next_cap_id_++;
   caps_.PushBack(
       MakeRefCounted<Capability>(thread, Capability::THREAD, cap_id, ZC_WRITE));
@@ -103,24 +110,28 @@ uint64_t Process::AddCapability(const RefPtr<Thread>& thread) {
 }
 
 uint64_t Process::AddCapability(const RefPtr<Process>& p) {
+  MutexHolder lock(mutex_);
   uint64_t cap_id = next_cap_id_++;
   caps_.PushBack(MakeRefCounted<Capability>(p, Capability::PROCESS, cap_id,
                                             ZC_WRITE | ZC_PROC_SPAWN_THREAD));
   return cap_id;
 }
 uint64_t Process::AddCapability(const RefPtr<AddressSpace>& vmas) {
+  MutexHolder lock(mutex_);
   uint64_t cap_id = next_cap_id_++;
   caps_.PushBack(MakeRefCounted<Capability>(vmas, Capability::ADDRESS_SPACE,
                                             cap_id, ZC_WRITE));
   return cap_id;
 }
 uint64_t Process::AddCapability(const RefPtr<MemoryObject>& vmmo) {
+  MutexHolder lock(mutex_);
   uint64_t cap_id = next_cap_id_++;
   caps_.PushBack(MakeRefCounted<Capability>(vmmo, Capability::MEMORY_OBJECT,
                                             cap_id, ZC_WRITE));
   return cap_id;
 }
 uint64_t Process::AddCapability(const RefPtr<Channel>& chan) {
+  MutexHolder lock(mutex_);
   uint64_t cap_id = next_cap_id_++;
   caps_.PushBack(MakeRefCounted<Capability>(chan, Capability::CHANNEL, cap_id,
                                             ZC_WRITE | ZC_READ));
@@ -128,6 +139,7 @@ uint64_t Process::AddCapability(const RefPtr<Channel>& chan) {
 }
 
 uint64_t Process::AddCapability(const RefPtr<Port>& port) {
+  MutexHolder lock(mutex_);
   uint64_t cap_id = next_cap_id_++;
   caps_.PushBack(MakeRefCounted<Capability>(port, Capability::PORT, cap_id,
                                             ZC_WRITE | ZC_READ));
@@ -135,6 +147,7 @@ uint64_t Process::AddCapability(const RefPtr<Port>& port) {
 }
 
 void Process::AddCapability(uint64_t cap_id, const RefPtr<MemoryObject>& vmmo) {
+  MutexHolder lock(mutex_);
   caps_.PushBack(MakeRefCounted<Capability>(vmmo, Capability::MEMORY_OBJECT,
                                             cap_id, ZC_WRITE));
 }

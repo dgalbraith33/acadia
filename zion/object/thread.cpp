@@ -15,7 +15,7 @@ extern "C" void jump_user_space(uint64_t rip, uint64_t rsp, uint64_t arg1,
 
 extern "C" void thread_init() {
   asm("sti");
-  gScheduler->CurrentThread().Init();
+  gScheduler->CurrentThread()->Init();
   panic("Reached end of thread.");
 }
 

@@ -24,7 +24,7 @@ extern "C" void syscall_enter();
 
 // Used by syscall_enter.s
 extern "C" uint64_t GetKernelRsp() {
-  return gScheduler->CurrentThread().Rsp0Start();
+  return gScheduler->CurrentThread()->Rsp0Start();
 }
 
 void InitSyscall() {
@@ -210,12 +210,12 @@ z_err_t IrqRegister(ZIrqRegisterReq* req, ZIrqRegisterResp* resp) {
 }
 
 extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
-  Thread& thread = gScheduler->CurrentThread();
+  RefPtr<Thread> thread = gScheduler->CurrentThread();
   switch (call_id) {
     case Z_PROCESS_EXIT:
       // FIXME: kill process here.
       dbgln("Exit code: %u", req);
-      thread.Exit();
+      thread->Exit();
       panic("Returned from thread exit");
       break;
     case Z_PROCESS_SPAWN:
@@ -227,7 +227,7 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
     case Z_THREAD_START:
       return ThreadStart(reinterpret_cast<ZThreadStartReq*>(req));
     case Z_THREAD_EXIT:
-      thread.Exit();
+      thread->Exit();
       panic("Returned from thread exit");
       break;
 

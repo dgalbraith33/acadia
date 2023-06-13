@@ -13,7 +13,7 @@ class Scheduler {
   void Enable() { enabled_ = true; }
 
   Process& CurrentProcess() { return current_thread_->process(); }
-  Thread& CurrentThread() { return *current_thread_; }
+  RefPtr<Thread> CurrentThread() { return current_thread_; }
 
   void Enqueue(const RefPtr<Thread>& thread) {
     runnable_threads_.PushBack(thread);

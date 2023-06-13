@@ -31,6 +31,7 @@ AhciDevice::AhciDevice(AhciPort* port) : port_struct_(port) {
       command_list_->command_headers[0].command_table_base_addr & 0xFFF;
   command_table_ = reinterpret_cast<CommandTable*>(vaddr + ct_off);
 
+  port_struct_->interrupt_status = 0;
   port_struct_->interrupt_enable = 0xFFFFFFFF;
 }
 
