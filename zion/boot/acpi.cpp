@@ -34,6 +34,48 @@ struct SdtHeader {
   uint32_t creator_revision;
 } __attribute__((packed));
 
+struct MadtEntry {
+  uint8_t type;
+  uint8_t length;
+} __attribute__((packed));
+
+struct MadtLocalApic {
+  MadtEntry entry;
+  uint8_t processor_id;
+  uint8_t apic_id;
+  uint32_t flags;
+} __attribute__((packed));
+
+struct MadtIoApic {
+  MadtEntry entry;
+  uint8_t io_apic_id;
+  uint8_t reserved;
+  uint32_t io_apic_address;
+  uint32_t global_system_interrupt_base;
+} __attribute__((packed));
+
+struct MadtIoApicInterruptSource {
+  MadtEntry entry;
+  uint8_t bus_source;
+  uint8_t irq_source;
+  uint32_t global_system_interrupt;
+  uint16_t flags;
+} __attribute__((packed));
+
+struct MadtLocalApicNonMaskable {
+  MadtEntry entry;
+  uint8_t apic_processor_id;
+  uint16_t flags;
+  uint8_t lint_num;
+} __attribute__((packed));
+
+struct MadtHeader {
+  SdtHeader sdt_headr;
+  uint32_t local_apic_address;
+  uint32_t flags;
+  MadtEntry first_entry;
+} __attribute__((packed));
+
 bool streq(const char* a, const char* b, uint8_t len) {
   for (uint8_t i = 0; i < len; i++) {
     if (a[i] != b[i]) return false;
@@ -76,7 +118,7 @@ void ParseMcfg(SdtHeader* rsdt) {
     uint64_t bus_info = entries[2 * i + 1];
     if (bus_info != 0xff000000) {
 #if K_ACPI_DEBUG
-      dbgln("WARN: Unexpected bus-info for PCI EC. Mem region will be wrong.")
+      dbgln("WARN: Unexpected bus-info for PCI EC. Mem region will be wrong.");
 #endif
     }
     gPcieEcBase = base_ecm_addr;
@@ -91,6 +133,55 @@ void ParseMcfg(SdtHeader* rsdt) {
   }
 }
 
+void ParseMadt(SdtHeader* rsdt) {
+#if K_ACPI_DEBUG
+  dbgsz(rsdt->signature, 4);
+#endif
+  uint64_t max_addr = reinterpret_cast<uint64_t>(rsdt) + rsdt->length;
+  MadtHeader* header = reinterpret_cast<MadtHeader*>(rsdt);
+
+  dbgln("Local APIC %x", header->local_apic_address);
+  dbgln("Flags: %x", header->flags);
+
+  MadtEntry* entry = &header->first_entry;
+
+  while (reinterpret_cast<uint64_t>(entry) < max_addr) {
+    switch (entry->type) {
+      case 0: {
+        MadtLocalApic* local = reinterpret_cast<MadtLocalApic*>(entry);
+        dbgln("Local APIC (Proc id, id, flags): %x, %x, %x",
+              local->processor_id, local->apic_id, local->flags);
+        break;
+      }
+      case 1: {
+        MadtIoApic* io = reinterpret_cast<MadtIoApic*>(entry);
+        dbgln("IO Apic (id, addr, gsi base): %x, %x, %x", io->io_apic_id,
+              io->io_apic_address, io->global_system_interrupt_base);
+        break;
+      }
+      case 2: {
+        MadtIoApicInterruptSource* src =
+            reinterpret_cast<MadtIoApicInterruptSource*>(entry);
+        dbgln("IO Source (Bus, IRQ, GSI, flags): %x, %x, %x, %x",
+              src->bus_source, src->irq_source, src->global_system_interrupt,
+              src->flags);
+        break;
+      }
+      case 4: {
+        MadtLocalApicNonMaskable* lnmi =
+            reinterpret_cast<MadtLocalApicNonMaskable*>(entry);
+        dbgln("Local NMI (proc id, flags, lint#): %x, %x, %x",
+              lnmi->apic_processor_id, lnmi->flags, lnmi->lint_num);
+        break;
+      }
+      default:
+        dbgln("Unhandled entry type: %u", entry->type);
+    }
+    entry = reinterpret_cast<MadtEntry*>(reinterpret_cast<uint64_t>(entry) +
+                                         entry->length);
+  }
+}
+
 void ParseSdt(SdtHeader* rsdt) {
   if (!checksum((uint8_t*)rsdt, rsdt->length)) {
     dbgln("Bad RSDT checksum.");
@@ -98,6 +189,8 @@ void ParseSdt(SdtHeader* rsdt) {
   }
   if (streq(rsdt->signature, "MCFG", 4)) {
     ParseMcfg(rsdt);
+  } else if (streq(rsdt->signature, "APIC", 4)) {
+    ParseMadt(rsdt);
   } else {
 #if K_ACPI_DEBUG
     dbgln("Unhandled:");
