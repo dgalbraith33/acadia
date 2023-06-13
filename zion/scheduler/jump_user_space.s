@@ -10,7 +10,7 @@ jump_user_space:
 
   pushq $0x23 # ss
   pushq %rsi
-  pushf  # Can we just push 0 for flags?
+  pushq $0x202  # Bit 9 enables interrupts.
   pushq $0x1B # cs
   pushq %rdi
   mov %rdx, %rdi
