@@ -187,7 +187,6 @@ z_err_t ChannelRecv(ZChannelRecvReq* req) {
 
 z_err_t PortRecv(ZPortRecvReq* req) {
   auto& proc = gScheduler->CurrentProcess();
-  dbgln("Port cap %u", req->port_cap);
   auto port_cap = proc.GetCapability(req->port_cap);
   RET_ERR(ValidateCap(port_cap, Capability::PORT, ZC_READ));
 
@@ -199,12 +198,10 @@ z_err_t IrqRegister(ZIrqRegisterReq* req, ZIrqRegisterResp* resp) {
   auto& proc = gScheduler->CurrentProcess();
   if (req->irq_num != Z_IRQ_PCI_BASE) {
     // FIXME: Don't hardcode this nonsense.
-    dbgln("Irq %x", req->irq_num);
     return Z_ERR_UNIMPLEMENTED;
   }
   RefPtr<Port> port = MakeRefCounted<Port>();
   resp->port_cap = proc.AddCapability(port);
-  dbgln("Port cap %u", resp->port_cap);
   RegisterPciPort(port);
   return Z_OK;
 }

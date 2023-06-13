@@ -136,7 +136,6 @@ void ParseMcfg(SdtHeader* rsdt) {
 void ParseMadt(SdtHeader* rsdt) {
 #if K_ACPI_DEBUG
   dbgsz(rsdt->signature, 4);
-#endif
   uint64_t max_addr = reinterpret_cast<uint64_t>(rsdt) + rsdt->length;
   MadtHeader* header = reinterpret_cast<MadtHeader*>(rsdt);
 
@@ -180,6 +179,7 @@ void ParseMadt(SdtHeader* rsdt) {
     entry = reinterpret_cast<MadtEntry*>(reinterpret_cast<uint64_t>(entry) +
                                          entry->length);
   }
+#endif
 }
 
 void ParseSdt(SdtHeader* rsdt) {

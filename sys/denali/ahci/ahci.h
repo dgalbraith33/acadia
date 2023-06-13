@@ -35,7 +35,7 @@ struct PciMsiCap {
   uint8_t reserved;
   uint64_t message_address;
   uint16_t message_data;
-};
+} __attribute__((packed));
 
 struct AhciHba {
   uint32_t capabilities;
@@ -90,7 +90,7 @@ struct PhysicalRegionDescriptor {
   // 21:0 is byte count
   // 31 is Interrupt on Completion
   uint32_t byte_count;
-};
+} __attribute__((packed));
 
 struct CommandTable {
   uint8_t command_fis[64];
@@ -110,9 +110,73 @@ typedef enum {
   FIS_TYPE_DEV_BITS = 0xA1,   // Set device bits FIS - device to host
 } FIS_TYPE;
 
-struct DmaFis {};
+struct DmaFis {
+  // DWORD 0
+  uint8_t fis_type;  // FIS_TYPE_DMA_SETUP
 
-struct PioSetupFis {};
+  uint8_t pmport : 4;  // Port multiplier
+  uint8_t rsv0 : 1;    // Reserved
+  uint8_t d : 1;       // Data transfer direction, 1 - device to host
+  uint8_t i : 1;       // Interrupt bit
+  uint8_t a : 1;       // Auto-activate. Specifies if DMA Activate FIS is needed
+
+  uint8_t rsved[2];  // Reserved
+
+  // DWORD 1&2
+
+  uint64_t DMAbufferID;  // DMA Buffer Identifier. Used to Identify DMA buffer
+                         // in host memory. SATA Spec says host specific and not
+                         // in Spec. Trying AHCI spec might work.
+
+  // DWORD 3
+  uint32_t rsvd;  // More reserved
+
+  // DWORD 4
+  uint32_t DMAbufOffset;  // Byte offset into buffer. First 2 bits must be 0
+
+  // DWORD 5
+  uint32_t TransferCount;  // Number of bytes to transfer. Bit 0 must be 0
+
+  // DWORD 6
+  uint32_t resvd;  // Reserved
+} __attribute__((packed));
+
+struct PioSetupFis {
+  // DWORD 0
+  uint8_t fis_type;  // FIS_TYPE_PIO_SETUP
+
+  uint8_t pmport : 4;  // Port multiplier
+  uint8_t rsv0 : 1;    // Reserved
+  uint8_t d : 1;       // Data transfer direction, 1 - device to host
+  uint8_t i : 1;       // Interrupt bit
+  uint8_t rsv1 : 1;
+
+  uint8_t status;  // Status register
+  uint8_t error;   // Error register
+
+  // DWORD 1
+  uint8_t lba0;    // LBA low register, 7:0
+  uint8_t lba1;    // LBA mid register, 15:8
+  uint8_t lba2;    // LBA high register, 23:16
+  uint8_t device;  // Device register
+
+  // DWORD 2
+  uint8_t lba3;  // LBA register, 31:24
+  uint8_t lba4;  // LBA register, 39:32
+  uint8_t lba5;  // LBA register, 47:40
+  uint8_t rsv2;  // Reserved
+
+  // DWORD 3
+  uint8_t countl;    // Count register, 7:0
+  uint8_t counth;    // Count register, 15:8
+  uint8_t rsv3;      // Reserved
+  uint8_t e_status;  // New value of status register
+
+  // DWORD 4
+  uint16_t tc;      // Transfer count
+  uint8_t rsv4[2];  // Reserved
+} __attribute__((packed));
+
 struct HostToDeviceRegisterFis {
   uint8_t fis_type;  // FIS_TYPE_REG_H2D
   uint8_t pmp_and_c;
@@ -138,9 +202,36 @@ struct HostToDeviceRegisterFis {
 
   // DWORD 4
   uint32_t reserved;  // Reserved
-};
-struct DeviceToHostRegisterFis {};
-struct SetDeviceBitsFis {};
+} __attribute__((packed));
+struct DeviceToHostRegisterFis {
+  // DWORD 0
+  uint8_t fis_type;  // FIS_TYPE_REG_D2H
+
+  uint8_t pmport_and_i;
+
+  uint8_t status;  // Status register
+  uint8_t error;   // Error register
+
+  // DWORD 1
+  uint8_t lba0;    // LBA low register, 7:0
+  uint8_t lba1;    // LBA mid register, 15:8
+  uint8_t lba2;    // LBA high register, 23:16
+  uint8_t device;  // Device register
+
+  // DWORD 2
+  uint8_t lba3;  // LBA register, 31:24
+  uint8_t lba4;  // LBA register, 39:32
+  uint8_t lba5;  // LBA register, 47:40
+  uint8_t reserved1;
+
+  // DWORD 3
+  uint16_t count;
+  uint16_t reserved2;
+
+  uint32_t reserved3;
+} __attribute__((packed));
+struct SetDeviceBitsFis {
+} __attribute__((packed));
 
 struct ReceivedFis {
   DmaFis dma_fis;

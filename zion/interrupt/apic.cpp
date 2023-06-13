@@ -7,7 +7,7 @@
 #include "common/port.h"
 #include "debug/debug.h"
 
-#define APIC_DEBUG 1
+#define APIC_DEBUG 0
 
 namespace {
 

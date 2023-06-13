@@ -4,6 +4,12 @@
 #include <string.h>
 #include <zcall.h>
 
+namespace {
+
+void HandleIdent(AhciDevice* dev) { dev->HandleIdentify(); }
+
+}  // namespace
+
 AhciDevice::AhciDevice(AhciPort* port) : port_struct_(port) {
   if ((port_struct_->sata_status & 0x103) != 0x103) {
     return;
@@ -15,27 +21,30 @@ AhciDevice::AhciDevice(AhciPort* port) : port_struct_(port) {
     crash("Non adjacent cl & fis", Z_ERR_UNIMPLEMENTED);
   }
 
-  check(ZMemoryObjectCreatePhysical(cl_page, 0x1000, &vmmo_cap_));
-
-  uint64_t vaddr;
-  check(ZAddressSpaceMap(Z_INIT_VMAS_SELF, 0, vmmo_cap_, &vaddr));
+  command_structures_ = MappedMemoryRegion::DirectPhysical(cl_page, 0x1000);
 
   uint64_t cl_off = port_struct_->command_list_base & 0xFFF;
-  command_list_ = reinterpret_cast<CommandList*>(vaddr + cl_off);
+  command_list_ =
+      reinterpret_cast<CommandList*>(command_structures_.vaddr() + cl_off);
 
   uint64_t fis_off = port_struct_->fis_base & 0xFFF;
-  received_fis_ = reinterpret_cast<ReceivedFis*>(vaddr + fis_off);
+  received_fis_ =
+      reinterpret_cast<ReceivedFis*>(command_structures_.vaddr() + fis_off);
 
   // FIXME: Hacky
   uint64_t ct_off =
       command_list_->command_headers[0].command_table_base_addr & 0xFFF;
-  command_table_ = reinterpret_cast<CommandTable*>(vaddr + ct_off);
+  command_table_ =
+      reinterpret_cast<CommandTable*>(command_structures_.vaddr() + ct_off);
 
-  port_struct_->interrupt_status = 0;
   port_struct_->interrupt_enable = 0xFFFFFFFF;
+
+  if (port_struct_->signature == 0x101) {
+    SendIdentify();
+  }
 }
 
-z_err_t AhciDevice::SendIdentify(uint16_t** result) {
+z_err_t AhciDevice::SendIdentify() {
   HostToDeviceRegisterFis fis{
       .fis_type = FIS_TYPE_REG_H2D,
       .pmp_and_c = 0x80,
@@ -64,20 +73,22 @@ z_err_t AhciDevice::SendIdentify(uint16_t** result) {
 
   memcpy(command_table_->command_fis, &fis, sizeof(fis));
 
-  port_struct_->command_issue |= 1;
+  commands_[0].region = MappedMemoryRegion::ContiguousPhysical(512);
+  commands_[0].callback = HandleIdent;
 
-  uint64_t vmmo_cap, paddr;
-  RET_ERR(ZMemoryObjectCreateContiguous(512, &vmmo_cap, &paddr));
-
-  command_table_->prds[0].region_address = paddr;
+  command_table_->prds[0].region_address = commands_[0].region.paddr();
   command_table_->prds[0].byte_count = 512;
 
-  uint64_t vaddr;
-  RET_ERR(ZAddressSpaceMap(Z_INIT_VMAS_SELF, 0, vmmo_cap, &vaddr));
-
-  *result = reinterpret_cast<uint16_t*>(vaddr);
+  port_struct_->command_issue |= 1;
+  commands_issued_ |= 1;
 
   return Z_OK;
+}
+
+void AhciDevice::HandleIdentify() {
+  dbgln("Handling Idenify");
+  uint16_t* ident = reinterpret_cast<uint16_t*>(commands_[0].region.vaddr());
+  dbgln("Ident: %x", ident[0]);
 }
 
 void AhciDevice::DumpInfo() {
@@ -87,7 +98,6 @@ void AhciDevice::DumpInfo() {
   dbgln("Signature: %x", port_struct_->signature);
   dbgln("SATA status: %x", port_struct_->sata_status);
   dbgln("Int status: %x", port_struct_->interrupt_status);
-  dbgln("Int enable: %x", port_struct_->interrupt_enable);
   dbgln("Int enable: %x", port_struct_->interrupt_enable);
 
   // Just dump one command info for now.
@@ -105,5 +115,36 @@ void AhciDevice::HandleIrq() {
   // FIXME: Probably only clear the interrupts we know how to handle.
   port_struct_->interrupt_status = int_status;
 
-  dbgln("int receieved: %x", int_status);
+  uint32_t commands_finished = commands_issued_ & ~port_struct_->command_issue;
+
+  for (uint64_t i = 0; i < 32; i++) {
+    if (commands_finished & (1 << i)) {
+      commands_[i].callback(this);
+      commands_issued_ &= ~(1 << i);
+    }
+  }
+
+  // TODO: Do something with this information.
+  if (int_status & 0x1) {
+    // Device to host.
+    DeviceToHostRegisterFis& fis = received_fis_->device_to_host_register_fis;
+    if (fis.fis_type != FIS_TYPE_REG_D2H) {
+      dbgln("BAD FIS TYPE (exp,act): %x, %x", FIS_TYPE_REG_D2H, fis.fis_type);
+      return;
+    }
+    if (fis.error) {
+      dbgln("D2H err: %x", fis.error);
+    }
+  }
+  if (int_status & 0x2) {
+    // PIO.
+    PioSetupFis& fis = received_fis_->pio_set_fis;
+    if (fis.fis_type != FIS_TYPE_PIO_SETUP) {
+      dbgln("BAD FIS TYPE (exp,act): %x, %x", FIS_TYPE_PIO_SETUP, fis.fis_type);
+      return;
+    }
+    if (fis.error) {
+      dbgln("PIO err: %x", fis.error);
+    }
+  }
 }

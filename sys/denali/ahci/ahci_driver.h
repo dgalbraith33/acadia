@@ -16,13 +16,19 @@ class AhciDriver {
   void DumpPorts();
 
  private:
+  MappedMemoryRegion pci_region_;
   PciDeviceHeader* pci_device_header_ = nullptr;
+  MappedMemoryRegion ahci_region_;
   AhciHba* ahci_hba_ = nullptr;
 
-  AhciDevice devices_[6];
+  // TODO: Allocate these dynamically.
+  AhciDevice devices_[32];
 
   Thread irq_thread_;
   uint64_t irq_port_cap_ = 0;
+
+  uint64_t num_ports_;
+  uint64_t num_commands_;
 
   z_err_t LoadPciDeviceHeader();
   z_err_t LoadCapabilities();
