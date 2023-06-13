@@ -17,6 +17,7 @@ class Capability : public RefCounted<Capability> {
     ADDRESS_SPACE,
     MEMORY_OBJECT,
     CHANNEL,
+    PORT,
   };
   Capability(const RefPtr<KernelObject>& obj, Type type, uint64_t id,
              uint64_t permissions)

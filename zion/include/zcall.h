@@ -43,6 +43,14 @@
 #define Z_CHANNEL_RECV 0x42
 #define Z_CHANNEL_SENDRECV 0x43
 
+#define Z_PORT_CREATE 0x50
+#define Z_PORT_SEND 0x51
+#define Z_PORT_RECV 0x52
+
+#define Z_IRQ_REGISTER 0x58
+
+#define Z_IRQ_PCI_BASE 0x30
+
 // Debugging Calls.
 #define Z_DEBUG_PRINT 0x10000000
 
@@ -70,6 +78,10 @@ void ZThreadExit();
 [[nodiscard]] z_err_t ZMemoryObjectCreate(uint64_t size, uint64_t* vmmo_cap);
 [[nodiscard]] z_err_t ZMemoryObjectCreatePhysical(uint64_t paddr, uint64_t size,
                                                   uint64_t* vmmo_cap);
+[[nodiscard]] z_err_t ZMemoryObjectCreateContiguous(uint64_t size,
+                                                    uint64_t* vmmo_cap,
+                                                    uint64_t* paddr);
+
 [[nodiscard]] z_err_t ZTempPcieConfigObjectCreate(uint64_t* vmmo_cap,
                                                   uint64_t* vmmo_size);
 
@@ -82,5 +94,11 @@ void ZThreadExit();
                                    uint64_t* caps, uint64_t* type,
                                    uint64_t* actual_bytes,
                                    uint64_t* actual_caps);
+
+[[nodiscard]] z_err_t ZPortRecv(uint64_t port_cap, uint64_t num_bytes,
+                                uint8_t* bytes, uint64_t num_caps,
+                                uint64_t* caps, uint64_t* type,
+                                uint64_t* actual_bytes, uint64_t* actual_caps);
+[[nodiscard]] z_err_t ZIrqRegister(uint64_t irq_num, uint64_t* port_cap);
 
 [[nodiscard]] z_err_t ZDebug(const char* message);

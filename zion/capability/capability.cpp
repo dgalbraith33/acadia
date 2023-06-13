@@ -42,3 +42,11 @@ RefPtr<Channel> Capability::obj<Channel>() {
   }
   return StaticCastRefPtr<Channel>(obj_);
 }
+
+template <>
+RefPtr<Port> Capability::obj<Port>() {
+  if (type_ != PORT) {
+    panic("Accessing %u cap as object.", type_);
+  }
+  return StaticCastRefPtr<Port>(obj_);
+}

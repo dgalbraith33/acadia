@@ -7,6 +7,7 @@
 #include "lib/ref_ptr.h"
 #include "object/address_space.h"
 #include "object/channel.h"
+#include "object/port.h"
 
 // Forward decl due to cyclic dependency.
 class Thread;
@@ -37,6 +38,7 @@ class Process : public KernelObject {
   uint64_t AddCapability(const RefPtr<AddressSpace>& vmas);
   uint64_t AddCapability(const RefPtr<MemoryObject>& vmmo);
   uint64_t AddCapability(const RefPtr<Channel>& chan);
+  uint64_t AddCapability(const RefPtr<Port>& chan);
 
   void AddCapability(uint64_t cap_id, const RefPtr<MemoryObject>& vmmo);
   // Checks the state of all child threads and transitions to

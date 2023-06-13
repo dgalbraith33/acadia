@@ -7,7 +7,7 @@
 #include "common/port.h"
 #include "debug/debug.h"
 
-#define APIC_DEBUG 0
+#define APIC_DEBUG 1
 
 namespace {
 
@@ -17,6 +17,7 @@ namespace {
 
 const uint64_t kEoiOffset = 0xB0;
 
+// FIXME: parse these from madt.
 constexpr uint64_t kLApicBase = 0xFEE0'0000;
 constexpr uint64_t kIoApicAddr = 0xFEC0'0000;
 constexpr uint64_t kIoApicData = 0xFEC0'0010;
@@ -88,7 +89,6 @@ void InspectApic() {
   dbgln("TPR: %x", GetLocalReg(0x80));
   dbgln("APR: %x", GetLocalReg(0x90));
   dbgln("PPR: %x", GetLocalReg(0xA0));
-  dbgln("RRD: %x", GetLocalReg(0xC0));
   dbgln("LDR: %x", GetLocalReg(0xD0));
   dbgln("DFR: %x", GetLocalReg(0xE0));
   dbgln("SIV: %x", GetLocalReg(0xF0));
@@ -119,10 +119,22 @@ void EnableApic() {
   SetIoEntry(0x14, 0x20);
   // Skip Keyboard for now.
   // SetIoEntry(0x12, 0x21);
+
+  // TODO: This also works with the interrupt numbers provided by the MADT
+  // I need to do further investigation on the difference in this case and
+  // also how to find a declarative spec for where the PCI Lines are mapped.
+
+  // PCI Line 1-4
+  // FIXME: These should be level triggered according to spec I believe
+  // but because we handle the interrupt outside of the kernel it is tricky
+  // to wait to send the end of interrupt message.
+  // Because of this leave them as edge triggered and send EOI immediately.
+  SetIoEntry(0x30, 0x30);
+  SetIoEntry(0x32, 0x31);
+  SetIoEntry(0x34, 0x32);
+  SetIoEntry(0x36, 0x33);
+
   InspectApic();
 }
 
-void SignalEOI() {
-  // Value doesn't matter.
-  WriteLocalReg(kEoiOffset, 0x1);
-}
+void SignalEOI() { WriteLocalReg(kEoiOffset, 0x0); }

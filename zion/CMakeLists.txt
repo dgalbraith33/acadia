@@ -19,6 +19,7 @@ add_executable(zion
   object/address_space.cpp
   object/channel.cpp
   object/memory_object.cpp
+  object/port.cpp
   object/process.cpp
   object/thread.cpp
   scheduler/context_switch.s

@@ -7,7 +7,10 @@
 #include "debug/debug.h"
 #include "include/zcall.h"
 #include "include/zerrors.h"
+#include "interrupt/interrupt.h"
+#include "memory/physical_memory.h"
 #include "object/channel.h"
+#include "object/port.h"
 #include "object/process.h"
 #include "scheduler/process_manager.h"
 #include "scheduler/scheduler.h"
@@ -131,11 +134,16 @@ z_err_t MemoryObjectCreate(ZMemoryObjectCreateReq* req,
 }
 
 z_err_t MemoryObjectCreatePhysical(ZMemoryObjectCreatePhysicalReq* req,
-                                   ZMemoryObjectCreateResp* resp) {
+                                   ZMemoryObjectCreatePhysicalResp* resp) {
   auto& curr_proc = gScheduler->CurrentProcess();
-  auto vmmo_ref = MakeRefCounted<FixedMemoryObject>(req->paddr, req->size);
+  uint64_t paddr = req->paddr;
+  if (paddr == 0) {
+    paddr = phys_mem::AllocateContinuous((req->size - 1 / 0x1000) + 1);
+  }
+  auto vmmo_ref = MakeRefCounted<FixedMemoryObject>(paddr, req->size);
   resp->vmmo_cap =
       curr_proc.AddCapability(StaticCastRefPtr<MemoryObject>(vmmo_ref));
+  resp->paddr = paddr;
   return Z_OK;
 }
 
@@ -174,7 +182,30 @@ z_err_t ChannelRecv(ZChannelRecvReq* req) {
   RET_ERR(ValidateCap(chan_cap, Capability::CHANNEL, ZC_READ));
 
   auto chan = chan_cap->obj<Channel>();
-  chan->Read(req->message);
+  return chan->Read(req->message);
+}
+
+z_err_t PortRecv(ZPortRecvReq* req) {
+  auto& proc = gScheduler->CurrentProcess();
+  dbgln("Port cap %u", req->port_cap);
+  auto port_cap = proc.GetCapability(req->port_cap);
+  RET_ERR(ValidateCap(port_cap, Capability::PORT, ZC_READ));
+
+  auto port = port_cap->obj<Port>();
+  return port->Read(req->message);
+}
+
+z_err_t IrqRegister(ZIrqRegisterReq* req, ZIrqRegisterResp* resp) {
+  auto& proc = gScheduler->CurrentProcess();
+  if (req->irq_num != Z_IRQ_PCI_BASE) {
+    // FIXME: Don't hardcode this nonsense.
+    dbgln("Irq %x", req->irq_num);
+    return Z_ERR_UNIMPLEMENTED;
+  }
+  RefPtr<Port> port = MakeRefCounted<Port>();
+  resp->port_cap = proc.AddCapability(port);
+  dbgln("Port cap %u", resp->port_cap);
+  RegisterPciPort(port);
   return Z_OK;
 }
 
@@ -210,7 +241,7 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
     case Z_MEMORY_OBJECT_CREATE_PHYSICAL:
       return MemoryObjectCreatePhysical(
           reinterpret_cast<ZMemoryObjectCreatePhysicalReq*>(req),
-          reinterpret_cast<ZMemoryObjectCreateResp*>(resp));
+          reinterpret_cast<ZMemoryObjectCreatePhysicalResp*>(resp));
     case Z_TEMP_PCIE_CONFIG_OBJECT_CREATE:
       return TempPcieConfigObjectCreate(
           reinterpret_cast<ZTempPcieConfigObjectCreateResp*>(resp));
@@ -220,6 +251,11 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
       return ChannelSend(reinterpret_cast<ZChannelSendReq*>(req));
     case Z_CHANNEL_RECV:
       return ChannelRecv(reinterpret_cast<ZChannelRecvReq*>(req));
+    case Z_PORT_RECV:
+      return PortRecv(reinterpret_cast<ZPortRecvReq*>(req));
+    case Z_IRQ_REGISTER:
+      return IrqRegister(reinterpret_cast<ZIrqRegisterReq*>(req),
+                         reinterpret_cast<ZIrqRegisterResp*>(resp));
     case Z_DEBUG_PRINT:
       dbgln("[Debug] %s", req);
       return Z_OK;

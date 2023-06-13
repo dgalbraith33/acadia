@@ -51,6 +51,11 @@ struct ZMemoryObjectCreatePhysicalReq {
   uint64_t size;
 };
 
+struct ZMemoryObjectCreatePhysicalResp {
+  uint64_t vmmo_cap;
+  uint64_t paddr;
+};
+
 struct ZTempPcieConfigObjectCreateResp {
   uint64_t vmmo_cap;
   uint64_t vmmo_size;
@@ -79,4 +84,17 @@ struct ZChannelSendReq {
 struct ZChannelRecvReq {
   uint64_t chan_cap;
   ZMessage message;
+};
+
+struct ZPortRecvReq {
+  uint64_t port_cap;
+  ZMessage message;
+};
+
+struct ZIrqRegisterReq {
+  uint64_t irq_num;
+};
+
+struct ZIrqRegisterResp {
+  uint64_t port_cap;
 };

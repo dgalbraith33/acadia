@@ -35,6 +35,7 @@ class MemoryObject : public KernelObject {
 
 class FixedMemoryObject : public MemoryObject {
  public:
+  // FIXME: Validate that this is 4k aligned.
   FixedMemoryObject(uint64_t physical_addr, uint64_t size)
       : MemoryObject(size, true), physical_addr_(physical_addr) {}
 

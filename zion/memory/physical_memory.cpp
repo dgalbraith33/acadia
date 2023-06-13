@@ -63,6 +63,34 @@ class PhysicalMemoryManager {
     }
     return page;
   }
+  uint64_t AllocateContinuous(uint64_t num_pages) {
+    if (front_ == nullptr) {
+      panic("No available memory regions.");
+    }
+
+    if (front_->num_pages == 0) {
+      panic("Bad state, empty memory block.");
+    }
+
+    MemBlock* block = front_;
+    while (block != nullptr && block->num_pages < num_pages) {
+      block = block->next;
+    }
+
+    if (block == nullptr) {
+      panic("No memory regions to allocate");
+    }
+
+    uint64_t page = front_->base;
+    front_->base += num_pages * 0x1000;
+    front_->num_pages -= num_pages;
+    if (front_->num_pages == 0) {
+      MemBlock* temp = front_;
+      front_ = front_->next;
+      delete temp;
+    }
+    return page;
+  }
   void FreePage(uint64_t page) { AddMemoryRegion(page, 0x1000); }
 
  private:
@@ -127,6 +155,14 @@ uint64_t AllocatePage() {
   gBootstrap.next_page += 0x1000;
 
   return page;
+}
+
+uint64_t AllocateContinuous(uint64_t num_continuous) {
+  if (gPmm == nullptr) {
+    panic("No physical memory manager!");
+  }
+
+  return gPmm->AllocateContinuous(num_continuous);
 }
 
 }  // namespace phys_mem

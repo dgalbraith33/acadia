@@ -9,13 +9,30 @@ namespace {
 const uint64_t kSataPciPhys = 0xB00FA000;
 const uint64_t kPciSize = 0x1000;
 
+const uint64_t kGhc_InteruptEnable = 0x2;
+
+void interrupt_thread(void* void_driver) {
+  AhciDriver* driver = static_cast<AhciDriver*>(void_driver);
+  dbgln("this %lx", driver);
+
+  driver->InterruptLoop();
+
+  crash("Driver returned from interrupt loop", Z_ERR_UNIMPLEMENTED);
+}
+
 }  // namespace
 
 z_err_t AhciDriver::Init() {
   RET_ERR(LoadPciDeviceHeader());
+  RET_ERR(LoadCapabilities());
   dbgln("ABAR: %x", pci_device_header_->abar);
+  dbgln("Interrupt line: %x", pci_device_header_->interrupt_line);
+  dbgln("Interrupt pin: %x", pci_device_header_->interrupt_pin);
+  RET_ERR(RegisterIrq());
   RET_ERR(LoadHbaRegisters());
   dbgln("Version: %x", ahci_hba_->version);
+  ahci_hba_->global_host_control |= kGhc_InteruptEnable;
+  RET_ERR(LoadDevices());
   DumpCapabilities();
   DumpPorts();
   return Z_OK;
@@ -26,7 +43,7 @@ void AhciDriver::DumpCapabilities() {
   uint32_t caps = ahci_hba_->capabilities;
 
   dbgln("Num Ports: %u", (caps & 0x1F) + 1);
-  dbgln("Num Command Slots: %u", (caps & 0x1F00) >> 8);
+  dbgln("Num Command Slots: %u", ((caps & 0x1F00) >> 8) + 1);
   if (caps & 0x20) {
     dbgln("External SATA");
   }
@@ -97,33 +114,33 @@ void AhciDriver::DumpCapabilities() {
   if (caps & 0x10) {
     dbgln("Aggressive device sleep management");
   }
+
+  dbgln("Control %x", ahci_hba_->global_host_control);
 }
 
 void AhciDriver::DumpPorts() {
-  dbgln("Ports implemented %x", ahci_hba_->port_implemented);
-
-  uint64_t port_index = 0;
-  uint32_t ports_implemented = ahci_hba_->port_implemented;
-  while (ports_implemented) {
-    if (!(ports_implemented & 0x1)) {
-      ports_implemented >>= 1;
-      port_index++;
+  for (uint64_t i = 0; i < 6; i++) {
+    AhciDevice& dev = devices_[i];
+    if (!dev.IsInit()) {
       continue;
     }
-    uint64_t port_addr =
-        reinterpret_cast<uint64_t>(ahci_hba_) + 0x100 + (0x80 * port_index);
-    AhciPort* port = reinterpret_cast<AhciPort*>(port_addr);
 
     dbgln("");
-    dbgln("Port %u:", port_index);
-    dbgln("Comlist: %lx", port->command_list_base);
-    dbgln("FIS: %lx", port->fis_base);
-    dbgln("Command: %x", port->command);
-    dbgln("Signature: %x", port->signature);
-    dbgln("SATA status: %x", port->sata_status);
+    dbgln("Port %u:", i);
+    dev.DumpInfo();
+  }
+}
 
-    ports_implemented >>= 1;
-    port_index++;
+void AhciDriver::InterruptLoop() {
+  dbgln("this %lx", this);
+  while (true) {
+    uint64_t type, bytes, caps;
+    check(ZPortRecv(irq_port_cap_, 0, 0, 0, 0, &type, &bytes, &caps));
+    for (uint64_t i = 0; i < 6; i++) {
+      if (devices_[i].IsInit()) {
+        devices_[i].HandleIrq();
+      }
+    }
   }
 }
 
@@ -137,6 +154,46 @@ z_err_t AhciDriver::LoadPciDeviceHeader() {
   return Z_OK;
 }
 
+z_err_t AhciDriver::LoadCapabilities() {
+  if (!(pci_device_header_->status_reg & 0x10)) {
+    dbgln("No caps!");
+    return Z_ERR_INVALID;
+  }
+  uint8_t* base = reinterpret_cast<uint8_t*>(pci_device_header_);
+  uint16_t offset = pci_device_header_->cap_ptr;
+  do {
+    uint16_t* cap = reinterpret_cast<uint16_t*>(base + offset);
+    switch (*cap & 0xFF) {
+      case 0x01:
+        dbgln("Power Management");
+        break;
+      case 0x05:
+        dbgln("MSI");
+        break;
+      case 0x12:
+        dbgln("SATA");
+        break;
+      default:
+        dbgln("Unrecognized cap");
+        break;
+    }
+
+    offset = (*cap & 0xFF00) >> 8;
+  } while (offset);
+  return Z_OK;
+}
+
+z_err_t AhciDriver::RegisterIrq() {
+  if (pci_device_header_->interrupt_pin == 0) {
+    crash("Can't register IRQ without a pin num", Z_INVALID);
+  }
+  uint64_t irq_num = Z_IRQ_PCI_BASE + pci_device_header_->interrupt_pin - 1;
+  RET_ERR(ZIrqRegister(irq_num, &irq_port_cap_));
+  dbgln("this %lx", this);
+  irq_thread_ = Thread(interrupt_thread, this);
+  return Z_OK;
+}
+
 z_err_t AhciDriver::LoadHbaRegisters() {
   uint64_t vmmo_cap;
   RET_ERR(
@@ -145,5 +202,24 @@ z_err_t AhciDriver::LoadHbaRegisters() {
   uint64_t vaddr;
   RET_ERR(ZAddressSpaceMap(Z_INIT_VMAS_SELF, 0, vmmo_cap, &vaddr));
   ahci_hba_ = reinterpret_cast<AhciHba*>(vaddr);
+  return Z_OK;
+}
+
+z_err_t AhciDriver::LoadDevices() {
+  // FIXME: Don't set this up so we hardcode 6 devices.
+  for (uint8_t i = 0; i < 6; i++) {
+    if (!(ahci_hba_->port_implemented & (1 << i))) {
+      continue;
+    }
+    uint64_t port_addr =
+        reinterpret_cast<uint64_t>(ahci_hba_) + 0x100 + (0x80 * i);
+    devices_[i] = AhciDevice(reinterpret_cast<AhciPort*>(port_addr));
+    if (!devices_[i].IsInit()) {
+      continue;
+    }
+    dbgln("Identify %u", i);
+    uint16_t* identify;
+    devices_[i].SendIdentify(&identify);
+  }
   return Z_OK;
 }

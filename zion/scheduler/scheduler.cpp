@@ -40,11 +40,13 @@ void Scheduler::Preempt() {
   if (current_thread_ == sleep_thread_) {
     // Sleep should never be preempted. (We should yield it if another thread
     // becomes scheduleable).
+    asm volatile("sti");
     return;
   }
 
   if (runnable_threads_.size() == 0) {
     // Continue.
+    asm volatile("sti");
     return;
   }
 

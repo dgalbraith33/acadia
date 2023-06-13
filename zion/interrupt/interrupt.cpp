@@ -138,11 +138,44 @@ extern "C" void interrupt_timer(InterruptFrame*) {
   gScheduler->Preempt();
 }
 
+RefPtr<Port> pci1_port;
+extern "C" void isr_pci1();
+extern "C" void interrupt_pci1(InterruptFrame*) {
+  dbgln("Interrupt PCI line 1");
+  pci1_port->Write({});
+  SignalEOI();
+}
+
+extern "C" void isr_pci2();
+extern "C" void interrupt_pci2(InterruptFrame*) {
+  dbgln("Interrupt PCI line 2");
+  SignalEOI();
+}
+
+extern "C" void isr_pci3();
+extern "C" void interrupt_pci3(InterruptFrame*) {
+  dbgln("Interrupt PCI line 3");
+  SignalEOI();
+}
+
+extern "C" void isr_pci4();
+extern "C" void interrupt_pci4(InterruptFrame*) {
+  dbgln("Interrupt PCI line 4");
+  SignalEOI();
+}
+
 void InitIdt() {
   gIdt[0] = CreateDescriptor(isr_divide_by_zero);
   gIdt[13] = CreateDescriptor(isr_protection_fault);
   gIdt[14] = CreateDescriptor(isr_page_fault);
-  gIdt[32] = CreateDescriptor(isr_timer);
+
+  gIdt[0x20] = CreateDescriptor(isr_timer);
+
+  gIdt[0x30] = CreateDescriptor(isr_pci1);
+  gIdt[0x31] = CreateDescriptor(isr_pci2);
+  gIdt[0x32] = CreateDescriptor(isr_pci3);
+  gIdt[0x33] = CreateDescriptor(isr_pci4);
+
   InterruptDescriptorTablePointer idtp{
       .size = sizeof(gIdt),
       .base = reinterpret_cast<uint64_t>(gIdt),
@@ -151,3 +184,5 @@ void InitIdt() {
 
   EnableApic();
 }
+
+void RegisterPciPort(const RefPtr<Port>& port) { pci1_port = port; }

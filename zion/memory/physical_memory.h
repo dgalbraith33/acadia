@@ -13,6 +13,7 @@ void InitBootstrapPageAllocation();
 void InitPhysicalMemoryManager();
 
 uint64_t AllocatePage();
+uint64_t AllocateContinuous(uint64_t num_pages);
 void FreePage(uint64_t page);
 
 }  // namespace phys_mem

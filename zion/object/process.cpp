@@ -127,6 +127,13 @@ uint64_t Process::AddCapability(const RefPtr<Channel>& chan) {
   return cap_id;
 }
 
+uint64_t Process::AddCapability(const RefPtr<Port>& port) {
+  uint64_t cap_id = next_cap_id_++;
+  caps_.PushBack(MakeRefCounted<Capability>(port, Capability::PORT, cap_id,
+                                            ZC_WRITE | ZC_READ));
+  return cap_id;
+}
+
 void Process::AddCapability(uint64_t cap_id, const RefPtr<MemoryObject>& vmmo) {
   caps_.PushBack(MakeRefCounted<Capability>(vmmo, Capability::MEMORY_OBJECT,
                                             cap_id, ZC_WRITE));
