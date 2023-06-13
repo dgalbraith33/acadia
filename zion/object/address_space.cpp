@@ -55,6 +55,11 @@ bool AddressSpace::HandlePageFault(uint64_t vaddr) {
 #if K_VMAS_DEBUG
   dbgln("[VMAS] Page Fault!");
 #endif
+  if (user_stacks_.IsValidStack(vaddr)) {
+    MapPage(cr3_, vaddr, phys_mem::AllocatePage());
+    return true;
+  }
+
   MemoryMapping* mapping = GetMemoryMappingForAddr(vaddr);
   if (mapping == nullptr) {
     return false;

@@ -21,3 +21,14 @@ void UserStackManager::FreeUserStack(uint64_t stack_ptr) {
   freed_stacks_++;
   dbgln("%u freed user stacks", freed_stacks_);
 }
+
+bool UserStackManager::IsValidStack(uint64_t vaddr) {
+  if (vaddr < next_stack_ || vaddr > (kStackMax - 0x1000)) {
+    return false;
+  }
+  // Checks if the address is in the first page of the stack.
+  if (vaddr & 0xFF000) {
+    return true;
+  }
+  return false;
+}

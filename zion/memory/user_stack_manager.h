@@ -20,6 +20,9 @@ class UserStackManager {
   uint64_t NewUserStack();
   void FreeUserStack(uint64_t stack_ptr);
 
+  // Used to check if we should page in this address.
+  bool IsValidStack(uint64_t vaddr);
+
  private:
   const uint64_t kStackMax = 0x00008000'00000000;
   const uint64_t kStackMin = 0x00007FF0'00000000;
