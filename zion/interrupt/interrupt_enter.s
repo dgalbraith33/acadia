@@ -60,3 +60,9 @@ isr_handler protection_fault,1
 isr_handler page_fault,1
 
 isr_handler timer
+
+isr_handler pci1
+isr_handler pci2
+isr_handler pci3
+isr_handler pci4
+
