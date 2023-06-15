@@ -29,9 +29,8 @@ class AhciDevice {
   CommandTable* command_table_ = nullptr;
 
   struct Command {
-    typedef void (*Callback)(AhciDevice*);
     MappedMemoryRegion region;
-    Callback callback;
+    // std::function<void(MappedMemoryRegion)> callback;
   };
   Command commands_[32];
   uint32_t commands_issued_ = 0;

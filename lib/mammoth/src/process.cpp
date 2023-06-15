@@ -93,8 +93,8 @@ uint64_t LoadElfProgram(uint64_t base, uint64_t as_cap) {
 
 }  // namespace
 
-uint64_t SpawnProcessFromElfRegion(uint64_t program) {
-  Channel local, foreign;
+uint64_t SpawnProcessFromElfRegion(uint64_t program, Channel& local) {
+  Channel foreign;
   check(CreateChannels(local, foreign));
 
 #if MAM_PROC_DEBUG
@@ -117,8 +117,6 @@ uint64_t SpawnProcessFromElfRegion(uint64_t program) {
   dbgln("Thread start");
 #endif
   check(ZThreadStart(thread_cap, entry_point, foreign_chan_id, 0));
-
-  local.WriteStr("Hello!");
 
   return Z_OK;
 }

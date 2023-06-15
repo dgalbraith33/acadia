@@ -76,7 +76,7 @@ RefPtr<Capability> Process::ReleaseCapability(uint64_t cid) {
     }
     ++iter;
   }
-  dbgln("Bad cap access");
+  dbgln("Bad cap release: %u", cid);
   dbgln("Num caps: %u", caps_.size());
   return {};
 }
@@ -90,7 +90,7 @@ RefPtr<Capability> Process::GetCapability(uint64_t cid) {
     }
     ++iter;
   }
-  dbgln("Bad cap access");
+  dbgln("Bad cap access %u", cid);
   dbgln("Num caps: %u", caps_.size());
   return {};
 }

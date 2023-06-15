@@ -33,6 +33,19 @@ z_err_t AhciDriver::Init() {
   return Z_OK;
 }
 
+z_err_t AhciDriver::GetDevice(uint64_t id, AhciDevice& device) {
+  if (id >= 32) {
+    return Z_ERR_INVALID;
+  }
+
+  if (!devices_[id].IsInit()) {
+    return Z_ERR_NOT_FOUND;
+  }
+
+  device = devices_[id];
+  return Z_OK;
+}
+
 void AhciDriver::DumpCapabilities() {
   dbgln("AHCI Capabilities:");
   uint32_t caps = ahci_hba_->capabilities;

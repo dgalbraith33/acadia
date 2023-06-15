@@ -1,11 +1,14 @@
 add_executable(denali
   ahci/ahci_device.cpp
   ahci/ahci_driver.cpp
-  denali.cpp)
+  denali.cpp
+  denali_server.cpp
+  )
 
 
 target_include_directories(denali
-   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+   PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 target_link_libraries(denali
   cxx

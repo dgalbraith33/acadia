@@ -33,7 +33,7 @@ z_err_t Channel::WriteStr(const char* msg) {
   if (!chan_cap_) {
     return Z_ERR_NULL;
   }
-  uint64_t type = 11;
+  uint64_t type = 0;
   return ZChannelSend(chan_cap_, type, strlen(msg),
                       reinterpret_cast<const uint8_t*>(msg), 0, 0);
 }

@@ -12,6 +12,8 @@ class AhciDriver {
 
   void InterruptLoop();
 
+  z_err_t GetDevice(uint64_t id, AhciDevice& device);
+
   void DumpCapabilities();
   void DumpPorts();
 
