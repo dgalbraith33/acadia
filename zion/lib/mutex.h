@@ -6,6 +6,7 @@ class Mutex {
  public:
   Mutex(const char* name) : name_(name) {}
 
+  // FIXME: Block thread on lock rather than "preempting"
   void Lock();
   void Unlock() { lock_ = false; }
 
