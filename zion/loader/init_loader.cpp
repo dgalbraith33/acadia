@@ -127,7 +127,7 @@ void LoadInitProgram() {
   RefPtr<MemoryObject> prog2_vmmo = MakeRefCounted<MemoryObject>(prog2.size);
   prog2_vmmo->CopyBytesToObject(reinterpret_cast<uint64_t>(prog2.address),
                                 prog2.size);
-  proc->AddCapability(Z_INIT_BOOT_VMMO, prog2_vmmo);
+  proc->AddNewCapabilityWithId(Z_INIT_BOOT_VMMO, prog2_vmmo, ZC_WRITE);
 
   proc->CreateThread()->Start(entry, 0, 0);
 }

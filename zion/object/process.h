@@ -39,14 +39,18 @@ class Process : public KernelObject {
 
   RefPtr<Capability> ReleaseCapability(uint64_t cid);
   RefPtr<Capability> GetCapability(uint64_t cid);
-  // FIXME: We can't reset the cap id here.
-  uint64_t AddCapability(const RefPtr<Capability>& cap);
-
-  void AddCapability(uint64_t cap_id, const RefPtr<MemoryObject>& vmmo);
 
   template <typename T>
   uint64_t AddNewCapability(const RefPtr<T>& obj, uint64_t permissions) {
     return caps_.AddNewCapability(obj, permissions);
+  }
+  uint64_t AddExistingCapability(const RefPtr<Capability>& cap);
+
+  // FIXME: Eliminate reliance on this.
+  template <typename T>
+  void AddNewCapabilityWithId(uint64_t id, const RefPtr<T>& obj,
+                              uint64_t permissions) {
+    return caps_.AddNewCapabilityWithId(id, obj, permissions);
   }
 
   // Checks the state of all child threads and transitions to

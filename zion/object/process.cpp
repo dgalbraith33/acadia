@@ -22,9 +22,9 @@ RefPtr<Process> Process::RootProcess() {
 }
 RefPtr<Process> Process::Create() {
   auto proc = MakeRefCounted<Process>();
-  proc->caps_.AddNewCapabilityWithId(Z_INIT_PROC_SELF, proc,
-                                     ZC_PROC_SPAWN_PROC | ZC_PROC_SPAWN_THREAD);
-  proc->caps_.AddNewCapabilityWithId(Z_INIT_VMAS_SELF, proc->vmas(), ZC_WRITE);
+  proc->AddNewCapabilityWithId(Z_INIT_PROC_SELF, proc,
+                               ZC_PROC_SPAWN_PROC | ZC_PROC_SPAWN_THREAD);
+  proc->AddNewCapabilityWithId(Z_INIT_VMAS_SELF, proc->vmas(), ZC_WRITE);
   return proc;
 }
 
@@ -71,10 +71,6 @@ RefPtr<Capability> Process::GetCapability(uint64_t cid) {
   return caps_.GetCapability(cid);
 }
 
-uint64_t Process::AddCapability(const RefPtr<Capability>& cap) {
+uint64_t Process::AddExistingCapability(const RefPtr<Capability>& cap) {
   return caps_.AddExistingCapability(cap);
-}
-
-void Process::AddCapability(uint64_t cap_id, const RefPtr<MemoryObject>& vmmo) {
-  caps_.AddNewCapabilityWithId(cap_id, vmmo, ZC_WRITE);
 }

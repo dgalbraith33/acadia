@@ -44,7 +44,7 @@ z_err_t Channel::Read(ZMessage& msg) {
   msg.num_caps = next_msg->caps.size();
   auto& proc = gScheduler->CurrentProcess();
   for (uint64_t i = 0; i < msg.num_caps; i++) {
-    msg.caps[i] = proc.AddCapability(next_msg->caps.PopFront());
+    msg.caps[i] = proc.AddExistingCapability(next_msg->caps.PopFront());
   }
 
   pending_messages_.PopFront();

@@ -81,7 +81,7 @@ z_err_t ProcessSpawn(ZProcessSpawnReq* req, ZProcessSpawnResp* resp) {
       return Z_ERR_CAP_NOT_FOUND;
     }
     // FIXME: Check permissions.
-    resp->bootstrap_cap = proc->AddCapability(cap);
+    resp->bootstrap_cap = proc->AddExistingCapability(cap);
   }
 
   return Z_OK;
