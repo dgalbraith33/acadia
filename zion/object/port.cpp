@@ -27,7 +27,9 @@ z_err_t Port::Write(const ZMessage& msg) {
   MutexHolder lock(mutex_);
   pending_messages_.PushBack(message);
   if (blocked_threads_.size() > 0) {
-    gScheduler->Enqueue(blocked_threads_.PopFront());
+    auto thread = blocked_threads_.PopFront();
+    thread->SetState(Thread::RUNNABLE);
+    gScheduler->Enqueue(thread);
   }
   return Z_OK;
 }

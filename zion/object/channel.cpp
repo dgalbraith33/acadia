@@ -82,7 +82,9 @@ z_err_t Channel::EnqueueMessage(const ZMessage& msg) {
   pending_messages_.PushBack(message);
 
   if (blocked_threads_.size() > 0) {
-    gScheduler->Enqueue(blocked_threads_.PopFront());
+    auto thread = blocked_threads_.PopFront();
+    thread->SetState(Thread::RUNNABLE);
+    gScheduler->Enqueue(thread);
   }
   return Z_OK;
 }
