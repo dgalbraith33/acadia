@@ -29,6 +29,8 @@ uint64_t Channel::release_cap() {
   return cap;
 }
 
+uint64_t Channel::cap() { return chan_cap_; }
+
 z_err_t Channel::WriteStr(const char* msg) {
   if (!chan_cap_) {
     return Z_ERR_NULL;

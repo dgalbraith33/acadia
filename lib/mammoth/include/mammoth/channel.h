@@ -8,6 +8,7 @@ class Channel {
   Channel() {}
   void adopt_cap(uint64_t id);
   uint64_t release_cap();
+  uint64_t cap();
 
   z_err_t WriteStr(const char* msg);
   z_err_t ReadStr(char* buffer, uint64_t* size);

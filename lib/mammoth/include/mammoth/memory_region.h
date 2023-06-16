@@ -15,6 +15,9 @@ class MappedMemoryRegion {
 
   uint64_t paddr() { return paddr_; }
   uint64_t vaddr() { return vaddr_; }
+  uint64_t size() { return size_; }
+
+  uint64_t cap() { return vmmo_cap_; }
 
   operator bool() { return vmmo_cap_ != 0; }
 

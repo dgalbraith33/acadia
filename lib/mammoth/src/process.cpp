@@ -69,7 +69,7 @@ uint64_t LoadElfProgram(uint64_t base, uint64_t as_cap) {
     dbgln("Create mem object");
 #endif
     uint64_t mem_cap;
-    uint64_t size = program.filesz;
+    uint64_t size = program.memsz;
     check(ZMemoryObjectCreate(size, &mem_cap));
 
 #if MAM_PROC_DEBUG
