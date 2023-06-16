@@ -29,7 +29,11 @@ class CapabilityTable {
   // FIXME: store this id here rather than in the capability.
   uint64_t next_cap_id_ = 0x100;
   // FIXME: use a map data structure.
-  LinkedList<RefPtr<Capability>> capabilities_;
+  struct CapEntry {
+    uint64_t id;
+    RefPtr<Capability> cap;
+  };
+  LinkedList<CapEntry> capabilities_;
 };
 
 template <typename T>
@@ -37,7 +41,8 @@ uint64_t CapabilityTable::AddNewCapability(const RefPtr<T>& object,
                                            uint64_t permissions) {
   MutexHolder h(lock_);
   uint64_t id = next_cap_id_++;
-  capabilities_.PushBack(MakeRefCounted<Capability>(object, id, permissions));
+  capabilities_.PushBack(
+      {.id = id, .cap = MakeRefCounted<Capability>(object, permissions)});
   return id;
 }
 
@@ -45,5 +50,6 @@ template <typename T>
 void CapabilityTable::AddNewCapabilityWithId(uint64_t id,
                                              const RefPtr<T>& object,
                                              uint64_t permissions) {
-  capabilities_.PushBack(MakeRefCounted<Capability>(object, id, permissions));
+  capabilities_.PushBack(
+      {.id = id, .cap = MakeRefCounted<Capability>(object, permissions)});
 }

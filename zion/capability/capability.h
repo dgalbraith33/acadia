@@ -10,18 +10,15 @@ class Thread;
 
 class Capability : public RefCounted<Capability> {
  public:
-  Capability(const RefPtr<KernelObject>& obj, uint64_t id, uint64_t permissions)
-      : obj_(obj), id_(id), permissions_(permissions) {}
+  Capability(const RefPtr<KernelObject>& obj, uint64_t permissions)
+      : obj_(obj), permissions_(permissions) {}
 
   template <typename T>
-  Capability(const RefPtr<T>& obj, uint64_t id, uint64_t permissions)
-      : Capability(StaticCastRefPtr<KernelObject>(obj), id, permissions) {}
+  Capability(const RefPtr<T>& obj, uint64_t permissions)
+      : Capability(StaticCastRefPtr<KernelObject>(obj), permissions) {}
 
   template <typename T>
   RefPtr<T> obj();
-
-  uint64_t id() { return id_; }
-  void set_id(uint64_t id) { id_ = id; }
 
   uint64_t permissions() { return permissions_; }
   bool HasPermissions(uint64_t requested) {
@@ -30,7 +27,6 @@ class Capability : public RefCounted<Capability> {
 
  private:
   RefPtr<KernelObject> obj_;
-  uint64_t id_;
   uint64_t permissions_;
 };
 

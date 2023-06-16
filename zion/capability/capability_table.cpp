@@ -4,17 +4,17 @@ CapabilityTable::CapabilityTable() {}
 
 uint64_t CapabilityTable::AddExistingCapability(const RefPtr<Capability>& cap) {
   MutexHolder h(lock_);
-  cap->set_id(next_cap_id_++);
-  capabilities_.PushBack(cap);
-  return cap->id();
+  uint64_t id = next_cap_id_++;
+  capabilities_.PushBack({.id = id, .cap = cap});
+  return id;
 }
 
 RefPtr<Capability> CapabilityTable::GetCapability(uint64_t id) {
   MutexHolder h(lock_);
   auto iter = capabilities_.begin();
   while (iter != capabilities_.end()) {
-    if (*iter && (*iter)->id() == id) {
-      return *iter;
+    if (iter->cap && iter->id == id) {
+      return iter->cap;
     }
     ++iter;
   }
@@ -27,10 +27,10 @@ RefPtr<Capability> CapabilityTable::ReleaseCapability(uint64_t id) {
   MutexHolder h(lock_);
   auto iter = capabilities_.begin();
   while (iter != capabilities_.end()) {
-    if (*iter && (*iter)->id() == id) {
+    if (iter->cap && iter->id == id) {
       // FIXME: Do an actual release here.
-      auto cap = *iter;
-      *iter = {nullptr};
+      auto cap = iter->cap;
+      iter->cap = {nullptr};
       return cap;
     }
     ++iter;
