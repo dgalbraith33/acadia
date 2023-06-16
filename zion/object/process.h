@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include "capability/capability.h"
+#include "capability/capability_table.h"
 #include "lib/linked_list.h"
 #include "lib/mutex.h"
 #include "lib/ref_ptr.h"
@@ -63,5 +64,5 @@ class Process : public KernelObject {
   uint64_t next_cap_id_ = 0x100;
 
   LinkedList<RefPtr<Thread>> threads_;
-  LinkedList<RefPtr<Capability>> caps_;
+  CapabilityTable caps_;
 };
