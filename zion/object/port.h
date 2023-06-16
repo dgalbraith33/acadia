@@ -1,7 +1,9 @@
 #pragma once
 
+#include "capability/capability.h"
 #include "lib/linked_list.h"
 #include "lib/mutex.h"
+#include "lib/shared_ptr.h"
 #include "object/kernel_object.h"
 #include "object/thread.h"
 #include "usr/zcall_internal.h"
@@ -27,9 +29,11 @@ class Port : public KernelObject {
     uint64_t type;
     uint64_t num_bytes;
     uint8_t* bytes;
+
+    LinkedList<RefPtr<Capability>> caps;
   };
 
-  LinkedList<Message> pending_messages_;
+  LinkedList<SharedPtr<Message>> pending_messages_;
 
   LinkedList<RefPtr<Thread>> blocked_threads_;
 

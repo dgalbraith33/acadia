@@ -8,6 +8,7 @@
 #include "object/process.h"
 #include "object/thread.h"
 #include "scheduler/process_manager.h"
+#include "scheduler/scheduler.h"
 
 #define K_INIT_DEBUG 0
 
@@ -127,7 +128,26 @@ void LoadInitProgram() {
   RefPtr<MemoryObject> prog2_vmmo = MakeRefCounted<MemoryObject>(prog2.size);
   prog2_vmmo->CopyBytesToObject(reinterpret_cast<uint64_t>(prog2.address),
                                 prog2.size);
-  proc->AddNewCapabilityWithId(Z_INIT_BOOT_VMMO, prog2_vmmo, ZC_WRITE);
 
-  proc->CreateThread()->Start(entry, 0, 0);
+  // TODO: Probably add a way for the kernel to write caps directly rather than
+  // by installing them first.
+  uint64_t vmmo_cap =
+      gScheduler->CurrentProcess().AddNewCapability(prog2_vmmo, ZC_WRITE);
+
+  auto port = MakeRefCounted<Port>();
+  uint64_t port_cap = proc->AddNewCapability(port, ZC_READ | ZC_WRITE);
+
+  uint64_t vmmo_id = Z_INIT_BOOT_VMMO;
+  ZMessage vmmo_msg{
+      .type = 0,
+      .num_bytes = 8,
+      .bytes = reinterpret_cast<uint8_t*>(&vmmo_id),
+      .num_caps = 1,
+      .caps = &vmmo_cap,
+  };
+  if (port->Write(vmmo_msg) != Z_OK) {
+    panic("Failed to write cap");
+  }
+
+  proc->CreateThread()->Start(entry, port_cap, 0);
 }

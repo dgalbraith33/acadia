@@ -5,23 +5,25 @@
 Port::Port() {}
 
 z_err_t Port::Write(const ZMessage& msg) {
-  if (msg.num_caps > 0) {
-    dbgln("Unimplemented passing caps on port");
-    return Z_ERR_UNIMPLEMENTED;
-  }
-
   if (msg.num_bytes > 0x1000) {
     dbgln("Large message size unimplemented: %x", msg.num_bytes);
     return Z_ERR_INVALID;
   }
+  dbgln("port write");
 
-  Message message{
-      .type = msg.type,
-      .num_bytes = msg.num_bytes,
-      .bytes = new uint8_t[msg.num_bytes],
-  };
+  auto message = MakeShared<Message>();
+  message->type = msg.type, message->num_bytes = msg.num_bytes;
+  message->bytes = new uint8_t[msg.num_bytes];
   for (uint64_t i = 0; i < msg.num_bytes; i++) {
-    message.bytes[i] = msg.bytes[i];
+    message->bytes[i] = msg.bytes[i];
+  }
+
+  for (uint64_t i = 0; i < msg.num_caps; i++) {
+    auto cap = gScheduler->CurrentProcess().ReleaseCapability(msg.caps[i]);
+    if (!cap) {
+      return Z_ERR_CAP_NOT_FOUND;
+    }
+    message->caps.PushBack(cap);
   }
 
   MutexHolder lock(mutex_);
@@ -35,6 +37,7 @@ z_err_t Port::Write(const ZMessage& msg) {
 }
 
 z_err_t Port::Read(ZMessage& msg) {
+  dbgln("port read");
   mutex_.Lock();
   while (pending_messages_.size() < 1) {
     blocked_threads_.PushBack(gScheduler->CurrentThread());
@@ -45,17 +48,25 @@ z_err_t Port::Read(ZMessage& msg) {
   mutex_.Unlock();
 
   MutexHolder lock(mutex_);
-  Message next_msg = pending_messages_.PeekFront();
-  if (next_msg.num_bytes > msg.num_bytes) {
+  auto next_msg = pending_messages_.PeekFront();
+  if (next_msg->num_bytes > msg.num_bytes) {
+    return Z_ERR_BUFF_SIZE;
+  }
+  if (next_msg->caps.size() > msg.num_caps) {
     return Z_ERR_BUFF_SIZE;
   }
 
-  msg.type = next_msg.type;
-  msg.num_bytes = next_msg.num_bytes;
-  msg.num_caps = 0;
+  msg.type = next_msg->type;
+  msg.num_bytes = next_msg->num_bytes;
 
   for (uint64_t i = 0; i < msg.num_bytes; i++) {
-    msg.bytes[i] = next_msg.bytes[i];
+    msg.bytes[i] = next_msg->bytes[i];
+  }
+
+  msg.num_caps = next_msg->caps.size();
+  auto& proc = gScheduler->CurrentProcess();
+  for (uint64_t i = 0; i < msg.num_caps; i++) {
+    msg.caps[i] = proc.AddExistingCapability(next_msg->caps.PopFront());
   }
 
   pending_messages_.PopFront();
