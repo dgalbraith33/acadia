@@ -74,29 +74,6 @@ RefPtr<Capability> Process::GetCapability(uint64_t cid) {
 uint64_t Process::AddCapability(const RefPtr<Capability>& cap) {
   return caps_.AddExistingCapability(cap);
 }
-uint64_t Process::AddCapability(const RefPtr<Thread>& thread) {
-  return caps_.AddNewCapability(thread, ZC_WRITE);
-}
-
-uint64_t Process::AddCapability(const RefPtr<Process>& proc) {
-  return caps_.AddNewCapability(proc, ZC_WRITE | ZC_PROC_SPAWN_THREAD);
-}
-
-uint64_t Process::AddCapability(const RefPtr<AddressSpace>& vmas) {
-  return caps_.AddNewCapability(vmas, ZC_WRITE);
-}
-
-uint64_t Process::AddCapability(const RefPtr<MemoryObject>& vmmo) {
-  return caps_.AddNewCapability(vmmo, ZC_WRITE);
-}
-
-uint64_t Process::AddCapability(const RefPtr<Channel>& chan) {
-  return caps_.AddNewCapability(chan, ZC_WRITE | ZC_READ);
-}
-
-uint64_t Process::AddCapability(const RefPtr<Port>& port) {
-  return caps_.AddNewCapability(port, ZC_WRITE | ZC_READ);
-}
 
 void Process::AddCapability(uint64_t cap_id, const RefPtr<MemoryObject>& vmmo) {
   caps_.AddNewCapabilityWithId(cap_id, vmmo, ZC_WRITE);

@@ -41,14 +41,14 @@ class Process : public KernelObject {
   RefPtr<Capability> GetCapability(uint64_t cid);
   // FIXME: We can't reset the cap id here.
   uint64_t AddCapability(const RefPtr<Capability>& cap);
-  uint64_t AddCapability(const RefPtr<Thread>& t);
-  uint64_t AddCapability(const RefPtr<Process>& p);
-  uint64_t AddCapability(const RefPtr<AddressSpace>& vmas);
-  uint64_t AddCapability(const RefPtr<MemoryObject>& vmmo);
-  uint64_t AddCapability(const RefPtr<Channel>& chan);
-  uint64_t AddCapability(const RefPtr<Port>& chan);
 
   void AddCapability(uint64_t cap_id, const RefPtr<MemoryObject>& vmmo);
+
+  template <typename T>
+  uint64_t AddNewCapability(const RefPtr<T>& obj, uint64_t permissions) {
+    return caps_.AddNewCapability(obj, permissions);
+  }
+
   // Checks the state of all child threads and transitions to
   // finished if all have finished.
   void CheckState();

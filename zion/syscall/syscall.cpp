@@ -71,8 +71,9 @@ z_err_t ProcessSpawn(ZProcessSpawnReq* req, ZProcessSpawnResp* resp) {
   RefPtr<Process> proc = Process::Create();
   gProcMan->InsertProcess(proc);
 
-  resp->proc_cap = curr_proc.AddCapability(proc);
-  resp->vmas_cap = curr_proc.AddCapability(proc->vmas());
+  resp->proc_cap = curr_proc.AddNewCapability(
+      proc, ZC_PROC_SPAWN_PROC | ZC_PROC_SPAWN_PROC | ZC_WRITE);
+  resp->vmas_cap = curr_proc.AddNewCapability(proc->vmas(), ZC_WRITE);
 
   if (req->bootstrap_cap != 0) {
     auto cap = curr_proc.ReleaseCapability(req->bootstrap_cap);
@@ -94,7 +95,7 @@ z_err_t ThreadCreate(ZThreadCreateReq* req, ZThreadCreateResp* resp) {
   auto parent_proc = cap->obj<Process>();
   RET_IF_NULL(parent_proc);
   auto thread = parent_proc->CreateThread();
-  resp->thread_cap = curr_proc.AddCapability(thread);
+  resp->thread_cap = curr_proc.AddNewCapability(thread, ZC_WRITE);
 
   return Z_OK;
 }
@@ -136,8 +137,8 @@ z_err_t AddressSpaceMap(ZAddressSpaceMapReq* req, ZAddressSpaceMapResp* resp) {
 z_err_t MemoryObjectCreate(ZMemoryObjectCreateReq* req,
                            ZMemoryObjectCreateResp* resp) {
   auto& curr_proc = gScheduler->CurrentProcess();
-  resp->vmmo_cap =
-      curr_proc.AddCapability(MakeRefCounted<MemoryObject>(req->size));
+  resp->vmmo_cap = curr_proc.AddNewCapability(
+      MakeRefCounted<MemoryObject>(req->size), ZC_WRITE);
   return Z_OK;
 }
 
@@ -149,8 +150,8 @@ z_err_t MemoryObjectCreatePhysical(ZMemoryObjectCreatePhysicalReq* req,
     paddr = phys_mem::AllocateContinuous(((req->size - 1) / 0x1000) + 1);
   }
   auto vmmo_ref = MakeRefCounted<FixedMemoryObject>(paddr, req->size);
-  resp->vmmo_cap =
-      curr_proc.AddCapability(StaticCastRefPtr<MemoryObject>(vmmo_ref));
+  resp->vmmo_cap = curr_proc.AddNewCapability(
+      StaticCastRefPtr<MemoryObject>(vmmo_ref), ZC_WRITE);
   resp->paddr = paddr;
   return Z_OK;
 }
@@ -160,8 +161,8 @@ z_err_t TempPcieConfigObjectCreate(ZTempPcieConfigObjectCreateResp* resp) {
   uint64_t pci_base, pci_size;
   RET_ERR(GetPciExtendedConfiguration(&pci_base, &pci_size));
   auto vmmo_ref = MakeRefCounted<FixedMemoryObject>(pci_base, pci_size);
-  resp->vmmo_cap =
-      curr_proc.AddCapability(StaticCastRefPtr<MemoryObject>(vmmo_ref));
+  resp->vmmo_cap = curr_proc.AddNewCapability(
+      StaticCastRefPtr<MemoryObject>(vmmo_ref), ZC_WRITE);
   resp->vmmo_size = pci_size;
   return Z_OK;
 }
@@ -169,8 +170,10 @@ z_err_t TempPcieConfigObjectCreate(ZTempPcieConfigObjectCreateResp* resp) {
 z_err_t ChannelCreate(ZChannelCreateResp* resp) {
   auto& proc = gScheduler->CurrentProcess();
   auto chan_pair = Channel::CreateChannelPair();
-  resp->chan_cap1 = proc.AddCapability(chan_pair.first());
-  resp->chan_cap2 = proc.AddCapability(chan_pair.second());
+  resp->chan_cap1 =
+      proc.AddNewCapability(chan_pair.first(), ZC_WRITE | ZC_READ);
+  resp->chan_cap2 =
+      proc.AddNewCapability(chan_pair.second(), ZC_WRITE | ZC_READ);
   return Z_OK;
 }
 
@@ -212,7 +215,7 @@ z_err_t IrqRegister(ZIrqRegisterReq* req, ZIrqRegisterResp* resp) {
     return Z_ERR_UNIMPLEMENTED;
   }
   RefPtr<Port> port = MakeRefCounted<Port>();
-  resp->port_cap = proc.AddCapability(port);
+  resp->port_cap = proc.AddNewCapability(port, ZC_READ | ZC_WRITE);
   RegisterPciPort(port);
   return Z_OK;
 }
