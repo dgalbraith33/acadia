@@ -9,6 +9,8 @@ class DenaliServer {
 
   z_err_t RunServer();
 
+  void HandleResponse(uint64_t lba, uint64_t size, uint64_t cap);
+
  private:
   static const uint64_t kBuffSize = 1024;
   uint64_t channel_cap_;
@@ -16,6 +18,5 @@ class DenaliServer {
 
   AhciDriver& driver_;
 
-  z_err_t HandleRead(const DenaliRead& read, DenaliReadResponse& resp,
-                     uint64_t& mem_cap);
+  z_err_t HandleRead(const DenaliRead& read);
 };

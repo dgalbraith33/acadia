@@ -12,7 +12,7 @@ class AhciDriver {
 
   void InterruptLoop();
 
-  z_err_t GetDevice(uint64_t id, AhciDevice& device);
+  z_err_t GetDevice(uint64_t id, AhciDevice** device);
 
   void DumpCapabilities();
   void DumpPorts();
@@ -24,7 +24,7 @@ class AhciDriver {
   AhciHba* ahci_hba_ = nullptr;
 
   // TODO: Allocate these dynamically.
-  AhciDevice devices_[32];
+  AhciDevice* devices_[32];
 
   Thread irq_thread_;
   uint64_t irq_port_cap_ = 0;

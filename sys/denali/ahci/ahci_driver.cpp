@@ -33,16 +33,16 @@ z_err_t AhciDriver::Init() {
   return Z_OK;
 }
 
-z_err_t AhciDriver::GetDevice(uint64_t id, AhciDevice& device) {
+z_err_t AhciDriver::GetDevice(uint64_t id, AhciDevice** device) {
   if (id >= 32) {
     return Z_ERR_INVALID;
   }
 
-  if (!devices_[id].IsInit()) {
+  if (devices_[id] != nullptr && !devices_[id]->IsInit()) {
     return Z_ERR_NOT_FOUND;
   }
 
-  device = devices_[id];
+  *device = devices_[id];
   return Z_OK;
 }
 
@@ -126,24 +126,27 @@ void AhciDriver::DumpCapabilities() {
 
 void AhciDriver::DumpPorts() {
   for (uint64_t i = 0; i < 6; i++) {
-    AhciDevice& dev = devices_[i];
-    if (!dev.IsInit()) {
+    AhciDevice* dev = devices_[i];
+    if (dev == nullptr || !dev->IsInit()) {
       continue;
     }
 
     dbgln("");
     dbgln("Port %u:", i);
-    dev.DumpInfo();
+    dev->DumpInfo();
   }
 }
 
 void AhciDriver::InterruptLoop() {
+  dbgln("Starting interrupt loop");
   while (true) {
     uint64_t type, bytes, caps;
     check(ZPortRecv(irq_port_cap_, 0, 0, 0, 0, &type, &bytes, &caps));
     for (uint64_t i = 0; i < 32; i++) {
-      if (devices_[i].IsInit() && (ahci_hba_->interrupt_status & (1 << i))) {
-        devices_[i].HandleIrq();
+      if (devices_[i] != nullptr && devices_[i]->IsInit() &&
+          (ahci_hba_->interrupt_status & (1 << i))) {
+        dbgln("Interrupt for %u", i);
+        devices_[i]->HandleIrq();
         ahci_hba_->interrupt_status &= ~(1 << i);
       }
     }
@@ -212,7 +215,7 @@ z_err_t AhciDriver::LoadDevices() {
     }
     uint64_t port_addr =
         reinterpret_cast<uint64_t>(ahci_hba_) + 0x100 + (0x80 * i);
-    devices_[i] = AhciDevice(reinterpret_cast<AhciPort*>(port_addr));
+    devices_[i] = new AhciDevice(reinterpret_cast<AhciPort*>(port_addr));
   }
   return Z_OK;
 }

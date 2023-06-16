@@ -4,12 +4,6 @@
 #include <string.h>
 #include <zcall.h>
 
-namespace {
-
-void HandleIdent(AhciDevice* dev) { dev->HandleIdentify(); }
-
-}  // namespace
-
 AhciDevice::AhciDevice(AhciPort* port) : port_struct_(port) {
   if ((port_struct_->sata_status & 0x103) != 0x103) {
     return;
@@ -38,57 +32,23 @@ AhciDevice::AhciDevice(AhciPort* port) : port_struct_(port) {
       reinterpret_cast<CommandTable*>(command_structures_.vaddr() + ct_off);
 
   port_struct_->interrupt_enable = 0xFFFFFFFF;
-
-  if (port_struct_->signature == 0x101) {
-    SendIdentify();
-  }
 }
 
-z_err_t AhciDevice::SendIdentify() {
-  HostToDeviceRegisterFis fis{
-      .fis_type = FIS_TYPE_REG_H2D,
-      .pmp_and_c = 0x80,
-      .command = 0xEC,
-      .featurel = 0,
+z_err_t AhciDevice::IssueCommand(Command* command) {
+  command->PopulateFis(command_table_->command_fis);
+  command->PopulatePrdt(command_table_->prdt);
 
-      .lba0 = 0,
-      .lba1 = 0,
-      .lba2 = 0,
-      .device = 0,
-
-      .lba3 = 0,
-      .lba4 = 0,
-      .lba5 = 0,
-      .featureh = 0,
-
-      .count = 0,
-      .icc = 0,
-      .control = 0,
-
-      .reserved = 0,
-  };
-
-  command_list_->command_headers[0].command = (sizeof(fis) / 2) & 0x1F;
+  command_list_->command_headers[0].command =
+      (sizeof(HostToDeviceRegisterFis) / 2) & 0x1F;
   command_list_->command_headers[0].prd_table_length = 1;
+  command_list_->command_headers[0].prd_byte_count = 0;
 
-  memcpy(command_table_->command_fis, &fis, sizeof(fis));
+  commands_[0] = command;
 
-  commands_[0].region = MappedMemoryRegion::ContiguousPhysical(512);
-  //  commands_[0].callback = HandleIdent;
-
-  command_table_->prds[0].region_address = commands_[0].region.paddr();
-  command_table_->prds[0].byte_count = 512;
-
-  port_struct_->command_issue |= 1;
   commands_issued_ |= 1;
+  port_struct_->command_issue |= 1;
 
   return Z_OK;
-}
-
-void AhciDevice::HandleIdentify() {
-  dbgln("Handling Idenify");
-  uint16_t* ident = reinterpret_cast<uint16_t*>(commands_[0].region.vaddr());
-  dbgln("Ident: %x", ident[0]);
 }
 
 void AhciDevice::DumpInfo() {
@@ -116,11 +76,15 @@ void AhciDevice::HandleIrq() {
   port_struct_->interrupt_status = int_status;
 
   uint32_t commands_finished = commands_issued_ & ~port_struct_->command_issue;
+  dbgln("finished %x", commands_finished);
+  dbgln("status %x", int_status);
+  dbgln("Issued %x, %x", commands_issued_, port_struct_->command_issue);
 
+  // FIXME: Pass error codes to the callback.
   for (uint64_t i = 0; i < 32; i++) {
     if (commands_finished & (1 << i)) {
-      // commands_[i].callback(this);
       commands_issued_ &= ~(1 << i);
+      commands_[i]->Callback();
     }
   }
 
@@ -134,6 +98,7 @@ void AhciDevice::HandleIrq() {
     }
     if (fis.error) {
       dbgln("D2H err: %x", fis.error);
+      dbgln("status: %x", fis.status);
     }
   }
   if (int_status & 0x2) {

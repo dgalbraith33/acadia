@@ -4,6 +4,7 @@
 #include <zerrors.h>
 
 #include "ahci/ahci.h"
+#include "ahci/command.h"
 
 class AhciDevice {
  public:
@@ -15,10 +16,12 @@ class AhciDevice {
 
   bool IsInit() { return port_struct_ != nullptr && command_structures_; }
 
-  z_err_t SendIdentify();
-  void HandleIdentify();
+  z_err_t IssueCommand(Command* command);
 
   void HandleIrq();
+
+  AhciDevice(const AhciDevice&) = delete;
+  AhciDevice& operator=(const AhciDevice&) = delete;
 
  private:
   AhciPort* port_struct_ = nullptr;
@@ -28,10 +31,6 @@ class AhciDevice {
   ReceivedFis* received_fis_ = nullptr;
   CommandTable* command_table_ = nullptr;
 
-  struct Command {
-    MappedMemoryRegion region;
-    // std::function<void(MappedMemoryRegion)> callback;
-  };
-  Command commands_[32];
-  uint32_t commands_issued_ = 0;
+  Command* commands_[32];
+  volatile uint32_t commands_issued_ = 0;
 };

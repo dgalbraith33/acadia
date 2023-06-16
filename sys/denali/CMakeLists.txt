@@ -1,6 +1,7 @@
 add_executable(denali
   ahci/ahci_device.cpp
   ahci/ahci_driver.cpp
+  ahci/command.cpp
   denali.cpp
   denali_server.cpp
   )
