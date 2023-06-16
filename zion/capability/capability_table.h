@@ -13,14 +13,13 @@ class CapabilityTable {
   CapabilityTable& operator=(CapabilityTable&) = delete;
 
   template <typename T>
-  uint64_t AddNewCapability(const RefPtr<T>& object, Capability::Type type,
-                            uint64_t permissions);
+  uint64_t AddNewCapability(const RefPtr<T>& object, uint64_t permissions);
   uint64_t AddExistingCapability(const RefPtr<Capability>& cap);
 
   // FIXME: Remove reliance on this.
   template <typename T>
   void AddNewCapabilityWithId(uint64_t id, const RefPtr<T>& object,
-                              Capability::Type type, uint64_t permissions);
+                              uint64_t permissions);
 
   RefPtr<Capability> GetCapability(uint64_t id);
   RefPtr<Capability> ReleaseCapability(uint64_t id);
@@ -35,20 +34,16 @@ class CapabilityTable {
 
 template <typename T>
 uint64_t CapabilityTable::AddNewCapability(const RefPtr<T>& object,
-                                           Capability::Type type,
                                            uint64_t permissions) {
   MutexHolder h(lock_);
   uint64_t id = next_cap_id_++;
-  capabilities_.PushBack(
-      MakeRefCounted<Capability>(object, type, id, permissions));
+  capabilities_.PushBack(MakeRefCounted<Capability>(object, id, permissions));
   return id;
 }
 
 template <typename T>
 void CapabilityTable::AddNewCapabilityWithId(uint64_t id,
                                              const RefPtr<T>& object,
-                                             Capability::Type type,
                                              uint64_t permissions) {
-  capabilities_.PushBack(
-      MakeRefCounted<Capability>(object, type, id, permissions));
+  capabilities_.PushBack(MakeRefCounted<Capability>(object, id, permissions));
 }

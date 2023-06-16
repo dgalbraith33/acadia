@@ -3,6 +3,12 @@
 #include "lib/linked_list.h"
 #include "object/kernel_object.h"
 
+class MemoryObject;
+template <>
+struct KernelObjectTag<MemoryObject> {
+  static const uint64_t type = KernelObject::MEMORY_OBJECT;
+};
+
 /*
  * MemoryObject is a page-aligned set of memory that corresponds
  * to physical pages.
@@ -11,6 +17,7 @@
  * */
 class MemoryObject : public KernelObject {
  public:
+  uint64_t TypeTag() override { return KernelObject::MEMORY_OBJECT; }
   MemoryObject(uint64_t size);
 
   uint64_t size() { return size_; }

@@ -10,8 +10,16 @@
 #include "object/kernel_object.h"
 #include "usr/zcall_internal.h"
 
+class Channel;
+
+template <>
+struct KernelObjectTag<Channel> {
+  static const uint64_t type = KernelObject::CHANNEL;
+};
+
 class Channel : public KernelObject {
  public:
+  uint64_t TypeTag() override { return KernelObject::CHANNEL; }
   static Pair<RefPtr<Channel>, RefPtr<Channel>> CreateChannelPair();
 
   RefPtr<Channel> peer() { return peer_; }

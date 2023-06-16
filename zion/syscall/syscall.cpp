@@ -16,6 +16,13 @@
 #include "scheduler/scheduler.h"
 #include "usr/zcall_internal.h"
 
+#define RET_IF_NULL(expr)    \
+  {                          \
+    if (!expr) {             \
+      return Z_ERR_CAP_TYPE; \
+    }                        \
+  }
+
 #define EFER 0xC0000080
 #define STAR 0xC0000081
 #define LSTAR 0xC0000082
@@ -46,13 +53,9 @@ void InitSyscall() {
   SetMSR(LSTAR, reinterpret_cast<uint64_t>(syscall_enter));
 }
 
-z_err_t ValidateCap(const RefPtr<Capability>& cap, Capability::Type type,
-                    uint64_t permissions) {
+z_err_t ValidateCap(const RefPtr<Capability>& cap, uint64_t permissions) {
   if (!cap) {
     return Z_ERR_CAP_NOT_FOUND;
-  }
-  if (!cap->CheckType(type)) {
-    return Z_ERR_CAP_TYPE;
   }
   if (!cap->HasPermissions(permissions)) {
     return Z_ERR_CAP_DENIED;
@@ -63,7 +66,7 @@ z_err_t ValidateCap(const RefPtr<Capability>& cap, Capability::Type type,
 z_err_t ProcessSpawn(ZProcessSpawnReq* req, ZProcessSpawnResp* resp) {
   auto& curr_proc = gScheduler->CurrentProcess();
   auto cap = curr_proc.GetCapability(req->proc_cap);
-  RET_ERR(ValidateCap(cap, Capability::PROCESS, ZC_PROC_SPAWN_PROC));
+  RET_ERR(ValidateCap(cap, ZC_PROC_SPAWN_PROC));
 
   RefPtr<Process> proc = Process::Create();
   gProcMan->InsertProcess(proc);
@@ -86,9 +89,10 @@ z_err_t ProcessSpawn(ZProcessSpawnReq* req, ZProcessSpawnResp* resp) {
 z_err_t ThreadCreate(ZThreadCreateReq* req, ZThreadCreateResp* resp) {
   auto& curr_proc = gScheduler->CurrentProcess();
   auto cap = curr_proc.GetCapability(req->proc_cap);
-  RET_ERR(ValidateCap(cap, Capability::PROCESS, ZC_PROC_SPAWN_THREAD));
+  RET_ERR(ValidateCap(cap, ZC_PROC_SPAWN_THREAD));
 
   auto parent_proc = cap->obj<Process>();
+  RET_IF_NULL(parent_proc);
   auto thread = parent_proc->CreateThread();
   resp->thread_cap = curr_proc.AddCapability(thread);
 
@@ -98,9 +102,10 @@ z_err_t ThreadCreate(ZThreadCreateReq* req, ZThreadCreateResp* resp) {
 z_err_t ThreadStart(ZThreadStartReq* req) {
   auto& curr_proc = gScheduler->CurrentProcess();
   auto cap = curr_proc.GetCapability(req->thread_cap);
-  RET_ERR(ValidateCap(cap, Capability::THREAD, ZC_WRITE));
+  RET_ERR(ValidateCap(cap, ZC_WRITE));
 
   auto thread = cap->obj<Thread>();
+  RET_IF_NULL(thread);
   // FIXME: validate entry point is in user space.
   thread->Start(req->entry, req->arg1, req->arg2);
   return Z_OK;
@@ -110,11 +115,14 @@ z_err_t AddressSpaceMap(ZAddressSpaceMapReq* req, ZAddressSpaceMapResp* resp) {
   auto& curr_proc = gScheduler->CurrentProcess();
   auto vmas_cap = curr_proc.GetCapability(req->vmas_cap);
   auto vmmo_cap = curr_proc.GetCapability(req->vmmo_cap);
-  RET_ERR(ValidateCap(vmas_cap, Capability::ADDRESS_SPACE, ZC_WRITE));
-  RET_ERR(ValidateCap(vmmo_cap, Capability::MEMORY_OBJECT, ZC_WRITE));
+  RET_ERR(ValidateCap(vmas_cap, ZC_WRITE));
+  RET_ERR(ValidateCap(vmmo_cap, ZC_WRITE));
 
   auto vmas = vmas_cap->obj<AddressSpace>();
   auto vmmo = vmmo_cap->obj<MemoryObject>();
+  RET_IF_NULL(vmas);
+  RET_IF_NULL(vmmo);
+  dbgln("Ptr %x, %x", vmas.get(), vmmo.get());
   // FIXME: Validation necessary.
   if (req->vmas_offset != 0) {
     vmas->MapInMemoryObject(req->vmas_offset, vmmo);
@@ -169,9 +177,10 @@ z_err_t ChannelCreate(ZChannelCreateResp* resp) {
 z_err_t ChannelSend(ZChannelSendReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto chan_cap = proc.GetCapability(req->chan_cap);
-  RET_ERR(ValidateCap(chan_cap, Capability::CHANNEL, ZC_WRITE));
+  RET_ERR(ValidateCap(chan_cap, ZC_WRITE));
 
   auto chan = chan_cap->obj<Channel>();
+  RET_IF_NULL(chan);
   chan->Write(req->message);
   return Z_OK;
 }
@@ -179,18 +188,20 @@ z_err_t ChannelSend(ZChannelSendReq* req) {
 z_err_t ChannelRecv(ZChannelRecvReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto chan_cap = proc.GetCapability(req->chan_cap);
-  RET_ERR(ValidateCap(chan_cap, Capability::CHANNEL, ZC_READ));
+  RET_ERR(ValidateCap(chan_cap, ZC_READ));
 
   auto chan = chan_cap->obj<Channel>();
+  RET_IF_NULL(chan);
   return chan->Read(req->message);
 }
 
 z_err_t PortRecv(ZPortRecvReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto port_cap = proc.GetCapability(req->port_cap);
-  RET_ERR(ValidateCap(port_cap, Capability::PORT, ZC_READ));
+  RET_ERR(ValidateCap(port_cap, ZC_READ));
 
   auto port = port_cap->obj<Port>();
+  RET_IF_NULL(port);
   return port->Read(req->message);
 }
 

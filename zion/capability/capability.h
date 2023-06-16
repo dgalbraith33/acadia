@@ -10,31 +10,18 @@ class Thread;
 
 class Capability : public RefCounted<Capability> {
  public:
-  enum Type {
-    UNDEFINED,
-    PROCESS,
-    THREAD,
-    ADDRESS_SPACE,
-    MEMORY_OBJECT,
-    CHANNEL,
-    PORT,
-  };
-  Capability(const RefPtr<KernelObject>& obj, Type type, uint64_t id,
-             uint64_t permissions)
-      : obj_(obj), type_(type), id_(id), permissions_(permissions) {}
+  Capability(const RefPtr<KernelObject>& obj, uint64_t id, uint64_t permissions)
+      : obj_(obj), id_(id), permissions_(permissions) {}
 
   template <typename T>
-  Capability(const RefPtr<T>& obj, Type type, uint64_t id, uint64_t permissions)
-      : Capability(StaticCastRefPtr<KernelObject>(obj), type, id, permissions) {
-  }
+  Capability(const RefPtr<T>& obj, uint64_t id, uint64_t permissions)
+      : Capability(StaticCastRefPtr<KernelObject>(obj), id, permissions) {}
 
   template <typename T>
   RefPtr<T> obj();
 
   uint64_t id() { return id_; }
   void set_id(uint64_t id) { id_ = id; }
-
-  bool CheckType(Type type) { return type_ == type; }
 
   uint64_t permissions() { return permissions_; }
   bool HasPermissions(uint64_t requested) {
@@ -43,7 +30,14 @@ class Capability : public RefCounted<Capability> {
 
  private:
   RefPtr<KernelObject> obj_;
-  Type type_;
   uint64_t id_;
   uint64_t permissions_;
 };
+
+template <typename T>
+RefPtr<T> Capability::obj() {
+  if (obj_->TypeTag() != KernelObjectTag<T>::type) {
+    return nullptr;
+  }
+  return StaticCastRefPtr<T>(obj_);
+}

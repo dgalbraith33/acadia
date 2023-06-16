@@ -6,8 +6,17 @@
 #include "object/thread.h"
 #include "usr/zcall_internal.h"
 
+class Port;
+
+template <>
+struct KernelObjectTag<Port> {
+  static const uint64_t type = KernelObject::PORT;
+};
+
 class Port : public KernelObject {
  public:
+  uint64_t TypeTag() override { return KernelObject::PORT; }
+
   Port();
 
   z_err_t Write(const ZMessage& msg);

@@ -14,8 +14,14 @@
 // Forward decl due to cyclic dependency.
 class Thread;
 
+template <>
+struct KernelObjectTag<Process> {
+  static const uint64_t type = KernelObject::PROCESS;
+};
+
 class Process : public KernelObject {
  public:
+  uint64_t TypeTag() override { return KernelObject::PROCESS; }
   enum State {
     UNSPECIFIED,
     SETUP,

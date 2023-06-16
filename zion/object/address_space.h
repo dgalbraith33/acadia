@@ -6,6 +6,13 @@
 #include "memory/user_stack_manager.h"
 #include "object/memory_object.h"
 
+class AddressSpace;
+
+template <>
+struct KernelObjectTag<AddressSpace> {
+  static const uint64_t type = KernelObject::ADDRESS_SPACE;
+};
+
 // VirtualMemory class holds a memory space for an individual process.
 //
 // Memory Regions are predefined for simplicity for now. However, in general
@@ -26,6 +33,8 @@
 // 0xFFFFFFFF 90000000 - 0xFFFFFFFF 9FFFFFFF : KERNEL_STACK (256 MiB)
 class AddressSpace : public KernelObject {
  public:
+  uint64_t TypeTag() override { return KernelObject::ADDRESS_SPACE; }
+
   enum MemoryType {
     UNSPECIFIED,
     UNMAPPED,
