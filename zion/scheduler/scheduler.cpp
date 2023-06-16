@@ -1,5 +1,6 @@
 #include "scheduler/scheduler.h"
 
+#include "common/gdt.h"
 #include "debug/debug.h"
 #include "lib/linked_list.h"
 #include "scheduler/process_manager.h"
@@ -26,6 +27,7 @@ void Scheduler::SwapToCurrent(Thread& prev) {
   }
   current_thread_->SetState(Thread::RUNNING);
 
+  SetRsp0(current_thread_->Rsp0Start());
   context_switch(prev.Rsp0Ptr(), current_thread_->Rsp0Ptr());
 
   asm volatile("sti");
