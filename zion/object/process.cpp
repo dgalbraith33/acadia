@@ -42,7 +42,7 @@ RefPtr<Thread> Process::GetThread(uint64_t tid) {
   MutexHolder lock(mutex_);
   auto iter = threads_.begin();
   while (iter != threads_.end()) {
-    if (iter->tid() == tid) {
+    if ((*iter)->tid() == tid) {
       return *iter;
     }
     ++iter;
@@ -55,7 +55,7 @@ void Process::CheckState() {
   MutexHolder lock(mutex_);
   auto iter = threads_.begin();
   while (iter != threads_.end()) {
-    if (iter->GetState() != Thread::FINISHED) {
+    if ((*iter)->GetState() != Thread::FINISHED) {
       return;
     }
     ++iter;

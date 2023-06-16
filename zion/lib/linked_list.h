@@ -88,7 +88,7 @@ class LinkedList {
     }
 
     T& operator*() { return item_->item; }
-    T& operator->() { return item_->item; }
+    T* operator->() { return &item_->item; }
     bool operator==(const Iterator& other) { return item_ == other.item_; }
     bool operator!=(const Iterator& other) { return item_ != other.item_; }
 

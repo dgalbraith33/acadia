@@ -13,7 +13,7 @@ RefPtr<Capability> CapabilityTable::GetCapability(uint64_t id) {
   MutexHolder h(lock_);
   auto iter = capabilities_.begin();
   while (iter != capabilities_.end()) {
-    if (*iter && iter->id() == id) {
+    if (*iter && (*iter)->id() == id) {
       return *iter;
     }
     ++iter;
@@ -27,7 +27,7 @@ RefPtr<Capability> CapabilityTable::ReleaseCapability(uint64_t id) {
   MutexHolder h(lock_);
   auto iter = capabilities_.begin();
   while (iter != capabilities_.end()) {
-    if (*iter && iter->id() == id) {
+    if (*iter && (*iter)->id() == id) {
       // FIXME: Do an actual release here.
       auto cap = *iter;
       *iter = {nullptr};
