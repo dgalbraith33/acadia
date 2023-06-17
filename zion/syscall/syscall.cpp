@@ -238,7 +238,7 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
   switch (call_id) {
     case Z_PROCESS_EXIT:
       // FIXME: kill process here.
-      dbgln("Exit code: %u", req);
+      dbgln("Exit code: %x", req);
       thread->Exit();
       panic("Returned from thread exit");
       break;
