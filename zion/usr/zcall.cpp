@@ -163,6 +163,13 @@ z_err_t ZChannelRecv(uint64_t chan_cap, uint64_t num_bytes, uint8_t* bytes,
   return ret;
 }
 
+z_err_t ZPortCreate(uint64_t* port_cap) {
+  ZPortCreateResp resp;
+  z_err_t ret = SysCall2(Z_PORT_CREATE, 0, &resp);
+  *port_cap = resp.port_cap;
+  return ret;
+}
+
 z_err_t ZPortRecv(uint64_t port_cap, uint64_t num_bytes, uint8_t* bytes,
                   uint64_t num_caps, uint64_t* caps, uint64_t* type,
                   uint64_t* actual_bytes, uint64_t* actual_caps) {

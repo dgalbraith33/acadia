@@ -198,6 +198,12 @@ z_err_t ChannelRecv(ZChannelRecvReq* req) {
   return chan->Read(req->message);
 }
 
+z_err_t PortCreate(ZPortCreateResp* resp) {
+  auto& proc = gScheduler->CurrentProcess();
+  auto port = MakeRefCounted<Port>();
+  return proc.AddNewCapability(port, ZC_WRITE | ZC_READ);
+}
+
 z_err_t PortRecv(ZPortRecvReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto port_cap = proc.GetCapability(req->port_cap);
@@ -275,6 +281,8 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
       return ChannelSend(reinterpret_cast<ZChannelSendReq*>(req));
     case Z_CHANNEL_RECV:
       return ChannelRecv(reinterpret_cast<ZChannelRecvReq*>(req));
+    case Z_PORT_CREATE:
+      return PortCreate(reinterpret_cast<ZPortCreateResp*>(resp));
     case Z_PORT_RECV:
       return PortRecv(reinterpret_cast<ZPortRecvReq*>(req));
     case Z_PORT_POLL:
