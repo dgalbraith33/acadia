@@ -15,7 +15,7 @@
 #define Z_PROCESS_START 0x03
 
 #define ZC_PROC_SPAWN_PROC 0x100
-#define ZC_PROC_SPAWN_THREAD 0x101
+#define ZC_PROC_SPAWN_THREAD 0x200
 
 // Thread Calls.
 #define Z_THREAD_CREATE 0x10

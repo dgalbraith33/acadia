@@ -57,7 +57,10 @@ z_err_t ValidateCap(const RefPtr<Capability>& cap, uint64_t permissions) {
   if (!cap) {
     return Z_ERR_CAP_NOT_FOUND;
   }
+  // FIXME: Check capability type before permissions, otherwise you can
+  // get a confusing error.
   if (!cap->HasPermissions(permissions)) {
+    dbgln("PERM, has %x needs %x", cap->permissions(), permissions);
     return Z_ERR_CAP_DENIED;
   }
   return Z_OK;
@@ -72,7 +75,7 @@ z_err_t ProcessSpawn(ZProcessSpawnReq* req, ZProcessSpawnResp* resp) {
   gProcMan->InsertProcess(proc);
 
   resp->proc_cap = curr_proc.AddNewCapability(
-      proc, ZC_PROC_SPAWN_PROC | ZC_PROC_SPAWN_PROC | ZC_WRITE);
+      proc, ZC_PROC_SPAWN_PROC | ZC_PROC_SPAWN_THREAD | ZC_WRITE);
   resp->vmas_cap = curr_proc.AddNewCapability(proc->vmas(), ZC_WRITE);
 
   if (req->bootstrap_cap != 0) {
