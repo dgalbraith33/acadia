@@ -2,6 +2,7 @@
 
 #include <mammoth/debug.h>
 #include <zcall.h>
+#include <zinit.h>
 
 namespace {
 

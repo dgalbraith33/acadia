@@ -1,6 +1,7 @@
 #include "mammoth/thread.h"
 
 #include <zcall.h>
+#include <zinit.h>
 
 #include "mammoth/debug.h"
 

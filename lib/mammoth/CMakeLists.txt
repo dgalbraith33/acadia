@@ -1,8 +1,10 @@
 add_library(mammoth_lib STATIC
   src/channel.cpp
   src/debug.cpp
+  src/init.cpp
   src/memory_region.cpp
   src/process.cpp
+  src/port.cpp
   src/thread.cpp
   )
 

@@ -1,4 +1,5 @@
 #include <zcall.h>
+#include <zinit.h>
 
 #include "stdlib.h"
 

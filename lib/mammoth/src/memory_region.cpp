@@ -1,6 +1,7 @@
 #include "mammoth/memory_region.h"
 
 #include <zcall.h>
+#include <zinit.h>
 
 #include "mammoth/debug.h"
 

@@ -3,6 +3,7 @@
 #include "boot/boot_info.h"
 #include "debug/debug.h"
 #include "include/zcall.h"
+#include "include/zinit.h"
 #include "lib/ref_ptr.h"
 #include "memory/paging_util.h"
 #include "object/process.h"
@@ -71,7 +72,7 @@ uint64_t LoadElfProgram(Process& dest_proc, uint64_t base, uint64_t offset) {
         program.type, program.flags, program.offset, program.vaddr,
         program.paddr, program.filesz, program.memsz, program.align);
 #endif
-    auto mem_obj = MakeRefCounted<MemoryObject>(program.filesz);
+    auto mem_obj = MakeRefCounted<MemoryObject>(program.memsz);
     mem_obj->CopyBytesToObject(base + program.offset, program.filesz);
     dest_proc.vmas()->MapInMemoryObject(program.vaddr, mem_obj);
   }
@@ -137,7 +138,7 @@ void LoadInitProgram() {
   auto port = MakeRefCounted<Port>();
   uint64_t port_cap = proc->AddNewCapability(port, ZC_READ | ZC_WRITE);
 
-  uint64_t vmmo_id = Z_INIT_BOOT_VMMO;
+  uint64_t vmmo_id = Z_BOOT_DENALI_VMMO;
   ZMessage vmmo_msg{
       .type = 0,
       .num_bytes = 8,
