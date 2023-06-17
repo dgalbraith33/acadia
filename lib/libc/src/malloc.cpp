@@ -1,4 +1,5 @@
 #include <zcall.h>
+#include <zglobal.h>
 #include <zinit.h>
 
 #include "stdlib.h"
@@ -15,7 +16,7 @@ class NaiveAllocator {
     if (err != 0) {
       ZProcessExit(err);
     }
-    err = ZAddressSpaceMap(Z_INIT_VMAS_SELF, 0, vmmo_cap, &next_addr_);
+    err = ZAddressSpaceMap(gSelfVmasCap, 0, vmmo_cap, &next_addr_);
     max_addr_ = next_addr_ + kSize;
   }
 

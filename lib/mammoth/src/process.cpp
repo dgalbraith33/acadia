@@ -7,6 +7,7 @@
 #include "mammoth/channel.h"
 #include "mammoth/debug.h"
 #include "mammoth/init.h"
+#include "mammoth/port.h"
 
 #define MAM_PROC_DEBUG 0
 
@@ -99,26 +100,40 @@ uint64_t SpawnProcessFromElfRegion(uint64_t program, Channel& local) {
   Channel foreign;
   check(CreateChannels(local, foreign));
 
+  uint64_t proc_cap;
+  uint64_t as_cap;
+  uint64_t foreign_port_id;
+  uint64_t port_cap;
+#if MAM_PROC_DEBUG
+  dbgln("Port Create");
+#endif
+  check(ZPortCreate(&port_cap));
+  uint64_t port_cap_donate;
+  check(ZCapDuplicate(port_cap, &port_cap_donate));
+
 #if MAM_PROC_DEBUG
   dbgln("Spawn");
 #endif
-  uint64_t proc_cap;
-  uint64_t as_cap;
-  uint64_t foreign_chan_id;
-  check(ZProcessSpawn(gSelfProcCap, foreign.release_cap(), &proc_cap, &as_cap,
-                      &foreign_chan_id));
+  check(ZProcessSpawn(gSelfProcCap, port_cap_donate, &proc_cap, &as_cap,
+                      &foreign_port_id));
 
   uint64_t entry_point = LoadElfProgram(program, as_cap);
+
 #if MAM_PROC_DEBUG
   dbgln("Thread Create");
 #endif
   uint64_t thread_cap;
   check(ZThreadCreate(proc_cap, &thread_cap));
 
+  Port p(port_cap);
+  check(p.WriteMessage<uint64_t>(Z_INIT_SELF_PROC, proc_cap));
+  check(p.WriteMessage<uint64_t>(Z_INIT_SELF_VMAS, as_cap));
+  check(p.WriteMessage<uint64_t>(Z_INIT_CHANNEL, foreign.release_cap()));
+
 #if MAM_PROC_DEBUG
   dbgln("Thread start");
 #endif
-  check(ZThreadStart(thread_cap, entry_point, foreign_chan_id, 0));
+  check(ZThreadStart(thread_cap, entry_point, foreign_port_id, 0));
 
   return Z_OK;
 }

@@ -21,13 +21,7 @@ RefPtr<Process> Process::RootProcess() {
 
   return proc;
 }
-RefPtr<Process> Process::Create() {
-  auto proc = MakeRefCounted<Process>();
-  proc->AddNewCapabilityWithId(Z_INIT_PROC_SELF, proc,
-                               ZC_PROC_SPAWN_PROC | ZC_PROC_SPAWN_THREAD);
-  proc->AddNewCapabilityWithId(Z_INIT_VMAS_SELF, proc->vmas(), ZC_WRITE);
-  return proc;
-}
+RefPtr<Process> Process::Create() { return MakeRefCounted<Process>(); }
 
 Process::Process()
     : id_(gNextId++), vmas_(MakeRefCounted<AddressSpace>()), state_(RUNNING) {}

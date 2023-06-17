@@ -8,6 +8,8 @@
 uint64_t gSelfProcCap = 0;
 uint64_t gSelfVmasCap = 0;
 
+uint64_t gInitChannelCap = 0;
+
 uint64_t gBootDenaliVmmoCap = 0;
 
 z_err_t ParseInitPort(uint64_t init_port_cap) {
@@ -24,6 +26,9 @@ z_err_t ParseInitPort(uint64_t init_port_cap) {
       case Z_INIT_SELF_VMAS:
         dbgln("received vmas");
         gSelfVmasCap = init_cap;
+        break;
+      case Z_INIT_CHANNEL:
+        gInitChannelCap = init_cap;
         break;
       case Z_BOOT_DENALI_VMMO:
         dbgln("received denali");
