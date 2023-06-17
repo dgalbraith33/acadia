@@ -94,6 +94,9 @@ void ZThreadExit();
                                    uint64_t* actual_caps);
 
 [[nodiscard]] z_err_t ZPortCreate(uint64_t* port_cap);
+[[nodiscard]] z_err_t ZPortSend(uint64_t port_cap, uint64_t num_bytes,
+                                const uint8_t* bytes, uint64_t num_caps,
+                                uint64_t* caps);
 [[nodiscard]] z_err_t ZPortRecv(uint64_t port_cap, uint64_t num_bytes,
                                 uint8_t* bytes, uint64_t num_caps,
                                 uint64_t* caps, uint64_t* type,

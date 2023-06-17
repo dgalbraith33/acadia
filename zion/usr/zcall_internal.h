@@ -90,6 +90,11 @@ struct ZPortCreateResp {
   uint64_t port_cap;
 };
 
+struct ZPortSendReq {
+  uint64_t port_cap;
+  ZMessage message;
+};
+
 struct ZPortRecvReq {
   uint64_t port_cap;
   ZMessage message;

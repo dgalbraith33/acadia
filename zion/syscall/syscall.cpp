@@ -204,6 +204,16 @@ z_err_t PortCreate(ZPortCreateResp* resp) {
   return proc.AddNewCapability(port, ZC_WRITE | ZC_READ);
 }
 
+z_err_t PortSend(ZPortSendReq* req) {
+  auto& proc = gScheduler->CurrentProcess();
+  auto port_cap = proc.GetCapability(req->port_cap);
+  RET_ERR(ValidateCap(port_cap, ZC_WRITE));
+
+  auto port = port_cap->obj<Port>();
+  RET_IF_NULL(port);
+  return port->Write(req->message);
+}
+
 z_err_t PortRecv(ZPortRecvReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto port_cap = proc.GetCapability(req->port_cap);
@@ -293,6 +303,8 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
       return ChannelRecv(reinterpret_cast<ZChannelRecvReq*>(req));
     case Z_PORT_CREATE:
       return PortCreate(reinterpret_cast<ZPortCreateResp*>(resp));
+    case Z_PORT_SEND:
+      return PortSend(reinterpret_cast<ZPortSendReq*>(req));
     case Z_PORT_RECV:
       return PortRecv(reinterpret_cast<ZPortRecvReq*>(req));
     case Z_PORT_POLL:

@@ -170,6 +170,19 @@ z_err_t ZPortCreate(uint64_t* port_cap) {
   return ret;
 }
 
+z_err_t ZPortSend(uint64_t port_cap, uint64_t num_bytes, const uint8_t* bytes,
+                  uint64_t num_caps, uint64_t* caps) {
+  ZPortSendReq req{.port_cap = port_cap,
+                   .message = {
+                       .type = 0,
+                       .num_bytes = num_bytes,
+                       .bytes = const_cast<uint8_t*>(bytes),
+                       .num_caps = num_caps,
+                       .caps = caps,
+                   }};
+  return SysCall1(Z_PORT_SEND, &req);
+}
+
 z_err_t ZPortRecv(uint64_t port_cap, uint64_t num_bytes, uint8_t* bytes,
                   uint64_t num_caps, uint64_t* caps, uint64_t* type,
                   uint64_t* actual_bytes, uint64_t* actual_caps) {
