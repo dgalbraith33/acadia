@@ -201,7 +201,8 @@ z_err_t ChannelRecv(ZChannelRecvReq* req) {
 z_err_t PortCreate(ZPortCreateResp* resp) {
   auto& proc = gScheduler->CurrentProcess();
   auto port = MakeRefCounted<Port>();
-  return proc.AddNewCapability(port, ZC_WRITE | ZC_READ);
+  resp->port_cap = proc.AddNewCapability(port, ZC_WRITE | ZC_READ);
+  return Z_OK;
 }
 
 z_err_t PortSend(ZPortSendReq* req) {
