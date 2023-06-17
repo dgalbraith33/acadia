@@ -1,6 +1,6 @@
 #include "object/channel.h"
 
-#include "include/zerrors.h"
+#include "include/ztypes.h"
 #include "scheduler/scheduler.h"
 
 Pair<RefPtr<Channel>, RefPtr<Channel>> Channel::CreateChannelPair() {

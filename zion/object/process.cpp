@@ -2,7 +2,6 @@
 
 #include "debug/debug.h"
 #include "include/zcall.h"
-#include "include/zinit.h"
 #include "memory/paging_util.h"
 #include "memory/physical_memory.h"
 #include "object/thread.h"

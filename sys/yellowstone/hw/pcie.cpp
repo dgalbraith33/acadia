@@ -3,7 +3,6 @@
 #include <mammoth/debug.h>
 #include <mammoth/init.h>
 #include <zcall.h>
-#include <zinit.h>
 
 namespace {
 

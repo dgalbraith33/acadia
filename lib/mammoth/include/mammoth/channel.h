@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include <zerrors.h>
+#include <ztypes.h>
 
 class Channel {
  public:

@@ -2,55 +2,7 @@
 
 #include <stdint.h>
 
-#include "zerrors.h"
-
-#define Z_INVALID 0x0
-
-#define ZC_WRITE 0x01
-#define ZC_READ 0x02
-
-// Process Calls.
-#define Z_PROCESS_EXIT 0x01
-#define Z_PROCESS_SPAWN 0x02
-#define Z_PROCESS_START 0x03
-
-#define ZC_PROC_SPAWN_PROC 0x100
-#define ZC_PROC_SPAWN_THREAD 0x200
-
-// Thread Calls.
-#define Z_THREAD_CREATE 0x10
-#define Z_THREAD_START 0x11
-#define Z_THREAD_EXIT 0x12
-
-// Memory Calls
-#define Z_ADDRESS_SPACE_MAP 0x21
-#define Z_ADDRESS_SPACE_UNMAP 0x22
-
-#define Z_MEMORY_OBJECT_CREATE 0x30
-#define Z_MEMORY_OBJECT_CREATE_PHYSICAL 0x31
-
-#define Z_TEMP_PCIE_CONFIG_OBJECT_CREATE 0x3F
-
-// IPC Calls
-#define Z_CHANNEL_CREATE 0x40
-#define Z_CHANNEL_SEND 0x41
-#define Z_CHANNEL_RECV 0x42
-#define Z_CHANNEL_SENDRECV 0x43
-
-#define Z_PORT_CREATE 0x50
-#define Z_PORT_SEND 0x51
-#define Z_PORT_RECV 0x52
-#define Z_PORT_POLL 0x53
-
-#define Z_IRQ_REGISTER 0x58
-
-#define Z_IRQ_PCI_BASE 0x30
-
-// Capability Calls
-#define Z_CAP_DUPLICATE 0x60
-
-// Debugging Calls.
-#define Z_DEBUG_PRINT 0x10000000
+#include "ztypes.h"
 
 void ZProcessExit(uint64_t code);
 

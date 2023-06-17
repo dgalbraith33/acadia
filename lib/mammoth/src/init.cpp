@@ -1,6 +1,6 @@
 #include "mammoth/init.h"
 
-#include <zinit.h>
+#include <ztypes.h>
 
 #include "mammoth/debug.h"
 #include "mammoth/port.h"

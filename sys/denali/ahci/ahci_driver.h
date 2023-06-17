@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mammoth/thread.h>
-#include <zerrors.h>
+#include <ztypes.h>
 
 #include "ahci/ahci.h"
 #include "ahci/ahci_device.h"

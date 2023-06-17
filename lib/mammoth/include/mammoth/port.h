@@ -2,7 +2,6 @@
 
 #include <stdint.h>
 #include <zcall.h>
-#include <zerrors.h>
 
 class Port {
  public:

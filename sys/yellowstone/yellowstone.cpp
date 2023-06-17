@@ -4,7 +4,6 @@
 #include <mammoth/init.h>
 #include <mammoth/process.h>
 #include <zcall.h>
-#include <zinit.h>
 
 #include "hw/pcie.h"
 

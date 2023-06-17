@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include "include/zerrors.h"
+#include "include/ztypes.h"
 
 void ProbeRsdp();
 

@@ -2,7 +2,7 @@
 
 #include <stdarg.h>
 
-#include "include/zerrors.h"
+#include "include/ztypes.h"
 
 void dbg(const char* fmt, ...);
 void dbgln(const char* str, ...);

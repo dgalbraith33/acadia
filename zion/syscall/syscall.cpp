@@ -6,7 +6,6 @@
 #include "common/msr.h"
 #include "debug/debug.h"
 #include "include/zcall.h"
-#include "include/zerrors.h"
 #include "interrupt/interrupt.h"
 #include "memory/physical_memory.h"
 #include "object/channel.h"

@@ -3,7 +3,6 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <zcall.h>
-#include <zerrors.h>
 
 void dbgln_internal(const char* str) {  // Safe to ignore the result since right
                                         // now this doesn't throw.

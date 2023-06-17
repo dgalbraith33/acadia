@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mammoth/memory_region.h>
-#include <zerrors.h>
+#include <ztypes.h>
 
 #include "ahci/ahci.h"
 #include "ahci/command.h"

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "capability/capability.h"
-#include "include/zerrors.h"
+#include "include/ztypes.h"
 #include "lib/linked_list.h"
 #include "lib/mutex.h"
 #include "lib/pair.h"

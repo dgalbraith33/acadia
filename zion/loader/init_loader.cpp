@@ -3,7 +3,6 @@
 #include "boot/boot_info.h"
 #include "debug/debug.h"
 #include "include/zcall.h"
-#include "include/zinit.h"
 #include "lib/ref_ptr.h"
 #include "memory/paging_util.h"
 #include "object/process.h"

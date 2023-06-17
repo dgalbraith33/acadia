@@ -1,8 +1,6 @@
 #include "mammoth/process.h"
 
 #include <zcall.h>
-#include <zerrors.h>
-#include <zinit.h>
 
 #include "mammoth/channel.h"
 #include "mammoth/debug.h"
