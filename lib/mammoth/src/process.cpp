@@ -6,6 +6,7 @@
 
 #include "mammoth/channel.h"
 #include "mammoth/debug.h"
+#include "mammoth/init.h"
 
 #define MAM_PROC_DEBUG 0
 
@@ -77,7 +78,7 @@ uint64_t LoadElfProgram(uint64_t base, uint64_t as_cap) {
     dbgln("Map Local");
 #endif
     uint64_t vaddr;
-    check(ZAddressSpaceMap(Z_INIT_VMAS_SELF, 0, mem_cap, &vaddr));
+    check(ZAddressSpaceMap(gSelfVmasCap, 0, mem_cap, &vaddr));
 
 #if MAM_PROC_DEBUG
     dbgln("Copy");
@@ -104,8 +105,8 @@ uint64_t SpawnProcessFromElfRegion(uint64_t program, Channel& local) {
   uint64_t proc_cap;
   uint64_t as_cap;
   uint64_t foreign_chan_id;
-  check(ZProcessSpawn(Z_INIT_PROC_SELF, foreign.release_cap(), &proc_cap,
-                      &as_cap, &foreign_chan_id));
+  check(ZProcessSpawn(gSelfProcCap, foreign.release_cap(), &proc_cap, &as_cap,
+                      &foreign_chan_id));
 
   uint64_t entry_point = LoadElfProgram(program, as_cap);
 #if MAM_PROC_DEBUG

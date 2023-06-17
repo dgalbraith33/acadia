@@ -1,6 +1,7 @@
 #include "hw/pcie.h"
 
 #include <mammoth/debug.h>
+#include <mammoth/init.h>
 #include <zcall.h>
 #include <zinit.h>
 
@@ -92,7 +93,7 @@ void DumpPciEDevices() {
 
   dbgln("Creating addr space");
   uint64_t vaddr;
-  check(ZAddressSpaceMap(Z_INIT_VMAS_SELF, 0, vmmo_cap, &vaddr));
+  check(ZAddressSpaceMap(gSelfVmasCap, 0, vmmo_cap, &vaddr));
   dbgln("Addr %lx", vaddr);
 
   dbgln("Dumping PCI");

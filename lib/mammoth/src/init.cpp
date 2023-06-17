@@ -17,11 +17,11 @@ z_err_t ParseInitPort(uint64_t init_port_cap) {
   while ((ret = port.PollForIntCap(&init_sig, &init_cap)) != Z_ERR_EMPTY) {
     RET_ERR(ret);
     switch (init_sig) {
-      case Z_INIT_PROC_SELF:
+      case Z_INIT_SELF_PROC:
         dbgln("received proc");
         gSelfProcCap = init_cap;
         break;
-      case Z_INIT_VMAS_SELF:
+      case Z_INIT_SELF_VMAS:
         dbgln("received vmas");
         gSelfVmasCap = init_cap;
         break;

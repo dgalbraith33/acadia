@@ -133,6 +133,11 @@ void LoadInitProgram() {
   auto port = MakeRefCounted<Port>();
   uint64_t port_cap = proc->AddNewCapability(port, ZC_READ | ZC_WRITE);
 
+  port->WriteKernel(Z_INIT_SELF_PROC,
+                    MakeRefCounted<Capability>(
+                        proc, ZC_PROC_SPAWN_PROC | ZC_PROC_SPAWN_THREAD));
+  port->WriteKernel(Z_INIT_SELF_VMAS,
+                    MakeRefCounted<Capability>(proc->vmas(), ZC_WRITE));
   port->WriteKernel(Z_BOOT_DENALI_VMMO,
                     MakeRefCounted<Capability>(prog2_vmmo, ZC_READ | ZC_WRITE));
 

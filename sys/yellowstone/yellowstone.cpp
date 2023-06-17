@@ -13,7 +13,7 @@ uint64_t main(uint64_t port_cap) {
   check(ParseInitPort(port_cap));
 
   uint64_t vaddr;
-  check(ZAddressSpaceMap(Z_INIT_VMAS_SELF, 0, gBootDenaliVmmoCap, &vaddr));
+  check(ZAddressSpaceMap(gSelfVmasCap, 0, gBootDenaliVmmoCap, &vaddr));
 
   Channel local;
   check(SpawnProcessFromElfRegion(vaddr, local));
@@ -35,7 +35,7 @@ uint64_t main(uint64_t port_cap) {
 
   dbgln("Resp: %u", type);
 
-  check(ZAddressSpaceMap(Z_INIT_VMAS_SELF, 0, mem_cap, &vaddr));
+  check(ZAddressSpaceMap(gSelfVmasCap, 0, mem_cap, &vaddr));
   uint32_t* mbr = reinterpret_cast<uint32_t*>(vaddr + 0x1FE);
   dbgln("MBR: %x", *mbr);
 
