@@ -239,6 +239,16 @@ z_err_t IrqRegister(ZIrqRegisterReq* req, ZIrqRegisterResp* resp) {
   return Z_OK;
 }
 
+z_err_t CapDuplicate(ZCapDuplicateReq* req, ZCapDuplicateResp* resp) {
+  auto& proc = gScheduler->CurrentProcess();
+  auto cap = proc.GetCapability(req->cap);
+  if (!cap) {
+    return Z_ERR_CAP_NOT_FOUND;
+  }
+  resp->cap = proc.AddExistingCapability(cap);
+  return Z_OK;
+}
+
 extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
   RefPtr<Thread> thread = gScheduler->CurrentThread();
   switch (call_id) {
@@ -290,6 +300,9 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
     case Z_IRQ_REGISTER:
       return IrqRegister(reinterpret_cast<ZIrqRegisterReq*>(req),
                          reinterpret_cast<ZIrqRegisterResp*>(resp));
+    case Z_CAP_DUPLICATE:
+      return CapDuplicate(reinterpret_cast<ZCapDuplicateReq*>(req),
+                          reinterpret_cast<ZCapDuplicateResp*>(resp));
     case Z_DEBUG_PRINT:
       dbgln("[Debug] %s", req);
       return Z_OK;

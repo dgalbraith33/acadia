@@ -222,4 +222,14 @@ z_err_t ZIrqRegister(uint64_t irq_num, uint64_t* port_cap) {
   return ret;
 }
 
+z_err_t ZCapDuplicate(uint64_t cap_in, uint64_t* cap_out) {
+  ZCapDuplicateReq req{
+      .cap = cap_in,
+  };
+  ZCapDuplicateResp resp;
+  z_err_t ret = SysCall2(Z_CAP_DUPLICATE, &req, &resp);
+  *cap_out = resp.cap;
+  return ret;
+}
+
 z_err_t ZDebug(const char* message) { return SysCall1(Z_DEBUG_PRINT, message); }

@@ -102,3 +102,11 @@ struct ZIrqRegisterReq {
 struct ZIrqRegisterResp {
   uint64_t port_cap;
 };
+
+struct ZCapDuplicateReq {
+  uint64_t cap;
+};
+
+struct ZCapDuplicateResp {
+  uint64_t cap;
+};

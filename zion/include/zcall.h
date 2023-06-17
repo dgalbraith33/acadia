@@ -46,6 +46,9 @@
 
 #define Z_IRQ_PCI_BASE 0x30
 
+// Capability Calls
+#define Z_CAP_DUPLICATE 0x60
+
 // Debugging Calls.
 #define Z_DEBUG_PRINT 0x10000000
 
@@ -100,5 +103,7 @@ void ZThreadExit();
                                 uint64_t* caps, uint64_t* type,
                                 uint64_t* actual_bytes, uint64_t* actual_caps);
 [[nodiscard]] z_err_t ZIrqRegister(uint64_t irq_num, uint64_t* port_cap);
+
+[[nodiscard]] z_err_t ZCapDuplicate(uint64_t cap_in, uint64_t* cap_out);
 
 [[nodiscard]] z_err_t ZDebug(const char* message);
