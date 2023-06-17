@@ -74,6 +74,23 @@ z_err_t Port::Read(ZMessage& msg) {
   return Z_OK;
 }
 
+void Port::WriteKernel(uint64_t init, RefPtr<Capability> cap) {
+  MutexHolder h(mutex_);
+
+  auto msg = MakeShared<Message>();
+  msg->type = 0;
+  msg->bytes = new uint8_t[8];
+  msg->num_bytes = sizeof(init);
+
+  uint8_t* data = reinterpret_cast<uint8_t*>(&init);
+  for (uint8_t i = 0; i < sizeof(init); i++) {
+    msg->bytes[i] = data[i];
+  }
+  msg->caps.PushBack(cap);
+
+  pending_messages_.PushBack(msg);
+}
+
 bool Port::HasMessages() {
   MutexHolder h(mutex_);
   return pending_messages_.size() != 0;

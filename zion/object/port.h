@@ -24,6 +24,8 @@ class Port : public KernelObject {
   z_err_t Write(const ZMessage& msg);
   z_err_t Read(ZMessage& msg);
 
+  void WriteKernel(uint64_t init, RefPtr<Capability> cap);
+
   bool HasMessages();
 
  private:
