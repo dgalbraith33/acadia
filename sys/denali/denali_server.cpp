@@ -19,9 +19,13 @@ z_err_t DenaliServer::RunServer() {
   while (true) {
     uint64_t buff_size = kBuffSize;
     uint64_t cap_size = 0;
-    uint64_t type = DENALI_INVALID;
     RET_ERR(ZChannelRecv(channel_cap_, buff_size, read_buffer_, 0, nullptr,
-                         &type, &buff_size, &cap_size));
+                         &buff_size, &cap_size));
+    if (buff_size < sizeof(uint64_t)) {
+      dbgln("Skipping invalid message");
+      continue;
+    }
+    uint64_t type = *reinterpret_cast<uint64_t*>(read_buffer_);
     switch (type) {
       case Z_INVALID:
         dbgln(reinterpret_cast<char*>(read_buffer_));
@@ -55,6 +59,6 @@ void DenaliServer::HandleResponse(uint64_t lba, uint64_t size, uint64_t cap) {
       .lba = lba,
       .size = size,
   };
-  check(ZChannelSend(channel_cap_, DENALI_READ, sizeof(resp),
+  check(ZChannelSend(channel_cap_, sizeof(resp),
                      reinterpret_cast<uint8_t*>(&resp), 1, &cap));
 }

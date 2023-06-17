@@ -69,8 +69,6 @@ struct ZChannelCreateResp {
 };
 
 struct ZMessage {
-  uint64_t type;
-
   uint64_t num_bytes;
   uint8_t* bytes;
 

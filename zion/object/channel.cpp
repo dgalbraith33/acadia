@@ -34,7 +34,6 @@ z_err_t Channel::Read(ZMessage& msg) {
     return Z_ERR_BUFF_SIZE;
   }
 
-  msg.type = next_msg->type;
   msg.num_bytes = next_msg->num_bytes;
 
   for (uint64_t i = 0; i < msg.num_bytes; i++) {
@@ -59,7 +58,6 @@ z_err_t Channel::EnqueueMessage(const ZMessage& msg) {
   }
 
   auto message = MakeShared<Message>();
-  message->type = msg.type;
 
   // Copy Message body.
   message->num_bytes = msg.num_bytes;

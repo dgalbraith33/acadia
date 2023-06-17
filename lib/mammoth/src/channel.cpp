@@ -35,8 +35,7 @@ z_err_t Channel::WriteStr(const char* msg) {
   if (!chan_cap_) {
     return Z_ERR_NULL;
   }
-  uint64_t type = 0;
-  return ZChannelSend(chan_cap_, type, strlen(msg),
+  return ZChannelSend(chan_cap_, strlen(msg),
                       reinterpret_cast<const uint8_t*>(msg), 0, 0);
 }
 
@@ -44,10 +43,9 @@ z_err_t Channel::ReadStr(char* buffer, uint64_t* size) {
   if (!chan_cap_) {
     return Z_ERR_NULL;
   }
-  uint64_t type;
   uint64_t num_caps;
   return ZChannelRecv(chan_cap_, *size, reinterpret_cast<uint8_t*>(buffer), 0,
-                      0, &type, size, &num_caps);
+                      0, size, &num_caps);
 }
 
 z_err_t CreateChannels(Channel& c1, Channel& c2) {

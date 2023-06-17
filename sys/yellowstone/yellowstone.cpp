@@ -22,17 +22,15 @@ uint64_t main(uint64_t port_cap) {
       .lba = 0,
       .size = 1,
   };
-  check(ZChannelSend(local.cap(), DENALI_READ, sizeof(DenaliRead),
+  check(ZChannelSend(local.cap(), sizeof(DenaliRead),
                      reinterpret_cast<uint8_t*>(&read), 0, nullptr));
 
   DenaliReadResponse resp;
-  uint64_t mem_cap, type, bytes, caps;
+  uint64_t mem_cap, bytes, caps;
 
   check(ZChannelRecv(local.cap(), sizeof(resp),
-                     reinterpret_cast<uint8_t*>(&resp), 1, &mem_cap, &type,
-                     &bytes, &caps));
-
-  dbgln("Resp: %u", type);
+                     reinterpret_cast<uint8_t*>(&resp), 1, &mem_cap, &bytes,
+                     &caps));
 
   check(ZAddressSpaceMap(gSelfVmasCap, 0, mem_cap, &vaddr));
   uint32_t* mbr = reinterpret_cast<uint32_t*>(vaddr + 0x1FE);

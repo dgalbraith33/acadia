@@ -36,13 +36,12 @@ void ZThreadExit();
                                                   uint64_t* vmmo_size);
 
 [[nodiscard]] z_err_t ZChannelCreate(z_cap_t* channel1, z_cap_t* channel2);
-[[nodiscard]] z_err_t ZChannelSend(z_cap_t chan_cap, uint64_t type,
-                                   uint64_t num_bytes, const uint8_t* bytes,
-                                   uint64_t num_caps, const z_cap_t* caps);
+[[nodiscard]] z_err_t ZChannelSend(z_cap_t chan_cap, uint64_t num_bytes,
+                                   const uint8_t* bytes, uint64_t num_caps,
+                                   const z_cap_t* caps);
 [[nodiscard]] z_err_t ZChannelRecv(z_cap_t chan_cap, uint64_t num_bytes,
                                    uint8_t* bytes, uint64_t num_caps,
-                                   z_cap_t* caps, uint64_t* type,
-                                   uint64_t* actual_bytes,
+                                   z_cap_t* caps, uint64_t* actual_bytes,
                                    uint64_t* actual_caps);
 
 [[nodiscard]] z_err_t ZPortCreate(z_cap_t* port_cap);
@@ -51,12 +50,12 @@ void ZThreadExit();
                                 z_cap_t* caps);
 [[nodiscard]] z_err_t ZPortRecv(z_cap_t port_cap, uint64_t num_bytes,
                                 uint8_t* bytes, uint64_t num_caps,
-                                z_cap_t* caps, uint64_t* type,
-                                uint64_t* actual_bytes, uint64_t* actual_caps);
+                                z_cap_t* caps, uint64_t* actual_bytes,
+                                uint64_t* actual_caps);
 [[nodiscard]] z_err_t ZPortPoll(z_cap_t port_cap, uint64_t num_bytes,
                                 uint8_t* bytes, uint64_t num_caps,
-                                z_cap_t* caps, uint64_t* type,
-                                uint64_t* actual_bytes, uint64_t* actual_caps);
+                                z_cap_t* caps, uint64_t* actual_bytes,
+                                uint64_t* actual_caps);
 [[nodiscard]] z_err_t ZIrqRegister(uint64_t irq_num, z_cap_t* port_cap);
 
 [[nodiscard]] z_err_t ZCapDuplicate(z_cap_t cap_in, z_cap_t* cap_out);

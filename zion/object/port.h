@@ -30,7 +30,6 @@ class Port : public KernelObject {
 
  private:
   struct Message {
-    uint64_t type;
     uint64_t num_bytes;
     uint8_t* bytes;
 

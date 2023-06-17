@@ -140,8 +140,8 @@ void AhciDriver::DumpPorts() {
 void AhciDriver::InterruptLoop() {
   dbgln("Starting interrupt loop");
   while (true) {
-    uint64_t type, bytes, caps;
-    check(ZPortRecv(irq_port_cap_, 0, 0, 0, 0, &type, &bytes, &caps));
+    uint64_t bytes, caps;
+    check(ZPortRecv(irq_port_cap_, 0, 0, 0, 0, &bytes, &caps));
     for (uint64_t i = 0; i < 32; i++) {
       if (devices_[i] != nullptr && devices_[i]->IsInit() &&
           (ahci_hba_->interrupt_status & (1 << i))) {

@@ -11,7 +11,7 @@ z_err_t Port::Write(const ZMessage& msg) {
   }
 
   auto message = MakeShared<Message>();
-  message->type = msg.type, message->num_bytes = msg.num_bytes;
+  message->num_bytes = msg.num_bytes;
   message->bytes = new uint8_t[msg.num_bytes];
   for (uint64_t i = 0; i < msg.num_bytes; i++) {
     message->bytes[i] = msg.bytes[i];
@@ -54,7 +54,6 @@ z_err_t Port::Read(ZMessage& msg) {
     return Z_ERR_BUFF_SIZE;
   }
 
-  msg.type = next_msg->type;
   msg.num_bytes = next_msg->num_bytes;
 
   for (uint64_t i = 0; i < msg.num_bytes; i++) {
@@ -76,7 +75,6 @@ void Port::WriteKernel(uint64_t init, RefPtr<Capability> cap) {
   MutexHolder h(mutex_);
 
   auto msg = MakeShared<Message>();
-  msg->type = 0;
   msg->bytes = new uint8_t[8];
   msg->num_bytes = sizeof(init);
 

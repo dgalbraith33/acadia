@@ -125,14 +125,12 @@ z_err_t ZChannelCreate(z_cap_t* channel1, z_cap_t* channel2) {
   return ret;
 }
 
-z_err_t ZChannelSend(z_cap_t chan_cap, uint64_t type, uint64_t num_bytes,
-                     const uint8_t* bytes, uint64_t num_caps,
-                     const z_cap_t* caps) {
+z_err_t ZChannelSend(z_cap_t chan_cap, uint64_t num_bytes, const uint8_t* bytes,
+                     uint64_t num_caps, const z_cap_t* caps) {
   ZChannelSendReq req{
       .chan_cap = chan_cap,
       .message =
           {
-              .type = type,
               .num_bytes = num_bytes,
               .bytes = const_cast<uint8_t*>(bytes),
               .num_caps = num_caps,
@@ -143,13 +141,12 @@ z_err_t ZChannelSend(z_cap_t chan_cap, uint64_t type, uint64_t num_bytes,
 }
 
 z_err_t ZChannelRecv(z_cap_t chan_cap, uint64_t num_bytes, uint8_t* bytes,
-                     uint64_t num_caps, z_cap_t* caps, uint64_t* type,
-                     uint64_t* actual_bytes, uint64_t* actual_caps) {
+                     uint64_t num_caps, z_cap_t* caps, uint64_t* actual_bytes,
+                     uint64_t* actual_caps) {
   ZChannelRecvReq req{
       .chan_cap = chan_cap,
       .message =
           {
-              .type = 0,
               .num_bytes = num_bytes,
               .bytes = bytes,
               .num_caps = num_caps,
@@ -157,7 +154,6 @@ z_err_t ZChannelRecv(z_cap_t chan_cap, uint64_t num_bytes, uint8_t* bytes,
           },
   };
   z_err_t ret = SysCall1(Z_CHANNEL_RECV, &req);
-  *type = req.message.type;
   *actual_bytes = req.message.num_bytes;
   *actual_caps = req.message.num_caps;
   return ret;
@@ -174,7 +170,6 @@ z_err_t ZPortSend(z_cap_t port_cap, uint64_t num_bytes, const uint8_t* bytes,
                   uint64_t num_caps, z_cap_t* caps) {
   ZPortSendReq req{.port_cap = port_cap,
                    .message = {
-                       .type = 0,
                        .num_bytes = num_bytes,
                        .bytes = const_cast<uint8_t*>(bytes),
                        .num_caps = num_caps,
@@ -184,13 +179,12 @@ z_err_t ZPortSend(z_cap_t port_cap, uint64_t num_bytes, const uint8_t* bytes,
 }
 
 z_err_t ZPortRecv(z_cap_t port_cap, uint64_t num_bytes, uint8_t* bytes,
-                  uint64_t num_caps, z_cap_t* caps, uint64_t* type,
-                  uint64_t* actual_bytes, uint64_t* actual_caps) {
+                  uint64_t num_caps, z_cap_t* caps, uint64_t* actual_bytes,
+                  uint64_t* actual_caps) {
   ZPortRecvReq req{
       .port_cap = port_cap,
       .message =
           {
-              .type = 0,
               .num_bytes = num_bytes,
               .bytes = bytes,
               .num_caps = num_caps,
@@ -198,20 +192,18 @@ z_err_t ZPortRecv(z_cap_t port_cap, uint64_t num_bytes, uint8_t* bytes,
           },
   };
   z_err_t ret = SysCall1(Z_PORT_RECV, &req);
-  *type = req.message.type;
   *actual_bytes = req.message.num_bytes;
   *actual_caps = req.message.num_caps;
   return ret;
 }
 
 z_err_t ZPortPoll(z_cap_t port_cap, uint64_t num_bytes, uint8_t* bytes,
-                  uint64_t num_caps, z_cap_t* caps, uint64_t* type,
-                  uint64_t* actual_bytes, uint64_t* actual_caps) {
+                  uint64_t num_caps, z_cap_t* caps, uint64_t* actual_bytes,
+                  uint64_t* actual_caps) {
   ZPortRecvReq req{
       .port_cap = port_cap,
       .message =
           {
-              .type = 0,
               .num_bytes = num_bytes,
               .bytes = bytes,
               .num_caps = num_caps,
@@ -219,7 +211,6 @@ z_err_t ZPortPoll(z_cap_t port_cap, uint64_t num_bytes, uint8_t* bytes,
           },
   };
   z_err_t ret = SysCall1(Z_PORT_POLL, &req);
-  *type = req.message.type;
   *actual_bytes = req.message.num_bytes;
   *actual_caps = req.message.num_caps;
   return ret;

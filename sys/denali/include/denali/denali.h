@@ -6,6 +6,7 @@
 #define DENALI_READ 100
 
 struct DenaliRead {
+  uint64_t request_type = DENALI_READ;
   uint64_t device_id;
 
   uint64_t lba;
