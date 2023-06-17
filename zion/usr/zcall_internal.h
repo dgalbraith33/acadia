@@ -2,36 +2,38 @@
 
 #include <stdint.h>
 
+#include "include/ztypes.h"
+
 struct ZProcessSpawnReq {
-  uint64_t proc_cap;
-  uint64_t bootstrap_cap;
+  z_cap_t proc_cap;
+  z_cap_t bootstrap_cap;
 };
 
 struct ZProcessSpawnResp {
-  uint64_t proc_cap;
-  uint64_t vmas_cap;
-  uint64_t bootstrap_cap;
+  z_cap_t proc_cap;
+  z_cap_t vmas_cap;
+  z_cap_t bootstrap_cap;
 };
 
 struct ZThreadCreateReq {
-  uint64_t proc_cap;
+  z_cap_t proc_cap;
 };
 
 struct ZThreadCreateResp {
-  uint64_t thread_cap;
+  z_cap_t thread_cap;
 };
 
 struct ZThreadStartReq {
-  uint64_t thread_cap;
+  z_cap_t thread_cap;
   uint64_t entry;
   uint64_t arg1;
   uint64_t arg2;
 };
 
 struct ZAddressSpaceMapReq {
-  uint64_t vmas_cap;
-  uint64_t vmas_offset;
-  uint64_t vmmo_cap;
+  z_cap_t vmas_cap;
+  z_cap_t vmas_offset;
+  z_cap_t vmmo_cap;
 };
 
 struct ZAddressSpaceMapResp {
@@ -43,7 +45,7 @@ struct ZMemoryObjectCreateReq {
 };
 
 struct ZMemoryObjectCreateResp {
-  uint64_t vmmo_cap;
+  z_cap_t vmmo_cap;
 };
 
 struct ZMemoryObjectCreatePhysicalReq {
@@ -52,18 +54,18 @@ struct ZMemoryObjectCreatePhysicalReq {
 };
 
 struct ZMemoryObjectCreatePhysicalResp {
-  uint64_t vmmo_cap;
+  z_cap_t vmmo_cap;
   uint64_t paddr;
 };
 
 struct ZTempPcieConfigObjectCreateResp {
-  uint64_t vmmo_cap;
+  z_cap_t vmmo_cap;
   uint64_t vmmo_size;
 };
 
 struct ZChannelCreateResp {
-  uint64_t chan_cap1;
-  uint64_t chan_cap2;
+  z_cap_t chan_cap1;
+  z_cap_t chan_cap2;
 };
 
 struct ZMessage {
@@ -73,30 +75,30 @@ struct ZMessage {
   uint8_t* bytes;
 
   uint64_t num_caps;
-  uint64_t* caps;
+  z_cap_t* caps;
 };
 
 struct ZChannelSendReq {
-  uint64_t chan_cap;
+  z_cap_t chan_cap;
   ZMessage message;
 };
 
 struct ZChannelRecvReq {
-  uint64_t chan_cap;
+  z_cap_t chan_cap;
   ZMessage message;
 };
 
 struct ZPortCreateResp {
-  uint64_t port_cap;
+  z_cap_t port_cap;
 };
 
 struct ZPortSendReq {
-  uint64_t port_cap;
+  z_cap_t port_cap;
   ZMessage message;
 };
 
 struct ZPortRecvReq {
-  uint64_t port_cap;
+  z_cap_t port_cap;
   ZMessage message;
 };
 
@@ -105,13 +107,13 @@ struct ZIrqRegisterReq {
 };
 
 struct ZIrqRegisterResp {
-  uint64_t port_cap;
+  z_cap_t port_cap;
 };
 
 struct ZCapDuplicateReq {
-  uint64_t cap;
+  z_cap_t cap;
 };
 
 struct ZCapDuplicateResp {
-  uint64_t cap;
+  z_cap_t cap;
 };

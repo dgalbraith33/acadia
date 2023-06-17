@@ -23,9 +23,9 @@ void ZProcessExit(uint64_t code) {
   SysCall1(Z_PROCESS_EXIT, reinterpret_cast<void*>(code));
 }
 
-z_err_t ZProcessSpawn(uint64_t proc_cap, uint64_t bootstrap_cap,
-                      uint64_t* new_proc_cap, uint64_t* new_vmas_cap,
-                      uint64_t* new_bootstrap_cap) {
+z_err_t ZProcessSpawn(z_cap_t proc_cap, z_cap_t bootstrap_cap,
+                      z_cap_t* new_proc_cap, z_cap_t* new_vmas_cap,
+                      z_cap_t* new_bootstrap_cap) {
   ZProcessSpawnReq req{
       .proc_cap = proc_cap,
       .bootstrap_cap = bootstrap_cap,
@@ -38,7 +38,7 @@ z_err_t ZProcessSpawn(uint64_t proc_cap, uint64_t bootstrap_cap,
   return ret;
 }
 
-z_err_t ZThreadCreate(uint64_t proc_cap, uint64_t* thread_cap) {
+z_err_t ZThreadCreate(z_cap_t proc_cap, z_cap_t* thread_cap) {
   ZThreadCreateReq req{
       .proc_cap = proc_cap,
   };
@@ -48,7 +48,7 @@ z_err_t ZThreadCreate(uint64_t proc_cap, uint64_t* thread_cap) {
   return ret;
 }
 
-z_err_t ZThreadStart(uint64_t thread_cap, uint64_t entry, uint64_t arg1,
+z_err_t ZThreadStart(z_cap_t thread_cap, uint64_t entry, uint64_t arg1,
                      uint64_t arg2) {
   ZThreadStartReq req{
       .thread_cap = thread_cap,
@@ -61,8 +61,8 @@ z_err_t ZThreadStart(uint64_t thread_cap, uint64_t entry, uint64_t arg1,
 
 void ZThreadExit() { SysCall0(Z_THREAD_EXIT); }
 
-z_err_t ZAddressSpaceMap(uint64_t vmas_cap, uint64_t vmas_offset,
-                         uint64_t vmmo_cap, uint64_t* vaddr) {
+z_err_t ZAddressSpaceMap(z_cap_t vmas_cap, uint64_t vmas_offset,
+                         z_cap_t vmmo_cap, uint64_t* vaddr) {
   ZAddressSpaceMapReq req{
       .vmas_cap = vmas_cap,
       .vmas_offset = vmas_offset,
@@ -74,7 +74,7 @@ z_err_t ZAddressSpaceMap(uint64_t vmas_cap, uint64_t vmas_offset,
   return ret;
 }
 
-z_err_t ZMemoryObjectCreate(uint64_t size, uint64_t* vmmo_cap) {
+z_err_t ZMemoryObjectCreate(uint64_t size, z_cap_t* vmmo_cap) {
   ZMemoryObjectCreateReq req{
       .size = size,
   };
@@ -85,7 +85,7 @@ z_err_t ZMemoryObjectCreate(uint64_t size, uint64_t* vmmo_cap) {
 }
 
 z_err_t ZMemoryObjectCreatePhysical(uint64_t paddr, uint64_t size,
-                                    uint64_t* vmmo_cap) {
+                                    z_cap_t* vmmo_cap) {
   ZMemoryObjectCreatePhysicalReq req{
       .paddr = paddr,
       .size = size,
@@ -96,7 +96,7 @@ z_err_t ZMemoryObjectCreatePhysical(uint64_t paddr, uint64_t size,
   return ret;
 }
 
-z_err_t ZMemoryObjectCreateContiguous(uint64_t size, uint64_t* vmmo_cap,
+z_err_t ZMemoryObjectCreateContiguous(uint64_t size, z_cap_t* vmmo_cap,
                                       uint64_t* paddr) {
   ZMemoryObjectCreatePhysicalReq req{
       .paddr = 0,
@@ -109,7 +109,7 @@ z_err_t ZMemoryObjectCreateContiguous(uint64_t size, uint64_t* vmmo_cap,
   return ret;
 }
 
-z_err_t ZTempPcieConfigObjectCreate(uint64_t* vmmo_cap, uint64_t* vmmo_size) {
+z_err_t ZTempPcieConfigObjectCreate(z_cap_t* vmmo_cap, uint64_t* vmmo_size) {
   ZTempPcieConfigObjectCreateResp resp;
   z_err_t ret = SysCall2(Z_TEMP_PCIE_CONFIG_OBJECT_CREATE, 0, &resp);
   *vmmo_cap = resp.vmmo_cap;
@@ -117,7 +117,7 @@ z_err_t ZTempPcieConfigObjectCreate(uint64_t* vmmo_cap, uint64_t* vmmo_size) {
   return ret;
 }
 
-z_err_t ZChannelCreate(uint64_t* channel1, uint64_t* channel2) {
+z_err_t ZChannelCreate(z_cap_t* channel1, z_cap_t* channel2) {
   ZChannelCreateResp resp;
   z_err_t ret = SysCall2(Z_CHANNEL_CREATE, 0, &resp);
   *channel1 = resp.chan_cap1;
@@ -125,9 +125,9 @@ z_err_t ZChannelCreate(uint64_t* channel1, uint64_t* channel2) {
   return ret;
 }
 
-z_err_t ZChannelSend(uint64_t chan_cap, uint64_t type, uint64_t num_bytes,
+z_err_t ZChannelSend(z_cap_t chan_cap, uint64_t type, uint64_t num_bytes,
                      const uint8_t* bytes, uint64_t num_caps,
-                     const uint64_t* caps) {
+                     const z_cap_t* caps) {
   ZChannelSendReq req{
       .chan_cap = chan_cap,
       .message =
@@ -136,14 +136,14 @@ z_err_t ZChannelSend(uint64_t chan_cap, uint64_t type, uint64_t num_bytes,
               .num_bytes = num_bytes,
               .bytes = const_cast<uint8_t*>(bytes),
               .num_caps = num_caps,
-              .caps = const_cast<uint64_t*>(caps),
+              .caps = const_cast<z_cap_t*>(caps),
           },
   };
   return SysCall1(Z_CHANNEL_SEND, &req);
 }
 
-z_err_t ZChannelRecv(uint64_t chan_cap, uint64_t num_bytes, uint8_t* bytes,
-                     uint64_t num_caps, uint64_t* caps, uint64_t* type,
+z_err_t ZChannelRecv(z_cap_t chan_cap, uint64_t num_bytes, uint8_t* bytes,
+                     uint64_t num_caps, z_cap_t* caps, uint64_t* type,
                      uint64_t* actual_bytes, uint64_t* actual_caps) {
   ZChannelRecvReq req{
       .chan_cap = chan_cap,
@@ -163,15 +163,15 @@ z_err_t ZChannelRecv(uint64_t chan_cap, uint64_t num_bytes, uint8_t* bytes,
   return ret;
 }
 
-z_err_t ZPortCreate(uint64_t* port_cap) {
+z_err_t ZPortCreate(z_cap_t* port_cap) {
   ZPortCreateResp resp;
   z_err_t ret = SysCall2(Z_PORT_CREATE, 0, &resp);
   *port_cap = resp.port_cap;
   return ret;
 }
 
-z_err_t ZPortSend(uint64_t port_cap, uint64_t num_bytes, const uint8_t* bytes,
-                  uint64_t num_caps, uint64_t* caps) {
+z_err_t ZPortSend(z_cap_t port_cap, uint64_t num_bytes, const uint8_t* bytes,
+                  uint64_t num_caps, z_cap_t* caps) {
   ZPortSendReq req{.port_cap = port_cap,
                    .message = {
                        .type = 0,
@@ -183,8 +183,8 @@ z_err_t ZPortSend(uint64_t port_cap, uint64_t num_bytes, const uint8_t* bytes,
   return SysCall1(Z_PORT_SEND, &req);
 }
 
-z_err_t ZPortRecv(uint64_t port_cap, uint64_t num_bytes, uint8_t* bytes,
-                  uint64_t num_caps, uint64_t* caps, uint64_t* type,
+z_err_t ZPortRecv(z_cap_t port_cap, uint64_t num_bytes, uint8_t* bytes,
+                  uint64_t num_caps, z_cap_t* caps, uint64_t* type,
                   uint64_t* actual_bytes, uint64_t* actual_caps) {
   ZPortRecvReq req{
       .port_cap = port_cap,
@@ -204,8 +204,8 @@ z_err_t ZPortRecv(uint64_t port_cap, uint64_t num_bytes, uint8_t* bytes,
   return ret;
 }
 
-z_err_t ZPortPoll(uint64_t port_cap, uint64_t num_bytes, uint8_t* bytes,
-                  uint64_t num_caps, uint64_t* caps, uint64_t* type,
+z_err_t ZPortPoll(z_cap_t port_cap, uint64_t num_bytes, uint8_t* bytes,
+                  uint64_t num_caps, z_cap_t* caps, uint64_t* type,
                   uint64_t* actual_bytes, uint64_t* actual_caps) {
   ZPortRecvReq req{
       .port_cap = port_cap,
@@ -225,7 +225,7 @@ z_err_t ZPortPoll(uint64_t port_cap, uint64_t num_bytes, uint8_t* bytes,
   return ret;
 }
 
-z_err_t ZIrqRegister(uint64_t irq_num, uint64_t* port_cap) {
+z_err_t ZIrqRegister(uint64_t irq_num, z_cap_t* port_cap) {
   ZIrqRegisterReq req{
       .irq_num = irq_num,
   };
@@ -235,7 +235,7 @@ z_err_t ZIrqRegister(uint64_t irq_num, uint64_t* port_cap) {
   return ret;
 }
 
-z_err_t ZCapDuplicate(uint64_t cap_in, uint64_t* cap_out) {
+z_err_t ZCapDuplicate(z_cap_t cap_in, z_cap_t* cap_out) {
   ZCapDuplicateReq req{
       .cap = cap_in,
   };

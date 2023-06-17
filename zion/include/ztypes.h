@@ -72,6 +72,9 @@ typedef uint64_t z_err_t;
 /* ------------------------------
  * Capability Types
  * ------------------------------*/
+
+typedef uint64_t z_cap_t;
+
 #define Z_INVALID 0x0
 
 // General Capability Permissions
