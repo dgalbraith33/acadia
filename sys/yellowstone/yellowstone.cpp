@@ -6,7 +6,7 @@
 
 #include "hw/pcie.h"
 
-int main(uint64_t port_cap) {
+uint64_t main(uint64_t port_cap) {
   dbgln("Yellowstone Initializing.");
   uint64_t msg_type, type, cap, bytes, caps;
   check(ZPortRecv(port_cap, 8, reinterpret_cast<uint8_t*>(&msg_type), 1, &cap,
