@@ -10,6 +10,7 @@
 #define Z_ERR_BUFF_SIZE 005
 #define Z_ERR_NULL 0x6
 #define Z_ERR_EXISTS 0x7
+#define Z_ERR_EMPTY 0x8
 
 #define Z_ERR_CAP_NOT_FOUND 0x100
 #define Z_ERR_CAP_TYPE 0x101

@@ -184,6 +184,27 @@ z_err_t ZPortRecv(uint64_t port_cap, uint64_t num_bytes, uint8_t* bytes,
   return ret;
 }
 
+z_err_t ZPortPoll(uint64_t port_cap, uint64_t num_bytes, uint8_t* bytes,
+                  uint64_t num_caps, uint64_t* caps, uint64_t* type,
+                  uint64_t* actual_bytes, uint64_t* actual_caps) {
+  ZPortRecvReq req{
+      .port_cap = port_cap,
+      .message =
+          {
+              .type = 0,
+              .num_bytes = num_bytes,
+              .bytes = bytes,
+              .num_caps = num_caps,
+              .caps = caps,
+          },
+  };
+  z_err_t ret = SysCall1(Z_PORT_POLL, &req);
+  *type = req.message.type;
+  *actual_bytes = req.message.num_bytes;
+  *actual_caps = req.message.num_caps;
+  return ret;
+}
+
 z_err_t ZIrqRegister(uint64_t irq_num, uint64_t* port_cap) {
   ZIrqRegisterReq req{
       .irq_num = irq_num,

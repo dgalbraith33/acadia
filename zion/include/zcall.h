@@ -46,6 +46,7 @@
 #define Z_PORT_CREATE 0x50
 #define Z_PORT_SEND 0x51
 #define Z_PORT_RECV 0x52
+#define Z_PORT_POLL 0x53
 
 #define Z_IRQ_REGISTER 0x58
 
@@ -96,6 +97,10 @@ void ZThreadExit();
                                    uint64_t* actual_caps);
 
 [[nodiscard]] z_err_t ZPortRecv(uint64_t port_cap, uint64_t num_bytes,
+                                uint8_t* bytes, uint64_t num_caps,
+                                uint64_t* caps, uint64_t* type,
+                                uint64_t* actual_bytes, uint64_t* actual_caps);
+[[nodiscard]] z_err_t ZPortPoll(uint64_t port_cap, uint64_t num_bytes,
                                 uint8_t* bytes, uint64_t num_caps,
                                 uint64_t* caps, uint64_t* type,
                                 uint64_t* actual_bytes, uint64_t* actual_caps);

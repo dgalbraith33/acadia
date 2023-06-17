@@ -73,3 +73,8 @@ z_err_t Port::Read(ZMessage& msg) {
 
   return Z_OK;
 }
+
+bool Port::HasMessages() {
+  MutexHolder h(mutex_);
+  return pending_messages_.size() != 0;
+}

@@ -208,6 +208,19 @@ z_err_t PortRecv(ZPortRecvReq* req) {
   return port->Read(req->message);
 }
 
+z_err_t PortPoll(ZPortRecvReq* req) {
+  auto& proc = gScheduler->CurrentProcess();
+  auto port_cap = proc.GetCapability(req->port_cap);
+  RET_ERR(ValidateCap(port_cap, ZC_READ));
+
+  auto port = port_cap->obj<Port>();
+  RET_IF_NULL(port);
+  if (!port->HasMessages()) {
+    return Z_ERR_EMPTY;
+  }
+  return port->Read(req->message);
+}
+
 z_err_t IrqRegister(ZIrqRegisterReq* req, ZIrqRegisterResp* resp) {
   auto& proc = gScheduler->CurrentProcess();
   if (req->irq_num != Z_IRQ_PCI_BASE) {
@@ -264,6 +277,8 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
       return ChannelRecv(reinterpret_cast<ZChannelRecvReq*>(req));
     case Z_PORT_RECV:
       return PortRecv(reinterpret_cast<ZPortRecvReq*>(req));
+    case Z_PORT_POLL:
+      return PortPoll(reinterpret_cast<ZPortRecvReq*>(req));
     case Z_IRQ_REGISTER:
       return IrqRegister(reinterpret_cast<ZIrqRegisterReq*>(req),
                          reinterpret_cast<ZIrqRegisterResp*>(resp));
