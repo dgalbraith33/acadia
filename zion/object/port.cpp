@@ -9,7 +9,6 @@ z_err_t Port::Write(const ZMessage& msg) {
     dbgln("Large message size unimplemented: %x", msg.num_bytes);
     return Z_ERR_INVALID;
   }
-  dbgln("port write");
 
   auto message = MakeShared<Message>();
   message->type = msg.type, message->num_bytes = msg.num_bytes;
@@ -37,7 +36,6 @@ z_err_t Port::Write(const ZMessage& msg) {
 }
 
 z_err_t Port::Read(ZMessage& msg) {
-  dbgln("port read");
   mutex_.Lock();
   while (pending_messages_.size() < 1) {
     blocked_threads_.PushBack(gScheduler->CurrentThread());

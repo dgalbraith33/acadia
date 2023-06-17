@@ -70,7 +70,6 @@ class SharedPtr {
       return;
     }
     if (--(*ref_cnt_) == 0) {
-      dbgln("Deleting shared ptr: %m", ptr_);
       delete ptr_;
       delete ref_cnt_;
     }

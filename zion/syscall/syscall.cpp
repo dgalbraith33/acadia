@@ -123,7 +123,7 @@ z_err_t AddressSpaceMap(ZAddressSpaceMapReq* req, ZAddressSpaceMapResp* resp) {
   auto vmmo = vmmo_cap->obj<MemoryObject>();
   RET_IF_NULL(vmas);
   RET_IF_NULL(vmmo);
-  dbgln("Ptr %x, %x", vmas.get(), vmmo.get());
+
   // FIXME: Validation necessary.
   if (req->vmas_offset != 0) {
     vmas->MapInMemoryObject(req->vmas_offset, vmmo);
