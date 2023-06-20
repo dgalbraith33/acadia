@@ -19,21 +19,6 @@ z_err_t SysCall1(uint64_t number, const void* first) {
   return SysCall2(number, first, 0);
 }
 
-z_err_t ZProcessSpawn(z_cap_t proc_cap, z_cap_t bootstrap_cap,
-                      z_cap_t* new_proc_cap, z_cap_t* new_vmas_cap,
-                      z_cap_t* new_bootstrap_cap) {
-  ZProcessSpawnReq req{
-      .proc_cap = proc_cap,
-      .bootstrap_cap = bootstrap_cap,
-  };
-  ZProcessSpawnResp resp;
-  z_err_t ret = SysCall2(Z_PROCESS_SPAWN, &req, &resp);
-  *new_proc_cap = resp.proc_cap;
-  *new_vmas_cap = resp.vmas_cap;
-  *new_bootstrap_cap = resp.bootstrap_cap;
-  return ret;
-}
-
 z_err_t ZThreadStart(z_cap_t thread_cap, uint64_t entry, uint64_t arg1,
                      uint64_t arg2) {
   ZThreadStartReq req{

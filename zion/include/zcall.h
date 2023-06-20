@@ -28,19 +28,62 @@
     return SysCall1(kZion##name, &req);                \
   }
 
+#define SYS3(name, t1, a1, t2, a2, t3, a3)                    \
+  struct Z##name##Req {                                       \
+    t1 a1;                                                    \
+    t2 a2;                                                    \
+    t3 a3;                                                    \
+  };                                                          \
+  [[nodiscard]] inline z_err_t Z##name(t1 a1, t2 a2, t3 a3) { \
+    Z##name##Req req{                                         \
+        .a1 = a1,                                             \
+        .a2 = a2,                                             \
+        .a3 = a3,                                             \
+    };                                                        \
+    return SysCall1(kZion##name, &req);                       \
+  }
+
+#define SYS4(name, t1, a1, t2, a2, t3, a3, t4, a4)                   \
+  struct Z##name##Req {                                              \
+    t1 a1;                                                           \
+    t2 a2;                                                           \
+    t3 a3;                                                           \
+    t4 a4;                                                           \
+  };                                                                 \
+  [[nodiscard]] inline z_err_t Z##name(t1 a1, t2 a2, t3 a3, t4 a4) { \
+    Z##name##Req req{                                                \
+        .a1 = a1,                                                    \
+        .a2 = a2,                                                    \
+        .a3 = a3,                                                    \
+        .a4 = a4,                                                    \
+    };                                                               \
+    return SysCall1(kZion##name, &req);                              \
+  }
+
+#define SYS5(name, t1, a1, t2, a2, t3, a3, t4, a4, t5, a5)                  \
+  struct Z##name##Req {                                                     \
+    t1 a1;                                                                  \
+    t2 a2;                                                                  \
+    t3 a3;                                                                  \
+    t4 a4;                                                                  \
+    t5 a5;                                                                  \
+  };                                                                        \
+  [[nodiscard]] inline z_err_t Z##name(t1 a1, t2 a2, t3 a3, t4 a4, t5 a5) { \
+    Z##name##Req req{                                                       \
+        .a1 = a1,                                                           \
+        .a2 = a2,                                                           \
+        .a3 = a3,                                                           \
+        .a4 = a4,                                                           \
+        .a5 = a5,                                                           \
+    };                                                                      \
+    return SysCall1(kZion##name, &req);                                     \
+  }
+
 z_err_t SysCall1(uint64_t code, const void* req);
 
 SYS1(ProcessExit, uint64_t, code);
-
-[[nodiscard]] z_err_t ZProcessSpawn(z_cap_t proc_cap, z_cap_t bootstrap_cap,
-                                    z_cap_t* new_proc_cap,
-                                    z_cap_t* new_vmas_cap,
-                                    z_cap_t* new_bootstrap_cap);
-
-// UNUSED for now, I think we can get away with just starting a thread.
-[[nodiscard]] z_err_t ZProcessStart(z_cap_t proc_cap, z_cap_t thread_cap,
-                                    uint64_t entry, uint64_t arg1,
-                                    uint64_t arg2);
+SYS5(ProcessSpawn, z_cap_t, proc_cap, z_cap_t, bootstrap_cap, z_cap_t*,
+     new_proc_cap, z_cap_t*, new_vmas_cap, z_cap_t*, new_bootstrap_cap);
 
 SYS2(ThreadCreate, z_cap_t, proc_cap, z_cap_t*, thread_cap);
 

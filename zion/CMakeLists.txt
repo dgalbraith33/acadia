@@ -27,6 +27,7 @@ add_executable(zion
   scheduler/jump_user_space.s
   scheduler/process_manager.cpp
   scheduler/scheduler.cpp
+  syscall/process.cpp
   syscall/syscall.cpp
   syscall/syscall_enter.s
   zion.cpp)

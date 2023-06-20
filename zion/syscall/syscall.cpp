@@ -13,6 +13,7 @@
 #include "object/process.h"
 #include "scheduler/process_manager.h"
 #include "scheduler/scheduler.h"
+#include "syscall/process.h"
 #include "usr/zcall_internal.h"
 
 #define RET_IF_NULL(expr)    \
@@ -62,39 +63,6 @@ z_err_t ValidateCap(const RefPtr<Capability>& cap, uint64_t permissions) {
     dbgln("PERM, has %x needs %x", cap->permissions(), permissions);
     return Z_ERR_CAP_DENIED;
   }
-  return Z_OK;
-}
-
-z_err_t ProcessExit(ZProcessExitReq* req) {
-  auto curr_thread = gScheduler->CurrentThread();
-  dbgln("Exit code: %x", req->code);
-  // FIXME: kill process here.
-  curr_thread->Exit();
-  panic("Returned from thread exit");
-  return Z_ERR_UNIMPLEMENTED;
-}
-
-z_err_t ProcessSpawn(ZProcessSpawnReq* req, ZProcessSpawnResp* resp) {
-  auto& curr_proc = gScheduler->CurrentProcess();
-  auto cap = curr_proc.GetCapability(req->proc_cap);
-  RET_ERR(ValidateCap(cap, ZC_PROC_SPAWN_PROC));
-
-  RefPtr<Process> proc = Process::Create();
-  gProcMan->InsertProcess(proc);
-
-  resp->proc_cap = curr_proc.AddNewCapability(
-      proc, ZC_PROC_SPAWN_PROC | ZC_PROC_SPAWN_THREAD | ZC_WRITE);
-  resp->vmas_cap = curr_proc.AddNewCapability(proc->vmas(), ZC_WRITE);
-
-  if (req->bootstrap_cap != 0) {
-    auto cap = curr_proc.ReleaseCapability(req->bootstrap_cap);
-    if (!cap) {
-      return Z_ERR_CAP_NOT_FOUND;
-    }
-    // FIXME: Check permissions.
-    resp->bootstrap_cap = proc->AddExistingCapability(cap);
-  }
-
   return Z_OK;
 }
 
@@ -277,11 +245,10 @@ z_err_t CapDuplicate(ZCapDuplicateReq* req, ZCapDuplicateResp* resp) {
 extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
   RefPtr<Thread> thread = gScheduler->CurrentThread();
   switch (call_id) {
+    // syscall/process.h
     CASE(ProcessExit);
+    CASE(ProcessSpawn);
     CASE(ThreadCreate);
-    case Z_PROCESS_SPAWN:
-      return ProcessSpawn(reinterpret_cast<ZProcessSpawnReq*>(req),
-                          reinterpret_cast<ZProcessSpawnResp*>(resp));
     case Z_THREAD_START:
       return ThreadStart(reinterpret_cast<ZThreadStartReq*>(req));
     case Z_THREAD_EXIT:

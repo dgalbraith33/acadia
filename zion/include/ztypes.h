@@ -31,8 +31,7 @@ typedef uint64_t z_err_t;
 
 // Process Calls.
 const uint64_t kZionProcessExit = 0x1;
-#define Z_PROCESS_SPAWN 0x02
-#define Z_PROCESS_START 0x03
+const uint64_t kZionProcessSpawn = 0x2;
 
 // Thread Calls.
 const uint64_t kZionThreadCreate = 0x10;

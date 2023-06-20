@@ -4,17 +4,6 @@
 
 #include "include/ztypes.h"
 
-struct ZProcessSpawnReq {
-  z_cap_t proc_cap;
-  z_cap_t bootstrap_cap;
-};
-
-struct ZProcessSpawnResp {
-  z_cap_t proc_cap;
-  z_cap_t vmas_cap;
-  z_cap_t bootstrap_cap;
-};
-
 struct ZThreadStartReq {
   z_cap_t thread_cap;
   uint64_t entry;
