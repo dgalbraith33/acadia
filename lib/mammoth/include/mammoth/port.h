@@ -18,6 +18,5 @@ class Port {
 
 template <typename T>
 z_err_t Port::WriteMessage(const T& obj, uint64_t cap) {
-  return ZPortSend(port_cap_, sizeof(obj),
-                   reinterpret_cast<const uint8_t*>(&obj), 1, &cap);
+  return ZPortSend(port_cap_, sizeof(obj), &obj, 1, &cap);
 }

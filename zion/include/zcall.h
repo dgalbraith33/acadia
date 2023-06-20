@@ -113,17 +113,15 @@ SYS5(ChannelSend, z_cap_t, chan_cap, uint64_t, num_bytes, const void*, data,
 SYS5(ChannelRecv, z_cap_t, chan_cap, uint64_t*, num_bytes, void*, data,
      uint64_t*, num_caps, z_cap_t*, caps);
 
-[[nodiscard]] z_err_t ZPortCreate(z_cap_t* port_cap);
-[[nodiscard]] z_err_t ZPortSend(z_cap_t port_cap, uint64_t num_bytes,
-                                const void* data, uint64_t num_caps,
-                                z_cap_t* caps);
-[[nodiscard]] z_err_t ZPortRecv(z_cap_t port_cap, uint64_t num_bytes,
-                                void* data, uint64_t num_caps, z_cap_t* caps,
-                                uint64_t* actual_bytes, uint64_t* actual_caps);
-[[nodiscard]] z_err_t ZPortPoll(z_cap_t port_cap, uint64_t num_bytes,
-                                void* data, uint64_t num_caps, z_cap_t* caps,
-                                uint64_t* actual_bytes, uint64_t* actual_caps);
-[[nodiscard]] z_err_t ZIrqRegister(uint64_t irq_num, z_cap_t* port_cap);
+SYS1(PortCreate, z_cap_t*, port_cap);
+SYS5(PortSend, z_cap_t, port_cap, uint64_t, num_bytes, const void*, data,
+     uint64_t, num_caps, z_cap_t*, caps);
+SYS5(PortRecv, z_cap_t, port_cap, uint64_t*, num_bytes, void*, data, uint64_t*,
+     num_caps, z_cap_t*, caps);
+SYS5(PortPoll, z_cap_t, port_cap, uint64_t*, num_bytes, void*, data, uint64_t*,
+     num_caps, z_cap_t*, caps);
+
+SYS2(IrqRegister, uint64_t, irq_num, z_cap_t*, port_cap);
 
 [[nodiscard]] z_err_t ZCapDuplicate(z_cap_t cap_in, z_cap_t* cap_out);
 

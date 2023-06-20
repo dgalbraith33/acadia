@@ -54,12 +54,12 @@ const uint64_t kZionChannelSend = 0x41;
 const uint64_t kZionChannelRecv = 0x42;
 const uint64_t kZionChannelSendRecv = 0x43;
 
-#define Z_PORT_CREATE 0x50
-#define Z_PORT_SEND 0x51
-#define Z_PORT_RECV 0x52
-#define Z_PORT_POLL 0x53
+const uint64_t kZionPortCreate = 0x50;
+const uint64_t kZionPortSend = 0x51;
+const uint64_t kZionPortRecv = 0x52;
+const uint64_t kZionPortPoll = 0x53;
 
-#define Z_IRQ_REGISTER 0x58
+const uint64_t kZionIrqRegister = 0x58;
 
 #define Z_IRQ_PCI_BASE 0x30
 

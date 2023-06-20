@@ -15,6 +15,7 @@
 #include "syscall/address_space.h"
 #include "syscall/channel.h"
 #include "syscall/memory_object.h"
+#include "syscall/port.h"
 #include "syscall/process.h"
 #include "syscall/thread.h"
 #include "usr/zcall_internal.h"
@@ -62,58 +63,6 @@ z_err_t ValidateCap(const RefPtr<Capability>& cap, uint64_t permissions) {
   return Z_OK;
 }
 
-z_err_t PortCreate(ZPortCreateResp* resp) {
-  auto& proc = gScheduler->CurrentProcess();
-  auto port = MakeRefCounted<Port>();
-  resp->port_cap = proc.AddNewCapability(port, ZC_WRITE | ZC_READ);
-  return Z_OK;
-}
-
-z_err_t PortSend(ZPortSendReq* req) {
-  auto& proc = gScheduler->CurrentProcess();
-  auto port_cap = proc.GetCapability(req->port_cap);
-  RET_ERR(ValidateCap(port_cap, ZC_WRITE));
-
-  auto port = port_cap->obj<Port>();
-  RET_IF_NULL(port);
-  return port->Write(req->message);
-}
-
-z_err_t PortRecv(ZPortRecvReq* req) {
-  auto& proc = gScheduler->CurrentProcess();
-  auto port_cap = proc.GetCapability(req->port_cap);
-  RET_ERR(ValidateCap(port_cap, ZC_READ));
-
-  auto port = port_cap->obj<Port>();
-  RET_IF_NULL(port);
-  return port->Read(req->message);
-}
-
-z_err_t PortPoll(ZPortRecvReq* req) {
-  auto& proc = gScheduler->CurrentProcess();
-  auto port_cap = proc.GetCapability(req->port_cap);
-  RET_ERR(ValidateCap(port_cap, ZC_READ));
-
-  auto port = port_cap->obj<Port>();
-  RET_IF_NULL(port);
-  if (!port->HasMessages()) {
-    return Z_ERR_EMPTY;
-  }
-  return port->Read(req->message);
-}
-
-z_err_t IrqRegister(ZIrqRegisterReq* req, ZIrqRegisterResp* resp) {
-  auto& proc = gScheduler->CurrentProcess();
-  if (req->irq_num != Z_IRQ_PCI_BASE) {
-    // FIXME: Don't hardcode this nonsense.
-    return Z_ERR_UNIMPLEMENTED;
-  }
-  RefPtr<Port> port = MakeRefCounted<Port>();
-  resp->port_cap = proc.AddNewCapability(port, ZC_READ | ZC_WRITE);
-  RegisterPciPort(port);
-  return Z_OK;
-}
-
 z_err_t CapDuplicate(ZCapDuplicateReq* req, ZCapDuplicateResp* resp) {
   auto& proc = gScheduler->CurrentProcess();
   auto cap = proc.GetCapability(req->cap);
@@ -149,17 +98,12 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
     CASE(ChannelCreate);
     CASE(ChannelSend);
     CASE(ChannelRecv);
-    case Z_PORT_CREATE:
-      return PortCreate(reinterpret_cast<ZPortCreateResp*>(resp));
-    case Z_PORT_SEND:
-      return PortSend(reinterpret_cast<ZPortSendReq*>(req));
-    case Z_PORT_RECV:
-      return PortRecv(reinterpret_cast<ZPortRecvReq*>(req));
-    case Z_PORT_POLL:
-      return PortPoll(reinterpret_cast<ZPortRecvReq*>(req));
-    case Z_IRQ_REGISTER:
-      return IrqRegister(reinterpret_cast<ZIrqRegisterReq*>(req),
-                         reinterpret_cast<ZIrqRegisterResp*>(resp));
+    // syscall/port.h
+    CASE(PortCreate);
+    CASE(PortSend);
+    CASE(PortRecv);
+    CASE(PortPoll);
+    CASE(IrqRegister);
     case Z_CAP_DUPLICATE:
       return CapDuplicate(reinterpret_cast<ZCapDuplicateReq*>(req),
                           reinterpret_cast<ZCapDuplicateResp*>(resp));
