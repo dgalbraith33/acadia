@@ -1,8 +1,8 @@
 #include "syscall/process.h"
 
+#include "capability/capability.h"
 #include "scheduler/process_manager.h"
 #include "scheduler/scheduler.h"
-#include "syscall/syscall.h"
 
 z_err_t ProcessExit(ZProcessExitReq* req) {
   auto curr_thread = gScheduler->CurrentThread();
@@ -16,7 +16,7 @@ z_err_t ProcessExit(ZProcessExitReq* req) {
 z_err_t ProcessSpawn(ZProcessSpawnReq* req) {
   auto& curr_proc = gScheduler->CurrentProcess();
   auto cap = curr_proc.GetCapability(req->proc_cap);
-  RET_ERR(ValidateCap(cap, ZC_PROC_SPAWN_PROC));
+  RET_ERR(ValidateCapability<Process>(cap, ZC_PROC_SPAWN_PROC));
 
   RefPtr<Process> proc = Process::Create();
   gProcMan->InsertProcess(proc);

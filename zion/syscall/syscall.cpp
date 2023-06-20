@@ -43,19 +43,6 @@ void InitSyscall() {
   SetMSR(LSTAR, reinterpret_cast<uint64_t>(syscall_enter));
 }
 
-z_err_t ValidateCap(const RefPtr<Capability>& cap, uint64_t permissions) {
-  if (!cap) {
-    return Z_ERR_CAP_NOT_FOUND;
-  }
-  // FIXME: Check capability type before permissions, otherwise you can
-  // get a confusing error.
-  if (!cap->HasPermissions(permissions)) {
-    dbgln("PERM, has %x needs %x", cap->permissions(), permissions);
-    return Z_ERR_CAP_DENIED;
-  }
-  return Z_OK;
-}
-
 #define CASE(name)  \
   case kZion##name: \
     return name(reinterpret_cast<Z##name##Req*>(req));

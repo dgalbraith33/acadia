@@ -1,8 +1,8 @@
 #include "syscall/port.h"
 
+#include "capability/capability.h"
 #include "interrupt/interrupt.h"
 #include "scheduler/scheduler.h"
-#include "syscall/syscall.h"
 
 z_err_t PortCreate(ZPortCreateReq* req) {
   auto& proc = gScheduler->CurrentProcess();
@@ -14,20 +14,18 @@ z_err_t PortCreate(ZPortCreateReq* req) {
 z_err_t PortSend(ZPortSendReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto port_cap = proc.GetCapability(req->port_cap);
-  RET_ERR(ValidateCap(port_cap, ZC_WRITE));
+  RET_ERR(ValidateCapability<Port>(port_cap, ZC_WRITE));
 
   auto port = port_cap->obj<Port>();
-  RET_IF_NULL(port);
   return port->Write(req->num_bytes, req->data, req->num_caps, req->caps);
 }
 
 z_err_t PortRecv(ZPortRecvReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto port_cap = proc.GetCapability(req->port_cap);
-  RET_ERR(ValidateCap(port_cap, ZC_READ));
+  RET_ERR(ValidateCapability<Port>(port_cap, ZC_READ));
 
   auto port = port_cap->obj<Port>();
-  RET_IF_NULL(port);
   ZMessage message{
       .num_bytes = *req->num_bytes,
       .data = const_cast<void*>(req->data),
@@ -40,10 +38,9 @@ z_err_t PortRecv(ZPortRecvReq* req) {
 z_err_t PortPoll(ZPortPollReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto port_cap = proc.GetCapability(req->port_cap);
-  RET_ERR(ValidateCap(port_cap, ZC_READ));
+  RET_ERR(ValidateCapability<Port>(port_cap, ZC_READ));
 
   auto port = port_cap->obj<Port>();
-  RET_IF_NULL(port);
   // FIXME: Race condition here where this call could block if the last message
   // is removed between this check and the port read.
   if (!port->HasMessages()) {

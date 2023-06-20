@@ -20,6 +20,8 @@ class Capability : public RefCounted<Capability> {
   template <typename T>
   RefPtr<T> obj();
 
+  RefPtr<KernelObject> raw_obj() { return obj_; }
+
   uint64_t permissions() { return permissions_; }
   bool HasPermissions(uint64_t requested) {
     return (permissions_ & requested) == requested;
@@ -37,3 +39,28 @@ RefPtr<T> Capability::obj() {
   }
   return StaticCastRefPtr<T>(obj_);
 }
+
+template <typename T>
+z_err_t ValidateCapability(const RefPtr<Capability>& cap,
+                           uint64_t permissions) {
+  if (!cap) {
+    return Z_ERR_CAP_NOT_FOUND;
+  }
+
+  if (cap->raw_obj()->TypeTag() != KernelObjectTag<T>::type) {
+    return Z_ERR_CAP_TYPE;
+  }
+
+  if (!cap->HasPermissions(permissions)) {
+    return Z_ERR_CAP_DENIED;
+  }
+
+  return Z_OK;
+}
+
+#define RET_IF_NULL(expr)    \
+  {                          \
+    if (!expr) {             \
+      return Z_ERR_CAP_TYPE; \
+    }                        \
+  }
