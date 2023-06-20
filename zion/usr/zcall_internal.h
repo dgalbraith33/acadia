@@ -4,39 +4,6 @@
 
 #include "include/ztypes.h"
 
-struct ZAddressSpaceMapReq {
-  z_cap_t vmas_cap;
-  z_cap_t vmas_offset;
-  z_cap_t vmmo_cap;
-};
-
-struct ZAddressSpaceMapResp {
-  uint64_t vaddr;
-};
-
-struct ZMemoryObjectCreateReq {
-  uint64_t size;
-};
-
-struct ZMemoryObjectCreateResp {
-  z_cap_t vmmo_cap;
-};
-
-struct ZMemoryObjectCreatePhysicalReq {
-  uint64_t paddr;
-  uint64_t size;
-};
-
-struct ZMemoryObjectCreatePhysicalResp {
-  z_cap_t vmmo_cap;
-  uint64_t paddr;
-};
-
-struct ZTempPcieConfigObjectCreateResp {
-  z_cap_t vmmo_cap;
-  uint64_t vmmo_size;
-};
-
 struct ZChannelCreateResp {
   z_cap_t chan_cap1;
   z_cap_t chan_cap2;

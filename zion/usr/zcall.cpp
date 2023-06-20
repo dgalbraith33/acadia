@@ -19,62 +19,6 @@ z_err_t SysCall1(uint64_t number, const void* first) {
   return SysCall2(number, first, 0);
 }
 
-z_err_t ZAddressSpaceMap(z_cap_t vmas_cap, uint64_t vmas_offset,
-                         z_cap_t vmmo_cap, uint64_t* vaddr) {
-  ZAddressSpaceMapReq req{
-      .vmas_cap = vmas_cap,
-      .vmas_offset = vmas_offset,
-      .vmmo_cap = vmmo_cap,
-  };
-  ZAddressSpaceMapResp resp;
-  z_err_t ret = SysCall2(Z_ADDRESS_SPACE_MAP, &req, &resp);
-  *vaddr = resp.vaddr;
-  return ret;
-}
-
-z_err_t ZMemoryObjectCreate(uint64_t size, z_cap_t* vmmo_cap) {
-  ZMemoryObjectCreateReq req{
-      .size = size,
-  };
-  ZMemoryObjectCreateResp resp;
-  z_err_t ret = SysCall2(Z_MEMORY_OBJECT_CREATE, &req, &resp);
-  *vmmo_cap = resp.vmmo_cap;
-  return ret;
-}
-
-z_err_t ZMemoryObjectCreatePhysical(uint64_t paddr, uint64_t size,
-                                    z_cap_t* vmmo_cap) {
-  ZMemoryObjectCreatePhysicalReq req{
-      .paddr = paddr,
-      .size = size,
-  };
-  ZMemoryObjectCreatePhysicalResp resp;
-  z_err_t ret = SysCall2(Z_MEMORY_OBJECT_CREATE_PHYSICAL, &req, &resp);
-  *vmmo_cap = resp.vmmo_cap;
-  return ret;
-}
-
-z_err_t ZMemoryObjectCreateContiguous(uint64_t size, z_cap_t* vmmo_cap,
-                                      uint64_t* paddr) {
-  ZMemoryObjectCreatePhysicalReq req{
-      .paddr = 0,
-      .size = size,
-  };
-  ZMemoryObjectCreatePhysicalResp resp;
-  z_err_t ret = SysCall2(Z_MEMORY_OBJECT_CREATE_PHYSICAL, &req, &resp);
-  *vmmo_cap = resp.vmmo_cap;
-  *paddr = resp.paddr;
-  return ret;
-}
-
-z_err_t ZTempPcieConfigObjectCreate(z_cap_t* vmmo_cap, uint64_t* vmmo_size) {
-  ZTempPcieConfigObjectCreateResp resp;
-  z_err_t ret = SysCall2(Z_TEMP_PCIE_CONFIG_OBJECT_CREATE, 0, &resp);
-  *vmmo_cap = resp.vmmo_cap;
-  *vmmo_size = resp.vmmo_size;
-  return ret;
-}
-
 z_err_t ZChannelCreate(z_cap_t* channel1, z_cap_t* channel2) {
   ZChannelCreateResp resp;
   z_err_t ret = SysCall2(Z_CHANNEL_CREATE, 0, &resp);

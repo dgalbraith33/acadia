@@ -2,7 +2,6 @@
 
 #include <stdint.h>
 
-#include "boot/acpi.h"
 #include "common/msr.h"
 #include "debug/debug.h"
 #include "include/zcall.h"
@@ -13,6 +12,8 @@
 #include "object/process.h"
 #include "scheduler/process_manager.h"
 #include "scheduler/scheduler.h"
+#include "syscall/address_space.h"
+#include "syscall/memory_object.h"
 #include "syscall/process.h"
 #include "syscall/thread.h"
 #include "usr/zcall_internal.h"
@@ -57,61 +58,6 @@ z_err_t ValidateCap(const RefPtr<Capability>& cap, uint64_t permissions) {
     dbgln("PERM, has %x needs %x", cap->permissions(), permissions);
     return Z_ERR_CAP_DENIED;
   }
-  return Z_OK;
-}
-
-z_err_t AddressSpaceMap(ZAddressSpaceMapReq* req, ZAddressSpaceMapResp* resp) {
-  auto& curr_proc = gScheduler->CurrentProcess();
-  auto vmas_cap = curr_proc.GetCapability(req->vmas_cap);
-  auto vmmo_cap = curr_proc.GetCapability(req->vmmo_cap);
-  RET_ERR(ValidateCap(vmas_cap, ZC_WRITE));
-  RET_ERR(ValidateCap(vmmo_cap, ZC_WRITE));
-
-  auto vmas = vmas_cap->obj<AddressSpace>();
-  auto vmmo = vmmo_cap->obj<MemoryObject>();
-  RET_IF_NULL(vmas);
-  RET_IF_NULL(vmmo);
-
-  // FIXME: Validation necessary.
-  if (req->vmas_offset != 0) {
-    vmas->MapInMemoryObject(req->vmas_offset, vmmo);
-    resp->vaddr = req->vmas_offset;
-  } else {
-    resp->vaddr = vmas->MapInMemoryObject(vmmo);
-  }
-  return Z_OK;
-}
-
-z_err_t MemoryObjectCreate(ZMemoryObjectCreateReq* req,
-                           ZMemoryObjectCreateResp* resp) {
-  auto& curr_proc = gScheduler->CurrentProcess();
-  resp->vmmo_cap = curr_proc.AddNewCapability(
-      MakeRefCounted<MemoryObject>(req->size), ZC_WRITE);
-  return Z_OK;
-}
-
-z_err_t MemoryObjectCreatePhysical(ZMemoryObjectCreatePhysicalReq* req,
-                                   ZMemoryObjectCreatePhysicalResp* resp) {
-  auto& curr_proc = gScheduler->CurrentProcess();
-  uint64_t paddr = req->paddr;
-  if (paddr == 0) {
-    paddr = phys_mem::AllocateContinuous(((req->size - 1) / 0x1000) + 1);
-  }
-  auto vmmo_ref = MakeRefCounted<FixedMemoryObject>(paddr, req->size);
-  resp->vmmo_cap = curr_proc.AddNewCapability(
-      StaticCastRefPtr<MemoryObject>(vmmo_ref), ZC_WRITE);
-  resp->paddr = paddr;
-  return Z_OK;
-}
-
-z_err_t TempPcieConfigObjectCreate(ZTempPcieConfigObjectCreateResp* resp) {
-  auto& curr_proc = gScheduler->CurrentProcess();
-  uint64_t pci_base, pci_size;
-  RET_ERR(GetPciExtendedConfiguration(&pci_base, &pci_size));
-  auto vmmo_ref = MakeRefCounted<FixedMemoryObject>(pci_base, pci_size);
-  resp->vmmo_cap = curr_proc.AddNewCapability(
-      StaticCastRefPtr<MemoryObject>(vmmo_ref), ZC_WRITE);
-  resp->vmmo_size = pci_size;
   return Z_OK;
 }
 
@@ -222,20 +168,13 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
     CASE(ThreadCreate);
     CASE(ThreadStart);
     CASE(ThreadExit);
-    case Z_ADDRESS_SPACE_MAP:
-      return AddressSpaceMap(reinterpret_cast<ZAddressSpaceMapReq*>(req),
-                             reinterpret_cast<ZAddressSpaceMapResp*>(resp));
-    case Z_MEMORY_OBJECT_CREATE:
-      return MemoryObjectCreate(
-          reinterpret_cast<ZMemoryObjectCreateReq*>(req),
-          reinterpret_cast<ZMemoryObjectCreateResp*>(resp));
-    case Z_MEMORY_OBJECT_CREATE_PHYSICAL:
-      return MemoryObjectCreatePhysical(
-          reinterpret_cast<ZMemoryObjectCreatePhysicalReq*>(req),
-          reinterpret_cast<ZMemoryObjectCreatePhysicalResp*>(resp));
-    case Z_TEMP_PCIE_CONFIG_OBJECT_CREATE:
-      return TempPcieConfigObjectCreate(
-          reinterpret_cast<ZTempPcieConfigObjectCreateResp*>(resp));
+    // syscall/address_space.h
+    CASE(AddressSpaceMap);
+    // syscall/memory_object.h
+    CASE(MemoryObjectCreate);
+    CASE(MemoryObjectCreatePhysical);
+    CASE(MemoryObjectCreateContiguous);
+    CASE(TempPcieConfigObjectCreate);
     case Z_CHANNEL_CREATE:
       return ChannelCreate(reinterpret_cast<ZChannelCreateResp*>(resp));
     case Z_CHANNEL_SEND:

@@ -27,10 +27,12 @@ add_executable(zion
   scheduler/jump_user_space.s
   scheduler/process_manager.cpp
   scheduler/scheduler.cpp
+  syscall/address_space.cpp
+  syscall/memory_object.cpp
   syscall/process.cpp
   syscall/syscall.cpp
-  syscall/thread.cpp
   syscall/syscall_enter.s
+  syscall/thread.cpp
   zion.cpp)
 
 target_include_directories(zion

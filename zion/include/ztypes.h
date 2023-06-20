@@ -39,13 +39,14 @@ const uint64_t kZionThreadStart = 0x11;
 const uint64_t kZionThreadExit = 0x12;
 
 // Memory Calls
-#define Z_ADDRESS_SPACE_MAP 0x21
-#define Z_ADDRESS_SPACE_UNMAP 0x22
+const uint64_t kZionAddressSpaceMap = 0x21;
+const uint64_t kZionAddressSpaceUnMap = 0x21;
 
-#define Z_MEMORY_OBJECT_CREATE 0x30
-#define Z_MEMORY_OBJECT_CREATE_PHYSICAL 0x31
+const uint64_t kZionMemoryObjectCreate = 0x30;
+const uint64_t kZionMemoryObjectCreatePhysical = 0x31;
+const uint64_t kZionMemoryObjectCreateContiguous = 0x32;
 
-#define Z_TEMP_PCIE_CONFIG_OBJECT_CREATE 0x3F
+const uint64_t kZionTempPcieConfigObjectCreate = 0x3F;
 
 // IPC Calls
 #define Z_CHANNEL_CREATE 0x40

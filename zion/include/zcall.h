@@ -97,17 +97,15 @@ SYS4(ThreadStart, z_cap_t, thread_cap, uint64_t, entry, uint64_t, arg1,
      uint64_t, arg2);
 SYS0(ThreadExit);
 
-[[nodiscard]] z_err_t ZAddressSpaceMap(z_cap_t vmas_cap, uint64_t vmas_offset,
-                                       z_cap_t vmmo_cap, uint64_t* vaddr);
-[[nodiscard]] z_err_t ZMemoryObjectCreate(uint64_t size, z_cap_t* vmmo_cap);
-[[nodiscard]] z_err_t ZMemoryObjectCreatePhysical(uint64_t paddr, uint64_t size,
-                                                  z_cap_t* vmmo_cap);
-[[nodiscard]] z_err_t ZMemoryObjectCreateContiguous(uint64_t size,
-                                                    z_cap_t* vmmo_cap,
-                                                    uint64_t* paddr);
+SYS4(AddressSpaceMap, z_cap_t, vmas_cap, uint64_t, vmas_offset, z_cap_t,
+     vmmo_cap, uint64_t*, vaddr);
 
-[[nodiscard]] z_err_t ZTempPcieConfigObjectCreate(z_cap_t* vmmo_cap,
-                                                  uint64_t* vmmo_size);
+SYS2(MemoryObjectCreate, uint64_t, size, z_cap_t*, vmmo_cap);
+SYS3(MemoryObjectCreatePhysical, uint64_t, paddr, uint64_t, size, z_cap_t*,
+     vmmo_cap);
+SYS3(MemoryObjectCreateContiguous, uint64_t, size, z_cap_t*, vmmo_cap,
+     uint64_t*, paddr);
+SYS2(TempPcieConfigObjectCreate, z_cap_t*, vmmo_cap, uint64_t*, vmmo_size);
 
 [[nodiscard]] z_err_t ZChannelCreate(z_cap_t* channel1, z_cap_t* channel2);
 [[nodiscard]] z_err_t ZChannelSend(z_cap_t chan_cap, uint64_t num_bytes,
