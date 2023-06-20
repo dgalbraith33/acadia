@@ -15,14 +15,6 @@ struct ZProcessSpawnResp {
   z_cap_t bootstrap_cap;
 };
 
-struct ZThreadCreateReq {
-  z_cap_t proc_cap;
-};
-
-struct ZThreadCreateResp {
-  z_cap_t thread_cap;
-};
-
 struct ZThreadStartReq {
   z_cap_t thread_cap;
   uint64_t entry;

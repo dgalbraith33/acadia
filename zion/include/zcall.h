@@ -4,7 +4,33 @@
 
 #include "ztypes.h"
 
-void ZProcessExit(uint64_t code);
+#define SYS1(name, num, t1, a1)                 \
+  struct Z##name##Req {                         \
+    t1 a1;                                      \
+  };                                            \
+  [[nodiscard]] inline z_err_t Z##name(t1 a1) { \
+    Z##name##Req req{                           \
+        .a1 = a1,                               \
+    };                                          \
+    return SysCall1(num, &req);                 \
+  }
+
+#define SYS2(name, num, t1, a1, t2, a2)                \
+  struct Z##name##Req {                                \
+    t1 a1;                                             \
+    t2 a2;                                             \
+  };                                                   \
+  [[nodiscard]] inline z_err_t Z##name(t1 a1, t2 a2) { \
+    Z##name##Req req{                                  \
+        .a1 = a1,                                      \
+        .a2 = a2,                                      \
+    };                                                 \
+    return SysCall1(num, &req);                        \
+  }
+
+z_err_t SysCall1(uint64_t code, const void* req);
+
+SYS1(ProcessExit, Z_PROCESS_EXIT, uint64_t, code);
 
 [[nodiscard]] z_err_t ZProcessSpawn(z_cap_t proc_cap, z_cap_t bootstrap_cap,
                                     z_cap_t* new_proc_cap,
@@ -16,7 +42,7 @@ void ZProcessExit(uint64_t code);
                                     uint64_t entry, uint64_t arg1,
                                     uint64_t arg2);
 
-[[nodiscard]] z_err_t ZThreadCreate(z_cap_t proc_cap, z_cap_t* thread_cap);
+SYS2(ThreadCreate, Z_THREAD_CREATE, z_cap_t, proc_cap, z_cap_t*, thread_cap);
 
 [[nodiscard]] z_err_t ZThreadStart(z_cap_t thread_cap, uint64_t entry,
                                    uint64_t arg1, uint64_t arg2);

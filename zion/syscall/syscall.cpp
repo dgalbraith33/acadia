@@ -89,7 +89,7 @@ z_err_t ProcessSpawn(ZProcessSpawnReq* req, ZProcessSpawnResp* resp) {
   return Z_OK;
 }
 
-z_err_t ThreadCreate(ZThreadCreateReq* req, ZThreadCreateResp* resp) {
+z_err_t ThreadCreate(ZThreadCreateReq* req) {
   auto& curr_proc = gScheduler->CurrentProcess();
   auto cap = curr_proc.GetCapability(req->proc_cap);
   RET_ERR(ValidateCap(cap, ZC_PROC_SPAWN_THREAD));
@@ -97,8 +97,7 @@ z_err_t ThreadCreate(ZThreadCreateReq* req, ZThreadCreateResp* resp) {
   auto parent_proc = cap->obj<Process>();
   RET_IF_NULL(parent_proc);
   auto thread = parent_proc->CreateThread();
-  resp->thread_cap = curr_proc.AddNewCapability(thread, ZC_WRITE);
-
+  *req->thread_cap = curr_proc.AddNewCapability(thread, ZC_WRITE);
   return Z_OK;
 }
 
@@ -267,7 +266,8 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
   switch (call_id) {
     case Z_PROCESS_EXIT:
       // FIXME: kill process here.
-      dbgln("Exit code: %x", req);
+      dbgln("Exiting: %m", req);
+      dbgln("Exit code: %x", reinterpret_cast<ZProcessExitReq*>(req)->code);
       thread->Exit();
       panic("Returned from thread exit");
       break;
@@ -275,8 +275,7 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
       return ProcessSpawn(reinterpret_cast<ZProcessSpawnReq*>(req),
                           reinterpret_cast<ZProcessSpawnResp*>(resp));
     case Z_THREAD_CREATE:
-      return ThreadCreate(reinterpret_cast<ZThreadCreateReq*>(req),
-                          reinterpret_cast<ZThreadCreateResp*>(resp));
+      return ThreadCreate(reinterpret_cast<ZThreadCreateReq*>(req));
     case Z_THREAD_START:
       return ThreadStart(reinterpret_cast<ZThreadStartReq*>(req));
     case Z_THREAD_EXIT:

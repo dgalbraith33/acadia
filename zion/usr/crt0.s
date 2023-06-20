@@ -8,6 +8,7 @@ _start:
 _exit:
   // EXIT syscall.
   mov $1, %rdi
-  // Return code as a param.
-  mov %rax, %rsi
+  // Return code as a "struct" on the stack.
+  push %rax
+  mov %rsp, %rsi
   syscall
