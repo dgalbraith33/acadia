@@ -5,11 +5,14 @@
 #include <mammoth/process.h>
 #include <zcall.h>
 
+#include "hw/gpt.h"
 #include "hw/pcie.h"
 
 uint64_t main(uint64_t port_cap) {
   dbgln("Yellowstone Initializing.");
   check(ParseInitPort(port_cap));
+
+  DumpPciEDevices();
 
   uint64_t vaddr;
   check(ZAddressSpaceMap(gSelfVmasCap, 0, gBootDenaliVmmoCap, &vaddr));
@@ -22,21 +25,29 @@ uint64_t main(uint64_t port_cap) {
       .lba = 0,
       .size = 1,
   };
-  check(ZChannelSend(local.cap(), sizeof(DenaliRead),
-                     reinterpret_cast<uint8_t*>(&read), 0, nullptr));
-
+  check(local.WriteStruct(&read));
   DenaliReadResponse resp;
-  uint64_t mem_cap, bytes, caps;
+  uint64_t mem_cap;
+  check(local.ReadStructAndCap(&resp, &mem_cap));
+  check(CheckMbrIsGpt(mem_cap));
 
-  check(ZChannelRecv(local.cap(), sizeof(resp),
-                     reinterpret_cast<uint8_t*>(&resp), 1, &mem_cap, &bytes,
-                     &caps));
+  DenaliRead read_lba1{
+      .device_id = 0,
+      .lba = 1,
+      .size = 1,
+  };
+  check(local.WriteStruct(&read_lba1));
+  check(local.ReadStructAndCap(&resp, &mem_cap));
+  check(ReadPartitionHeader(mem_cap));
 
-  check(ZAddressSpaceMap(gSelfVmasCap, 0, mem_cap, &vaddr));
-  uint32_t* mbr = reinterpret_cast<uint32_t*>(vaddr + 0x1FE);
-  dbgln("MBR: %x", *mbr);
-
-  DumpPciEDevices();
+  DenaliRead read_parts{
+      .device_id = 0,
+      .lba = 2,
+      .size = 10,  // FIXME: Dont hardcode this.
+  };
+  check(local.WriteStruct(&read_parts));
+  check(local.ReadStructAndCap(&resp, &mem_cap));
+  check(ReadPartitionEntries(mem_cap));
 
   dbgln("Yellowstone Finished Successfully.");
   return 0;

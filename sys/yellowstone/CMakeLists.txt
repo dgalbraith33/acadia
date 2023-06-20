@@ -1,4 +1,5 @@
 add_executable(yellowstone
+  hw/gpt.cpp
   hw/pcie.cpp
   yellowstone.cpp
   )
