@@ -9,7 +9,7 @@ add_executable(denali
 
 target_include_directories(denali
    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-   PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+   "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 target_link_libraries(denali
   cxx
@@ -17,6 +17,22 @@ target_link_libraries(denali
   )
 
 set_target_properties(denali PROPERTIES
+  COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${BASE_COMPILE_FLAGS}"
+  LINK_FLAGS "${CMAKE_EXE_LINK_FLAGS} ${BASE_LINK_FLAGS}"
+  )
+
+add_library(libdenali
+  client/denali_client.cpp
+  )
+
+target_include_directories(libdenali
+   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+   PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
+ target_link_libraries(libdenali
+   mammoth_lib)
+
+set_target_properties(libdenali PROPERTIES
   COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${BASE_COMPILE_FLAGS}"
   LINK_FLAGS "${CMAKE_EXE_LINK_FLAGS} ${BASE_LINK_FLAGS}"
   )
