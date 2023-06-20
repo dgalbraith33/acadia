@@ -11,11 +11,3 @@ struct ZMessage {
   uint64_t num_caps;
   z_cap_t* caps;
 };
-
-struct ZCapDuplicateReq {
-  z_cap_t cap;
-};
-
-struct ZCapDuplicateResp {
-  z_cap_t cap;
-};

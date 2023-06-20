@@ -123,6 +123,6 @@ SYS5(PortPoll, z_cap_t, port_cap, uint64_t*, num_bytes, void*, data, uint64_t*,
 
 SYS2(IrqRegister, uint64_t, irq_num, z_cap_t*, port_cap);
 
-[[nodiscard]] z_err_t ZCapDuplicate(z_cap_t cap_in, z_cap_t* cap_out);
+SYS2(CapDuplicate, z_cap_t, cap_in, z_cap_t*, cap_out);
 
-[[nodiscard]] z_err_t ZDebug(const char* message);
+SYS1(Debug, const char*, message);

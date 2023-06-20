@@ -13,7 +13,9 @@
 #include "scheduler/process_manager.h"
 #include "scheduler/scheduler.h"
 #include "syscall/address_space.h"
+#include "syscall/capability.h"
 #include "syscall/channel.h"
+#include "syscall/debug.h"
 #include "syscall/memory_object.h"
 #include "syscall/port.h"
 #include "syscall/process.h"
@@ -63,16 +65,6 @@ z_err_t ValidateCap(const RefPtr<Capability>& cap, uint64_t permissions) {
   return Z_OK;
 }
 
-z_err_t CapDuplicate(ZCapDuplicateReq* req, ZCapDuplicateResp* resp) {
-  auto& proc = gScheduler->CurrentProcess();
-  auto cap = proc.GetCapability(req->cap);
-  if (!cap) {
-    return Z_ERR_CAP_NOT_FOUND;
-  }
-  resp->cap = proc.AddExistingCapability(cap);
-  return Z_OK;
-}
-
 #define CASE(name)  \
   case kZion##name: \
     return name(reinterpret_cast<Z##name##Req*>(req));
@@ -104,13 +96,10 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
     CASE(PortRecv);
     CASE(PortPoll);
     CASE(IrqRegister);
-    case Z_CAP_DUPLICATE:
-      return CapDuplicate(reinterpret_cast<ZCapDuplicateReq*>(req),
-                          reinterpret_cast<ZCapDuplicateResp*>(resp));
-    case Z_DEBUG_PRINT:
-      dbgln("[Debug] %s", req);
-      return Z_OK;
-      break;
+    // syscall/capability.h
+    CASE(CapDuplicate);
+    // syscall/debug.h
+    CASE(Debug);
     default:
       panic("Unhandled syscall number: %x", call_id);
   }

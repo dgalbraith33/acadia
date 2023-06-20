@@ -64,10 +64,10 @@ const uint64_t kZionIrqRegister = 0x58;
 #define Z_IRQ_PCI_BASE 0x30
 
 // Capability Calls
-#define Z_CAP_DUPLICATE 0x60
+const uint64_t kZionCapDuplicate = 0x70;
 
 // Debugging Calls.
-#define Z_DEBUG_PRINT 0x10000000
+const uint64_t kZionDebug = 0x1'0000;
 
 /* ------------------------------
  * Capability Types
