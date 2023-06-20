@@ -1,10 +1,15 @@
 #pragma once
 
+#include <denali/denali_client.h>
 #include <stdint.h>
 #include <ztypes.h>
 
-z_err_t CheckMbrIsGpt(uint64_t mem_cap);
+class GptReader {
+ public:
+  GptReader(const DenaliClient&);
 
-z_err_t ReadPartitionHeader(uint64_t mem_cap);
+  z_err_t ParsePartitionTables();
 
-z_err_t ReadPartitionEntries(uint64_t mem_cap);
+ private:
+  DenaliClient denali_;
+};

@@ -4,12 +4,12 @@ add_executable(yellowstone
   yellowstone.cpp
   )
  target_include_directories(yellowstone
-   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-   "${CMAKE_CURRENT_SOURCE_DIR}/../denali/include/")
+   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(yellowstone
   cxx
   mammoth_lib
+  libdenali
   )
 
 set_target_properties(yellowstone PROPERTIES

@@ -4,6 +4,10 @@
 #include <zcall.h>
 #include <zglobal.h>
 
+const uint64_t kSectorSize = 512;
+
+const uint64_t kGptPartitionSignature = 0x54524150'20494645;
+
 struct MbrPartition {
   uint8_t boot_indicator;
   uint8_t starting_chs[3];
@@ -13,29 +17,6 @@ struct MbrPartition {
   uint32_t ending_lba;
 } __attribute__((packed));
 
-z_err_t CheckMbrIsGpt(uint64_t mem_cap) {
-  uint64_t vaddr;
-  RET_ERR(ZAddressSpaceMap(gSelfVmasCap, 0, mem_cap, &vaddr));
-  uint16_t* mbr_sig = reinterpret_cast<uint16_t*>(vaddr + 0x1FE);
-  if (*mbr_sig != 0xAA55) {
-    return Z_ERR_INVALID;
-  }
-
-  MbrPartition* first_partition =
-      reinterpret_cast<MbrPartition*>(vaddr + 0x1BE);
-  if (first_partition->boot_indicator != 0) {
-    dbgln("Boot indicator set: %u", first_partition->boot_indicator);
-    return Z_ERR_INVALID;
-  }
-  if (first_partition->os_type != 0xEE) {
-    dbgln("Incorrect OS type: %x", first_partition->os_type);
-  }
-  dbgln("LBAs: (%x, %x)", first_partition->starting_lba,
-        first_partition->ending_lba);
-  return Z_OK;
-}
-
-const uint64_t kGptPartitionSignature = 0x54524150'20494645;
 struct ParititionHeader {
   uint64_t signature;
   uint32_t revision;
@@ -54,24 +35,6 @@ struct ParititionHeader {
   uint32_t partition_entry_crc32;
 } __attribute__((packed));
 
-z_err_t ReadPartitionHeader(uint64_t mem_cap) {
-  uint64_t vaddr;
-  RET_ERR(ZAddressSpaceMap(gSelfVmasCap, 0, mem_cap, &vaddr));
-  ParititionHeader* header = reinterpret_cast<ParititionHeader*>(vaddr);
-
-  dbgln("signature %lx", header->signature);
-
-  dbgln("lba_partition_entries %lx", header->lba_partition_entries);
-  dbgln("num_partitions: %x", header->num_partitions);
-  dbgln("partition_entry_size: %x", header->parition_entry_size);
-  dbgln("Num blocks: %x",
-        (header->num_partitions * header->parition_entry_size) / 512);
-
-  dbgln("LBA: (%x, %x)", header->lba_min, header->lba_max);
-
-  return Z_OK;
-}
-
 struct PartitionEntry {
   uint64_t type_guid_low;
   uint64_t type_guid_high;
@@ -83,19 +46,48 @@ struct PartitionEntry {
   char partition_name[72];
 } __attribute__((packed));
 
-z_err_t ReadPartitionEntries(uint64_t mem_cap) {
-  uint64_t vaddr;
-  RET_ERR(ZAddressSpaceMap(gSelfVmasCap, 0, mem_cap, &vaddr));
-  ParititionHeader* header = reinterpret_cast<ParititionHeader*>(vaddr);
+GptReader::GptReader(const DenaliClient& client) : denali_(client) {}
 
-  // FIXME: Dont hard code these.
-  uint64_t num_parts = 0x28;
-  uint64_t entry_size = 0x80;
+z_err_t GptReader::ParsePartitionTables() {
+  MappedMemoryRegion lba_1_and_2 = denali_.ReadSectors(0, 0, 2);
+  uint16_t* mbr_sig = reinterpret_cast<uint16_t*>(lba_1_and_2.vaddr() + 0x1FE);
+  if (*mbr_sig != 0xAA55) {
+    return Z_ERR_INVALID;
+  }
+  MbrPartition* first_partition =
+      reinterpret_cast<MbrPartition*>(lba_1_and_2.vaddr() + 0x1BE);
+  if (first_partition->boot_indicator != 0) {
+    dbgln("Boot indicator set: %u", first_partition->boot_indicator);
+    return Z_ERR_INVALID;
+  }
+  if (first_partition->os_type != 0xEE) {
+    dbgln("Incorrect OS type: %x", first_partition->os_type);
+    return Z_ERR_INVALID;
+  }
+  dbgln("LBAs: (%x, %x)", first_partition->starting_lba,
+        first_partition->ending_lba);
 
+  // FIXME: Don't hardcode sector size.
+  ParititionHeader* header =
+      reinterpret_cast<ParititionHeader*>(lba_1_and_2.vaddr() + 512);
+
+  dbgln("signature %lx", header->signature);
+
+  uint64_t num_partitions = header->num_partitions;
+  uint64_t entry_size = header->parition_entry_size;
+  uint64_t num_blocks = (num_partitions * entry_size) / 512;
+
+  dbgln("lba_partition_entries %lx", header->lba_partition_entries);
+  dbgln("num_partitions: %x", num_partitions);
+  dbgln("partition_entry_size: %x", entry_size);
+  dbgln("Num blocks: %x", num_blocks);
+
+  MappedMemoryRegion part_table =
+      denali_.ReadSectors(0, header->lba_partition_entries, num_blocks);
   dbgln("Entries");
-  for (uint64_t i = 0; i < num_parts; i++) {
-    PartitionEntry* entry =
-        reinterpret_cast<PartitionEntry*>(vaddr + (i * entry_size));
+  for (uint64_t i = 0; i < num_partitions; i++) {
+    PartitionEntry* entry = reinterpret_cast<PartitionEntry*>(
+        part_table.vaddr() + (i * entry_size));
     if (entry->type_guid_low != 0 || entry->type_guid_high != 0) {
       dbgln("Entry %u", i);
       dbgln("T Guid: %lx-%lx", entry->type_guid_high, entry->type_guid_low);
