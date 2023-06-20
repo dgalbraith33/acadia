@@ -104,6 +104,15 @@ int vsprintf(char *str, const char *format, va_list arg) {
         format++;
         break;
       }
+      case 's': {
+        char *instr = va_arg(arg, char *);
+        int width = 0;
+        while (*instr != '\0') {
+          *(str++) = *(instr++);
+          width++;
+        }
+        break;
+      }
       default:
         *(str++) = *(format++);
         chars++;
