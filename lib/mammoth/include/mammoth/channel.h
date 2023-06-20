@@ -7,8 +7,8 @@ class Channel {
  public:
   Channel() {}
   void adopt_cap(uint64_t id);
-  uint64_t release_cap();
-  uint64_t cap();
+  z_cap_t release_cap();
+  z_cap_t cap();
 
   z_err_t WriteStr(const char* msg);
   z_err_t ReadStr(char* buffer, uint64_t* size);
@@ -23,7 +23,7 @@ class Channel {
   ~Channel() {}
 
  private:
-  uint64_t chan_cap_ = 0;
+  z_cap_t chan_cap_ = 0;
 };
 
 uint64_t CreateChannels(Channel& c1, Channel& c2);
@@ -35,9 +35,10 @@ z_err_t Channel::WriteStruct(T* obj) {
 
 template <typename T>
 z_err_t Channel::ReadStructAndCap(T* obj, uint64_t* cap) {
-  uint64_t num_bytes, num_caps;
-  uint64_t ret = ZChannelRecv(chan_cap_, sizeof(T), obj, /* num_caps= */ 1, cap,
-                              &num_bytes, &num_caps);
+  uint64_t num_bytes = sizeof(T);
+  uint64_t num_caps = 1;
+  uint64_t ret = ZChannelRecv(chan_cap_, &num_bytes, obj, &num_caps, cap);
+
   if (ret != Z_OK) {
     return ret;
   }

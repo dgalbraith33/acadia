@@ -107,14 +107,11 @@ SYS3(MemoryObjectCreateContiguous, uint64_t, size, z_cap_t*, vmmo_cap,
      uint64_t*, paddr);
 SYS2(TempPcieConfigObjectCreate, z_cap_t*, vmmo_cap, uint64_t*, vmmo_size);
 
-[[nodiscard]] z_err_t ZChannelCreate(z_cap_t* channel1, z_cap_t* channel2);
-[[nodiscard]] z_err_t ZChannelSend(z_cap_t chan_cap, uint64_t num_bytes,
-                                   const void* data, uint64_t num_caps,
-                                   const z_cap_t* caps);
-[[nodiscard]] z_err_t ZChannelRecv(z_cap_t chan_cap, uint64_t num_bytes,
-                                   void* data, uint64_t num_caps, z_cap_t* caps,
-                                   uint64_t* actual_bytes,
-                                   uint64_t* actual_caps);
+SYS2(ChannelCreate, z_cap_t*, channel1, z_cap_t*, channel2);
+SYS5(ChannelSend, z_cap_t, chan_cap, uint64_t, num_bytes, const void*, data,
+     uint64_t, num_caps, z_cap_t*, caps);
+SYS5(ChannelRecv, z_cap_t, chan_cap, uint64_t*, num_bytes, void*, data,
+     uint64_t*, num_caps, z_cap_t*, caps);
 
 [[nodiscard]] z_err_t ZPortCreate(z_cap_t* port_cap);
 [[nodiscard]] z_err_t ZPortSend(z_cap_t port_cap, uint64_t num_bytes,

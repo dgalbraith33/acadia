@@ -23,33 +23,32 @@ void Channel::adopt_cap(uint64_t id) {
   }
   chan_cap_ = id;
 }
-uint64_t Channel::release_cap() {
-  uint64_t cap = chan_cap_;
+z_cap_t Channel::release_cap() {
+  z_cap_t cap = chan_cap_;
   chan_cap_ = 0;
   return cap;
 }
 
-uint64_t Channel::cap() { return chan_cap_; }
+z_cap_t Channel::cap() { return chan_cap_; }
 
 z_err_t Channel::WriteStr(const char* msg) {
   if (!chan_cap_) {
     return Z_ERR_NULL;
   }
-  return ZChannelSend(chan_cap_, strlen(msg),
-                      reinterpret_cast<const uint8_t*>(msg), 0, 0);
+  return ZChannelSend(chan_cap_, strlen(msg), msg, 0, nullptr);
 }
 
 z_err_t Channel::ReadStr(char* buffer, uint64_t* size) {
   if (!chan_cap_) {
     return Z_ERR_NULL;
   }
-  uint64_t num_caps;
-  return ZChannelRecv(chan_cap_, *size, reinterpret_cast<uint8_t*>(buffer), 0,
-                      0, size, &num_caps);
+  uint64_t num_caps = 0;
+  return ZChannelRecv(chan_cap_, size, reinterpret_cast<uint8_t*>(buffer),
+                      &num_caps, nullptr);
 }
 
 z_err_t CreateChannels(Channel& c1, Channel& c2) {
-  uint64_t chan1, chan2;
+  z_cap_t chan1, chan2;
   z_err_t err = ZChannelCreate(&chan1, &chan2);
   if (err != Z_OK) {
     return err;

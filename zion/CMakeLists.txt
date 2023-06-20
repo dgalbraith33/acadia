@@ -28,6 +28,7 @@ add_executable(zion
   scheduler/process_manager.cpp
   scheduler/scheduler.cpp
   syscall/address_space.cpp
+  syscall/channel.cpp
   syscall/memory_object.cpp
   syscall/process.cpp
   syscall/syscall.cpp

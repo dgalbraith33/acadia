@@ -13,6 +13,7 @@
 #include "scheduler/process_manager.h"
 #include "scheduler/scheduler.h"
 #include "syscall/address_space.h"
+#include "syscall/channel.h"
 #include "syscall/memory_object.h"
 #include "syscall/process.h"
 #include "syscall/thread.h"
@@ -59,37 +60,6 @@ z_err_t ValidateCap(const RefPtr<Capability>& cap, uint64_t permissions) {
     return Z_ERR_CAP_DENIED;
   }
   return Z_OK;
-}
-
-z_err_t ChannelCreate(ZChannelCreateResp* resp) {
-  auto& proc = gScheduler->CurrentProcess();
-  auto chan_pair = Channel::CreateChannelPair();
-  resp->chan_cap1 =
-      proc.AddNewCapability(chan_pair.first(), ZC_WRITE | ZC_READ);
-  resp->chan_cap2 =
-      proc.AddNewCapability(chan_pair.second(), ZC_WRITE | ZC_READ);
-  return Z_OK;
-}
-
-z_err_t ChannelSend(ZChannelSendReq* req) {
-  auto& proc = gScheduler->CurrentProcess();
-  auto chan_cap = proc.GetCapability(req->chan_cap);
-  RET_ERR(ValidateCap(chan_cap, ZC_WRITE));
-
-  auto chan = chan_cap->obj<Channel>();
-  RET_IF_NULL(chan);
-  chan->Write(req->message);
-  return Z_OK;
-}
-
-z_err_t ChannelRecv(ZChannelRecvReq* req) {
-  auto& proc = gScheduler->CurrentProcess();
-  auto chan_cap = proc.GetCapability(req->chan_cap);
-  RET_ERR(ValidateCap(chan_cap, ZC_READ));
-
-  auto chan = chan_cap->obj<Channel>();
-  RET_IF_NULL(chan);
-  return chan->Read(req->message);
 }
 
 z_err_t PortCreate(ZPortCreateResp* resp) {
@@ -175,12 +145,10 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
     CASE(MemoryObjectCreatePhysical);
     CASE(MemoryObjectCreateContiguous);
     CASE(TempPcieConfigObjectCreate);
-    case Z_CHANNEL_CREATE:
-      return ChannelCreate(reinterpret_cast<ZChannelCreateResp*>(resp));
-    case Z_CHANNEL_SEND:
-      return ChannelSend(reinterpret_cast<ZChannelSendReq*>(req));
-    case Z_CHANNEL_RECV:
-      return ChannelRecv(reinterpret_cast<ZChannelRecvReq*>(req));
+    // syscall/channel.h
+    CASE(ChannelCreate);
+    CASE(ChannelSend);
+    CASE(ChannelRecv);
     case Z_PORT_CREATE:
       return PortCreate(reinterpret_cast<ZPortCreateResp*>(resp));
     case Z_PORT_SEND:

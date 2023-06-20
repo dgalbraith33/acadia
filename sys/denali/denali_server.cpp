@@ -19,8 +19,8 @@ z_err_t DenaliServer::RunServer() {
   while (true) {
     uint64_t buff_size = kBuffSize;
     uint64_t cap_size = 0;
-    RET_ERR(ZChannelRecv(channel_cap_, buff_size, read_buffer_, 0, nullptr,
-                         &buff_size, &cap_size));
+    RET_ERR(ZChannelRecv(channel_cap_, &buff_size, read_buffer_, &cap_size,
+                         nullptr));
     if (buff_size < sizeof(uint64_t)) {
       dbgln("Skipping invalid message");
       continue;

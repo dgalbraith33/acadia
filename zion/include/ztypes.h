@@ -49,10 +49,10 @@ const uint64_t kZionMemoryObjectCreateContiguous = 0x32;
 const uint64_t kZionTempPcieConfigObjectCreate = 0x3F;
 
 // IPC Calls
-#define Z_CHANNEL_CREATE 0x40
-#define Z_CHANNEL_SEND 0x41
-#define Z_CHANNEL_RECV 0x42
-#define Z_CHANNEL_SENDRECV 0x43
+const uint64_t kZionChannelCreate = 0x40;
+const uint64_t kZionChannelSend = 0x41;
+const uint64_t kZionChannelRecv = 0x42;
+const uint64_t kZionChannelSendRecv = 0x43;
 
 #define Z_PORT_CREATE 0x50
 #define Z_PORT_SEND 0x51
