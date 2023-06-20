@@ -70,7 +70,7 @@ struct ZChannelCreateResp {
 
 struct ZMessage {
   uint64_t num_bytes;
-  uint8_t* bytes;
+  void* data;
 
   uint64_t num_caps;
   z_cap_t* caps;

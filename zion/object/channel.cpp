@@ -37,7 +37,7 @@ z_err_t Channel::Read(ZMessage& msg) {
   msg.num_bytes = next_msg->num_bytes;
 
   for (uint64_t i = 0; i < msg.num_bytes; i++) {
-    msg.bytes[i] = next_msg->bytes[i];
+    static_cast<uint8_t*>(msg.data)[i] = next_msg->bytes[i];
   }
 
   msg.num_caps = next_msg->caps.size();
@@ -63,7 +63,7 @@ z_err_t Channel::EnqueueMessage(const ZMessage& msg) {
   message->num_bytes = msg.num_bytes;
   message->bytes = new uint8_t[msg.num_bytes];
   for (uint64_t i = 0; i < msg.num_bytes; i++) {
-    message->bytes[i] = msg.bytes[i];
+    message->bytes[i] = static_cast<uint8_t*>(msg.data)[i];
   }
 
   // Release and store capabilities.
