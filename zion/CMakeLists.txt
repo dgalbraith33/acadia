@@ -29,6 +29,7 @@ add_executable(zion
   scheduler/scheduler.cpp
   syscall/process.cpp
   syscall/syscall.cpp
+  syscall/thread.cpp
   syscall/syscall_enter.s
   zion.cpp)
 

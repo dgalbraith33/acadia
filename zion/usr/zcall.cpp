@@ -19,19 +19,6 @@ z_err_t SysCall1(uint64_t number, const void* first) {
   return SysCall2(number, first, 0);
 }
 
-z_err_t ZThreadStart(z_cap_t thread_cap, uint64_t entry, uint64_t arg1,
-                     uint64_t arg2) {
-  ZThreadStartReq req{
-      .thread_cap = thread_cap,
-      .entry = entry,
-      .arg1 = arg1,
-      .arg2 = arg2,
-  };
-  return SysCall1(Z_THREAD_START, &req);
-}
-
-void ZThreadExit() { SysCall0(Z_THREAD_EXIT); }
-
 z_err_t ZAddressSpaceMap(z_cap_t vmas_cap, uint64_t vmas_offset,
                          z_cap_t vmmo_cap, uint64_t* vaddr) {
   ZAddressSpaceMapReq req{

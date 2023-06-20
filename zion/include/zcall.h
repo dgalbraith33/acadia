@@ -4,6 +4,13 @@
 
 #include "ztypes.h"
 
+#define SYS0(name)                         \
+  struct Z##name##Req {};                  \
+  [[nodiscard]] inline z_err_t Z##name() { \
+    Z##name##Req req{};                    \
+    return SysCall1(kZion##name, &req);    \
+  }
+
 #define SYS1(name, t1, a1)                      \
   struct Z##name##Req {                         \
     t1 a1;                                      \
@@ -86,11 +93,9 @@ SYS5(ProcessSpawn, z_cap_t, proc_cap, z_cap_t, bootstrap_cap, z_cap_t*,
      new_proc_cap, z_cap_t*, new_vmas_cap, z_cap_t*, new_bootstrap_cap);
 
 SYS2(ThreadCreate, z_cap_t, proc_cap, z_cap_t*, thread_cap);
-
-[[nodiscard]] z_err_t ZThreadStart(z_cap_t thread_cap, uint64_t entry,
-                                   uint64_t arg1, uint64_t arg2);
-
-void ZThreadExit();
+SYS4(ThreadStart, z_cap_t, thread_cap, uint64_t, entry, uint64_t, arg1,
+     uint64_t, arg2);
+SYS0(ThreadExit);
 
 [[nodiscard]] z_err_t ZAddressSpaceMap(z_cap_t vmas_cap, uint64_t vmas_offset,
                                        z_cap_t vmmo_cap, uint64_t* vaddr);

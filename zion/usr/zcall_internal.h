@@ -4,13 +4,6 @@
 
 #include "include/ztypes.h"
 
-struct ZThreadStartReq {
-  z_cap_t thread_cap;
-  uint64_t entry;
-  uint64_t arg1;
-  uint64_t arg2;
-};
-
 struct ZAddressSpaceMapReq {
   z_cap_t vmas_cap;
   z_cap_t vmas_offset;

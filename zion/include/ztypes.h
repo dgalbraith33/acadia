@@ -35,8 +35,8 @@ const uint64_t kZionProcessSpawn = 0x2;
 
 // Thread Calls.
 const uint64_t kZionThreadCreate = 0x10;
-#define Z_THREAD_START 0x11
-#define Z_THREAD_EXIT 0x12
+const uint64_t kZionThreadStart = 0x11;
+const uint64_t kZionThreadExit = 0x12;
 
 // Memory Calls
 #define Z_ADDRESS_SPACE_MAP 0x21
