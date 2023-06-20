@@ -76,9 +76,6 @@ void AhciDevice::HandleIrq() {
   port_struct_->interrupt_status = int_status;
 
   uint32_t commands_finished = commands_issued_ & ~port_struct_->command_issue;
-  dbgln("finished %x", commands_finished);
-  dbgln("status %x", int_status);
-  dbgln("Issued %x, %x", commands_issued_, port_struct_->command_issue);
 
   // FIXME: Pass error codes to the callback.
   for (uint64_t i = 0; i < 32; i++) {
