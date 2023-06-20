@@ -30,8 +30,6 @@ syscall_enter:
   # Restore caller registers using the userspace rsp in rbx
   mov 0x40(%rbx), %rdi
   mov 0x48(%rbx), %rsi
-  mov 0x50(%rbx), %rdx
-  mov 0x58(%rbx), %rcx
   # Don't push the rbp and rsp as the callee will do so.
   call SyscallHandler
 

@@ -3,14 +3,6 @@
 #include <stdint.h>
 
 #include "common/msr.h"
-#include "debug/debug.h"
-#include "include/zcall.h"
-#include "interrupt/interrupt.h"
-#include "memory/physical_memory.h"
-#include "object/channel.h"
-#include "object/port.h"
-#include "object/process.h"
-#include "scheduler/process_manager.h"
 #include "scheduler/scheduler.h"
 #include "syscall/address_space.h"
 #include "syscall/capability.h"
@@ -20,7 +12,6 @@
 #include "syscall/port.h"
 #include "syscall/process.h"
 #include "syscall/thread.h"
-#include "usr/zcall_internal.h"
 
 #define EFER 0xC0000080
 #define STAR 0xC0000081
@@ -69,8 +60,7 @@ z_err_t ValidateCap(const RefPtr<Capability>& cap, uint64_t permissions) {
   case kZion##name: \
     return name(reinterpret_cast<Z##name##Req*>(req));
 
-extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
-  RefPtr<Thread> thread = gScheduler->CurrentThread();
+extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req) {
   switch (call_id) {
     // syscall/process.h
     CASE(ProcessExit);
@@ -101,7 +91,8 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
     // syscall/debug.h
     CASE(Debug);
     default:
-      panic("Unhandled syscall number: %x", call_id);
+      dbgln("Unhandled syscall number: %x", call_id);
+      return Z_ERR_UNIMPLEMENTED;
   }
   UNREACHABLE
 }
