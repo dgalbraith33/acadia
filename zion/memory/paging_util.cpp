@@ -24,16 +24,6 @@
 namespace {
 
 uint64_t PageAlign(uint64_t addr) { return addr & ~0xFFF; }
-uint64_t* PageAlign(uint64_t* addr) {
-  return reinterpret_cast<uint64_t*>(reinterpret_cast<uint64_t>(addr) & ~0xFFF);
-}
-
-void ZeroOutPage(uint64_t* ptr) {
-  ptr = PageAlign(ptr);
-  for (uint64_t i = 0; i < 512; i++) {
-    ptr[i] = 0;
-  }
-}
 
 uint64_t ShiftForEntryIndexing(uint64_t addr, uint64_t offset) {
   addr &= ~0xFFFF0000'00000000;
@@ -126,21 +116,18 @@ void MapPage(uint64_t cr3, uint64_t vaddr, uint64_t paddr) {
 
   uint64_t* pml4_entry = Pml4Entry(cr3, vaddr);
   if (!(*pml4_entry & PRESENT_BIT)) {
-    uint64_t page = phys_mem::AllocatePage();
+    uint64_t page = phys_mem::AllocateAndZeroPage();
     *pml4_entry = page | access_bits;
-    ZeroOutPage(PageDirectoryPointerEntry(*pml4_entry, vaddr));
   }
   uint64_t* pdp_entry = PageDirectoryPointerEntry(*pml4_entry, vaddr);
   if (!(*pdp_entry & PRESENT_BIT)) {
-    uint64_t page = phys_mem::AllocatePage();
+    uint64_t page = phys_mem::AllocateAndZeroPage();
     *pdp_entry = page | access_bits;
-    ZeroOutPage(PageDirectoryEntry(*pdp_entry, vaddr));
   }
   uint64_t* pd_entry = PageDirectoryEntry(*pdp_entry, vaddr);
   if (!(*pd_entry & PRESENT_BIT)) {
-    uint64_t page = phys_mem::AllocatePage();
+    uint64_t page = phys_mem::AllocateAndZeroPage();
     *(pd_entry) = page | access_bits;
-    ZeroOutPage(PageTableEntry(*pd_entry, vaddr));
   }
 
   uint64_t* pt_entry = PageTableEntry(*pd_entry, vaddr);
@@ -158,9 +145,7 @@ uint64_t AllocatePageIfNecessary(uint64_t addr) {
     return phys;
   }
   phys = phys_mem::AllocatePage();
-  // FIXME: Maybe move this to the physical memory allocator.
-  ZeroOutPage(
-      reinterpret_cast<uint64_t*>(boot::GetHigherHalfDirectMap() + phys));
+
   MapPage(cr3, addr, phys);
   return phys;
 }

@@ -10,9 +10,12 @@ namespace phys_mem {
 // to initialize so we need this first.
 void InitBootstrapPageAllocation();
 
+// Initializes the main physical memory manager.
 void InitPhysicalMemoryManager();
 
 uint64_t AllocatePage();
+uint64_t AllocateAndZeroPage();
+
 uint64_t AllocateContinuous(uint64_t num_pages);
 void FreePage(uint64_t page);
 

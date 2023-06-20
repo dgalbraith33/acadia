@@ -8,6 +8,17 @@
 namespace phys_mem {
 namespace {
 
+uint64_t* PageAlign(uint64_t* addr) {
+  return reinterpret_cast<uint64_t*>(reinterpret_cast<uint64_t>(addr) & ~0xFFF);
+}
+
+void ZeroOutPage(uint64_t* ptr) {
+  ptr = PageAlign(ptr);
+  for (uint64_t i = 0; i < 512; i++) {
+    ptr[i] = 0;
+  }
+}
+
 struct BootstrapMemory {
   uint64_t init_page = 0;
   uint64_t next_page = 0;
@@ -161,6 +172,13 @@ uint64_t AllocatePage() {
   gBootstrap.next_page += 0x1000;
 
   return page;
+}
+
+uint64_t AllocateAndZeroPage() {
+  uint64_t paddr = AllocatePage();
+  ZeroOutPage(
+      reinterpret_cast<uint64_t*>(boot::GetHigherHalfDirectMap() + paddr));
+  return paddr;
 }
 
 uint64_t AllocateContinuous(uint64_t num_continuous) {
