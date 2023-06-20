@@ -46,13 +46,6 @@ class Process : public KernelObject {
   }
   uint64_t AddExistingCapability(const RefPtr<Capability>& cap);
 
-  // FIXME: Eliminate reliance on this.
-  template <typename T>
-  void AddNewCapabilityWithId(uint64_t id, const RefPtr<T>& obj,
-                              uint64_t permissions) {
-    return caps_.AddNewCapabilityWithId(id, obj, permissions);
-  }
-
   // Checks the state of all child threads and transitions to
   // finished if all have finished.
   void CheckState();
