@@ -18,13 +18,7 @@ z_err_t PortSend(ZPortSendReq* req) {
 
   auto port = port_cap->obj<Port>();
   RET_IF_NULL(port);
-  ZMessage message{
-      .num_bytes = req->num_bytes,
-      .data = const_cast<void*>(req->data),
-      .num_caps = req->num_caps,
-      .caps = req->caps,
-  };
-  return port->Write(message);
+  return port->Write(req->num_bytes, req->data, req->num_caps, req->caps);
 }
 
 z_err_t PortRecv(ZPortRecvReq* req) {
@@ -40,10 +34,7 @@ z_err_t PortRecv(ZPortRecvReq* req) {
       .num_caps = *req->num_caps,
       .caps = req->caps,
   };
-  RET_ERR(port->Read(message));
-  *req->num_bytes = message.num_bytes;
-  *req->num_caps = message.num_caps;
-  return Z_OK;
+  return port->Read(req->num_bytes, req->data, req->num_caps, req->caps);
 }
 
 z_err_t PortPoll(ZPortPollReq* req) {
@@ -53,19 +44,12 @@ z_err_t PortPoll(ZPortPollReq* req) {
 
   auto port = port_cap->obj<Port>();
   RET_IF_NULL(port);
+  // FIXME: Race condition here where this call could block if the last message
+  // is removed between this check and the port read.
   if (!port->HasMessages()) {
     return Z_ERR_EMPTY;
   }
-  ZMessage message{
-      .num_bytes = *req->num_bytes,
-      .data = const_cast<void*>(req->data),
-      .num_caps = *req->num_caps,
-      .caps = req->caps,
-  };
-  RET_ERR(port->Read(message));
-  *req->num_bytes = message.num_bytes;
-  *req->num_caps = message.num_caps;
-  return Z_OK;
+  return port->Read(req->num_bytes, req->data, req->num_caps, req->caps);
 }
 
 z_err_t IrqRegister(ZIrqRegisterReq* req) {

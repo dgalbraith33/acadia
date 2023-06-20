@@ -2,6 +2,7 @@
 
 #include "capability/capability.h"
 #include "lib/linked_list.h"
+#include "lib/message_queue.h"
 #include "lib/mutex.h"
 #include "lib/shared_ptr.h"
 #include "object/kernel_object.h"
@@ -21,23 +22,17 @@ class Port : public KernelObject {
 
   Port();
 
-  z_err_t Write(const ZMessage& msg);
-  z_err_t Read(ZMessage& msg);
+  z_err_t Write(uint64_t num_bytes, const void* bytes, uint64_t num_caps,
+                const z_cap_t* caps);
+  z_err_t Read(uint64_t* num_bytes, void* bytes, uint64_t* num_caps,
+               z_cap_t* caps);
 
   void WriteKernel(uint64_t init, RefPtr<Capability> cap);
 
   bool HasMessages();
 
  private:
-  struct Message {
-    uint64_t num_bytes;
-    uint8_t* bytes;
-
-    LinkedList<RefPtr<Capability>> caps;
-  };
-
-  LinkedList<SharedPtr<Message>> pending_messages_;
-
+  UnboundedMessageQueue message_queue_;
   LinkedList<RefPtr<Thread>> blocked_threads_;
 
   Mutex mutex_{"Port"};
