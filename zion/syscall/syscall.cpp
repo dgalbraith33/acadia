@@ -65,6 +65,15 @@ z_err_t ValidateCap(const RefPtr<Capability>& cap, uint64_t permissions) {
   return Z_OK;
 }
 
+z_err_t ProcessExit(ZProcessExitReq* req) {
+  auto curr_thread = gScheduler->CurrentThread();
+  dbgln("Exit code: %x", req->code);
+  // FIXME: kill process here.
+  curr_thread->Exit();
+  panic("Returned from thread exit");
+  return Z_ERR_UNIMPLEMENTED;
+}
+
 z_err_t ProcessSpawn(ZProcessSpawnReq* req, ZProcessSpawnResp* resp) {
   auto& curr_proc = gScheduler->CurrentProcess();
   auto cap = curr_proc.GetCapability(req->proc_cap);
@@ -261,21 +270,18 @@ z_err_t CapDuplicate(ZCapDuplicateReq* req, ZCapDuplicateResp* resp) {
   return Z_OK;
 }
 
+#define CASE(name)  \
+  case kZion##name: \
+    return name(reinterpret_cast<Z##name##Req*>(req));
+
 extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req, void* resp) {
   RefPtr<Thread> thread = gScheduler->CurrentThread();
   switch (call_id) {
-    case Z_PROCESS_EXIT:
-      // FIXME: kill process here.
-      dbgln("Exiting: %m", req);
-      dbgln("Exit code: %x", reinterpret_cast<ZProcessExitReq*>(req)->code);
-      thread->Exit();
-      panic("Returned from thread exit");
-      break;
+    CASE(ProcessExit);
+    CASE(ThreadCreate);
     case Z_PROCESS_SPAWN:
       return ProcessSpawn(reinterpret_cast<ZProcessSpawnReq*>(req),
                           reinterpret_cast<ZProcessSpawnResp*>(resp));
-    case Z_THREAD_CREATE:
-      return ThreadCreate(reinterpret_cast<ZThreadCreateReq*>(req));
     case Z_THREAD_START:
       return ThreadStart(reinterpret_cast<ZThreadStartReq*>(req));
     case Z_THREAD_EXIT:

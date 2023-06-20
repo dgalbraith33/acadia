@@ -30,12 +30,12 @@ typedef uint64_t z_err_t;
  * ------------------------------*/
 
 // Process Calls.
-#define Z_PROCESS_EXIT 0x01
+const uint64_t kZionProcessExit = 0x1;
 #define Z_PROCESS_SPAWN 0x02
 #define Z_PROCESS_START 0x03
 
 // Thread Calls.
-#define Z_THREAD_CREATE 0x10
+const uint64_t kZionThreadCreate = 0x10;
 #define Z_THREAD_START 0x11
 #define Z_THREAD_EXIT 0x12
 
