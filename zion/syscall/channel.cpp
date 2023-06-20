@@ -19,15 +19,7 @@ z_err_t ChannelSend(ZChannelSendReq* req) {
 
   auto chan = chan_cap->obj<Channel>();
   RET_IF_NULL(chan);
-  // FIXME: Get rid of this hack.
-  ZMessage message{
-      .num_bytes = req->num_bytes,
-      .data = const_cast<void*>(req->data),
-      .num_caps = req->num_caps,
-      .caps = req->caps,
-
-  };
-  return chan->Write(message);
+  return chan->Write(req->num_bytes, req->data, req->num_caps, req->caps);
 }
 
 z_err_t ChannelRecv(ZChannelRecvReq* req) {
@@ -37,16 +29,5 @@ z_err_t ChannelRecv(ZChannelRecvReq* req) {
 
   auto chan = chan_cap->obj<Channel>();
   RET_IF_NULL(chan);
-  // FIXME: Get rid of this hack.
-  ZMessage message{
-      .num_bytes = *req->num_bytes,
-      .data = const_cast<void*>(req->data),
-      .num_caps = *req->num_caps,
-      .caps = req->caps,
-
-  };
-  RET_ERR(chan->Read(message));
-  *req->num_bytes = message.num_bytes;
-  *req->num_caps = message.num_caps;
-  return Z_OK;
+  return chan->Read(req->num_bytes, req->data, req->num_caps, req->caps);
 }

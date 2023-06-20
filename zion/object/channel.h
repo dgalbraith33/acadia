@@ -3,6 +3,7 @@
 #include "capability/capability.h"
 #include "include/ztypes.h"
 #include "lib/linked_list.h"
+#include "lib/message_queue.h"
 #include "lib/mutex.h"
 #include "lib/pair.h"
 #include "lib/ref_ptr.h"
@@ -24,8 +25,10 @@ class Channel : public KernelObject {
 
   RefPtr<Channel> peer() { return peer_; }
 
-  z_err_t Write(const ZMessage& msg);
-  z_err_t Read(ZMessage& msg);
+  z_err_t Write(uint64_t num_bytes, const void* bytes, uint64_t num_caps,
+                const z_cap_t* caps);
+  z_err_t Read(uint64_t* num_bytes, void* bytes, uint64_t* num_caps,
+               z_cap_t* caps);
 
  private:
   // FIXME: We will likely never close the channel based on this
@@ -33,22 +36,14 @@ class Channel : public KernelObject {
   RefPtr<Channel> peer_{nullptr};
 
   Mutex mutex_{"channel"};
+  UnboundedMessageQueue message_queue_;
 
-  struct Message {
-    uint64_t num_bytes;
-    uint8_t* bytes;
-
-    LinkedList<RefPtr<Capability>> caps;
-  };
-
-  // FIXME: This is probably dangerous because of an
-  // implicit shallow copy.
-  LinkedList<SharedPtr<Message>> pending_messages_;
   LinkedList<RefPtr<Thread>> blocked_threads_;
 
   friend class MakeRefCountedFriend<Channel>;
   Channel() {}
   void SetPeer(const RefPtr<Channel>& peer) { peer_ = peer; }
 
-  z_err_t EnqueueMessage(const ZMessage& msg);
+  z_err_t WriteInternal(uint64_t num_bytes, const void* bytes,
+                        uint64_t num_caps, const z_cap_t* caps);
 };

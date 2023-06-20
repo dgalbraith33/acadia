@@ -11,14 +11,18 @@ Pair<RefPtr<Channel>, RefPtr<Channel>> Channel::CreateChannelPair() {
   return {c1, c2};
 }
 
-z_err_t Channel::Write(const ZMessage& msg) {
-  return peer_->EnqueueMessage(msg);
+z_err_t Channel::Write(uint64_t num_bytes, const void* bytes, uint64_t num_caps,
+                       const z_cap_t* caps) {
+  return peer_->WriteInternal(num_bytes, bytes, num_caps, caps);
 }
 
-z_err_t Channel::Read(ZMessage& msg) {
+z_err_t Channel::Read(uint64_t* num_bytes, void* bytes, uint64_t* num_caps,
+                      z_cap_t* caps) {
   mutex_.Lock();
-  while (pending_messages_.size() == 0) {
-    blocked_threads_.PushBack(gScheduler->CurrentThread());
+  while (message_queue_.empty()) {
+    auto thread = gScheduler->CurrentThread();
+    thread->SetState(Thread::BLOCKED);
+    blocked_threads_.PushBack(thread);
     mutex_.Unlock();
     gScheduler->Yield();
     mutex_.Lock();
@@ -26,58 +30,13 @@ z_err_t Channel::Read(ZMessage& msg) {
   mutex_.Unlock();
 
   MutexHolder lock(mutex_);
-  auto next_msg = pending_messages_.PeekFront();
-  if (next_msg->num_bytes > msg.num_bytes) {
-    return Z_ERR_BUFF_SIZE;
-  }
-  if (next_msg->caps.size() > msg.num_caps) {
-    return Z_ERR_BUFF_SIZE;
-  }
-
-  msg.num_bytes = next_msg->num_bytes;
-
-  for (uint64_t i = 0; i < msg.num_bytes; i++) {
-    static_cast<uint8_t*>(msg.data)[i] = next_msg->bytes[i];
-  }
-
-  msg.num_caps = next_msg->caps.size();
-  auto& proc = gScheduler->CurrentProcess();
-  for (uint64_t i = 0; i < msg.num_caps; i++) {
-    msg.caps[i] = proc.AddExistingCapability(next_msg->caps.PopFront());
-  }
-
-  pending_messages_.PopFront();
-
-  return Z_OK;
+  return message_queue_.PopFront(num_bytes, bytes, num_caps, caps);
 }
 
-z_err_t Channel::EnqueueMessage(const ZMessage& msg) {
-  if (msg.num_bytes > 0x1000) {
-    dbgln("Large message size unimplemented: %x", msg.num_bytes);
-    return Z_ERR_INVALID;
-  }
-
-  auto message = MakeShared<Message>();
-
-  // Copy Message body.
-  message->num_bytes = msg.num_bytes;
-  message->bytes = new uint8_t[msg.num_bytes];
-  for (uint64_t i = 0; i < msg.num_bytes; i++) {
-    message->bytes[i] = static_cast<uint8_t*>(msg.data)[i];
-  }
-
-  // Release and store capabilities.
-  for (uint64_t i = 0; i < msg.num_caps; i++) {
-    auto cap = gScheduler->CurrentProcess().ReleaseCapability(msg.caps[i]);
-    if (!cap) {
-      return Z_ERR_CAP_NOT_FOUND;
-    }
-    message->caps.PushBack(cap);
-  }
-
-  // Enqueue.
+z_err_t Channel::WriteInternal(uint64_t num_bytes, const void* bytes,
+                               uint64_t num_caps, const z_cap_t* caps) {
   MutexHolder lock(mutex_);
-  pending_messages_.PushBack(message);
+  RET_ERR(message_queue_.PushBack(num_bytes, bytes, num_caps, caps));
 
   if (blocked_threads_.size() > 0) {
     auto thread = blocked_threads_.PopFront();

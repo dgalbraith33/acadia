@@ -20,7 +20,9 @@ z_err_t Port::Read(uint64_t* num_bytes, void* bytes, uint64_t* num_caps,
                    z_cap_t* caps) {
   mutex_.Lock();
   while (message_queue_.empty()) {
-    blocked_threads_.PushBack(gScheduler->CurrentThread());
+    auto thread = gScheduler->CurrentThread();
+    thread->SetState(Thread::BLOCKED);
+    blocked_threads_.PushBack(thread);
     mutex_.Unlock();
     gScheduler->Yield();
     mutex_.Lock();

@@ -22,6 +22,7 @@ class Thread : public KernelObject {
     CREATED,
     RUNNING,
     RUNNABLE,
+    BLOCKED,
     FINISHED,
   };
   static RefPtr<Thread> RootThread(Process& root_proc);
