@@ -1,5 +1,7 @@
 #include "loader/init_loader.h"
 
+#include <glacier/string/string.h>
+
 #include "boot/boot_info.h"
 #include "debug/debug.h"
 #include "include/zcall.h"
@@ -103,11 +105,13 @@ void DumpModules() {
 #endif
 }
 
-const limine_file& GetInitProgram(const char* path) {
+const limine_file& GetInitProgram(glcr::String path) {
   const limine_module_response& resp = boot::GetModules();
   for (uint64_t i = 0; i < resp.module_count; i++) {
     const limine_file& file = *resp.modules[i];
-    if (streq(file.path, path)) return file;
+    if (path == file.path) {
+      return file;
+    }
   }
   panic("Program not found: %s", path);
 }

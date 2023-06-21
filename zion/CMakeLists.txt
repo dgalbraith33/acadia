@@ -45,6 +45,9 @@ target_include_directories(zion
   ${CMAKE_CURRENT_SOURCE_DIR}
   )
 
+target_link_libraries(zion
+  glacier)
+
 # -c -- Don't run the linker (only necessary for the assembler)
 # -ffreestanding
 # -fno-rtti -- No runtime type information (might mess with polymorphism?)
