@@ -1,9 +1,9 @@
 #pragma once
 
+#include <glacier/container/intrusive_list.h>
 #include <glacier/memory/ref_ptr.h>
 
 #include "capability/capability.h"
-#include "lib/linked_list.h"
 #include "lib/message_queue.h"
 #include "lib/mutex.h"
 #include "object/kernel_object.h"
@@ -34,7 +34,7 @@ class Port : public KernelObject {
 
  private:
   UnboundedMessageQueue message_queue_;
-  LinkedList<glcr::RefPtr<Thread>> blocked_threads_;
+  glcr::IntrusiveList<Thread> blocked_threads_;
 
   Mutex mutex_{"Port"};
 };

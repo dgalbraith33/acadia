@@ -1,10 +1,10 @@
 #pragma once
 
+#include <glacier/container/intrusive_list.h>
 #include <glacier/memory/ref_ptr.h>
 
 #include "capability/capability.h"
 #include "include/ztypes.h"
-#include "lib/linked_list.h"
 #include "lib/message_queue.h"
 #include "lib/mutex.h"
 #include "lib/pair.h"
@@ -38,7 +38,7 @@ class Channel : public KernelObject {
   Mutex mutex_{"channel"};
   UnboundedMessageQueue message_queue_;
 
-  LinkedList<glcr::RefPtr<Thread>> blocked_threads_;
+  glcr::IntrusiveList<Thread> blocked_threads_;
 
   friend class glcr::MakeRefCountedFriend<Channel>;
   Channel() {}
