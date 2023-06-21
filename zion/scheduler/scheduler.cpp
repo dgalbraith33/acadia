@@ -61,7 +61,8 @@ void Scheduler::Preempt() {
 
   glcr::RefPtr<Thread> prev = current_thread_;
   prev->SetState(Thread::RUNNABLE);
-  current_thread_ = runnable_threads_.CycleFront(prev);
+  runnable_threads_.PushBack(prev);
+  current_thread_ = runnable_threads_.PopFront();
 
   SwapToCurrent(*prev);
 }
@@ -79,7 +80,6 @@ void Scheduler::Yield() {
       panic("Sleep thread yielded without next.");
       return;
     } else {
-      // FIXME: Memory operation.
       current_thread_ = runnable_threads_.PopFront();
       prev->SetState(Thread::RUNNABLE);
     }
@@ -89,7 +89,6 @@ void Scheduler::Yield() {
       dbgln("Sleeping");
       gProcMan->DumpProcessStates();
     } else {
-      // FIXME: Memory operation.
       current_thread_ = runnable_threads_.PopFront();
     }
   }

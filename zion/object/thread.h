@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glacier/container/intrusive_list.h>
 #include <glacier/memory/ref_ptr.h>
 #include <stdint.h>
 
@@ -14,7 +15,7 @@ struct KernelObjectTag<Thread> {
   static const uint64_t type = KernelObject::THREAD;
 };
 
-class Thread : public KernelObject {
+class Thread : public KernelObject, public glcr::IntrusiveListNode<Thread> {
  public:
   uint64_t TypeTag() override { return KernelObject::THREAD; }
   enum State {

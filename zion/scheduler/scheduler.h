@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glacier/container/intrusive_list.h>
 #include <glacier/memory/ref_ptr.h>
 
 #include "object/process.h"
@@ -28,7 +29,7 @@ class Scheduler {
   bool enabled_ = false;
 
   glcr::RefPtr<Thread> current_thread_;
-  LinkedList<glcr::RefPtr<Thread>> runnable_threads_;
+  glcr::IntrusiveList<Thread> runnable_threads_;
 
   glcr::RefPtr<Thread> sleep_thread_;
 
