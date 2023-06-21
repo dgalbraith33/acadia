@@ -1,8 +1,8 @@
 #pragma once
 
+#include <glacier/memory/ref_ptr.h>
 #include <stdint.h>
 
-#include "lib/ref_ptr.h"
 #include "memory/user_stack_manager.h"
 #include "object/memory_object.h"
 
@@ -49,7 +49,7 @@ class AddressSpace : public KernelObject {
     KERNEL_STACK,
   };
 
-  static RefPtr<AddressSpace> ForRoot();
+  static glcr::RefPtr<AddressSpace> ForRoot();
 
   AddressSpace();
   AddressSpace(const AddressSpace&) = delete;
@@ -63,9 +63,10 @@ class AddressSpace : public KernelObject {
 
   // Maps in a memory object at a specific address.
   // Note this is unsafe for now as it may clobber other mappings.
-  void MapInMemoryObject(uint64_t vaddr, const RefPtr<MemoryObject>& mem_obj);
+  void MapInMemoryObject(uint64_t vaddr,
+                         const glcr::RefPtr<MemoryObject>& mem_obj);
 
-  uint64_t MapInMemoryObject(const RefPtr<MemoryObject>& mem_obj);
+  uint64_t MapInMemoryObject(const glcr::RefPtr<MemoryObject>& mem_obj);
 
   // Kernel Mappings.
   uint64_t* AllocateKernelStack();
@@ -74,7 +75,7 @@ class AddressSpace : public KernelObject {
   bool HandlePageFault(uint64_t vaddr);
 
  private:
-  friend class MakeRefCountedFriend<AddressSpace>;
+  friend class glcr::MakeRefCountedFriend<AddressSpace>;
   AddressSpace(uint64_t cr3) : cr3_(cr3) {}
   uint64_t cr3_ = 0;
 
@@ -83,7 +84,7 @@ class AddressSpace : public KernelObject {
 
   struct MemoryMapping {
     uint64_t vaddr;
-    RefPtr<MemoryObject> mem_obj;
+    glcr::RefPtr<MemoryObject> mem_obj;
   };
   LinkedList<MemoryMapping> memory_mappings_;
 

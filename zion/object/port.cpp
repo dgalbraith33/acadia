@@ -33,7 +33,7 @@ z_err_t Port::Read(uint64_t* num_bytes, void* bytes, uint64_t* num_caps,
   return message_queue_.PopFront(num_bytes, bytes, num_caps, caps);
 }
 
-void Port::WriteKernel(uint64_t init, RefPtr<Capability> cap) {
+void Port::WriteKernel(uint64_t init, glcr::RefPtr<Capability> cap) {
   MutexHolder h(mutex_);
   message_queue_.WriteKernel(init, cap);
 }

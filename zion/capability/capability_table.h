@@ -1,9 +1,10 @@
 #pragma once
 
+#include <glacier/memory/ref_ptr.h>
+
 #include "capability/capability.h"
 #include "lib/linked_list.h"
 #include "lib/mutex.h"
-#include "lib/ref_ptr.h"
 
 class CapabilityTable {
  public:
@@ -13,11 +14,12 @@ class CapabilityTable {
   CapabilityTable& operator=(CapabilityTable&) = delete;
 
   template <typename T>
-  uint64_t AddNewCapability(const RefPtr<T>& object, uint64_t permissions);
-  uint64_t AddExistingCapability(const RefPtr<Capability>& cap);
+  uint64_t AddNewCapability(const glcr::RefPtr<T>& object,
+                            uint64_t permissions);
+  uint64_t AddExistingCapability(const glcr::RefPtr<Capability>& cap);
 
-  RefPtr<Capability> GetCapability(uint64_t id);
-  RefPtr<Capability> ReleaseCapability(uint64_t id);
+  glcr::RefPtr<Capability> GetCapability(uint64_t id);
+  glcr::RefPtr<Capability> ReleaseCapability(uint64_t id);
 
  private:
   Mutex lock_{"cap table"};
@@ -26,13 +28,13 @@ class CapabilityTable {
   // FIXME: use a map data structure.
   struct CapEntry {
     uint64_t id;
-    RefPtr<Capability> cap;
+    glcr::RefPtr<Capability> cap;
   };
   LinkedList<CapEntry> capabilities_;
 };
 
 template <typename T>
-uint64_t CapabilityTable::AddNewCapability(const RefPtr<T>& object,
+uint64_t CapabilityTable::AddNewCapability(const glcr::RefPtr<T>& object,
                                            uint64_t permissions) {
   MutexHolder h(lock_);
   uint64_t id = next_cap_id_++;

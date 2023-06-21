@@ -1,6 +1,6 @@
 #pragma once
 
-#include "debug/debug.h"
+namespace glcr {
 
 template <typename T>
 class RefPtr;
@@ -28,7 +28,6 @@ class RefPtr {
       ptr_->Acquire();
     }
     if (old && old->Release()) {
-      dbgln("Deleting obj %m", old);
       delete old;
     }
 
@@ -90,3 +89,5 @@ template <typename T, typename U>
 RefPtr<T> StaticCastRefPtr(const RefPtr<U>& ref) {
   return RefPtr(static_cast<T*>(ref.get()), RefPtr<T>::DontAdopt);
 }
+
+}  // namespace glcr

@@ -59,7 +59,7 @@ void Scheduler::Preempt() {
     return;
   }
 
-  RefPtr<Thread> prev = current_thread_;
+  glcr::RefPtr<Thread> prev = current_thread_;
   prev->SetState(Thread::RUNNABLE);
   current_thread_ = runnable_threads_.CycleFront(prev);
 
@@ -73,7 +73,7 @@ void Scheduler::Yield() {
   }
   asm volatile("cli");
 
-  RefPtr<Thread> prev = current_thread_;
+  glcr::RefPtr<Thread> prev = current_thread_;
   if (prev == sleep_thread_) {
     if (runnable_threads_.size() == 0) {
       panic("Sleep thread yielded without next.");

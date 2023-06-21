@@ -1,8 +1,8 @@
 #pragma once
 
+#include <glacier/memory/ref_ptr.h>
 #include <stdint.h>
 
-#include "lib/ref_ptr.h"
 #include "object/kernel_object.h"
 
 // Forward decl due to cyclic dependency.
@@ -25,8 +25,8 @@ class Thread : public KernelObject {
     BLOCKED,
     FINISHED,
   };
-  static RefPtr<Thread> RootThread(Process& root_proc);
-  static RefPtr<Thread> Create(Process& proc, uint64_t tid);
+  static glcr::RefPtr<Thread> RootThread(Process& root_proc);
+  static glcr::RefPtr<Thread> Create(Process& proc, uint64_t tid);
 
   uint64_t tid() const { return id_; };
   uint64_t pid() const;
@@ -48,7 +48,7 @@ class Thread : public KernelObject {
   void Exit();
 
  private:
-  friend class MakeRefCountedFriend<Thread>;
+  friend class glcr::MakeRefCountedFriend<Thread>;
   Thread(Process& proc, uint64_t tid);
   // Special constructor for the root thread only.
   Thread(Process& proc) : process_(proc), id_(0) {}

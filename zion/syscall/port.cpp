@@ -6,7 +6,7 @@
 
 z_err_t PortCreate(ZPortCreateReq* req) {
   auto& proc = gScheduler->CurrentProcess();
-  auto port = MakeRefCounted<Port>();
+  auto port = glcr::MakeRefCounted<Port>();
   *req->port_cap = proc.AddNewCapability(port, ZC_WRITE | ZC_READ);
   return Z_OK;
 }
@@ -55,7 +55,7 @@ z_err_t IrqRegister(ZIrqRegisterReq* req) {
     // FIXME: Don't hardcode this nonsense.
     return Z_ERR_UNIMPLEMENTED;
   }
-  RefPtr<Port> port = MakeRefCounted<Port>();
+  glcr::RefPtr<Port> port = glcr::MakeRefCounted<Port>();
   *req->port_cap = proc.AddNewCapability(port, ZC_READ | ZC_WRITE);
   RegisterPciPort(port);
   return Z_OK;

@@ -2,14 +2,15 @@
 
 CapabilityTable::CapabilityTable() {}
 
-uint64_t CapabilityTable::AddExistingCapability(const RefPtr<Capability>& cap) {
+uint64_t CapabilityTable::AddExistingCapability(
+    const glcr::RefPtr<Capability>& cap) {
   MutexHolder h(lock_);
   uint64_t id = next_cap_id_++;
   capabilities_.PushBack({.id = id, .cap = cap});
   return id;
 }
 
-RefPtr<Capability> CapabilityTable::GetCapability(uint64_t id) {
+glcr::RefPtr<Capability> CapabilityTable::GetCapability(uint64_t id) {
   MutexHolder h(lock_);
   auto iter = capabilities_.begin();
   while (iter != capabilities_.end()) {
@@ -23,7 +24,7 @@ RefPtr<Capability> CapabilityTable::GetCapability(uint64_t id) {
   return {};
 }
 
-RefPtr<Capability> CapabilityTable::ReleaseCapability(uint64_t id) {
+glcr::RefPtr<Capability> CapabilityTable::ReleaseCapability(uint64_t id) {
   MutexHolder h(lock_);
   auto iter = capabilities_.begin();
   while (iter != capabilities_.end()) {

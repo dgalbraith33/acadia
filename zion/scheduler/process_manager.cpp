@@ -7,7 +7,7 @@ void ProcessManager::Init() {
   gProcMan->InsertProcess(Process::RootProcess());
 }
 
-void ProcessManager::InsertProcess(const RefPtr<Process>& proc) {
+void ProcessManager::InsertProcess(const glcr::RefPtr<Process>& proc) {
   proc_list_.PushBack(proc);
 }
 

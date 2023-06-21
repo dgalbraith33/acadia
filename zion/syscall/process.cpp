@@ -18,7 +18,7 @@ z_err_t ProcessSpawn(ZProcessSpawnReq* req) {
   auto cap = curr_proc.GetCapability(req->proc_cap);
   RET_ERR(ValidateCapability<Process>(cap, ZC_PROC_SPAWN_PROC));
 
-  RefPtr<Process> proc = Process::Create();
+  glcr::RefPtr<Process> proc = Process::Create();
   gProcMan->InsertProcess(proc);
 
   *req->new_proc_cap = curr_proc.AddNewCapability(

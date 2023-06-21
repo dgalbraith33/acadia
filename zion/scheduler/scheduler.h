@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glacier/memory/ref_ptr.h>
+
 #include "object/process.h"
 #include "object/thread.h"
 
@@ -13,9 +15,9 @@ class Scheduler {
   void Enable() { enabled_ = true; }
 
   Process& CurrentProcess() { return current_thread_->process(); }
-  RefPtr<Thread> CurrentThread() { return current_thread_; }
+  glcr::RefPtr<Thread> CurrentThread() { return current_thread_; }
 
-  void Enqueue(const RefPtr<Thread>& thread) {
+  void Enqueue(const glcr::RefPtr<Thread>& thread) {
     runnable_threads_.PushBack(thread);
   }
 
@@ -25,10 +27,10 @@ class Scheduler {
  private:
   bool enabled_ = false;
 
-  RefPtr<Thread> current_thread_;
-  LinkedList<RefPtr<Thread>> runnable_threads_;
+  glcr::RefPtr<Thread> current_thread_;
+  LinkedList<glcr::RefPtr<Thread>> runnable_threads_;
 
-  RefPtr<Thread> sleep_thread_;
+  glcr::RefPtr<Thread> sleep_thread_;
 
   Scheduler();
   void SwapToCurrent(Thread& prev);

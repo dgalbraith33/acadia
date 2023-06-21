@@ -138,7 +138,7 @@ extern "C" void interrupt_timer(InterruptFrame*) {
   gScheduler->Preempt();
 }
 
-RefPtr<Port> pci1_port;
+glcr::RefPtr<Port> pci1_port;
 extern "C" void isr_pci1();
 extern "C" void interrupt_pci1(InterruptFrame*) {
   dbgln("Interrupt PCI line 1");
@@ -185,4 +185,4 @@ void InitIdt() {
   EnableApic();
 }
 
-void RegisterPciPort(const RefPtr<Port>& port) { pci1_port = port; }
+void RegisterPciPort(const glcr::RefPtr<Port>& port) { pci1_port = port; }

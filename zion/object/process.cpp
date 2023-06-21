@@ -13,26 +13,31 @@ static uint64_t gNextId = 1;
 
 }
 
-RefPtr<Process> Process::RootProcess() {
-  RefPtr<Process> proc = MakeRefCounted<Process>(0);
+glcr::RefPtr<Process> Process::RootProcess() {
+  glcr::RefPtr<Process> proc = glcr::MakeRefCounted<Process>(0);
   proc->threads_.PushBack(Thread::RootThread(*proc));
   proc->next_thread_id_ = 1;
 
   return proc;
 }
-RefPtr<Process> Process::Create() { return MakeRefCounted<Process>(); }
+glcr::RefPtr<Process> Process::Create() {
+  return glcr::MakeRefCounted<Process>();
+}
 
 Process::Process()
-    : id_(gNextId++), vmas_(MakeRefCounted<AddressSpace>()), state_(RUNNING) {}
+    : id_(gNextId++),
+      vmas_(glcr::MakeRefCounted<AddressSpace>()),
+      state_(RUNNING) {}
 
-RefPtr<Thread> Process::CreateThread() {
+glcr::RefPtr<Thread> Process::CreateThread() {
   MutexHolder lock(mutex_);
-  RefPtr<Thread> thread = MakeRefCounted<Thread>(*this, next_thread_id_++);
+  glcr::RefPtr<Thread> thread =
+      glcr::MakeRefCounted<Thread>(*this, next_thread_id_++);
   threads_.PushBack(thread);
   return thread;
 }
 
-RefPtr<Thread> Process::GetThread(uint64_t tid) {
+glcr::RefPtr<Thread> Process::GetThread(uint64_t tid) {
   MutexHolder lock(mutex_);
   auto iter = threads_.begin();
   while (iter != threads_.end()) {
@@ -57,14 +62,14 @@ void Process::CheckState() {
   state_ = FINISHED;
 }
 
-RefPtr<Capability> Process::ReleaseCapability(uint64_t cid) {
+glcr::RefPtr<Capability> Process::ReleaseCapability(uint64_t cid) {
   return caps_.ReleaseCapability(cid);
 }
 
-RefPtr<Capability> Process::GetCapability(uint64_t cid) {
+glcr::RefPtr<Capability> Process::GetCapability(uint64_t cid) {
   return caps_.GetCapability(cid);
 }
 
-uint64_t Process::AddExistingCapability(const RefPtr<Capability>& cap) {
+uint64_t Process::AddExistingCapability(const glcr::RefPtr<Capability>& cap) {
   return caps_.AddExistingCapability(cap);
 }

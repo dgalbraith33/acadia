@@ -1,7 +1,8 @@
 #pragma once
 
+#include <glacier/memory/ref_ptr.h>
+
 #include "lib/linked_list.h"
-#include "lib/ref_ptr.h"
 #include "object/process.h"
 
 class ProcessManager {
@@ -10,14 +11,14 @@ class ProcessManager {
   // and stores it in the global variable.
   static void Init();
 
-  void InsertProcess(const RefPtr<Process>& proc);
+  void InsertProcess(const glcr::RefPtr<Process>& proc);
   Process& FromId(uint64_t id);
 
   void DumpProcessStates();
 
  private:
   // TODO: This should be a hashmap.
-  LinkedList<RefPtr<Process>> proc_list_;
+  LinkedList<glcr::RefPtr<Process>> proc_list_;
 };
 
 extern ProcessManager* gProcMan;

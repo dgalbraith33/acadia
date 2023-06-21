@@ -3,9 +3,10 @@
 #include "include/ztypes.h"
 #include "scheduler/scheduler.h"
 
-Pair<RefPtr<Channel>, RefPtr<Channel>> Channel::CreateChannelPair() {
-  auto c1 = MakeRefCounted<Channel>();
-  auto c2 = MakeRefCounted<Channel>();
+Pair<glcr::RefPtr<Channel>, glcr::RefPtr<Channel>>
+Channel::CreateChannelPair() {
+  auto c1 = glcr::MakeRefCounted<Channel>();
+  auto c2 = glcr::MakeRefCounted<Channel>();
   c1->SetPeer(c2);
   c2->SetPeer(c1);
   return {c1, c2};

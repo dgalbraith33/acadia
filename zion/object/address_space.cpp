@@ -8,10 +8,10 @@
 
 extern KernelStackManager* gKernelStackManager;
 
-RefPtr<AddressSpace> AddressSpace::ForRoot() {
+glcr::RefPtr<AddressSpace> AddressSpace::ForRoot() {
   uint64_t cr3 = 0;
   asm volatile("mov %%cr3, %0;" : "=r"(cr3));
-  return MakeRefCounted<AddressSpace>(cr3);
+  return glcr::MakeRefCounted<AddressSpace>(cr3);
 }
 
 AddressSpace::AddressSpace() {
@@ -36,12 +36,13 @@ uint64_t AddressSpace::GetNextMemMapAddr(uint64_t size) {
   return addr;
 }
 
-void AddressSpace::MapInMemoryObject(uint64_t vaddr,
-                                     const RefPtr<MemoryObject>& mem_obj) {
+void AddressSpace::MapInMemoryObject(
+    uint64_t vaddr, const glcr::RefPtr<MemoryObject>& mem_obj) {
   memory_mappings_.PushBack({.vaddr = vaddr, .mem_obj = mem_obj});
 }
 
-uint64_t AddressSpace::MapInMemoryObject(const RefPtr<MemoryObject>& mem_obj) {
+uint64_t AddressSpace::MapInMemoryObject(
+    const glcr::RefPtr<MemoryObject>& mem_obj) {
   uint64_t vaddr = GetNextMemMapAddr(mem_obj->size());
   memory_mappings_.PushBack({.vaddr = vaddr, .mem_obj = mem_obj});
   return vaddr;

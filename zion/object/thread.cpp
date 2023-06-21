@@ -21,12 +21,12 @@ extern "C" void thread_init() {
 
 }  // namespace
 
-RefPtr<Thread> Thread::RootThread(Process& root_proc) {
-  return MakeRefCounted<Thread>(root_proc);
+glcr::RefPtr<Thread> Thread::RootThread(Process& root_proc) {
+  return glcr::MakeRefCounted<Thread>(root_proc);
 }
 
-RefPtr<Thread> Thread::Create(Process& proc, uint64_t tid) {
-  return MakeRefCounted<Thread>(proc, tid);
+glcr::RefPtr<Thread> Thread::Create(Process& proc, uint64_t tid) {
+  return glcr::MakeRefCounted<Thread>(proc, tid);
 }
 
 Thread::Thread(Process& proc, uint64_t tid) : process_(proc), id_(tid) {

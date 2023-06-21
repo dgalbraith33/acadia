@@ -1,9 +1,10 @@
 #pragma once
 
 #include <glacier/memory/ref_counted.h>
+#include <glacier/memory/ref_ptr.h>
 #include <stdint.h>
 
-#include "lib/ref_ptr.h"
+#include "include/ztypes.h"
 #include "object/kernel_object.h"
 
 class Process;
@@ -11,17 +12,17 @@ class Thread;
 
 class Capability : public glcr::RefCounted<Capability> {
  public:
-  Capability(const RefPtr<KernelObject>& obj, uint64_t permissions)
+  Capability(const glcr::RefPtr<KernelObject>& obj, uint64_t permissions)
       : obj_(obj), permissions_(permissions) {}
 
   template <typename T>
-  Capability(const RefPtr<T>& obj, uint64_t permissions)
+  Capability(const glcr::RefPtr<T>& obj, uint64_t permissions)
       : Capability(StaticCastRefPtr<KernelObject>(obj), permissions) {}
 
   template <typename T>
-  RefPtr<T> obj();
+  glcr::RefPtr<T> obj();
 
-  RefPtr<KernelObject> raw_obj() { return obj_; }
+  glcr::RefPtr<KernelObject> raw_obj() { return obj_; }
 
   uint64_t permissions() { return permissions_; }
   bool HasPermissions(uint64_t requested) {
@@ -29,12 +30,12 @@ class Capability : public glcr::RefCounted<Capability> {
   }
 
  private:
-  RefPtr<KernelObject> obj_;
+  glcr::RefPtr<KernelObject> obj_;
   uint64_t permissions_;
 };
 
 template <typename T>
-RefPtr<T> Capability::obj() {
+glcr::RefPtr<T> Capability::obj() {
   if (obj_->TypeTag() != KernelObjectTag<T>::type) {
     return nullptr;
   }
@@ -42,7 +43,7 @@ RefPtr<T> Capability::obj() {
 }
 
 template <typename T>
-z_err_t ValidateCapability(const RefPtr<Capability>& cap,
+z_err_t ValidateCapability(const glcr::RefPtr<Capability>& cap,
                            uint64_t permissions) {
   if (!cap) {
     return Z_ERR_CAP_NOT_FOUND;

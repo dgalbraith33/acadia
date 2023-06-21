@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glacier/memory/ref_ptr.h>
+
 #include "capability/capability.h"
 #include "lib/linked_list.h"
 #include "lib/message_queue.h"
@@ -26,13 +28,13 @@ class Port : public KernelObject {
   z_err_t Read(uint64_t* num_bytes, void* bytes, uint64_t* num_caps,
                z_cap_t* caps);
 
-  void WriteKernel(uint64_t init, RefPtr<Capability> cap);
+  void WriteKernel(uint64_t init, glcr::RefPtr<Capability> cap);
 
   bool HasMessages();
 
  private:
   UnboundedMessageQueue message_queue_;
-  LinkedList<RefPtr<Thread>> blocked_threads_;
+  LinkedList<glcr::RefPtr<Thread>> blocked_threads_;
 
   Mutex mutex_{"Port"};
 };

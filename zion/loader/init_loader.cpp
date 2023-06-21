@@ -1,11 +1,11 @@
 #include "loader/init_loader.h"
 
+#include <glacier/memory/ref_ptr.h>
 #include <glacier/string/string.h>
 
 #include "boot/boot_info.h"
 #include "debug/debug.h"
 #include "include/zcall.h"
-#include "lib/ref_ptr.h"
 #include "memory/paging_util.h"
 #include "object/process.h"
 #include "object/thread.h"
@@ -73,7 +73,7 @@ uint64_t LoadElfProgram(Process& dest_proc, uint64_t base, uint64_t offset) {
         program.type, program.flags, program.offset, program.vaddr,
         program.paddr, program.filesz, program.memsz, program.align);
 #endif
-    auto mem_obj = MakeRefCounted<MemoryObject>(program.memsz);
+    auto mem_obj = glcr::MakeRefCounted<MemoryObject>(program.memsz);
     mem_obj->CopyBytesToObject(base + program.offset, program.filesz);
     dest_proc.vmas()->MapInMemoryObject(program.vaddr, mem_obj);
   }
@@ -122,18 +122,19 @@ void LoadInitProgram() {
   DumpModules();
   const limine_file& init_prog = GetInitProgram("/sys/yellowstone");
 
-  RefPtr<Process> proc = Process::Create();
+  glcr::RefPtr<Process> proc = Process::Create();
   gProcMan->InsertProcess(proc);
 
   uint64_t entry = LoadElfProgram(
       *proc, reinterpret_cast<uint64_t>(init_prog.address), init_prog.size);
 
   const limine_file& prog2 = GetInitProgram("/sys/denali");
-  RefPtr<MemoryObject> prog2_vmmo = MakeRefCounted<MemoryObject>(prog2.size);
+  glcr::RefPtr<MemoryObject> prog2_vmmo =
+      glcr::MakeRefCounted<MemoryObject>(prog2.size);
   prog2_vmmo->CopyBytesToObject(reinterpret_cast<uint64_t>(prog2.address),
                                 prog2.size);
 
-  auto port = MakeRefCounted<Port>();
+  auto port = glcr::MakeRefCounted<Port>();
   uint64_t port_cap = proc->AddNewCapability(port, ZC_READ | ZC_WRITE);
 
   port->WriteKernel(Z_INIT_SELF_PROC,

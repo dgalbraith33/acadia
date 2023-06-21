@@ -56,7 +56,8 @@ z_err_t UnboundedMessageQueue::PopFront(uint64_t* num_bytes, void* bytes,
   return Z_OK;
 }
 
-void UnboundedMessageQueue::WriteKernel(uint64_t init, RefPtr<Capability> cap) {
+void UnboundedMessageQueue::WriteKernel(uint64_t init,
+                                        glcr::RefPtr<Capability> cap) {
   auto msg = glcr::MakeShared<Message>();
   msg->bytes = new uint8_t[8];
   msg->num_bytes = sizeof(init);

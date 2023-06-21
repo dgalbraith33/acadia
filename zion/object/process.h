@@ -1,12 +1,12 @@
 #pragma once
 
+#include <glacier/memory/ref_ptr.h>
 #include <stdint.h>
 
 #include "capability/capability.h"
 #include "capability/capability_table.h"
 #include "lib/linked_list.h"
 #include "lib/mutex.h"
-#include "lib/ref_ptr.h"
 #include "object/address_space.h"
 #include "object/channel.h"
 #include "object/port.h"
@@ -28,23 +28,23 @@ class Process : public KernelObject {
     RUNNING,
     FINISHED,
   };
-  static RefPtr<Process> RootProcess();
-  static RefPtr<Process> Create();
+  static glcr::RefPtr<Process> RootProcess();
+  static glcr::RefPtr<Process> Create();
 
   uint64_t id() const { return id_; }
-  RefPtr<AddressSpace> vmas() { return vmas_; }
+  glcr::RefPtr<AddressSpace> vmas() { return vmas_; }
 
-  RefPtr<Thread> CreateThread();
-  RefPtr<Thread> GetThread(uint64_t tid);
+  glcr::RefPtr<Thread> CreateThread();
+  glcr::RefPtr<Thread> GetThread(uint64_t tid);
 
-  RefPtr<Capability> ReleaseCapability(uint64_t cid);
-  RefPtr<Capability> GetCapability(uint64_t cid);
+  glcr::RefPtr<Capability> ReleaseCapability(uint64_t cid);
+  glcr::RefPtr<Capability> GetCapability(uint64_t cid);
 
   template <typename T>
-  uint64_t AddNewCapability(const RefPtr<T>& obj, uint64_t permissions) {
+  uint64_t AddNewCapability(const glcr::RefPtr<T>& obj, uint64_t permissions) {
     return caps_.AddNewCapability(obj, permissions);
   }
-  uint64_t AddExistingCapability(const RefPtr<Capability>& cap);
+  uint64_t AddExistingCapability(const glcr::RefPtr<Capability>& cap);
 
   // Checks the state of all child threads and transitions to
   // finished if all have finished.
@@ -53,19 +53,19 @@ class Process : public KernelObject {
   State GetState() { return state_; }
 
  private:
-  friend class MakeRefCountedFriend<Process>;
+  friend class glcr::MakeRefCountedFriend<Process>;
   Process();
   Process(uint64_t id) : id_(id), vmas_(AddressSpace::ForRoot()) {}
 
   Mutex mutex_{"Process"};
 
   uint64_t id_;
-  RefPtr<AddressSpace> vmas_;
+  glcr::RefPtr<AddressSpace> vmas_;
   State state_;
 
   uint64_t next_thread_id_ = 0;
   uint64_t next_cap_id_ = 0x100;
 
-  LinkedList<RefPtr<Thread>> threads_;
+  LinkedList<glcr::RefPtr<Thread>> threads_;
   CapabilityTable caps_;
 };
