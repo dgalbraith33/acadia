@@ -4,7 +4,6 @@
 #include "lib/linked_list.h"
 #include "lib/message_queue.h"
 #include "lib/mutex.h"
-#include "lib/shared_ptr.h"
 #include "object/kernel_object.h"
 #include "object/thread.h"
 #include "usr/zcall_internal.h"

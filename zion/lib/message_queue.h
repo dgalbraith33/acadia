@@ -1,9 +1,9 @@
 #pragma once
 
 #include "capability/capability.h"
+#include "glacier/memory/shared_ptr.h"
 #include "include/ztypes.h"
 #include "lib/linked_list.h"
-#include "lib/shared_ptr.h"
 
 class MessageQueue {
  public:
@@ -40,5 +40,5 @@ class UnboundedMessageQueue : public MessageQueue {
     LinkedList<RefPtr<Capability>> caps;
   };
 
-  LinkedList<SharedPtr<Message>> pending_messages_;
+  LinkedList<glcr::SharedPtr<Message>> pending_messages_;
 };

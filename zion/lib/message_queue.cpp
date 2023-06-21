@@ -10,7 +10,7 @@ z_err_t UnboundedMessageQueue::PushBack(uint64_t num_bytes, const void* bytes,
     return Z_ERR_UNIMPLEMENTED;
   }
 
-  auto message = MakeShared<Message>();
+  auto message = glcr::MakeShared<Message>();
   message->num_bytes = num_bytes;
   message->bytes = new uint8_t[num_bytes];
   for (uint64_t i = 0; i < num_bytes; i++) {
@@ -57,7 +57,7 @@ z_err_t UnboundedMessageQueue::PopFront(uint64_t* num_bytes, void* bytes,
 }
 
 void UnboundedMessageQueue::WriteKernel(uint64_t init, RefPtr<Capability> cap) {
-  auto msg = MakeShared<Message>();
+  auto msg = glcr::MakeShared<Message>();
   msg->bytes = new uint8_t[8];
   msg->num_bytes = sizeof(init);
 

@@ -7,7 +7,6 @@
 #include "lib/mutex.h"
 #include "lib/pair.h"
 #include "lib/ref_ptr.h"
-#include "lib/shared_ptr.h"
 #include "object/kernel_object.h"
 #include "usr/zcall_internal.h"
 

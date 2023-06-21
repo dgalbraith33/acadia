@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include "debug/debug.h"
+namespace glcr {
 
 template <typename T>
 class SharedPtr {
@@ -30,33 +30,14 @@ class SharedPtr {
 
   ~SharedPtr() { Cleanup(); }
 
-  T& operator*() {
-    CheckValid();
-    return *ptr_;
-  }
-  const T& operator*() const {
-    CheckValid();
-    return *ptr_;
-  }
-  T* operator->() {
-    CheckValid();
-    return ptr_;
-  }
-  const T* operator->() const {
-    CheckValid();
-    return ptr_;
-  }
+  T& operator*() { return *ptr_; }
+  const T& operator*() const { return *ptr_; }
+  T* operator->() { return ptr_; }
+  const T* operator->() const { return ptr_; }
 
-  T* ptr() {
-    CheckValid();
-    return ptr_;
-  }
+  T* ptr() { return ptr_; }
 
-  bool operator==(const SharedPtr<T>& other) {
-    CheckValid();
-    other.CheckValid();
-    return ptr_ == other.ptr_;
-  }
+  bool operator==(const SharedPtr<T>& other) { return ptr_ == other.ptr_; }
 
   bool empty() { return !init_; }
 
@@ -74,15 +55,11 @@ class SharedPtr {
       delete ref_cnt_;
     }
   }
-
-  void CheckValid() const {
-    if (!init_) {
-      panic("Accessing invalid shared ptr");
-    }
-  }
 };
 
 template <typename T, class... A>
 SharedPtr<T> MakeShared(A... args) {
   return {new T(args...)};
 }
+
+}  // namespace glcr
