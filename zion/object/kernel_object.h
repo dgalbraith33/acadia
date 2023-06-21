@@ -1,8 +1,8 @@
 #pragma once
 
-#include "lib/ref_counted.h"
+#include <glacier/memory/ref_counted.h>
 
-class KernelObject : public RefCounted<KernelObject> {
+class KernelObject : public glcr::RefCounted<KernelObject> {
  public:
   enum ObjectType {
     INVALID = 0x0,

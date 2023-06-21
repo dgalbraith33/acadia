@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glacier/memory/ref_counted.h>
 #include <stdint.h>
 
 #include "lib/ref_ptr.h"
@@ -8,7 +9,7 @@
 class Process;
 class Thread;
 
-class Capability : public RefCounted<Capability> {
+class Capability : public glcr::RefCounted<Capability> {
  public:
   Capability(const RefPtr<KernelObject>& obj, uint64_t permissions)
       : obj_(obj), permissions_(permissions) {}
