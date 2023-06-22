@@ -16,7 +16,7 @@ DenaliServer::DenaliServer(uint64_t channel_cap, AhciDriver& driver)
   gServer = this;
 }
 
-z_err_t DenaliServer::RunServer() {
+glcr::ErrorCode DenaliServer::RunServer() {
   while (true) {
     uint64_t buff_size = kBuffSize;
     uint64_t cap_size = 0;
@@ -44,9 +44,8 @@ z_err_t DenaliServer::RunServer() {
   }
 }
 
-z_err_t DenaliServer::HandleRead(const DenaliRead& read) {
-  AhciDevice* device;
-  RET_ERR(driver_.GetDevice(read.device_id, &device));
+glcr::ErrorCode DenaliServer::HandleRead(const DenaliRead& read) {
+  ASSIGN_OR_RETURN(AhciDevice * device, driver_.GetDevice(read.device_id));
 
   device->IssueCommand(
       new DmaReadCommand(read.lba, read.size, ::HandleResponse));

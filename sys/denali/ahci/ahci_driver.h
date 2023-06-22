@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glacier/status/error_or.h>
 #include <mammoth/thread.h>
 #include <ztypes.h>
 
@@ -8,11 +9,11 @@
 
 class AhciDriver {
  public:
-  z_err_t Init();
+  glcr::ErrorCode Init();
 
   void InterruptLoop();
 
-  z_err_t GetDevice(uint64_t id, AhciDevice** device);
+  glcr::ErrorOr<AhciDevice*> GetDevice(uint64_t id);
 
   void DumpCapabilities();
   void DumpPorts();
@@ -32,9 +33,9 @@ class AhciDriver {
   uint64_t num_ports_;
   uint64_t num_commands_;
 
-  z_err_t LoadPciDeviceHeader();
-  z_err_t LoadCapabilities();
-  z_err_t RegisterIrq();
-  z_err_t LoadHbaRegisters();
-  z_err_t LoadDevices();
+  glcr::ErrorCode LoadPciDeviceHeader();
+  glcr::ErrorCode LoadCapabilities();
+  glcr::ErrorCode RegisterIrq();
+  glcr::ErrorCode LoadHbaRegisters();
+  glcr::ErrorCode LoadDevices();
 };

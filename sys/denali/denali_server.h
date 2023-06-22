@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glacier/status/error.h>
+
 #include "ahci/ahci_driver.h"
 #include "denali/denali.h"
 
@@ -7,7 +9,7 @@ class DenaliServer {
  public:
   DenaliServer(uint64_t channel_cap, AhciDriver& driver);
 
-  z_err_t RunServer();
+  glcr::ErrorCode RunServer();
 
   void HandleResponse(uint64_t lba, uint64_t size, uint64_t cap);
 
@@ -18,5 +20,5 @@ class DenaliServer {
 
   AhciDriver& driver_;
 
-  z_err_t HandleRead(const DenaliRead& read);
+  glcr::ErrorCode HandleRead(const DenaliRead& read);
 };

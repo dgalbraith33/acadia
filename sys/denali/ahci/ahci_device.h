@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glacier/status/error.h>
 #include <mammoth/memory_region.h>
 #include <ztypes.h>
 
@@ -16,7 +17,7 @@ class AhciDevice {
 
   bool IsInit() { return port_struct_ != nullptr && command_structures_; }
 
-  z_err_t IssueCommand(Command* command);
+  glcr::ErrorCode IssueCommand(Command* command);
 
   void HandleIrq();
 

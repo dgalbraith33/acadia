@@ -35,7 +35,7 @@ AhciDevice::AhciDevice(AhciPort* port) : port_struct_(port) {
   port_struct_->interrupt_enable = 0xFFFFFFFF;
 }
 
-z_err_t AhciDevice::IssueCommand(Command* command) {
+glcr::ErrorCode AhciDevice::IssueCommand(Command* command) {
   command->PopulateFis(command_table_->command_fis);
   command->PopulatePrdt(command_table_->prdt);
 

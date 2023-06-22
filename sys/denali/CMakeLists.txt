@@ -13,6 +13,7 @@ target_include_directories(denali
 
 target_link_libraries(denali
   cxx
+  glacier
   mammoth_lib
   )
 

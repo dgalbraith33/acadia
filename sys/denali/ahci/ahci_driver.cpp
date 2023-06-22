@@ -1,6 +1,7 @@
 #include "ahci/ahci_driver.h"
 
 #include <glacier/status/error.h>
+#include <glacier/status/error_or.h>
 #include <mammoth/debug.h>
 #include <stdint.h>
 #include <zcall.h>
@@ -22,7 +23,7 @@ void interrupt_thread(void* void_driver) {
 
 }  // namespace
 
-z_err_t AhciDriver::Init() {
+glcr::ErrorCode AhciDriver::Init() {
   RET_ERR(LoadPciDeviceHeader());
   // RET_ERR(LoadCapabilities());
   RET_ERR(RegisterIrq());
@@ -34,7 +35,7 @@ z_err_t AhciDriver::Init() {
   return glcr::OK;
 }
 
-z_err_t AhciDriver::GetDevice(uint64_t id, AhciDevice** device) {
+glcr::ErrorOr<AhciDevice*> AhciDriver::GetDevice(uint64_t id) {
   if (id >= 32) {
     return glcr::INVALID_ARGUMENT;
   }
@@ -43,8 +44,7 @@ z_err_t AhciDriver::GetDevice(uint64_t id, AhciDevice** device) {
     return glcr::NOT_FOUND;
   }
 
-  *device = devices_[id];
-  return glcr::OK;
+  return devices_[id];
 }
 
 void AhciDriver::DumpCapabilities() {
@@ -154,13 +154,13 @@ void AhciDriver::InterruptLoop() {
   }
 }
 
-z_err_t AhciDriver::LoadPciDeviceHeader() {
+glcr::ErrorCode AhciDriver::LoadPciDeviceHeader() {
   pci_region_ = MappedMemoryRegion::DirectPhysical(kSataPciPhys, kPciSize);
   pci_device_header_ = reinterpret_cast<PciDeviceHeader*>(pci_region_.vaddr());
   return glcr::OK;
 }
 
-z_err_t AhciDriver::LoadCapabilities() {
+glcr::ErrorCode AhciDriver::LoadCapabilities() {
   if (!(pci_device_header_->status_reg & 0x10)) {
     dbgln("No caps!");
     return glcr::FAILED_PRECONDITION;
@@ -189,9 +189,9 @@ z_err_t AhciDriver::LoadCapabilities() {
   return glcr::OK;
 }
 
-z_err_t AhciDriver::RegisterIrq() {
+glcr::ErrorCode AhciDriver::RegisterIrq() {
   if (pci_device_header_->interrupt_pin == 0) {
-    crash("Can't register IRQ without a pin num", Z_INVALID);
+    crash("Can't register IRQ without a pin num", glcr::INVALID_ARGUMENT);
   }
   uint64_t irq_num = Z_IRQ_PCI_BASE + pci_device_header_->interrupt_pin - 1;
   RET_ERR(ZIrqRegister(irq_num, &irq_port_cap_));
@@ -199,7 +199,7 @@ z_err_t AhciDriver::RegisterIrq() {
   return glcr::OK;
 }
 
-z_err_t AhciDriver::LoadHbaRegisters() {
+glcr::ErrorCode AhciDriver::LoadHbaRegisters() {
   ahci_region_ =
       MappedMemoryRegion::DirectPhysical(pci_device_header_->abar, 0x1100);
   ahci_hba_ = reinterpret_cast<AhciHba*>(ahci_region_.vaddr());
@@ -209,7 +209,7 @@ z_err_t AhciDriver::LoadHbaRegisters() {
   return glcr::OK;
 }
 
-z_err_t AhciDriver::LoadDevices() {
+glcr::ErrorCode AhciDriver::LoadDevices() {
   for (uint8_t i = 0; i < 32; i++) {
     if (!(ahci_hba_->port_implemented & (1 << i))) {
       continue;
