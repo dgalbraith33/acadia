@@ -3,7 +3,7 @@
 #include "include/ztypes.h"
 #include "scheduler/scheduler.h"
 
-Pair<glcr::RefPtr<Channel>, glcr::RefPtr<Channel>>
+glcr::Pair<glcr::RefPtr<Channel>, glcr::RefPtr<Channel>>
 Channel::CreateChannelPair() {
   auto c1 = glcr::MakeRefCounted<Channel>();
   auto c2 = glcr::MakeRefCounted<Channel>();

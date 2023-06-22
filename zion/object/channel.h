@@ -1,13 +1,13 @@
 #pragma once
 
 #include <glacier/container/intrusive_list.h>
+#include <glacier/container/pair.h>
 #include <glacier/memory/ref_ptr.h>
 
 #include "capability/capability.h"
 #include "include/ztypes.h"
 #include "lib/message_queue.h"
 #include "lib/mutex.h"
-#include "lib/pair.h"
 #include "object/kernel_object.h"
 #include "usr/zcall_internal.h"
 
@@ -21,7 +21,8 @@ struct KernelObjectTag<Channel> {
 class Channel : public KernelObject {
  public:
   uint64_t TypeTag() override { return KernelObject::CHANNEL; }
-  static Pair<glcr::RefPtr<Channel>, glcr::RefPtr<Channel>> CreateChannelPair();
+  static glcr::Pair<glcr::RefPtr<Channel>, glcr::RefPtr<Channel>>
+  CreateChannelPair();
 
   glcr::RefPtr<Channel> peer() { return peer_; }
 

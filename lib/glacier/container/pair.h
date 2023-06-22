@@ -1,5 +1,7 @@
 #pragma once
 
+namespace glcr {
+
 template <typename T, typename U>
 class Pair {
  public:
@@ -11,3 +13,5 @@ class Pair {
   T first_;
   U second_;
 };
+
+}  // namespace glcr
