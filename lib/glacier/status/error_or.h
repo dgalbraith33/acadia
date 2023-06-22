@@ -12,7 +12,7 @@ class ErrorOr {
   ErrorOr(ErrorOr&&) = delete;
 
   ErrorOr(ErrorCode code) : error_(code), ok_(false) {}
-  ErrorOr(T obj) : obj_(obj), ok_(true) {}
+  ErrorOr(const T& obj) : obj_(obj), ok_(true) {}
   ErrorOr(T&& obj) : obj_(obj), ok_(true) {}
 
   bool ok() { return ok_; }

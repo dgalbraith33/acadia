@@ -255,12 +255,10 @@ void ProbeRsdp() {
 #endif
 }
 
-z_err_t GetPciExtendedConfiguration(uint64_t* base, uint64_t* offset) {
+glcr::ErrorOr<PcieConfiguration> GetPciExtendedConfiguration() {
   if (gPcieEcSize == 0) {
     return glcr::NOT_FOUND;
   }
 
-  *base = gPcieEcBase;
-  *offset = gPcieEcSize;
-  return glcr::OK;
+  return PcieConfiguration{gPcieEcBase, gPcieEcSize};
 }
