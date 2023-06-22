@@ -32,13 +32,10 @@ add_executable(zion
   scheduler/scheduler.cpp
   syscall/address_space.cpp
   syscall/capability.cpp
-  syscall/channel.cpp
   syscall/debug.cpp
-  syscall/endpoint.cpp
+  syscall/ipc.cpp
   syscall/memory_object.cpp
-  syscall/port.cpp
   syscall/process.cpp
-  syscall/reply_port.cpp
   syscall/syscall.cpp
   syscall/syscall_enter.s
   syscall/thread.cpp
