@@ -88,3 +88,4 @@ typedef uint64_t z_cap_t;
 #define Z_INIT_ENDPOINT 0x4100'0000
 
 #define Z_BOOT_DENALI_VMMO 0x4200'0000
+#define Z_BOOT_VICTORIA_FALLS_VMMO 0x4200'0001

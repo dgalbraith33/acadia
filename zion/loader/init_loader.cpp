@@ -114,36 +114,42 @@ const limine_file& GetInitProgram(glcr::String path) {
     }
   }
   panic("Program not found: %s", path);
+  UNREACHABLE
+}
+
+void WriteInitProgram(glcr::RefPtr<Port> port, glcr::String name, uint64_t id) {
+  const limine_file& prog = GetInitProgram(name);
+  glcr::RefPtr<MemoryObject> prog_vmmo =
+      glcr::MakeRefCounted<MemoryObject>(prog.size);
+  prog_vmmo->CopyBytesToObject(reinterpret_cast<uint64_t>(prog.address),
+                               prog.size);
+  port->WriteKernel(id,
+                    MakeRefCounted<Capability>(prog_vmmo, ZC_READ | ZC_WRITE));
 }
 
 }  // namespace
 
 void LoadInitProgram() {
   DumpModules();
-  const limine_file& init_prog = GetInitProgram("/sys/yellowstone");
 
+  // Create process.
   glcr::RefPtr<Process> proc = Process::Create();
   gProcMan->InsertProcess(proc);
 
-  uint64_t entry = LoadElfProgram(
-      *proc, reinterpret_cast<uint64_t>(init_prog.address), init_prog.size);
-
-  const limine_file& prog2 = GetInitProgram("/sys/denali");
-  glcr::RefPtr<MemoryObject> prog2_vmmo =
-      glcr::MakeRefCounted<MemoryObject>(prog2.size);
-  prog2_vmmo->CopyBytesToObject(reinterpret_cast<uint64_t>(prog2.address),
-                                prog2.size);
-
+  // Write init data.
   auto port = glcr::MakeRefCounted<Port>();
   uint64_t port_cap = proc->AddNewCapability(port, ZC_READ | ZC_WRITE);
-
   port->WriteKernel(Z_INIT_SELF_PROC,
                     MakeRefCounted<Capability>(
                         proc, ZC_PROC_SPAWN_PROC | ZC_PROC_SPAWN_THREAD));
   port->WriteKernel(Z_INIT_SELF_VMAS,
                     MakeRefCounted<Capability>(proc->vmas(), ZC_WRITE));
-  port->WriteKernel(Z_BOOT_DENALI_VMMO,
-                    MakeRefCounted<Capability>(prog2_vmmo, ZC_READ | ZC_WRITE));
+  WriteInitProgram(port, "/sys/denali", Z_BOOT_DENALI_VMMO);
+  WriteInitProgram(port, "/sys/victoriafalls", Z_BOOT_VICTORIA_FALLS_VMMO);
 
+  // Start process.
+  const limine_file& init_prog = GetInitProgram("/sys/yellowstone");
+  uint64_t entry = LoadElfProgram(
+      *proc, reinterpret_cast<uint64_t>(init_prog.address), init_prog.size);
   proc->CreateThread()->Start(entry, port_cap, 0);
 }

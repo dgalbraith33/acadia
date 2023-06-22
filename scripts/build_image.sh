@@ -39,5 +39,6 @@ cp zion/zion efi/
 mkdir -p efi/sys
 cp sys/yellowstone/yellowstone efi/sys/yellowstone
 cp sys/denali/denali efi/sys/denali
+cp sys/victoriafalls/victoriafalls efi/sys/victoriafalls
 
 chown drew:drew $1

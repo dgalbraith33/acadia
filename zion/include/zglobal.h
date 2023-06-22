@@ -8,3 +8,4 @@ extern uint64_t gSelfVmasCap;
 extern uint64_t gInitEndpointCap;
 
 extern uint64_t gBootDenaliVmmoCap;
+extern uint64_t gBootVictoriaFallsVmmoCap;

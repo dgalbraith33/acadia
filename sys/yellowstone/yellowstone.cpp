@@ -28,6 +28,11 @@ uint64_t main(uint64_t port_cap) {
 
   check(reader.ParsePartitionTables());
 
+  check(ZAddressSpaceMap(gSelfVmasCap, 0, gBootVictoriaFallsVmmoCap, &vaddr));
+  auto error_or = SpawnProcessFromElfRegion(vaddr);
+  if (!error_or) {
+    check(error_or.error());
+  }
   dbgln("Yellowstone Finished Successfully.");
   return 0;
 }

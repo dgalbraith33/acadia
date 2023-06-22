@@ -12,6 +12,7 @@ uint64_t gSelfVmasCap = 0;
 uint64_t gInitEndpointCap = 0;
 
 uint64_t gBootDenaliVmmoCap = 0;
+uint64_t gBootVictoriaFallsVmmoCap = 0;
 
 z_err_t ParseInitPort(uint64_t init_port_cap) {
   Port port(init_port_cap);
@@ -34,6 +35,10 @@ z_err_t ParseInitPort(uint64_t init_port_cap) {
       case Z_BOOT_DENALI_VMMO:
         dbgln("received denali");
         gBootDenaliVmmoCap = init_cap;
+        break;
+      case Z_BOOT_VICTORIA_FALLS_VMMO:
+        dbgln("received victoria falls");
+        gBootVictoriaFallsVmmoCap = init_cap;
         break;
       default:
         dbgln("Unexpected init type %x, continuing.", init_sig);
