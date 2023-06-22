@@ -1,6 +1,8 @@
 add_library(mammoth_lib STATIC
   src/channel.cpp
   src/debug.cpp
+  src/endpoint_client.cpp
+  src/endpoint_server.cpp
   src/init.cpp
   src/memory_region.cpp
   src/process.cpp

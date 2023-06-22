@@ -32,12 +32,15 @@ class ErrorOr {
   bool ok_;
 };
 
-#define ASSIGN_OR_RETURN(lhs, rhs) \
-                                   \
-  auto e##__LINE__ = rhs;          \
-  if (!e##__LINE__.ok()) {         \
-    return e##__LINE__.error();    \
-  }                                \
+#define AOR_INNER(a, b) a##b
+#define AOR_VAR(a) AOR_INNER(e, a)
+
+#define ASSIGN_OR_RETURN(lhs, rhs)    \
+                                      \
+  auto AOR_VAR(__LINE__) = rhs;       \
+  if (!AOR_VAR(__LINE__).ok()) {      \
+    return AOR_VAR(__LINE__).error(); \
+  }                                   \
   lhs = rhs.value();
 
 }  // namespace glcr

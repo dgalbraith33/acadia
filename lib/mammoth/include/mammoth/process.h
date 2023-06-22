@@ -3,6 +3,6 @@
 #include <glacier/status/error_or.h>
 #include <stdint.h>
 
-#include "mammoth/channel.h"
+#include "mammoth/endpoint_client.h"
 
-glcr::ErrorOr<Channel> SpawnProcessFromElfRegion(uint64_t program);
+glcr::ErrorOr<EndpointClient> SpawnProcessFromElfRegion(uint64_t program);

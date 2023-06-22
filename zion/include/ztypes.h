@@ -41,6 +41,13 @@ const uint64_t kZionPortPoll = 0x53;
 
 const uint64_t kZionIrqRegister = 0x58;
 
+const uint64_t kZionEndpointCreate = 0x60;
+const uint64_t kZionEndpointSend = 0x61;
+const uint64_t kZionEndpointRecv = 0x62;
+const uint64_t kZionReplyPortSend = 0x63;
+const uint64_t kZionReplyPortRecv = 0x64;
+const uint64_t kZionEndpointCall = 0x65;
+
 #define Z_IRQ_PCI_BASE 0x30
 
 // Capability Calls

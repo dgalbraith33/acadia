@@ -4,18 +4,21 @@
 
 #include "denali/denali.h"
 
-MappedMemoryRegion DenaliClient::ReadSectors(uint64_t device_id, uint64_t lba,
-                                             uint64_t num_sectors) {
+glcr::ErrorOr<MappedMemoryRegion> DenaliClient::ReadSectors(
+    uint64_t device_id, uint64_t lba, uint64_t num_sectors) {
   DenaliRead read{
       .device_id = device_id,
       .lba = lba,
       .size = num_sectors,
   };
-  check(channel_.WriteStruct(&read));
+  auto pair_or = endpoint_.CallEndpoint<DenaliRead, DenaliReadResponse>(read);
+  if (!pair_or) {
+    return pair_or.error();
+  }
+  auto pair = pair_or.value();
 
-  DenaliReadResponse resp;
-  uint64_t mem_cap;
-  check(channel_.ReadStructAndCap(&resp, &mem_cap));
+  DenaliReadResponse& resp = pair.first();
+  z_cap_t& mem_cap = pair.second();
 
   return MappedMemoryRegion::FromCapability(mem_cap);
 }

@@ -3,8 +3,8 @@
 #include <glacier/status/error.h>
 #include <zcall.h>
 
-#include "mammoth/channel.h"
 #include "mammoth/debug.h"
+#include "mammoth/endpoint_server.h"
 #include "mammoth/init.h"
 #include "mammoth/port.h"
 
@@ -95,20 +95,21 @@ uint64_t LoadElfProgram(uint64_t base, uint64_t as_cap) {
 
 }  // namespace
 
-glcr::ErrorOr<Channel> SpawnProcessFromElfRegion(uint64_t program) {
-  Channel local, foreign;
-  check(CreateChannels(local, foreign));
+glcr::ErrorOr<EndpointClient> SpawnProcessFromElfRegion(uint64_t program) {
+  ASSIGN_OR_RETURN(EndpointServer server, EndpointServer::Create());
+  ASSIGN_OR_RETURN(EndpointClient client, server.CreateClient());
 
   uint64_t proc_cap;
   uint64_t as_cap;
   uint64_t foreign_port_id;
   uint64_t port_cap;
+
 #if MAM_PROC_DEBUG
   dbgln("Port Create");
 #endif
-  check(ZPortCreate(&port_cap));
+  RET_ERR(ZPortCreate(&port_cap));
   uint64_t port_cap_donate;
-  check(ZCapDuplicate(port_cap, &port_cap_donate));
+  RET_ERR(ZCapDuplicate(port_cap, &port_cap_donate));
 
 #if MAM_PROC_DEBUG
   dbgln("Spawn");
@@ -127,12 +128,12 @@ glcr::ErrorOr<Channel> SpawnProcessFromElfRegion(uint64_t program) {
   Port p(port_cap);
   check(p.WriteMessage<uint64_t>(Z_INIT_SELF_PROC, proc_cap));
   check(p.WriteMessage<uint64_t>(Z_INIT_SELF_VMAS, as_cap));
-  check(p.WriteMessage<uint64_t>(Z_INIT_CHANNEL, foreign.release_cap()));
+  check(p.WriteMessage<uint64_t>(Z_INIT_CHANNEL, server.GetCap()));
 
 #if MAM_PROC_DEBUG
   dbgln("Thread start");
 #endif
   check(ZThreadStart(thread_cap, entry_point, foreign_port_id, 0));
 
-  return local;
+  return client;
 }

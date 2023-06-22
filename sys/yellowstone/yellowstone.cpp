@@ -1,6 +1,6 @@
 #include <denali/denali.h>
-#include <mammoth/channel.h>
 #include <mammoth/debug.h>
+#include <mammoth/endpoint_client.h>
 #include <mammoth/init.h>
 #include <mammoth/process.h>
 #include <zcall.h>
@@ -17,13 +17,13 @@ uint64_t main(uint64_t port_cap) {
   uint64_t vaddr;
   check(ZAddressSpaceMap(gSelfVmasCap, 0, gBootDenaliVmmoCap, &vaddr));
 
-  auto local_or = SpawnProcessFromElfRegion(vaddr);
-  if (!local_or) {
-    check(local_or.error());
+  auto endpoint_or = SpawnProcessFromElfRegion(vaddr);
+  if (!endpoint_or) {
+    check(endpoint_or.error());
   }
-  Channel local = local_or.value();
+  EndpointClient endpoint = endpoint_or.value();
 
-  DenaliClient client(local);
+  DenaliClient client(endpoint);
   GptReader reader(client);
 
   check(reader.ParsePartitionTables());

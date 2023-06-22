@@ -123,6 +123,16 @@ SYS5(PortPoll, z_cap_t, port_cap, uint64_t*, num_bytes, void*, data, uint64_t*,
 
 SYS2(IrqRegister, uint64_t, irq_num, z_cap_t*, port_cap);
 
+SYS1(EndpointCreate, z_cap_t*, endpoint_cap);
+SYS4(EndpointSend, z_cap_t, endpoint_cap, uint64_t, num_bytes, const void*,
+     data, z_cap_t*, reply_port_cap);
+SYS4(EndpointRecv, z_cap_t, endpoint_cap, uint64_t*, num_bytes, void*, data,
+     z_cap_t*, reply_port_cap);
+SYS5(ReplyPortSend, z_cap_t, reply_port_cap, uint64_t, num_bytes, const void*,
+     data, uint64_t, num_caps, z_cap_t*, caps);
+SYS5(ReplyPortRecv, z_cap_t, reply_port_cap, uint64_t*, num_bytes, const void*,
+     data, uint64_t*, num_caps, z_cap_t*, caps);
+
 SYS2(CapDuplicate, z_cap_t, cap_in, z_cap_t*, cap_out);
 
 SYS1(Debug, const char*, message);

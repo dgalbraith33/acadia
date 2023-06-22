@@ -8,7 +8,7 @@ class GptReader {
  public:
   GptReader(const DenaliClient&);
 
-  z_err_t ParsePartitionTables();
+  glcr::ErrorCode ParsePartitionTables();
 
  private:
   DenaliClient denali_;
