@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glacier/container/intrusive_list.h>
 #include <glacier/memory/ref_ptr.h>
 #include <glacier/memory/shared_ptr.h>
 #include <glacier/status/error.h>
@@ -7,6 +8,7 @@
 #include "capability/capability.h"
 #include "include/ztypes.h"
 #include "lib/linked_list.h"
+#include "lib/mutex.h"
 
 class MessageQueue {
  public:
@@ -17,6 +19,12 @@ class MessageQueue {
   virtual glcr::ErrorCode PopFront(uint64_t* num_bytes, void* bytes,
                                    uint64_t* num_caps, z_cap_t* caps) = 0;
   virtual bool empty() = 0;
+
+ protected:
+  Mutex mutex_{"message"};
+  // FIXME: This maybe shouldn't be shared between classes since the
+  // SingleMessageQueue should only ever have one blocked thread.
+  glcr::IntrusiveList<Thread> blocked_threads_;
 };
 
 class UnboundedMessageQueue : public MessageQueue {
@@ -33,7 +41,10 @@ class UnboundedMessageQueue : public MessageQueue {
 
   void WriteKernel(uint64_t init, glcr::RefPtr<Capability> cap);
 
-  bool empty() override { return pending_messages_.size() == 0; }
+  bool empty() override {
+    MutexHolder h(mutex_);
+    return pending_messages_.size() == 0;
+  }
 
  private:
   struct Message {
@@ -58,7 +69,10 @@ class SingleMessageQueue : public MessageQueue {
   glcr::ErrorCode PopFront(uint64_t* num_bytes, void* bytes, uint64_t* num_caps,
                            z_cap_t* caps) override;
 
-  bool empty() override { return has_written_ == false; };
+  bool empty() override {
+    MutexHolder h(mutex_);
+    return has_written_ == false;
+  };
 
  private:
   bool has_written_ = false;

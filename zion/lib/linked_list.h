@@ -11,6 +11,7 @@ class LinkedList {
 
   LinkedList(const LinkedList&) = delete;
 
+  bool empty() const { return size_ == 0; }
   uint64_t size() const { return size_; }
 
   void PushBack(const T& item) {

@@ -26,12 +26,31 @@ z_err_t UnboundedMessageQueue::PushBack(uint64_t num_bytes, const void* bytes,
     message->caps.PushBack(cap);
   }
 
+  MutexHolder h(mutex_);
   pending_messages_.PushBack(message);
+
+  if (blocked_threads_.size() > 0) {
+    auto thread = blocked_threads_.PopFront();
+    thread->SetState(Thread::RUNNABLE);
+    gScheduler->Enqueue(thread);
+  }
   return glcr::OK;
 }
 
 z_err_t UnboundedMessageQueue::PopFront(uint64_t* num_bytes, void* bytes,
                                         uint64_t* num_caps, z_cap_t* caps) {
+  mutex_.Lock();
+  while (pending_messages_.empty()) {
+    auto thread = gScheduler->CurrentThread();
+    thread->SetState(Thread::BLOCKED);
+    blocked_threads_.PushBack(thread);
+    mutex_.Unlock();
+    gScheduler->Yield();
+    mutex_.Lock();
+  }
+  mutex_.Unlock();
+
+  MutexHolder lock(mutex_);
   auto next_msg = pending_messages_.PeekFront();
   if (next_msg->num_bytes > *num_bytes) {
     return glcr::BUFFER_SIZE;
@@ -58,6 +77,7 @@ z_err_t UnboundedMessageQueue::PopFront(uint64_t* num_bytes, void* bytes,
 
 void UnboundedMessageQueue::WriteKernel(uint64_t init,
                                         glcr::RefPtr<Capability> cap) {
+  // FIXME: Add synchronization here in case it is ever used outside of init.
   auto msg = glcr::MakeShared<Message>();
   msg->bytes = new uint8_t[8];
   msg->num_bytes = sizeof(init);
@@ -70,10 +90,12 @@ void UnboundedMessageQueue::WriteKernel(uint64_t init,
 
   pending_messages_.PushBack(msg);
 }
+
 glcr::ErrorCode SingleMessageQueue::PushBack(uint64_t num_bytes,
                                              const void* bytes,
                                              uint64_t num_caps,
                                              const z_cap_t* caps) {
+  MutexHolder h(mutex_);
   if (has_written_) {
     return glcr::FAILED_PRECONDITION;
   }
@@ -95,13 +117,31 @@ glcr::ErrorCode SingleMessageQueue::PushBack(uint64_t num_bytes,
 
   has_written_ = true;
 
+  if (blocked_threads_.size() > 0) {
+    auto thread = blocked_threads_.PopFront();
+    thread->SetState(Thread::RUNNABLE);
+    gScheduler->Enqueue(thread);
+  }
+
   return glcr::OK;
 }
 
 glcr::ErrorCode SingleMessageQueue::PopFront(uint64_t* num_bytes, void* bytes,
                                              uint64_t* num_caps,
                                              z_cap_t* caps) {
-  if (!has_written_ || has_read_) {
+  mutex_.Lock();
+  while (!has_written_) {
+    auto thread = gScheduler->CurrentThread();
+    thread->SetState(Thread::BLOCKED);
+    blocked_threads_.PushBack(thread);
+    mutex_.Unlock();
+    gScheduler->Yield();
+    mutex_.Lock();
+  }
+  mutex_.Unlock();
+
+  MutexHolder lock(mutex_);
+  if (has_read_) {
     return glcr::FAILED_PRECONDITION;
   }
 
