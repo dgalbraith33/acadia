@@ -21,6 +21,7 @@ add_executable(zion
   object/address_space.cpp
   object/channel.cpp
   object/endpoint.cpp
+  object/ipc_object.cpp
   object/memory_object.cpp
   object/port.cpp
   object/process.cpp

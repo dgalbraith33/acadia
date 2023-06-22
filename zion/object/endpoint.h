@@ -6,6 +6,7 @@
 
 #include "lib/message_queue.h"
 #include "lib/mutex.h"
+#include "object/ipc_object.h"
 #include "object/kernel_object.h"
 
 class Endpoint;
@@ -16,22 +17,23 @@ struct KernelObjectTag<Endpoint> {
   static const uint64_t type = KernelObject::ENDPOINT;
 };
 
-class Endpoint : public KernelObject {
+class Endpoint : public IpcObject {
  public:
   uint64_t TypeTag() override { return KernelObject::ENDPOINT; }
   static glcr::RefPtr<Endpoint> Create();
 
-  glcr::ErrorCode Write(uint64_t num_bytes, const void* data,
-                        z_cap_t reply_port_cap);
-
   glcr::ErrorCode Read(uint64_t* num_bytes, void* data,
                        z_cap_t* reply_port_cap);
 
- private:
-  Mutex mutex_{"endpoint"};
-  UnboundedMessageQueue message_queue_;
+  virtual MessageQueue& GetSendMessageQueue() override {
+    return message_queue_;
+  }
+  virtual MessageQueue& GetRecvMessageQueue() override {
+    return message_queue_;
+  }
 
-  glcr::IntrusiveList<Thread> blocked_threads_;
+ private:
+  UnboundedMessageQueue message_queue_;
 
   Endpoint() {}
 };

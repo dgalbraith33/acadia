@@ -142,7 +142,7 @@ glcr::RefPtr<Port> pci1_port;
 extern "C" void isr_pci1();
 extern "C" void interrupt_pci1(InterruptFrame*) {
   dbgln("Interrupt PCI line 1");
-  pci1_port->Write(0, nullptr, 0, nullptr);
+  pci1_port->Send(0, nullptr, 0, nullptr);
   SignalEOI();
 }
 

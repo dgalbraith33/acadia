@@ -16,6 +16,7 @@ class MessageQueue {
                                    uint64_t num_caps, const z_cap_t* caps) = 0;
   virtual glcr::ErrorCode PopFront(uint64_t* num_bytes, void* bytes,
                                    uint64_t* num_caps, z_cap_t* caps) = 0;
+  virtual bool empty() = 0;
 };
 
 class UnboundedMessageQueue : public MessageQueue {
@@ -32,8 +33,7 @@ class UnboundedMessageQueue : public MessageQueue {
 
   void WriteKernel(uint64_t init, glcr::RefPtr<Capability> cap);
 
-  uint64_t size() { return pending_messages_.size(); }
-  bool empty() { return size() == 0; }
+  bool empty() override { return pending_messages_.size() == 0; }
 
  private:
   struct Message {
@@ -58,7 +58,7 @@ class SingleMessageQueue : public MessageQueue {
   glcr::ErrorCode PopFront(uint64_t* num_bytes, void* bytes, uint64_t* num_caps,
                            z_cap_t* caps) override;
 
-  bool empty() { return has_written_ == false; };
+  bool empty() override { return has_written_ == false; };
 
  private:
   bool has_written_ = false;
