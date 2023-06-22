@@ -15,8 +15,9 @@ class Command {
 
 class DmaReadCommand : public Command {
  public:
-  typedef void (*DmaCallback)(uint64_t, uint64_t, uint64_t);
-  DmaReadCommand(uint64_t lba, uint64_t sector_cnt, DmaCallback callback);
+  typedef void (*DmaCallback)(z_cap_t, uint64_t, uint64_t, z_cap_t);
+  DmaReadCommand(uint64_t lba, uint64_t sector_cnt, DmaCallback callback,
+                 z_cap_t reply_port);
 
   virtual ~DmaReadCommand() override;
 
@@ -26,6 +27,7 @@ class DmaReadCommand : public Command {
   void Callback() override;
 
  private:
+  z_cap_t reply_port_;
   uint64_t lba_;
   uint64_t sector_cnt_;
   DmaCallback callback_;

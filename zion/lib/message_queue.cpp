@@ -70,3 +70,59 @@ void UnboundedMessageQueue::WriteKernel(uint64_t init,
 
   pending_messages_.PushBack(msg);
 }
+glcr::ErrorCode SingleMessageQueue::PushBack(uint64_t num_bytes,
+                                             const void* bytes,
+                                             uint64_t num_caps,
+                                             const z_cap_t* caps) {
+  if (has_written_) {
+    return glcr::FAILED_PRECONDITION;
+  }
+  num_bytes_ = num_bytes;
+  bytes_ = new uint8_t[num_bytes];
+
+  for (uint64_t i = 0; i < num_bytes; i++) {
+    bytes_[i] = reinterpret_cast<const uint8_t*>(bytes)[i];
+  }
+
+  for (uint64_t i = 0; i < num_caps; i++) {
+    // FIXME: This would feel safer closer to the relevant syscall.
+    auto cap = gScheduler->CurrentProcess().ReleaseCapability(caps[i]);
+    if (!cap) {
+      return glcr::CAP_NOT_FOUND;
+    }
+    caps_.PushBack(cap);
+  }
+
+  has_written_ = true;
+
+  return glcr::OK;
+}
+
+glcr::ErrorCode SingleMessageQueue::PopFront(uint64_t* num_bytes, void* bytes,
+                                             uint64_t* num_caps,
+                                             z_cap_t* caps) {
+  if (!has_written_ || has_read_) {
+    return glcr::FAILED_PRECONDITION;
+  }
+
+  if (num_bytes_ > *num_bytes) {
+    return glcr::BUFFER_SIZE;
+  }
+  if (caps_.size() > *num_caps) {
+    return glcr::BUFFER_SIZE;
+  }
+
+  *num_bytes = num_bytes_;
+  for (uint64_t i = 0; i < num_bytes_; i++) {
+    reinterpret_cast<uint8_t*>(bytes)[i] = bytes_[i];
+  }
+
+  *num_caps = caps_.size();
+  auto& proc = gScheduler->CurrentProcess();
+  for (uint64_t i = 0; i < *num_caps; i++) {
+    caps[i] = proc.AddExistingCapability(caps_.PopFront());
+  }
+  has_read_ = true;
+
+  return glcr::OK;
+}

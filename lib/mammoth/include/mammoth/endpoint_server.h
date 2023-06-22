@@ -15,6 +15,9 @@ class EndpointServer {
   // FIXME: Release Cap here.
   z_cap_t GetCap() { return endpoint_cap_; }
 
+  glcr::ErrorCode Recieve(uint64_t* num_bytes, void* data,
+                          z_cap_t* reply_port_cap);
+
  private:
   z_cap_t endpoint_cap_;
 

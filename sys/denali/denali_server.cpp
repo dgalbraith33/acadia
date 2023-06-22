@@ -6,22 +6,22 @@
 
 namespace {
 DenaliServer* gServer = nullptr;
-void HandleResponse(uint64_t lba, uint64_t size, uint64_t cap) {
-  gServer->HandleResponse(lba, size, cap);
+void HandleResponse(z_cap_t reply_port, uint64_t lba, uint64_t size,
+                    z_cap_t mem) {
+  gServer->HandleResponse(reply_port, lba, size, mem);
 }
 }  // namespace
 
-DenaliServer::DenaliServer(uint64_t channel_cap, AhciDriver& driver)
-    : channel_cap_(channel_cap), driver_(driver) {
+DenaliServer::DenaliServer(EndpointServer server, AhciDriver& driver)
+    : server_(server), driver_(driver) {
   gServer = this;
 }
 
 glcr::ErrorCode DenaliServer::RunServer() {
   while (true) {
     uint64_t buff_size = kBuffSize;
-    uint64_t cap_size = 0;
-    RET_ERR(ZChannelRecv(channel_cap_, &buff_size, read_buffer_, &cap_size,
-                         nullptr));
+    z_cap_t reply_port;
+    RET_ERR(server_.Recieve(&buff_size, read_buffer_, &reply_port));
     if (buff_size < sizeof(uint64_t)) {
       dbgln("Skipping invalid message");
       continue;
@@ -34,7 +34,7 @@ glcr::ErrorCode DenaliServer::RunServer() {
       case DENALI_READ: {
         DenaliRead* read_req = reinterpret_cast<DenaliRead*>(read_buffer_);
         uint64_t memcap = 0;
-        RET_ERR(HandleRead(*read_req));
+        RET_ERR(HandleRead(*read_req, reply_port));
         break;
       }
       default:
@@ -44,21 +44,22 @@ glcr::ErrorCode DenaliServer::RunServer() {
   }
 }
 
-glcr::ErrorCode DenaliServer::HandleRead(const DenaliRead& read) {
+glcr::ErrorCode DenaliServer::HandleRead(const DenaliRead& read,
+                                         z_cap_t reply_port) {
   ASSIGN_OR_RETURN(AhciDevice * device, driver_.GetDevice(read.device_id));
 
   device->IssueCommand(
-      new DmaReadCommand(read.lba, read.size, ::HandleResponse));
+      new DmaReadCommand(read.lba, read.size, ::HandleResponse, reply_port));
 
   return glcr::OK;
 }
 
-void DenaliServer::HandleResponse(uint64_t lba, uint64_t size, uint64_t cap) {
+void DenaliServer::HandleResponse(z_cap_t reply_port, uint64_t lba,
+                                  uint64_t size, z_cap_t mem) {
   DenaliReadResponse resp{
       .device_id = 0,
       .lba = lba,
       .size = size,
   };
-  check(ZChannelSend(channel_cap_, sizeof(resp),
-                     reinterpret_cast<uint8_t*>(&resp), 1, &cap));
+  check(ZReplyPortSend(reply_port, sizeof(resp), &resp, 1, &mem));
 }

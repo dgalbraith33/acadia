@@ -12,6 +12,8 @@ class KernelObject : public glcr::RefCounted<KernelObject> {
     MEMORY_OBJECT = 0x4,
     CHANNEL = 0x5,
     PORT = 0x6,
+    ENDPOINT = 0x7,
+    REPLY_PORT = 0x8,
   };
 
   virtual uint64_t TypeTag() = 0;

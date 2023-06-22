@@ -128,7 +128,7 @@ glcr::ErrorOr<EndpointClient> SpawnProcessFromElfRegion(uint64_t program) {
   Port p(port_cap);
   check(p.WriteMessage<uint64_t>(Z_INIT_SELF_PROC, proc_cap));
   check(p.WriteMessage<uint64_t>(Z_INIT_SELF_VMAS, as_cap));
-  check(p.WriteMessage<uint64_t>(Z_INIT_CHANNEL, server.GetCap()));
+  check(p.WriteMessage<uint64_t>(Z_INIT_ENDPOINT, server.GetCap()));
 
 #if MAM_PROC_DEBUG
   dbgln("Thread start");

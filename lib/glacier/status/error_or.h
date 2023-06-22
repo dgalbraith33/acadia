@@ -41,6 +41,6 @@ class ErrorOr {
   if (!AOR_VAR(__LINE__).ok()) {      \
     return AOR_VAR(__LINE__).error(); \
   }                                   \
-  lhs = rhs.value();
+  lhs = AOR_VAR(__LINE__).value();
 
 }  // namespace glcr

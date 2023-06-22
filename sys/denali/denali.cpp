@@ -1,5 +1,6 @@
-#include <mammoth/channel.h>
+
 #include <mammoth/debug.h>
+#include <mammoth/endpoint_server.h>
 #include <mammoth/init.h>
 #include <stdint.h>
 
@@ -11,7 +12,8 @@ uint64_t main(uint64_t init_port_cap) {
   AhciDriver driver;
   RET_ERR(driver.Init());
 
-  DenaliServer server(gInitChannelCap, driver);
+  EndpointServer endpoint = EndpointServer::Adopt(gInitEndpointCap);
+  DenaliServer server(endpoint, driver);
   RET_ERR(server.RunServer());
   // FIXME: Add thread join.
   return 0;

@@ -8,9 +8,11 @@
 #include "syscall/capability.h"
 #include "syscall/channel.h"
 #include "syscall/debug.h"
+#include "syscall/endpoint.h"
 #include "syscall/memory_object.h"
 #include "syscall/port.h"
 #include "syscall/process.h"
+#include "syscall/reply_port.h"
 #include "syscall/thread.h"
 
 #define EFER 0xC0000080
@@ -73,6 +75,13 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req) {
     CASE(PortRecv);
     CASE(PortPoll);
     CASE(IrqRegister);
+    // syscall/endpoint.h
+    CASE(EndpointCreate);
+    CASE(EndpointSend);
+    CASE(EndpointRecv);
+    // syscall/reply_port.h
+    CASE(ReplyPortSend);
+    CASE(ReplyPortRecv);
     // syscall/capability.h
     CASE(CapDuplicate);
     // syscall/debug.h

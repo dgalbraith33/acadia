@@ -20,9 +20,11 @@ add_executable(zion
   memory/user_stack_manager.cpp
   object/address_space.cpp
   object/channel.cpp
+  object/endpoint.cpp
   object/memory_object.cpp
   object/port.cpp
   object/process.cpp
+  object/reply_port.cpp
   object/thread.cpp
   scheduler/context_switch.s
   scheduler/jump_user_space.s
@@ -32,9 +34,11 @@ add_executable(zion
   syscall/capability.cpp
   syscall/channel.cpp
   syscall/debug.cpp
+  syscall/endpoint.cpp
   syscall/memory_object.cpp
   syscall/port.cpp
   syscall/process.cpp
+  syscall/reply_port.cpp
   syscall/syscall.cpp
   syscall/syscall_enter.s
   syscall/thread.cpp
