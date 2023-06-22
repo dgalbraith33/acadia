@@ -1,7 +1,10 @@
 #pragma once
 
+#include <glacier/status/error.h>
+
 #include "include/zcall.h"
 
-z_err_t ThreadCreate(ZThreadCreateReq* req);
-z_err_t ThreadStart(ZThreadStartReq* req);
-z_err_t ThreadExit(ZThreadExitReq*);
+glcr::ErrorCode ThreadCreate(ZThreadCreateReq* req);
+glcr::ErrorCode ThreadStart(ZThreadStartReq* req);
+glcr::ErrorCode ThreadExit(ZThreadExitReq*);
+glcr::ErrorCode ThreadWait(ZThreadWaitReq* req);

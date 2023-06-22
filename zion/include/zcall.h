@@ -96,6 +96,7 @@ SYS2(ThreadCreate, z_cap_t, proc_cap, z_cap_t*, thread_cap);
 SYS4(ThreadStart, z_cap_t, thread_cap, uint64_t, entry, uint64_t, arg1,
      uint64_t, arg2);
 SYS0(ThreadExit);
+SYS1(ThreadWait, z_cap_t, thread_cap);
 
 SYS4(AddressSpaceMap, z_cap_t, vmas_cap, uint64_t, vmas_offset, z_cap_t,
      vmmo_cap, uint64_t*, vaddr);

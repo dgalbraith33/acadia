@@ -48,6 +48,8 @@ class Thread : public KernelObject, public glcr::IntrusiveListNode<Thread> {
   void SetState(State state) { state_ = state; }
   void Exit();
 
+  void Wait();
+
  private:
   friend class glcr::MakeRefCountedFriend<Thread>;
   Thread(Process& proc, uint64_t tid);
@@ -68,4 +70,6 @@ class Thread : public KernelObject, public glcr::IntrusiveListNode<Thread> {
   // Stack pointer to take when returning from userspace.
   // I don't think me mind clobbering the stack here.
   uint64_t rsp0_start_;
+
+  glcr::IntrusiveList<Thread> blocked_threads_;
 };

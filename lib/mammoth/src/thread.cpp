@@ -10,7 +10,7 @@ namespace {
 extern "C" void thread_entry(Thread::Entry entry, void* arg1) {
   entry(arg1);
 
-  ZThreadExit();
+  (void)ZThreadExit();
 }
 
 }  // namespace
@@ -21,3 +21,5 @@ Thread::Thread(Entry e, const void* arg1) {
                      reinterpret_cast<uint64_t>(e),
                      reinterpret_cast<uint64_t>(arg1)));
 }
+
+glcr::ErrorCode Thread::Join() { return ZThreadWait(thread_cap_); }

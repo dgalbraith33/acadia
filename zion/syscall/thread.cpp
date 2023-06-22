@@ -3,18 +3,18 @@
 #include "capability/capability.h"
 #include "scheduler/scheduler.h"
 
-z_err_t ThreadCreate(ZThreadCreateReq* req) {
+glcr::ErrorCode ThreadCreate(ZThreadCreateReq* req) {
   auto& curr_proc = gScheduler->CurrentProcess();
   auto cap = curr_proc.GetCapability(req->proc_cap);
   RET_ERR(ValidateCapability<Process>(cap, ZC_PROC_SPAWN_THREAD));
 
   auto parent_proc = cap->obj<Process>();
   auto thread = parent_proc->CreateThread();
-  *req->thread_cap = curr_proc.AddNewCapability(thread, ZC_WRITE);
+  *req->thread_cap = curr_proc.AddNewCapability(thread, ZC_WRITE | ZC_READ);
   return glcr::OK;
 }
 
-z_err_t ThreadStart(ZThreadStartReq* req) {
+glcr::ErrorCode ThreadStart(ZThreadStartReq* req) {
   auto& curr_proc = gScheduler->CurrentProcess();
   auto cap = curr_proc.GetCapability(req->thread_cap);
   RET_ERR(ValidateCapability<Thread>(cap, ZC_WRITE));
@@ -25,8 +25,17 @@ z_err_t ThreadStart(ZThreadStartReq* req) {
   return glcr::OK;
 }
 
-z_err_t ThreadExit(ZThreadExitReq*) {
+glcr::ErrorCode ThreadExit(ZThreadExitReq*) {
   auto curr_thread = gScheduler->CurrentThread();
   curr_thread->Exit();
   panic("Returned from thread exit");
+}
+
+glcr::ErrorCode ThreadWait(ZThreadWaitReq* req) {
+  auto& curr_proc = gScheduler->CurrentProcess();
+  auto cap = curr_proc.GetCapability(req->thread_cap);
+  RET_ERR(ValidateCapability<Thread>(cap, ZC_READ));
+  auto thread = cap->obj<Thread>();
+  thread->Wait();
+  return glcr::OK;
 }

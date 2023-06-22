@@ -69,5 +69,18 @@ void Thread::Exit() {
 #endif
   state_ = FINISHED;
   process_.CheckState();
+  while (!blocked_threads_.size() == 0) {
+    auto thread = blocked_threads_.PopFront();
+    thread->SetState(Thread::RUNNABLE);
+    gScheduler->Enqueue(thread);
+  }
+  gScheduler->Yield();
+}
+
+void Thread::Wait() {
+  // FIXME: We need synchronization code here.
+  auto thread = gScheduler->CurrentThread();
+  thread->SetState(Thread::BLOCKED);
+  blocked_threads_.PushBack(thread);
   gScheduler->Yield();
 }
