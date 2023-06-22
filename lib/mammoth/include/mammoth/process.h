@@ -1,7 +1,8 @@
 #pragma once
 
+#include <glacier/status/error_or.h>
 #include <stdint.h>
 
 #include "mammoth/channel.h"
 
-uint64_t SpawnProcessFromElfRegion(uint64_t program, Channel& local);
+glcr::ErrorOr<Channel> SpawnProcessFromElfRegion(uint64_t program);

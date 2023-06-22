@@ -95,8 +95,8 @@ uint64_t LoadElfProgram(uint64_t base, uint64_t as_cap) {
 
 }  // namespace
 
-uint64_t SpawnProcessFromElfRegion(uint64_t program, Channel& local) {
-  Channel foreign;
+glcr::ErrorOr<Channel> SpawnProcessFromElfRegion(uint64_t program) {
+  Channel local, foreign;
   check(CreateChannels(local, foreign));
 
   uint64_t proc_cap;
@@ -134,5 +134,5 @@ uint64_t SpawnProcessFromElfRegion(uint64_t program, Channel& local) {
 #endif
   check(ZThreadStart(thread_cap, entry_point, foreign_port_id, 0));
 
-  return glcr::OK;
+  return local;
 }

@@ -17,8 +17,11 @@ uint64_t main(uint64_t port_cap) {
   uint64_t vaddr;
   check(ZAddressSpaceMap(gSelfVmasCap, 0, gBootDenaliVmmoCap, &vaddr));
 
-  Channel local;
-  check(SpawnProcessFromElfRegion(vaddr, local));
+  auto local_or = SpawnProcessFromElfRegion(vaddr);
+  if (!local_or) {
+    check(local_or.error());
+  }
+  Channel local = local_or.value();
 
   DenaliClient client(local);
   GptReader reader(client);
