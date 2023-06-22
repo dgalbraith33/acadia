@@ -1,8 +1,9 @@
 #pragma once
 
-#include <glacier/status/error_or.h>
+#include <glacier/status/error.h>
 #include <stdint.h>
 
 #include "mammoth/endpoint_client.h"
 
-glcr::ErrorOr<EndpointClient> SpawnProcessFromElfRegion(uint64_t program);
+glcr::ErrorCode SpawnProcessFromElfRegion(uint64_t program,
+                                          EndpointClient client);

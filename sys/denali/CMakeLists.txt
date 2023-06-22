@@ -15,6 +15,7 @@ target_link_libraries(denali
   cxx
   glacier
   mammoth_lib
+  yellowstonestub
   )
 
 set_target_properties(denali PROPERTIES

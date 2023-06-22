@@ -12,6 +12,8 @@ class EndpointClient {
   template <typename Req, typename Resp>
   glcr::ErrorOr<glcr::Pair<Resp, z_cap_t>> CallEndpoint(const Req& req);
 
+  z_cap_t GetCap() { return cap_; }
+
  private:
   EndpointClient(uint64_t cap) : cap_(cap) {}
   z_cap_t cap_;
