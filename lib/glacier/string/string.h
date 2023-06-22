@@ -8,6 +8,9 @@ class String {
  public:
   String(const char* cstr);
 
+  const char* cstr() const { return cstr_; }
+  uint64_t length() const { return length_; }
+
   bool operator==(const String& str);
 
  private:
