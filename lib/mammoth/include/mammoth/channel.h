@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glacier/status/error.h>
 #include <stdint.h>
 #include <zcall.h>
 
@@ -37,13 +38,10 @@ template <typename T>
 z_err_t Channel::ReadStructAndCap(T* obj, uint64_t* cap) {
   uint64_t num_bytes = sizeof(T);
   uint64_t num_caps = 1;
-  uint64_t ret = ZChannelRecv(chan_cap_, &num_bytes, obj, &num_caps, cap);
+  RET_ERR(ZChannelRecv(chan_cap_, &num_bytes, obj, &num_caps, cap));
 
-  if (ret != Z_OK) {
-    return ret;
-  }
   if (num_caps != 1 || num_bytes != sizeof(T)) {
-    return Z_ERR_INVALID;
+    return glcr::FAILED_PRECONDITION;
   }
-  return Z_OK;
+  return glcr::OK;
 }

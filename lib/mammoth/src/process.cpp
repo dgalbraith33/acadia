@@ -1,5 +1,6 @@
 #include "mammoth/process.h"
 
+#include <glacier/status/error.h>
 #include <zcall.h>
 
 #include "mammoth/channel.h"
@@ -133,5 +134,5 @@ uint64_t SpawnProcessFromElfRegion(uint64_t program, Channel& local) {
 #endif
   check(ZThreadStart(thread_cap, entry_point, foreign_port_id, 0));
 
-  return Z_OK;
+  return glcr::OK;
 }

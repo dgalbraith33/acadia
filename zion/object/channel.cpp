@@ -44,5 +44,5 @@ z_err_t Channel::WriteInternal(uint64_t num_bytes, const void* bytes,
     thread->SetState(Thread::RUNNABLE);
     gScheduler->Enqueue(thread);
   }
-  return Z_OK;
+  return glcr::OK;
 }

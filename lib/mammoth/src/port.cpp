@@ -1,5 +1,6 @@
 #include "mammoth/port.h"
 
+#include <glacier/status/error.h>
 #include <zcall.h>
 
 #include "mammoth/debug.h"
@@ -13,10 +14,10 @@ z_err_t Port::PollForIntCap(uint64_t *msg, uint64_t *cap) {
                     cap));
 
   if (bytes != sizeof(uint64_t)) {
-    return Z_ERR_INVALID;
+    return glcr::FAILED_PRECONDITION;
   }
   if (caps != 1) {
-    return Z_ERR_INVALID;
+    return glcr::FAILED_PRECONDITION;
   }
-  return Z_OK;
+  return glcr::OK;
 }

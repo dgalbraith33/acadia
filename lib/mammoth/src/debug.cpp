@@ -1,5 +1,6 @@
 #include "include/mammoth/debug.h"
 
+#include <glacier/status/error.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <zcall.h>
@@ -25,18 +26,18 @@ void dbgln(const char* fmt, ...) {
 
 void check(uint64_t code) {
   switch (code) {
-    case Z_OK:
+    case glcr::OK:
       return;
-    case Z_ERR_UNIMPLEMENTED:
+    case glcr::UNIMPLEMENTED:
       dbgln("crash: UNIMPLEMENTED");
       break;
-    case Z_ERR_CAP_NOT_FOUND:
+    case glcr::CAP_NOT_FOUND:
       dbgln("crash: missing capability");
       break;
-    case Z_ERR_CAP_TYPE:
+    case glcr::CAP_WRONG_TYPE:
       dbgln("crash: capability of the wrong type");
       break;
-    case Z_ERR_CAP_DENIED:
+    case glcr::CAP_PERMISSION_DENIED:
       dbgln("crash: capability permissions error");
       break;
     default:

@@ -1,5 +1,7 @@
 #include "syscall/port.h"
 
+#include <glacier/status/error.h>
+
 #include "capability/capability.h"
 #include "interrupt/interrupt.h"
 #include "scheduler/scheduler.h"
@@ -8,7 +10,7 @@ z_err_t PortCreate(ZPortCreateReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto port = glcr::MakeRefCounted<Port>();
   *req->port_cap = proc.AddNewCapability(port, ZC_WRITE | ZC_READ);
-  return Z_OK;
+  return glcr::OK;
 }
 
 z_err_t PortSend(ZPortSendReq* req) {
@@ -44,7 +46,7 @@ z_err_t PortPoll(ZPortPollReq* req) {
   // FIXME: Race condition here where this call could block if the last message
   // is removed between this check and the port read.
   if (!port->HasMessages()) {
-    return Z_ERR_EMPTY;
+    return glcr::EMPTY;
   }
   return port->Read(req->num_bytes, req->data, req->num_caps, req->caps);
 }
@@ -53,10 +55,10 @@ z_err_t IrqRegister(ZIrqRegisterReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   if (req->irq_num != Z_IRQ_PCI_BASE) {
     // FIXME: Don't hardcode this nonsense.
-    return Z_ERR_UNIMPLEMENTED;
+    return glcr::UNIMPLEMENTED;
   }
   glcr::RefPtr<Port> port = glcr::MakeRefCounted<Port>();
   *req->port_cap = proc.AddNewCapability(port, ZC_READ | ZC_WRITE);
   RegisterPciPort(port);
-  return Z_OK;
+  return glcr::OK;
 }

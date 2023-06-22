@@ -2,6 +2,7 @@
 
 #include <glacier/memory/ref_counted.h>
 #include <glacier/memory/ref_ptr.h>
+#include <glacier/status/error.h>
 #include <stdint.h>
 
 #include "include/ztypes.h"
@@ -46,18 +47,18 @@ template <typename T>
 z_err_t ValidateCapability(const glcr::RefPtr<Capability>& cap,
                            uint64_t permissions) {
   if (!cap) {
-    return Z_ERR_CAP_NOT_FOUND;
+    return glcr::CAP_NOT_FOUND;
   }
 
   if (cap->raw_obj()->TypeTag() != KernelObjectTag<T>::type) {
-    return Z_ERR_CAP_TYPE;
+    return glcr::CAP_WRONG_TYPE;
   }
 
   if (!cap->HasPermissions(permissions)) {
-    return Z_ERR_CAP_DENIED;
+    return glcr::CAP_PERMISSION_DENIED;
   }
 
-  return Z_OK;
+  return glcr::OK;
 }
 
 #define RET_IF_NULL(expr)    \

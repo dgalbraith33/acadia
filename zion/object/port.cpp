@@ -13,7 +13,7 @@ z_err_t Port::Write(uint64_t num_bytes, const void* bytes, uint64_t num_caps,
     thread->SetState(Thread::RUNNABLE);
     gScheduler->Enqueue(thread);
   }
-  return Z_OK;
+  return glcr::OK;
 }
 
 z_err_t Port::Read(uint64_t* num_bytes, void* bytes, uint64_t* num_caps,

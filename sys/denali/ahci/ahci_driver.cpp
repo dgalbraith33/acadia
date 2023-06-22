@@ -1,5 +1,6 @@
 #include "ahci/ahci_driver.h"
 
+#include <glacier/status/error.h>
 #include <mammoth/debug.h>
 #include <stdint.h>
 #include <zcall.h>
@@ -16,7 +17,7 @@ void interrupt_thread(void* void_driver) {
 
   driver->InterruptLoop();
 
-  crash("Driver returned from interrupt loop", Z_ERR_UNIMPLEMENTED);
+  crash("Driver returned from interrupt loop", glcr::INTERNAL);
 }
 
 }  // namespace
@@ -30,20 +31,20 @@ z_err_t AhciDriver::Init() {
   RET_ERR(LoadDevices());
   // DumpCapabilities();
   // DumpPorts();
-  return Z_OK;
+  return glcr::OK;
 }
 
 z_err_t AhciDriver::GetDevice(uint64_t id, AhciDevice** device) {
   if (id >= 32) {
-    return Z_ERR_INVALID;
+    return glcr::INVALID_ARGUMENT;
   }
 
   if (devices_[id] != nullptr && !devices_[id]->IsInit()) {
-    return Z_ERR_NOT_FOUND;
+    return glcr::NOT_FOUND;
   }
 
   *device = devices_[id];
-  return Z_OK;
+  return glcr::OK;
 }
 
 void AhciDriver::DumpCapabilities() {
@@ -156,13 +157,13 @@ void AhciDriver::InterruptLoop() {
 z_err_t AhciDriver::LoadPciDeviceHeader() {
   pci_region_ = MappedMemoryRegion::DirectPhysical(kSataPciPhys, kPciSize);
   pci_device_header_ = reinterpret_cast<PciDeviceHeader*>(pci_region_.vaddr());
-  return Z_OK;
+  return glcr::OK;
 }
 
 z_err_t AhciDriver::LoadCapabilities() {
   if (!(pci_device_header_->status_reg & 0x10)) {
     dbgln("No caps!");
-    return Z_ERR_INVALID;
+    return glcr::FAILED_PRECONDITION;
   }
   uint8_t* base = reinterpret_cast<uint8_t*>(pci_device_header_);
   uint16_t offset = pci_device_header_->cap_ptr;
@@ -185,7 +186,7 @@ z_err_t AhciDriver::LoadCapabilities() {
 
     offset = (*cap & 0xFF00) >> 8;
   } while (offset);
-  return Z_OK;
+  return glcr::OK;
 }
 
 z_err_t AhciDriver::RegisterIrq() {
@@ -195,7 +196,7 @@ z_err_t AhciDriver::RegisterIrq() {
   uint64_t irq_num = Z_IRQ_PCI_BASE + pci_device_header_->interrupt_pin - 1;
   RET_ERR(ZIrqRegister(irq_num, &irq_port_cap_));
   irq_thread_ = Thread(interrupt_thread, this);
-  return Z_OK;
+  return glcr::OK;
 }
 
 z_err_t AhciDriver::LoadHbaRegisters() {
@@ -205,7 +206,7 @@ z_err_t AhciDriver::LoadHbaRegisters() {
   num_ports_ = (ahci_hba_->capabilities & 0x1F) + 1;
   num_commands_ = ((ahci_hba_->capabilities & 0x1F00) >> 8) + 1;
 
-  return Z_OK;
+  return glcr::OK;
 }
 
 z_err_t AhciDriver::LoadDevices() {
@@ -217,5 +218,5 @@ z_err_t AhciDriver::LoadDevices() {
         reinterpret_cast<uint64_t>(ahci_hba_) + 0x100 + (0x80 * i);
     devices_[i] = new AhciDevice(reinterpret_cast<AhciPort*>(port_addr));
   }
-  return Z_OK;
+  return glcr::OK;
 }

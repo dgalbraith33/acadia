@@ -1,5 +1,6 @@
 #include "hw/gpt.h"
 
+#include <glacier/status/error.h>
 #include <mammoth/debug.h>
 #include <zcall.h>
 #include <zglobal.h>
@@ -52,17 +53,17 @@ z_err_t GptReader::ParsePartitionTables() {
   MappedMemoryRegion lba_1_and_2 = denali_.ReadSectors(0, 0, 2);
   uint16_t* mbr_sig = reinterpret_cast<uint16_t*>(lba_1_and_2.vaddr() + 0x1FE);
   if (*mbr_sig != 0xAA55) {
-    return Z_ERR_INVALID;
+    return glcr::FAILED_PRECONDITION;
   }
   MbrPartition* first_partition =
       reinterpret_cast<MbrPartition*>(lba_1_and_2.vaddr() + 0x1BE);
   if (first_partition->boot_indicator != 0) {
     dbgln("Boot indicator set: %u", first_partition->boot_indicator);
-    return Z_ERR_INVALID;
+    return glcr::FAILED_PRECONDITION;
   }
   if (first_partition->os_type != 0xEE) {
     dbgln("Incorrect OS type: %x", first_partition->os_type);
-    return Z_ERR_INVALID;
+    return glcr::FAILED_PRECONDITION;
   }
   dbgln("LBAs: (%x, %x)", first_partition->starting_lba,
         first_partition->ending_lba);
@@ -97,5 +98,5 @@ z_err_t GptReader::ParsePartitionTables() {
     }
   }
 
-  return Z_OK;
+  return glcr::OK;
 }

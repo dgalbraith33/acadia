@@ -8,7 +8,7 @@ z_err_t MemoryObjectCreate(ZMemoryObjectCreateReq* req) {
   auto& curr_proc = gScheduler->CurrentProcess();
   *req->vmmo_cap = curr_proc.AddNewCapability(
       glcr::MakeRefCounted<MemoryObject>(req->size), ZC_WRITE);
-  return Z_OK;
+  return glcr::OK;
 }
 
 z_err_t MemoryObjectCreatePhysical(ZMemoryObjectCreatePhysicalReq* req) {
@@ -17,7 +17,7 @@ z_err_t MemoryObjectCreatePhysical(ZMemoryObjectCreatePhysicalReq* req) {
   auto vmmo_ref = glcr::MakeRefCounted<FixedMemoryObject>(paddr, req->size);
   *req->vmmo_cap = curr_proc.AddNewCapability(
       StaticCastRefPtr<MemoryObject>(vmmo_ref), ZC_WRITE);
-  return Z_OK;
+  return glcr::OK;
 }
 
 z_err_t MemoryObjectCreateContiguous(ZMemoryObjectCreateContiguousReq* req) {
@@ -27,7 +27,7 @@ z_err_t MemoryObjectCreateContiguous(ZMemoryObjectCreateContiguousReq* req) {
   *req->vmmo_cap = curr_proc.AddNewCapability(
       StaticCastRefPtr<MemoryObject>(vmmo_ref), ZC_WRITE);
   *req->paddr = paddr;
-  return Z_OK;
+  return glcr::OK;
 }
 
 z_err_t TempPcieConfigObjectCreate(ZTempPcieConfigObjectCreateReq* req) {
@@ -38,5 +38,5 @@ z_err_t TempPcieConfigObjectCreate(ZTempPcieConfigObjectCreateReq* req) {
   *req->vmmo_cap = curr_proc.AddNewCapability(
       StaticCastRefPtr<MemoryObject>(vmmo_ref), ZC_WRITE);
   *req->vmmo_size = pci_size;
-  return Z_OK;
+  return glcr::OK;
 }

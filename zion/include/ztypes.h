@@ -2,27 +2,7 @@
 
 #include <stdint.h>
 
-/* ------------------------------
- * Error Types
- *
- * Bit 31 always set to 1 to
- * distinguish from user-space errors.
- * ------------------------------*/
-#define Z_OK 0x0
-
-#define Z_ERR_NOT_FOUND 0x1000'0001
-#define Z_ERR_INVALID 0x1000'0002
-#define Z_ERR_DENIED 0x1000'0003
-#define Z_ERR_UNIMPLEMENTED 0x1000'0004
-#define Z_ERR_BUFF_SIZE 001000'0005
-#define Z_ERR_NULL 0x1000'0006
-#define Z_ERR_EXISTS 0x1000'0007
-#define Z_ERR_EMPTY 0x1000'0008
-
-#define Z_ERR_CAP_NOT_FOUND 0x1001'0000
-#define Z_ERR_CAP_TYPE 0x1001'0001
-#define Z_ERR_CAP_DENIED 0x1001'0002
-
+// Error codes defined in glacier/status/error.h
 typedef uint64_t z_err_t;
 
 /* ------------------------------

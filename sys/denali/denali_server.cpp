@@ -1,5 +1,6 @@
 #include "denali_server.h"
 
+#include <glacier/status/error.h>
 #include <mammoth/debug.h>
 #include <zcall.h>
 
@@ -38,7 +39,7 @@ z_err_t DenaliServer::RunServer() {
       }
       default:
         dbgln("Invalid message type.");
-        return Z_ERR_UNIMPLEMENTED;
+        return glcr::UNIMPLEMENTED;
     }
   }
 }
@@ -50,7 +51,7 @@ z_err_t DenaliServer::HandleRead(const DenaliRead& read) {
   device->IssueCommand(
       new DmaReadCommand(read.lba, read.size, ::HandleResponse));
 
-  return Z_OK;
+  return glcr::OK;
 }
 
 void DenaliServer::HandleResponse(uint64_t lba, uint64_t size, uint64_t cap) {

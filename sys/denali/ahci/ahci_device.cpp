@@ -1,5 +1,6 @@
 #include "ahci/ahci_device.h"
 
+#include <glacier/status/error.h>
 #include <mammoth/debug.h>
 #include <string.h>
 #include <zcall.h>
@@ -12,7 +13,7 @@ AhciDevice::AhciDevice(AhciPort* port) : port_struct_(port) {
   uint64_t fis_page = port_struct_->fis_base & (~0xFFF);
 
   if (cl_page != fis_page) {
-    crash("Non adjacent cl & fis", Z_ERR_UNIMPLEMENTED);
+    crash("Non adjacent cl & fis", glcr::UNIMPLEMENTED);
   }
 
   command_structures_ = MappedMemoryRegion::DirectPhysical(cl_page, 0x1000);
@@ -48,7 +49,7 @@ z_err_t AhciDevice::IssueCommand(Command* command) {
   commands_issued_ |= 1;
   port_struct_->command_issue |= 1;
 
-  return Z_OK;
+  return glcr::OK;
 }
 
 void AhciDevice::DumpInfo() {

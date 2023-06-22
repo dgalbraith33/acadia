@@ -7,7 +7,7 @@ z_err_t UnboundedMessageQueue::PushBack(uint64_t num_bytes, const void* bytes,
                                         const z_cap_t* caps) {
   if (num_bytes > 0x1000) {
     dbgln("Large message size unimplemented: %x", num_bytes);
-    return Z_ERR_UNIMPLEMENTED;
+    return glcr::UNIMPLEMENTED;
   }
 
   auto message = glcr::MakeShared<Message>();
@@ -21,23 +21,23 @@ z_err_t UnboundedMessageQueue::PushBack(uint64_t num_bytes, const void* bytes,
     // FIXME: This would feel safer closer to the relevant syscall.
     auto cap = gScheduler->CurrentProcess().ReleaseCapability(caps[i]);
     if (!cap) {
-      return Z_ERR_CAP_NOT_FOUND;
+      return glcr::CAP_NOT_FOUND;
     }
     message->caps.PushBack(cap);
   }
 
   pending_messages_.PushBack(message);
-  return Z_OK;
+  return glcr::OK;
 }
 
 z_err_t UnboundedMessageQueue::PopFront(uint64_t* num_bytes, void* bytes,
                                         uint64_t* num_caps, z_cap_t* caps) {
   auto next_msg = pending_messages_.PeekFront();
   if (next_msg->num_bytes > *num_bytes) {
-    return Z_ERR_BUFF_SIZE;
+    return glcr::BUFFER_SIZE;
   }
   if (next_msg->caps.size() > *num_caps) {
-    return Z_ERR_BUFF_SIZE;
+    return glcr::BUFFER_SIZE;
   }
 
   next_msg = pending_messages_.PopFront();
@@ -53,7 +53,7 @@ z_err_t UnboundedMessageQueue::PopFront(uint64_t* num_bytes, void* bytes,
   for (uint64_t i = 0; i < *num_caps; i++) {
     caps[i] = proc.AddExistingCapability(next_msg->caps.PopFront());
   }
-  return Z_OK;
+  return glcr::OK;
 }
 
 void UnboundedMessageQueue::WriteKernel(uint64_t init,

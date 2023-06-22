@@ -20,5 +20,5 @@ z_err_t AddressSpaceMap(ZAddressSpaceMapReq* req) {
   } else {
     *req->vaddr = vmas->MapInMemoryObject(vmmo);
   }
-  return Z_OK;
+  return glcr::OK;
 }

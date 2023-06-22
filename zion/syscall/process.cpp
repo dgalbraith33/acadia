@@ -10,7 +10,7 @@ z_err_t ProcessExit(ZProcessExitReq* req) {
   // FIXME: kill process here.
   curr_thread->Exit();
   panic("Returned from thread exit");
-  return Z_ERR_UNIMPLEMENTED;
+  return glcr::UNIMPLEMENTED;
 }
 
 z_err_t ProcessSpawn(ZProcessSpawnReq* req) {
@@ -28,11 +28,11 @@ z_err_t ProcessSpawn(ZProcessSpawnReq* req) {
   if (req->bootstrap_cap != 0) {
     auto cap = curr_proc.ReleaseCapability(req->bootstrap_cap);
     if (!cap) {
-      return Z_ERR_CAP_NOT_FOUND;
+      return glcr::CAP_NOT_FOUND;
     }
     // FIXME: Check permissions.
     *req->new_bootstrap_cap = proc->AddExistingCapability(cap);
   }
 
-  return Z_OK;
+  return glcr::OK;
 }

@@ -1,5 +1,6 @@
 #include "mammoth/init.h"
 
+#include <glacier/status/error.h>
 #include <ztypes.h>
 
 #include "mammoth/debug.h"
@@ -16,7 +17,7 @@ z_err_t ParseInitPort(uint64_t init_port_cap) {
   Port port(init_port_cap);
   z_err_t ret;
   uint64_t init_sig, init_cap;
-  while ((ret = port.PollForIntCap(&init_sig, &init_cap)) != Z_ERR_EMPTY) {
+  while ((ret = port.PollForIntCap(&init_sig, &init_cap)) != glcr::EMPTY) {
     RET_ERR(ret);
     switch (init_sig) {
       case Z_INIT_SELF_PROC:
@@ -39,5 +40,5 @@ z_err_t ParseInitPort(uint64_t init_port_cap) {
     }
   }
 
-  return Z_OK;
+  return glcr::OK;
 }

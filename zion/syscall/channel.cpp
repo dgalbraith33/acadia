@@ -9,7 +9,7 @@ z_err_t ChannelCreate(ZChannelCreateReq* req) {
   *req->channel1 = proc.AddNewCapability(chan_pair.first(), ZC_WRITE | ZC_READ);
   *req->channel2 =
       proc.AddNewCapability(chan_pair.second(), ZC_WRITE | ZC_READ);
-  return Z_OK;
+  return glcr::OK;
 }
 
 z_err_t ChannelSend(ZChannelSendReq* req) {

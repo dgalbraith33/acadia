@@ -1,5 +1,7 @@
 #include "boot/acpi.h"
 
+#include <glacier/status/error.h>
+
 #include "boot/boot_info.h"
 #include "debug/debug.h"
 
@@ -255,10 +257,10 @@ void ProbeRsdp() {
 
 z_err_t GetPciExtendedConfiguration(uint64_t* base, uint64_t* offset) {
   if (gPcieEcSize == 0) {
-    return Z_ERR_NOT_FOUND;
+    return glcr::NOT_FOUND;
   }
 
   *base = gPcieEcBase;
   *offset = gPcieEcSize;
-  return Z_OK;
+  return glcr::OK;
 }

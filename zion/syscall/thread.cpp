@@ -11,7 +11,7 @@ z_err_t ThreadCreate(ZThreadCreateReq* req) {
   auto parent_proc = cap->obj<Process>();
   auto thread = parent_proc->CreateThread();
   *req->thread_cap = curr_proc.AddNewCapability(thread, ZC_WRITE);
-  return Z_OK;
+  return glcr::OK;
 }
 
 z_err_t ThreadStart(ZThreadStartReq* req) {
@@ -22,7 +22,7 @@ z_err_t ThreadStart(ZThreadStartReq* req) {
   auto thread = cap->obj<Thread>();
   // FIXME: validate entry point is in user space.
   thread->Start(req->entry, req->arg1, req->arg2);
-  return Z_OK;
+  return glcr::OK;
 }
 
 z_err_t ThreadExit(ZThreadExitReq*) {
