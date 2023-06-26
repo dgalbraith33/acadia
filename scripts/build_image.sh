@@ -26,14 +26,14 @@ parted -s $dev mklabel gpt mkpart EFI fat32 1MiB 10MiB mkpart ext2 10MiB 100% se
 mkfs.fat -F 12 "${dev}p1"
 mke2fs "${dev}p2"
 
-limine-deploy "${dev}"
+limine bios-install "${dev}"
 
 mkdir -p efi/
 mount "${dev}p1" efi/
 
 mkdir -p efi/EFI/BOOT
 cp /usr/share/limine/BOOTX64.EFI efi/EFI/BOOT
-cp /usr/share/limine/limine.sys efi/
+cp /usr/share/limine/limine-bios.sys efi/
 cp ../zion/boot/limine.cfg efi/
 cp zion/zion efi/
 mkdir -p efi/sys

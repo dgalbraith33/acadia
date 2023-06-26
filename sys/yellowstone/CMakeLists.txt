@@ -8,7 +8,6 @@ add_executable(yellowstone
    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(yellowstone
-  cxx
   mammoth_lib
   glacier
   libdenali

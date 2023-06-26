@@ -8,8 +8,6 @@
 #include "hw/gpt.h"
 #include "include/yellowstone.h"
 
-// FIXME: This linkage was missing :(
-void* operator new[](uint64_t size) { return malloc(size); }
 namespace {
 
 void ServerThreadBootstrap(void* yellowstone) {

@@ -12,7 +12,6 @@ target_include_directories(denali
    "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 target_link_libraries(denali
-  cxx
   glacier
   mammoth_lib
   yellowstonestub
