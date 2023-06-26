@@ -22,18 +22,18 @@ set_target_properties(denali PROPERTIES
   LINK_FLAGS "${CMAKE_EXE_LINK_FLAGS} ${BASE_LINK_FLAGS}"
   )
 
-add_library(libdenali
+add_library(denali_stub
   client/denali_client.cpp
   )
 
-target_include_directories(libdenali
+target_include_directories(denali_stub
    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
    PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
- target_link_libraries(libdenali
+ target_link_libraries(denali_stub
    mammoth)
 
-set_target_properties(libdenali PROPERTIES
+set_target_properties(denali_stub PROPERTIES
   COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${BASE_COMPILE_FLAGS}"
   LINK_FLAGS "${CMAKE_EXE_LINK_FLAGS} ${BASE_LINK_FLAGS}"
   )

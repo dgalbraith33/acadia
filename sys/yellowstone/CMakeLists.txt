@@ -10,7 +10,7 @@ add_executable(yellowstone
 target_link_libraries(yellowstone
   mammoth
   glacier
-  libdenali
+  denali_stub
   )
 
 set_target_properties(yellowstone PROPERTIES
