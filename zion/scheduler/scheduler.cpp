@@ -2,7 +2,6 @@
 
 #include "common/gdt.h"
 #include "debug/debug.h"
-#include "lib/linked_list.h"
 #include "scheduler/process_manager.h"
 
 namespace {

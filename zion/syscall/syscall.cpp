@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include "common/msr.h"
+#include "debug/debug.h"
 #include "scheduler/scheduler.h"
 #include "syscall/address_space.h"
 #include "syscall/capability.h"

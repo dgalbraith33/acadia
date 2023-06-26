@@ -1,5 +1,7 @@
 #include "capability/capability_table.h"
 
+#include "debug/debug.h"
+
 CapabilityTable::CapabilityTable() {}
 
 uint64_t CapabilityTable::AddExistingCapability(

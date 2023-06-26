@@ -1,6 +1,7 @@
 #include "syscall/thread.h"
 
 #include "capability/capability.h"
+#include "debug/debug.h"
 #include "scheduler/scheduler.h"
 
 glcr::ErrorCode ThreadCreate(ZThreadCreateReq* req) {
@@ -29,6 +30,7 @@ glcr::ErrorCode ThreadExit(ZThreadExitReq*) {
   auto curr_thread = gScheduler->CurrentThread();
   curr_thread->Exit();
   panic("Returned from thread exit");
+  UNREACHABLE
 }
 
 glcr::ErrorCode ThreadWait(ZThreadWaitReq* req) {

@@ -1,5 +1,7 @@
 #include "scheduler/process_manager.h"
 
+#include "debug/debug.h"
+
 ProcessManager* gProcMan = nullptr;
 
 void ProcessManager::Init() {

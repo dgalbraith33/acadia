@@ -1,6 +1,7 @@
 #pragma once
 
-#include "lib/linked_list.h"
+#include <glacier/container/linked_list.h>
+
 #include "object/kernel_object.h"
 
 class MemoryObject;
@@ -37,7 +38,7 @@ class MemoryObject : public KernelObject {
 
   virtual uint64_t PageNumberToPhysAddr(uint64_t page_num);
 
-  LinkedList<uint64_t> phys_page_list_;
+  glcr::LinkedList<uint64_t> phys_page_list_;
 };
 
 class FixedMemoryObject : public MemoryObject {

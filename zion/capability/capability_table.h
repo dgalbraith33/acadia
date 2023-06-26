@@ -1,9 +1,9 @@
 #pragma once
 
+#include <glacier/container/linked_list.h>
 #include <glacier/memory/ref_ptr.h>
 
 #include "capability/capability.h"
-#include "lib/linked_list.h"
 #include "lib/mutex.h"
 
 class CapabilityTable {
@@ -30,7 +30,7 @@ class CapabilityTable {
     uint64_t id;
     glcr::RefPtr<Capability> cap;
   };
-  LinkedList<CapEntry> capabilities_;
+  glcr::LinkedList<CapEntry> capabilities_;
 };
 
 template <typename T>

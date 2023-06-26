@@ -1,13 +1,13 @@
 #pragma once
 
 #include <glacier/container/intrusive_list.h>
+#include <glacier/container/linked_list.h>
 #include <glacier/memory/ref_ptr.h>
 #include <glacier/memory/shared_ptr.h>
 #include <glacier/status/error.h>
 
 #include "capability/capability.h"
 #include "include/ztypes.h"
-#include "lib/linked_list.h"
 #include "lib/mutex.h"
 
 class MessageQueue {
@@ -51,10 +51,10 @@ class UnboundedMessageQueue : public MessageQueue {
     uint64_t num_bytes;
     uint8_t* bytes;
 
-    LinkedList<glcr::RefPtr<Capability>> caps;
+    glcr::LinkedList<glcr::RefPtr<Capability>> caps;
   };
 
-  LinkedList<glcr::SharedPtr<Message>> pending_messages_;
+  glcr::LinkedList<glcr::SharedPtr<Message>> pending_messages_;
 };
 
 class SingleMessageQueue : public MessageQueue {
@@ -79,5 +79,5 @@ class SingleMessageQueue : public MessageQueue {
   bool has_read_ = false;
   uint64_t num_bytes_;
   uint8_t* bytes_;
-  LinkedList<glcr::RefPtr<Capability>> caps_;
+  glcr::LinkedList<glcr::RefPtr<Capability>> caps_;
 };

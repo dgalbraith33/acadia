@@ -1,11 +1,11 @@
 #pragma once
 
+#include <glacier/container/linked_list.h>
 #include <glacier/memory/ref_ptr.h>
 #include <stdint.h>
 
 #include "capability/capability.h"
 #include "capability/capability_table.h"
-#include "lib/linked_list.h"
 #include "lib/mutex.h"
 #include "object/address_space.h"
 #include "object/channel.h"
@@ -66,6 +66,6 @@ class Process : public KernelObject {
   uint64_t next_thread_id_ = 0;
   uint64_t next_cap_id_ = 0x100;
 
-  LinkedList<glcr::RefPtr<Thread>> threads_;
+  glcr::LinkedList<glcr::RefPtr<Thread>> threads_;
   CapabilityTable caps_;
 };

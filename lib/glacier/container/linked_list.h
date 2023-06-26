@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include "debug/debug.h"
+namespace glcr {
 
 template <typename T>
 class LinkedList {
@@ -32,43 +32,12 @@ class LinkedList {
   }
 
   T PopFront() {
-    if (size_ == 0 || front_ == nullptr) {
-      panic("Popping from empty list");
-    }
-
     size_--;
 
     ListItem* old_front = front_;
     front_ = front_->next;
     T ret = old_front->item;
     delete old_front;
-    return ret;
-  }
-
-  /*
-   * Returns the front item in the list and pushes the passed item to the back.
-   *
-   * Done in one function to avoid a memory alloc/dealloc during scheduling.
-   **/
-  T CycleFront(const T& new_item) {
-    if (size_ == 0 || front_ == nullptr) {
-      panic("Cycling empty list");
-    }
-
-    T ret = front_->item;
-    front_->item = new_item;
-    if (size_ == 1) {
-      return ret;
-    }
-
-    ListItem* old_front = front_;
-    ListItem* iter = front_;
-    front_ = front_->next;
-    while (iter->next != nullptr) {
-      iter = iter->next;
-    }
-    iter->next = old_front;
-    old_front->next = nullptr;
     return ret;
   }
 
@@ -105,3 +74,5 @@ class LinkedList {
 
   ListItem* front_ = nullptr;
 };
+
+}  // namespace glcr

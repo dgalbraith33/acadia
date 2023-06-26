@@ -1,6 +1,7 @@
 #include "syscall/process.h"
 
 #include "capability/capability.h"
+#include "debug/debug.h"
 #include "scheduler/process_manager.h"
 #include "scheduler/scheduler.h"
 

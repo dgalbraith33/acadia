@@ -1,5 +1,6 @@
 #include "object/address_space.h"
 
+#include "debug/debug.h"
 #include "memory/kernel_stack_manager.h"
 #include "memory/paging_util.h"
 #include "memory/physical_memory.h"

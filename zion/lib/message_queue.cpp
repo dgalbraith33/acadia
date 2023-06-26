@@ -1,5 +1,6 @@
 #include "lib/message_queue.h"
 
+#include "debug/debug.h"
 #include "scheduler/scheduler.h"
 
 z_err_t UnboundedMessageQueue::PushBack(uint64_t num_bytes, const void* bytes,
