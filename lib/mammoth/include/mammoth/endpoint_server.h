@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glacier/memory/unique_ptr.h>
 #include <glacier/status/error_or.h>
 #include <ztypes.h>
 
@@ -7,8 +8,12 @@
 
 class EndpointServer {
  public:
-  static glcr::ErrorOr<EndpointServer> Create();
-  static EndpointServer Adopt(z_cap_t endpoint_cap);
+  EndpointServer() = delete;
+  EndpointServer(const EndpointServer&) = delete;
+  EndpointServer& operator=(const EndpointServer&) = delete;
+
+  static glcr::ErrorOr<glcr::UniquePtr<EndpointServer>> Create();
+  static glcr::UniquePtr<EndpointServer> Adopt(z_cap_t endpoint_cap);
 
   glcr::ErrorOr<EndpointClient> CreateClient();
 

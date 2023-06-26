@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glacier/memory/unique_ptr.h>
 #include <glacier/status/error_or.h>
 #include <mammoth/endpoint_server.h>
 #include <mammoth/port_server.h>
@@ -7,7 +8,7 @@
 
 class YellowstoneServer {
  public:
-  static glcr::ErrorOr<YellowstoneServer> Create();
+  static glcr::ErrorOr<glcr::UniquePtr<YellowstoneServer>> Create();
 
   Thread RunServer();
   Thread RunRegistration();
@@ -18,7 +19,7 @@ class YellowstoneServer {
   glcr::ErrorOr<EndpointClient> GetServerClient();
 
  private:
-  EndpointServer server_;
+  glcr::UniquePtr<EndpointServer> server_;
   PortServer register_port_;
 
   static const uint64_t kBufferSize = 128;
@@ -29,5 +30,5 @@ class YellowstoneServer {
   z_cap_t denali_cap_ = 0;
   z_cap_t victoria_falls_cap_ = 0;
 
-  YellowstoneServer(EndpointServer server, PortServer port);
+  YellowstoneServer(glcr::UniquePtr<EndpointServer> server, PortServer port);
 };

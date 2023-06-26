@@ -1,5 +1,6 @@
 #include "denali_server.h"
 
+#include <glacier/memory/move.h>
 #include <glacier/status/error.h>
 #include <mammoth/debug.h>
 #include <zcall.h>
@@ -12,8 +13,9 @@ void HandleResponse(z_cap_t reply_port, uint64_t lba, uint64_t size,
 }
 }  // namespace
 
-DenaliServer::DenaliServer(EndpointServer server, AhciDriver& driver)
-    : server_(server), driver_(driver) {
+DenaliServer::DenaliServer(glcr::UniquePtr<EndpointServer> server,
+                           AhciDriver& driver)
+    : server_(glcr::Move(server)), driver_(driver) {
   gServer = this;
 }
 
@@ -21,7 +23,7 @@ glcr::ErrorCode DenaliServer::RunServer() {
   while (true) {
     uint64_t buff_size = kBuffSize;
     z_cap_t reply_port;
-    RET_ERR(server_.Recieve(&buff_size, read_buffer_, &reply_port));
+    RET_ERR(server_->Recieve(&buff_size, read_buffer_, &reply_port));
     if (buff_size < sizeof(uint64_t)) {
       dbgln("Skipping invalid message");
       continue;

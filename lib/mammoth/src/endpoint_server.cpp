@@ -1,13 +1,13 @@
 #include "mammoth/endpoint_server.h"
 
-glcr::ErrorOr<EndpointServer> EndpointServer::Create() {
+glcr::ErrorOr<glcr::UniquePtr<EndpointServer>> EndpointServer::Create() {
   uint64_t cap;
   RET_ERR(ZEndpointCreate(&cap));
-  return EndpointServer(cap);
+  return glcr::UniquePtr<EndpointServer>(new EndpointServer(cap));
 }
 
-EndpointServer EndpointServer::Adopt(z_cap_t endpoint_cap) {
-  return EndpointServer(endpoint_cap);
+glcr::UniquePtr<EndpointServer> EndpointServer::Adopt(z_cap_t endpoint_cap) {
+  return glcr::UniquePtr<EndpointServer>(new EndpointServer(endpoint_cap));
 }
 
 glcr::ErrorOr<EndpointClient> EndpointServer::CreateClient() {

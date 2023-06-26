@@ -28,11 +28,12 @@ uint64_t main(uint64_t init_port_cap) {
   auto resp_cap = resp_cap_or.value();
   PortClient notify = PortClient::AdoptPort(resp_cap.second());
 
-  ASSIGN_OR_RETURN(EndpointServer endpoint, EndpointServer::Create());
-  ASSIGN_OR_RETURN(EndpointClient client, endpoint.CreateClient());
+  ASSIGN_OR_RETURN(glcr::UniquePtr<EndpointServer> endpoint,
+                   EndpointServer::Create());
+  ASSIGN_OR_RETURN(EndpointClient client, endpoint->CreateClient());
   notify.WriteMessage("denali", client.GetCap());
 
-  DenaliServer server(endpoint, driver);
+  DenaliServer server(glcr::Move(endpoint), driver);
   RET_ERR(server.RunServer());
   // FIXME: Add thread join.
   return 0;

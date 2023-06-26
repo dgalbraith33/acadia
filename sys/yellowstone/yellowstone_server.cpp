@@ -30,14 +30,16 @@ glcr::ErrorCode HandleDenaliRegistration(z_cap_t endpoint_cap) {
 
 }  // namespace
 
-glcr::ErrorOr<YellowstoneServer> YellowstoneServer::Create() {
-  ASSIGN_OR_RETURN(EndpointServer server, EndpointServer::Create());
+glcr::ErrorOr<glcr::UniquePtr<YellowstoneServer>> YellowstoneServer::Create() {
+  ASSIGN_OR_RETURN(auto server, EndpointServer::Create());
   ASSIGN_OR_RETURN(PortServer port, PortServer::Create());
-  return YellowstoneServer(server, port);
+  return glcr::UniquePtr<YellowstoneServer>(
+      new YellowstoneServer(glcr::Move(server), port));
 }
 
-YellowstoneServer::YellowstoneServer(EndpointServer server, PortServer port)
-    : server_(server), register_port_(port) {}
+YellowstoneServer::YellowstoneServer(glcr::UniquePtr<EndpointServer> server,
+                                     PortServer port)
+    : server_(glcr::Move(server)), register_port_(port) {}
 
 Thread YellowstoneServer::RunServer() {
   return Thread(ServerThreadBootstrap, this);
@@ -52,7 +54,7 @@ void YellowstoneServer::ServerThread() {
     uint64_t num_bytes = kBufferSize;
     uint64_t reply_port_cap;
     // FIXME: Error handling.
-    check(server_.Recieve(&num_bytes, server_buffer_, &reply_port_cap));
+    check(server_->Recieve(&num_bytes, server_buffer_, &reply_port_cap));
     YellowstoneGetReq* req =
         reinterpret_cast<YellowstoneGetReq*>(server_buffer_);
     switch (req->type) {
@@ -102,5 +104,5 @@ void YellowstoneServer::RegistrationThread() {
 }
 
 glcr::ErrorOr<EndpointClient> YellowstoneServer::GetServerClient() {
-  return server_.CreateClient();
+  return server_->CreateClient();
 }

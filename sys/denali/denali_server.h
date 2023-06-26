@@ -8,7 +8,7 @@
 
 class DenaliServer {
  public:
-  DenaliServer(EndpointServer server, AhciDriver& driver);
+  DenaliServer(glcr::UniquePtr<EndpointServer> server, AhciDriver& driver);
 
   glcr::ErrorCode RunServer();
 
@@ -17,7 +17,7 @@ class DenaliServer {
 
  private:
   static const uint64_t kBuffSize = 1024;
-  EndpointServer server_;
+  glcr::UniquePtr<EndpointServer> server_;
   uint8_t read_buffer_[kBuffSize];
 
   AhciDriver& driver_;
