@@ -6,7 +6,8 @@
 #include "mammoth/debug.h"
 #include "mammoth/endpoint_server.h"
 #include "mammoth/init.h"
-#include "mammoth/port.h"
+#include "mammoth/port_client.h"
+#include "mammoth/port_server.h"
 
 #define MAM_PROC_DEBUG 0
 
@@ -105,14 +106,13 @@ glcr::ErrorCode SpawnProcessFromElfRegion(uint64_t program,
 #if MAM_PROC_DEBUG
   dbgln("Port Create");
 #endif
-  RET_ERR(ZPortCreate(&port_cap));
-  uint64_t port_cap_donate;
-  RET_ERR(ZCapDuplicate(port_cap, &port_cap_donate));
+  ASSIGN_OR_RETURN(PortServer server, PortServer::Create());
+  ASSIGN_OR_RETURN(PortClient pclient, server.CreateClient());
 
 #if MAM_PROC_DEBUG
   dbgln("Spawn");
 #endif
-  RET_ERR(ZProcessSpawn(gSelfProcCap, port_cap_donate, &proc_cap, &as_cap,
+  RET_ERR(ZProcessSpawn(gSelfProcCap, server.cap(), &proc_cap, &as_cap,
                         &foreign_port_id));
 
   uint64_t entry_point = LoadElfProgram(program, as_cap);
@@ -123,10 +123,9 @@ glcr::ErrorCode SpawnProcessFromElfRegion(uint64_t program,
   uint64_t thread_cap;
   RET_ERR(ZThreadCreate(proc_cap, &thread_cap));
 
-  Port p(port_cap);
-  RET_ERR(p.WriteMessage<uint64_t>(Z_INIT_SELF_PROC, proc_cap));
-  RET_ERR(p.WriteMessage<uint64_t>(Z_INIT_SELF_VMAS, as_cap));
-  RET_ERR(p.WriteMessage<uint64_t>(Z_INIT_ENDPOINT, client.GetCap()));
+  RET_ERR(pclient.WriteMessage<uint64_t>(Z_INIT_SELF_PROC, proc_cap));
+  RET_ERR(pclient.WriteMessage<uint64_t>(Z_INIT_SELF_VMAS, as_cap));
+  RET_ERR(pclient.WriteMessage<uint64_t>(Z_INIT_ENDPOINT, client.GetCap()));
 
 #if MAM_PROC_DEBUG
   dbgln("Thread start");

@@ -61,9 +61,12 @@ void YellowstoneServer::ServerThread() {
         break;
       case kYellowstoneGetRegistration: {
         dbgln("Yellowstone::GetRegistration");
-        uint64_t reg_cap;
-        check(register_port_.CreateClient(&reg_cap));
+        auto client_or = register_port_.CreateClient();
+        if (!client_or.ok()) {
+          check(client_or.error());
+        }
         YellowstoneGetRegistrationResp resp;
+        uint64_t reg_cap = client_or.value().cap();
         check(ZReplyPortSend(reply_port_cap, sizeof(resp), &resp, 1, &reg_cap));
         break;
       }

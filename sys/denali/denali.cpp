@@ -2,7 +2,7 @@
 #include <mammoth/debug.h>
 #include <mammoth/endpoint_server.h>
 #include <mammoth/init.h>
-#include <mammoth/port.h>
+#include <mammoth/port_client.h>
 #include <stdint.h>
 #include <yellowstone.h>
 
@@ -26,7 +26,7 @@ uint64_t main(uint64_t init_port_cap) {
     check(resp_cap_or.error());
   }
   auto resp_cap = resp_cap_or.value();
-  Port notify(resp_cap.second());
+  PortClient notify = PortClient::AdoptPort(resp_cap.second());
 
   ASSIGN_OR_RETURN(EndpointServer endpoint, EndpointServer::Create());
   ASSIGN_OR_RETURN(EndpointClient client, endpoint.CreateClient());
