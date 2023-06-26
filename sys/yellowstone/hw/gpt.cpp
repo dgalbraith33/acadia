@@ -47,11 +47,12 @@ struct PartitionEntry {
   char partition_name[72];
 } __attribute__((packed));
 
-GptReader::GptReader(const DenaliClient& client) : denali_(client) {}
+GptReader::GptReader(glcr::UniquePtr<DenaliClient> denali)
+    : denali_(glcr::Move(denali)) {}
 
 glcr::ErrorCode GptReader::ParsePartitionTables() {
   ASSIGN_OR_RETURN(MappedMemoryRegion lba_1_and_2,
-                   denali_.ReadSectors(0, 0, 2));
+                   denali_->ReadSectors(0, 0, 2));
   uint16_t* mbr_sig = reinterpret_cast<uint16_t*>(lba_1_and_2.vaddr() + 0x1FE);
   if (*mbr_sig != 0xAA55) {
     return glcr::FAILED_PRECONDITION;
@@ -86,7 +87,7 @@ glcr::ErrorCode GptReader::ParsePartitionTables() {
 
   ASSIGN_OR_RETURN(
       MappedMemoryRegion part_table,
-      denali_.ReadSectors(0, header->lba_partition_entries, num_blocks));
+      denali_->ReadSectors(0, header->lba_partition_entries, num_blocks));
   dbgln("Entries");
   for (uint64_t i = 0; i < num_partitions; i++) {
     PartitionEntry* entry = reinterpret_cast<PartitionEntry*>(

@@ -14,13 +14,15 @@ uint64_t main(uint64_t init_port_cap) {
   AhciDriver driver;
   RET_ERR(driver.Init());
 
-  EndpointClient yellowstone = EndpointClient::AdoptEndpoint(gInitEndpointCap);
+  glcr::UniquePtr<EndpointClient> yellowstone =
+      EndpointClient::AdoptEndpoint(gInitEndpointCap);
   YellowstoneGetReq req{
       .type = kYellowstoneGetRegistration,
   };
   auto resp_cap_or =
       yellowstone
-          .CallEndpoint<YellowstoneGetReq, YellowstoneGetRegistrationResp>(req);
+          ->CallEndpoint<YellowstoneGetReq, YellowstoneGetRegistrationResp>(
+              req);
   if (!resp_cap_or.ok()) {
     dbgln("Bad call");
     check(resp_cap_or.error());
@@ -30,8 +32,9 @@ uint64_t main(uint64_t init_port_cap) {
 
   ASSIGN_OR_RETURN(glcr::UniquePtr<EndpointServer> endpoint,
                    EndpointServer::Create());
-  ASSIGN_OR_RETURN(EndpointClient client, endpoint->CreateClient());
-  notify.WriteMessage("denali", client.GetCap());
+  ASSIGN_OR_RETURN(glcr::UniquePtr<EndpointClient> client,
+                   endpoint->CreateClient());
+  notify.WriteMessage("denali", client->GetCap());
 
   DenaliServer server(glcr::Move(endpoint), driver);
   RET_ERR(server.RunServer());

@@ -17,6 +17,7 @@ class UniquePtr {
     T* temp = ptr_;
     ptr_ = other.ptr_;
     other.ptr_ = temp;
+    return *this;
   }
 
   ~UniquePtr() {
@@ -45,7 +46,7 @@ class UniquePtr {
 
 template <typename T, typename... Args>
 UniquePtr<T> MakeUnique(Args... args) {
-  return UniquePtr(new T(args...));
+  return UniquePtr<T>(new T(args...));
 }
 
 }  // namespace glcr

@@ -96,8 +96,8 @@ uint64_t LoadElfProgram(uint64_t base, uint64_t as_cap) {
 
 }  // namespace
 
-glcr::ErrorCode SpawnProcessFromElfRegion(uint64_t program,
-                                          EndpointClient client) {
+glcr::ErrorCode SpawnProcessFromElfRegion(
+    uint64_t program, glcr::UniquePtr<EndpointClient> client) {
   uint64_t proc_cap;
   uint64_t as_cap;
   uint64_t foreign_port_id;
@@ -125,7 +125,7 @@ glcr::ErrorCode SpawnProcessFromElfRegion(uint64_t program,
 
   RET_ERR(pclient.WriteMessage<uint64_t>(Z_INIT_SELF_PROC, proc_cap));
   RET_ERR(pclient.WriteMessage<uint64_t>(Z_INIT_SELF_VMAS, as_cap));
-  RET_ERR(pclient.WriteMessage<uint64_t>(Z_INIT_ENDPOINT, client.GetCap()));
+  RET_ERR(pclient.WriteMessage<uint64_t>(Z_INIT_ENDPOINT, client->GetCap()));
 
 #if MAM_PROC_DEBUG
   dbgln("Thread start");

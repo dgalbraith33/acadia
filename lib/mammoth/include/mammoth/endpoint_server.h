@@ -15,7 +15,7 @@ class EndpointServer {
   static glcr::ErrorOr<glcr::UniquePtr<EndpointServer>> Create();
   static glcr::UniquePtr<EndpointServer> Adopt(z_cap_t endpoint_cap);
 
-  glcr::ErrorOr<EndpointClient> CreateClient();
+  glcr::ErrorOr<glcr::UniquePtr<EndpointClient>> CreateClient();
 
   // FIXME: Release Cap here.
   z_cap_t GetCap() { return endpoint_cap_; }

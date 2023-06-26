@@ -1,13 +1,18 @@
 #pragma once
 
 #include <glacier/container/pair.h>
+#include <glacier/memory/unique_ptr.h>
 #include <glacier/status/error_or.h>
 #include <zcall.h>
 #include <ztypes.h>
 
 class EndpointClient {
  public:
-  static EndpointClient AdoptEndpoint(z_cap_t cap);
+  EndpointClient() = delete;
+  EndpointClient(const EndpointClient&) = delete;
+  EndpointClient& operator=(const EndpointClient&) = delete;
+
+  static glcr::UniquePtr<EndpointClient> AdoptEndpoint(z_cap_t cap);
 
   template <typename Req, typename Resp>
   glcr::ErrorOr<glcr::Pair<Resp, z_cap_t>> CallEndpoint(const Req& req);

@@ -6,10 +6,10 @@
 
 class GptReader {
  public:
-  GptReader(const DenaliClient&);
+  GptReader(glcr::UniquePtr<DenaliClient> denali);
 
   glcr::ErrorCode ParsePartitionTables();
 
  private:
-  DenaliClient denali_;
+  glcr::UniquePtr<DenaliClient> denali_;
 };

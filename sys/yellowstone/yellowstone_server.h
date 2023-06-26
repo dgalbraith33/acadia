@@ -16,7 +16,7 @@ class YellowstoneServer {
   void ServerThread();
   void RegistrationThread();
 
-  glcr::ErrorOr<EndpointClient> GetServerClient();
+  glcr::ErrorOr<glcr::UniquePtr<EndpointClient>> GetServerClient();
 
  private:
   glcr::UniquePtr<EndpointServer> server_;

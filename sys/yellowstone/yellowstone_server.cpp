@@ -21,9 +21,8 @@ void RegistrationThreadBootstrap(void* yellowstone) {
 }
 
 glcr::ErrorCode HandleDenaliRegistration(z_cap_t endpoint_cap) {
-  EndpointClient endpoint = EndpointClient::AdoptEndpoint(endpoint_cap);
-  DenaliClient client(endpoint);
-  GptReader reader(client);
+  GptReader reader(glcr::UniquePtr<DenaliClient>(
+      new DenaliClient(EndpointClient::AdoptEndpoint(endpoint_cap))));
 
   return reader.ParsePartitionTables();
 }
@@ -103,6 +102,7 @@ void YellowstoneServer::RegistrationThread() {
   }
 }
 
-glcr::ErrorOr<EndpointClient> YellowstoneServer::GetServerClient() {
+glcr::ErrorOr<glcr::UniquePtr<EndpointClient>>
+YellowstoneServer::GetServerClient() {
   return server_->CreateClient();
 }

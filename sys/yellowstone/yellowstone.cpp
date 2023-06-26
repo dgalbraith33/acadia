@@ -19,12 +19,13 @@ uint64_t main(uint64_t port_cap) {
 
   uint64_t vaddr;
   check(ZAddressSpaceMap(gSelfVmasCap, 0, gBootDenaliVmmoCap, &vaddr));
-  ASSIGN_OR_RETURN(EndpointClient client, server->GetServerClient());
-  check(SpawnProcessFromElfRegion(vaddr, client));
+  ASSIGN_OR_RETURN(glcr::UniquePtr<EndpointClient> client,
+                   server->GetServerClient());
+  check(SpawnProcessFromElfRegion(vaddr, glcr::Move(client)));
 
   check(ZAddressSpaceMap(gSelfVmasCap, 0, gBootVictoriaFallsVmmoCap, &vaddr));
   ASSIGN_OR_RETURN(client, server->GetServerClient());
-  check(SpawnProcessFromElfRegion(vaddr, client));
+  check(SpawnProcessFromElfRegion(vaddr, glcr::Move(client)));
 
   check(server_thread.Join());
   check(registration_thread.Join());

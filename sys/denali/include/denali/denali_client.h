@@ -6,12 +6,13 @@
 
 class DenaliClient {
  public:
-  DenaliClient(const EndpointClient& endpoint) : endpoint_(endpoint) {}
+  DenaliClient(glcr::UniquePtr<EndpointClient> endpoint)
+      : endpoint_(glcr::Move(endpoint)) {}
 
   glcr::ErrorOr<MappedMemoryRegion> ReadSectors(uint64_t device_id,
                                                 uint64_t lba,
                                                 uint64_t num_sectors);
 
  private:
-  EndpointClient endpoint_;
+  glcr::UniquePtr<EndpointClient> endpoint_;
 };

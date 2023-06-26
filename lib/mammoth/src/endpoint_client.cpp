@@ -1,3 +1,5 @@
 #include "mammoth/endpoint_server.h"
 
-EndpointClient EndpointClient::AdoptEndpoint(z_cap_t cap) { return {cap}; }
+glcr::UniquePtr<EndpointClient> EndpointClient::AdoptEndpoint(z_cap_t cap) {
+  return glcr::UniquePtr<EndpointClient>(new EndpointClient(cap));
+}

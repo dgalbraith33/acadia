@@ -10,7 +10,7 @@ glcr::UniquePtr<EndpointServer> EndpointServer::Adopt(z_cap_t endpoint_cap) {
   return glcr::UniquePtr<EndpointServer>(new EndpointServer(endpoint_cap));
 }
 
-glcr::ErrorOr<EndpointClient> EndpointServer::CreateClient() {
+glcr::ErrorOr<glcr::UniquePtr<EndpointClient>> EndpointServer::CreateClient() {
   uint64_t client_cap;
   // FIXME: Restrict permissions to send-only here.
   RET_ERR(ZCapDuplicate(endpoint_cap_, &client_cap));
