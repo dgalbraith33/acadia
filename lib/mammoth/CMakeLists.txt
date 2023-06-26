@@ -8,6 +8,7 @@ add_library(mammoth_lib STATIC
   src/new.cpp
   src/process.cpp
   src/port.cpp
+  src/port_server.cpp
   src/thread.cpp
   )
 

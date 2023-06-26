@@ -2,7 +2,7 @@
 
 #include <glacier/status/error_or.h>
 #include <mammoth/endpoint_server.h>
-#include <mammoth/port.h>
+#include <mammoth/port_server.h>
 #include <mammoth/thread.h>
 
 class YellowstoneServer {
@@ -19,7 +19,7 @@ class YellowstoneServer {
 
  private:
   EndpointServer server_;
-  Port register_port_;
+  PortServer register_port_;
 
   static const uint64_t kBufferSize = 128;
   uint8_t server_buffer_[kBufferSize];
@@ -29,5 +29,5 @@ class YellowstoneServer {
   z_cap_t denali_cap_ = 0;
   z_cap_t victoria_falls_cap_ = 0;
 
-  YellowstoneServer(EndpointServer server, Port port);
+  YellowstoneServer(EndpointServer server, PortServer port);
 };

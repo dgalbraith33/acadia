@@ -32,11 +32,11 @@ glcr::ErrorCode HandleDenaliRegistration(z_cap_t endpoint_cap) {
 
 glcr::ErrorOr<YellowstoneServer> YellowstoneServer::Create() {
   ASSIGN_OR_RETURN(EndpointServer server, EndpointServer::Create());
-  ASSIGN_OR_RETURN(Port port, Port::Create());
+  ASSIGN_OR_RETURN(PortServer port, PortServer::Create());
   return YellowstoneServer(server, port);
 }
 
-YellowstoneServer::YellowstoneServer(EndpointServer server, Port port)
+YellowstoneServer::YellowstoneServer(EndpointServer server, PortServer port)
     : server_(server), register_port_(port) {}
 
 Thread YellowstoneServer::RunServer() {
@@ -62,7 +62,7 @@ void YellowstoneServer::ServerThread() {
       case kYellowstoneGetRegistration: {
         dbgln("Yellowstone::GetRegistration");
         uint64_t reg_cap;
-        check(register_port_.Duplicate(&reg_cap));
+        check(register_port_.CreateClient(&reg_cap));
         YellowstoneGetRegistrationResp resp;
         check(ZReplyPortSend(reply_port_cap, sizeof(resp), &resp, 1, &reg_cap));
         break;

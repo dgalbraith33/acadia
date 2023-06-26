@@ -4,7 +4,7 @@
 #include <ztypes.h>
 
 #include "mammoth/debug.h"
-#include "mammoth/port.h"
+#include "mammoth/port_server.h"
 
 uint64_t gSelfProcCap = 0;
 uint64_t gSelfVmasCap = 0;
@@ -15,7 +15,7 @@ uint64_t gBootDenaliVmmoCap = 0;
 uint64_t gBootVictoriaFallsVmmoCap = 0;
 
 z_err_t ParseInitPort(uint64_t init_port_cap) {
-  Port port(init_port_cap);
+  PortServer port = PortServer::AdoptCap(init_port_cap);
   z_err_t ret;
   uint64_t init_sig, init_cap;
   while ((ret = port.PollForIntCap(&init_sig, &init_cap)) != glcr::EMPTY) {
