@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glacier/memory/move.h>
 #include <glacier/status/error.h>
 
 namespace glcr {
@@ -15,7 +16,7 @@ class ErrorOr {
 
   ErrorOr(ErrorCode code) : error_(code), ok_(false) {}
   ErrorOr(const T& obj) : obj_(obj), ok_(true) {}
-  ErrorOr(T&& obj) : obj_(obj), ok_(true) {}
+  ErrorOr(T&& obj) : obj_(glcr::Move(obj)), ok_(true) {}
 
   bool ok() { return ok_; }
   operator bool() { return ok_; }
@@ -41,6 +42,6 @@ class ErrorOr {
   if (!AOR_VAR(__LINE__).ok()) {      \
     return AOR_VAR(__LINE__).error(); \
   }                                   \
-  lhs = AOR_VAR(__LINE__).value();
+  lhs = glcr::Move(AOR_VAR(__LINE__).value());
 
 }  // namespace glcr
