@@ -14,7 +14,7 @@ target_include_directories(denali
 target_link_libraries(denali
   glacier
   mammoth
-  yellowstonestub
+  yellowstone_stub
   )
 
 set_target_properties(denali PROPERTIES

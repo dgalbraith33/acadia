@@ -19,15 +19,15 @@ set_target_properties(yellowstone PROPERTIES
   )
 
 
-add_library(yellowstonestub
+add_library(yellowstone_stub
   stub/yellowstone_stub.cpp
   )
 
-target_include_directories(yellowstonestub
+target_include_directories(yellowstone_stub
    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
    PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-set_target_properties(yellowstonestub PROPERTIES
+set_target_properties(yellowstone_stub PROPERTIES
   COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${BASE_COMPILE_FLAGS}"
   LINK_FLAGS "${CMAKE_EXE_LINK_FLAGS} ${BASE_LINK_FLAGS}"
   )
