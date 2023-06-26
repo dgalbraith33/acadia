@@ -13,7 +13,7 @@ target_include_directories(denali
 
 target_link_libraries(denali
   glacier
-  mammoth_lib
+  mammoth
   yellowstonestub
   )
 
@@ -31,7 +31,7 @@ target_include_directories(libdenali
    PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
  target_link_libraries(libdenali
-   mammoth_lib)
+   mammoth)
 
 set_target_properties(libdenali PROPERTIES
   COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${BASE_COMPILE_FLAGS}"

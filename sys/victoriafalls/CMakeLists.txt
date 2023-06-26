@@ -7,7 +7,7 @@ target_include_directories(victoriafalls
 
 target_link_libraries(victoriafalls
   glacier
-  mammoth_lib
+  mammoth
   )
 
 set_target_properties(victoriafalls PROPERTIES
