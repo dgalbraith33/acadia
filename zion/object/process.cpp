@@ -39,25 +39,19 @@ glcr::RefPtr<Thread> Process::CreateThread() {
 
 glcr::RefPtr<Thread> Process::GetThread(uint64_t tid) {
   MutexHolder lock(mutex_);
-  auto iter = threads_.begin();
-  while (iter != threads_.end()) {
-    if ((*iter)->tid() == tid) {
-      return *iter;
-    }
-    ++iter;
+  if (tid >= threads_.size()) {
+    panic("Bad thread access %u on process %u with %u threads.", tid, id_,
+          threads_.size());
   }
-  panic("Bad thread access.");
-  return nullptr;
+  return threads_[tid];
 }
 
 void Process::CheckState() {
   MutexHolder lock(mutex_);
-  auto iter = threads_.begin();
-  while (iter != threads_.end()) {
-    if ((*iter)->GetState() != Thread::FINISHED) {
+  for (uint64_t i = 0; i < threads_.size(); i++) {
+    if (threads_[i]->GetState() != Thread::FINISHED) {
       return;
     }
-    ++iter;
   }
   state_ = FINISHED;
 }

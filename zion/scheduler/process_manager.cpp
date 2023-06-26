@@ -14,23 +14,15 @@ void ProcessManager::InsertProcess(const glcr::RefPtr<Process>& proc) {
 }
 
 Process& ProcessManager::FromId(uint64_t pid) {
-  auto iter = proc_list_.begin();
-  while (iter != proc_list_.end()) {
-    if ((*iter)->id() == pid) {
-      return **iter;
-    }
-    ++iter;
+  if (pid >= proc_list_.size()) {
+    panic("Bad proc access %u, have %u processes", pid, proc_list_.size());
   }
-
-  panic("Searching for invalid process id");
-  return *((Process*)0);
+  return *proc_list_[pid];
 }
 
 void ProcessManager::DumpProcessStates() {
   dbgln("Process States: %u", proc_list_.size());
-  auto iter = proc_list_.begin();
-  while (iter != proc_list_.end()) {
-    dbgln("%u: %u", (*iter)->id(), (*iter)->GetState());
-    ++iter;
+  for (uint64_t i = 0; i < proc_list_.size(); i++) {
+    dbgln("%u: %u", proc_list_[i]->id(), proc_list_[i]->GetState());
   }
 }

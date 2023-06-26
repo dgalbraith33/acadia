@@ -68,3 +68,4 @@ void* operator new(uint64_t size) { return GetKernelHeap().Allocate(size); }
 void* operator new[](uint64_t size) { return GetKernelHeap().Allocate(size); }
 
 void operator delete(void*, uint64_t) {}
+void operator delete[](void*) {}

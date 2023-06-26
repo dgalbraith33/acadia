@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glacier/container/linked_list.h>
+#include <glacier/container/vector.h>
 #include <glacier/memory/ref_ptr.h>
 
 #include "object/process.h"
@@ -18,7 +18,7 @@ class ProcessManager {
 
  private:
   // TODO: This should be a hashmap.
-  glcr::LinkedList<glcr::RefPtr<Process>> proc_list_;
+  glcr::Vector<glcr::RefPtr<Process>> proc_list_;
 };
 
 extern ProcessManager* gProcMan;
