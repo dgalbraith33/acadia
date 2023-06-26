@@ -10,7 +10,7 @@ target_include_directories(c
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 target_link_libraries(c
-  zion_lib
+  zion_stub
   )
 
 set_target_properties(c PROPERTIES

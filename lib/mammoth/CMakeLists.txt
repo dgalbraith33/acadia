@@ -19,7 +19,7 @@ target_include_directories(mammoth
 target_link_libraries(mammoth
   glacier
   c
-  zion_lib)
+  zion_stub)
 
 set_target_properties(mammoth PROPERTIES
   COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${BASE_COMPILE_FLAGS}"

@@ -82,14 +82,14 @@ set_target_properties(zion
 
 
 
-add_library(zion_lib STATIC
+add_library(zion_stub STATIC
   usr/crt0.s
   usr/zcall.cpp)
 
-target_include_directories(zion_lib
+target_include_directories(zion_stub
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-set_target_properties(zion_lib
+set_target_properties(zion_stub
   PROPERTIES
   COMPILE_FLAGS "${_Z_COMPILE_FLAGS}")
