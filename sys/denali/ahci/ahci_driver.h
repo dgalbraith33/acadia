@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glacier/memory/unique_ptr.h>
 #include <glacier/status/error_or.h>
 #include <mammoth/thread.h>
 #include <ztypes.h>
@@ -9,8 +10,8 @@
 
 class AhciDriver {
  public:
-  AhciDriver(uint64_t ahci_phys) : ahci_phys_(ahci_phys) {}
-  glcr::ErrorCode Init();
+  static glcr::ErrorOr<glcr::UniquePtr<AhciDriver>> Init(uint64_t ahci_phys);
+  glcr::ErrorCode RegisterIrq();
 
   void InterruptLoop();
 
@@ -20,8 +21,6 @@ class AhciDriver {
   void DumpPorts();
 
  private:
-  uint64_t ahci_phys_;
-  MappedMemoryRegion pci_region_;
   PciDeviceHeader* pci_device_header_ = nullptr;
   MappedMemoryRegion ahci_region_;
   AhciHba* ahci_hba_ = nullptr;
@@ -35,9 +34,10 @@ class AhciDriver {
   uint64_t num_ports_;
   uint64_t num_commands_;
 
-  glcr::ErrorCode LoadPciDeviceHeader();
   glcr::ErrorCode LoadCapabilities();
-  glcr::ErrorCode RegisterIrq();
   glcr::ErrorCode LoadHbaRegisters();
   glcr::ErrorCode LoadDevices();
+
+  AhciDriver(PciDeviceHeader* device_header)
+      : pci_device_header_(device_header) {}
 };

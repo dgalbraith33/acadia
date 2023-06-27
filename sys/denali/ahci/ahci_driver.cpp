@@ -20,18 +20,25 @@ void interrupt_thread(void* void_driver) {
   crash("Driver returned from interrupt loop", glcr::INTERNAL);
 }
 
+PciDeviceHeader* LoadPciDeviceHeader(uint64_t ahci_phys) {
+  MappedMemoryRegion pci_region =
+      MappedMemoryRegion::DirectPhysical(ahci_phys, kPciSize);
+  return reinterpret_cast<PciDeviceHeader*>(pci_region.vaddr());
+}
+
 }  // namespace
 
-glcr::ErrorCode AhciDriver::Init() {
-  RET_ERR(LoadPciDeviceHeader());
-  // RET_ERR(LoadCapabilities());
-  RET_ERR(RegisterIrq());
-  RET_ERR(LoadHbaRegisters());
-  ahci_hba_->global_host_control |= kGhc_InteruptEnable;
-  RET_ERR(LoadDevices());
-  // DumpCapabilities();
-  // DumpPorts();
-  return glcr::OK;
+glcr::ErrorOr<glcr::UniquePtr<AhciDriver>> AhciDriver::Init(
+    uint64_t ahci_phys) {
+  PciDeviceHeader* header = LoadPciDeviceHeader(ahci_phys);
+  glcr::UniquePtr<AhciDriver> driver(new AhciDriver(header));
+  // RET_ERR(driver.LoadCapabilities());
+  RET_ERR(driver->LoadHbaRegisters());
+  RET_ERR(driver->LoadDevices());
+  RET_ERR(driver->RegisterIrq());
+  // driver.DumpCapabilities();
+  // driver.DumpPorts();
+  return driver;
 }
 
 glcr::ErrorOr<AhciDevice*> AhciDriver::GetDevice(uint64_t id) {
@@ -153,12 +160,6 @@ void AhciDriver::InterruptLoop() {
   }
 }
 
-glcr::ErrorCode AhciDriver::LoadPciDeviceHeader() {
-  pci_region_ = MappedMemoryRegion::DirectPhysical(ahci_phys_, kPciSize);
-  pci_device_header_ = reinterpret_cast<PciDeviceHeader*>(pci_region_.vaddr());
-  return glcr::OK;
-}
-
 glcr::ErrorCode AhciDriver::LoadCapabilities() {
   if (!(pci_device_header_->status_reg & 0x10)) {
     dbgln("No caps!");
@@ -195,6 +196,7 @@ glcr::ErrorCode AhciDriver::RegisterIrq() {
   uint64_t irq_num = Z_IRQ_PCI_BASE + pci_device_header_->interrupt_pin - 1;
   RET_ERR(ZIrqRegister(irq_num, &irq_port_cap_));
   irq_thread_ = Thread(interrupt_thread, this);
+  ahci_hba_->global_host_control |= kGhc_InteruptEnable;
   return glcr::OK;
 }
 

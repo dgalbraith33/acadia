@@ -24,8 +24,7 @@ uint64_t main(uint64_t init_port_cap) {
   }
 
   uint64_t ahci_addr = resp_or.value().ahci_phys_offset;
-  AhciDriver driver(ahci_addr);
-  RET_ERR(driver.Init());
+  ASSIGN_OR_RETURN(auto driver, AhciDriver::Init(ahci_addr));
 
   YellowstoneGetReq req{
       .type = kYellowstoneGetRegistration,
@@ -46,7 +45,7 @@ uint64_t main(uint64_t init_port_cap) {
                    endpoint->CreateClient());
   notify.WriteMessage("denali", client->GetCap());
 
-  DenaliServer server(glcr::Move(endpoint), driver);
+  DenaliServer server(glcr::Move(endpoint), *driver);
   RET_ERR(server.RunServer());
   // FIXME: Add thread join.
   return 0;
