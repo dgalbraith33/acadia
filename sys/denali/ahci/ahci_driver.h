@@ -9,6 +9,7 @@
 
 class AhciDriver {
  public:
+  AhciDriver(uint64_t ahci_phys) : ahci_phys_(ahci_phys) {}
   glcr::ErrorCode Init();
 
   void InterruptLoop();
@@ -19,6 +20,7 @@ class AhciDriver {
   void DumpPorts();
 
  private:
+  uint64_t ahci_phys_;
   MappedMemoryRegion pci_region_;
   PciDeviceHeader* pci_device_header_ = nullptr;
   MappedMemoryRegion ahci_region_;

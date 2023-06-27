@@ -8,7 +8,6 @@
 
 namespace {
 
-const uint64_t kSataPciPhys = 0xB00FA000;
 const uint64_t kPciSize = 0x1000;
 
 const uint64_t kGhc_InteruptEnable = 0x2;
@@ -155,7 +154,7 @@ void AhciDriver::InterruptLoop() {
 }
 
 glcr::ErrorCode AhciDriver::LoadPciDeviceHeader() {
-  pci_region_ = MappedMemoryRegion::DirectPhysical(kSataPciPhys, kPciSize);
+  pci_region_ = MappedMemoryRegion::DirectPhysical(ahci_phys_, kPciSize);
   pci_device_header_ = reinterpret_cast<PciDeviceHeader*>(pci_region_.vaddr());
   return glcr::OK;
 }

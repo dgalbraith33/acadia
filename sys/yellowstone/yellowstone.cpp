@@ -15,7 +15,6 @@ uint64_t main(uint64_t port_cap) {
   ASSIGN_OR_RETURN(auto server, YellowstoneServer::Create());
   Thread server_thread = server->RunServer();
   Thread registration_thread = server->RunRegistration();
-  DumpPciEDevices();
 
   uint64_t vaddr;
   check(ZAddressSpaceMap(gSelfVmasCap, 0, gBootDenaliVmmoCap, &vaddr));

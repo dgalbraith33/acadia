@@ -6,6 +6,8 @@
 #include <mammoth/port_server.h>
 #include <mammoth/thread.h>
 
+#include "hw/pcie.h"
+
 class YellowstoneServer {
  public:
   static glcr::ErrorOr<glcr::UniquePtr<YellowstoneServer>> Create();
@@ -29,6 +31,8 @@ class YellowstoneServer {
   // TODO: Store these in a data structure.
   z_cap_t denali_cap_ = 0;
   z_cap_t victoria_falls_cap_ = 0;
+
+  PciReader pci_reader_;
 
   YellowstoneServer(glcr::UniquePtr<EndpointServer> server, PortServer port);
 };

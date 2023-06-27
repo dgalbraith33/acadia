@@ -11,7 +11,8 @@ glcr::ErrorOr<MappedMemoryRegion> DenaliClient::ReadSectors(
       .lba = lba,
       .size = num_sectors,
   };
-  auto pair_or = endpoint_->CallEndpoint<DenaliRead, DenaliReadResponse>(read);
+  auto pair_or =
+      endpoint_->CallEndpointGetCap<DenaliRead, DenaliReadResponse>(read);
   if (!pair_or) {
     return pair_or.error();
   }

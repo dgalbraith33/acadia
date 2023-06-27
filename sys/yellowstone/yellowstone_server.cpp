@@ -57,9 +57,15 @@ void YellowstoneServer::ServerThread() {
     YellowstoneGetReq* req =
         reinterpret_cast<YellowstoneGetReq*>(server_buffer_);
     switch (req->type) {
-      case kYellowstoneGetAhci:
+      case kYellowstoneGetAhci: {
         dbgln("Yellowstone::GetAHCI");
+        YellowstoneGetAhciResp resp{
+            .type = kYellowstoneGetAhci,
+            .ahci_phys_offset = pci_reader_.GetAhciPhysical(),
+        };
+        check(ZReplyPortSend(reply_port_cap, sizeof(resp), &resp, 0, nullptr));
         break;
+      }
       case kYellowstoneGetRegistration: {
         dbgln("Yellowstone::GetRegistration");
         auto client_or = register_port_.CreateClient();

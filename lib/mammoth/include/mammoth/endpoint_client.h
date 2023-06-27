@@ -15,7 +15,10 @@ class EndpointClient {
   static glcr::UniquePtr<EndpointClient> AdoptEndpoint(z_cap_t cap);
 
   template <typename Req, typename Resp>
-  glcr::ErrorOr<glcr::Pair<Resp, z_cap_t>> CallEndpoint(const Req& req);
+  glcr::ErrorOr<glcr::Pair<Resp, z_cap_t>> CallEndpointGetCap(const Req& req);
+
+  template <typename Req, typename Resp>
+  glcr::ErrorOr<Resp> CallEndpoint(const Req& req);
 
   z_cap_t GetCap() { return cap_; }
 
@@ -25,7 +28,7 @@ class EndpointClient {
 };
 
 template <typename Req, typename Resp>
-glcr::ErrorOr<glcr::Pair<Resp, z_cap_t>> EndpointClient::CallEndpoint(
+glcr::ErrorOr<glcr::Pair<Resp, z_cap_t>> EndpointClient::CallEndpointGetCap(
     const Req& req) {
   uint64_t reply_port_cap;
   RET_ERR(ZEndpointSend(cap_, sizeof(Req), &req, &reply_port_cap));
@@ -41,4 +44,22 @@ glcr::ErrorOr<glcr::Pair<Resp, z_cap_t>> EndpointClient::CallEndpoint(
   }
 
   return glcr::Pair{resp, cap};
+}
+
+template <typename Req, typename Resp>
+glcr::ErrorOr<Resp> EndpointClient::CallEndpoint(const Req& req) {
+  uint64_t reply_port_cap;
+  RET_ERR(ZEndpointSend(cap_, sizeof(Req), &req, &reply_port_cap));
+
+  Resp resp;
+  uint64_t num_bytes = sizeof(Resp);
+  uint64_t num_caps = 0;
+  RET_ERR(
+      ZReplyPortRecv(reply_port_cap, &num_bytes, &resp, &num_caps, nullptr));
+
+  if (num_bytes != sizeof(resp)) {
+    return glcr::FAILED_PRECONDITION;
+  }
+
+  return resp;
 }

@@ -6,28 +6,37 @@
 
 namespace {
 
-struct PciDeviceHeader {
-  uint16_t vendor_id;
-  uint16_t device_id;
-  uint16_t command_reg;
-  uint16_t status_reg;
-  uint8_t revision;
-  uint8_t prog_interface;
-  uint8_t subclass;
-  uint8_t class_code;
-  uint8_t cache_line_size;
-  uint8_t latency_timer;
-  uint8_t header_type;
-  uint8_t bist;
-} __attribute__((packed));
-
 PciDeviceHeader* PciHeader(uint64_t base, uint64_t bus, uint64_t dev,
                            uint64_t fun) {
   return reinterpret_cast<PciDeviceHeader*>(base + (bus << 20) + (dev << 15) +
                                             (fun << 12));
 }
 
-void FunctionDump(uint64_t base, uint64_t bus, uint64_t dev, uint64_t fun) {
+}  // namespace
+
+PciReader::PciReader() {
+  dbgln("Creating PCI obj");
+  uint64_t vmmo_cap, vmmo_size;
+  check(ZTempPcieConfigObjectCreate(&vmmo_cap, &vmmo_size));
+
+  dbgln("Creating addr space");
+  uint64_t vaddr;
+  check(ZAddressSpaceMap(gSelfVmasCap, 0, vmmo_cap, &vaddr));
+  dbgln("Addr %lx", vaddr);
+
+  dbgln("Dumping PCI");
+  PciDump(vaddr);
+  dbgln("Done");
+
+  header_ = PciHeader(vaddr, 0, 0, 0);
+}
+
+uint64_t PciReader::GetAhciPhysical() {
+  return phys_mem_offset_ + achi_device_offset_;
+}
+
+void PciReader::FunctionDump(uint64_t base, uint64_t bus, uint64_t dev,
+                             uint64_t fun) {
   PciDeviceHeader* hdr = PciHeader(base, bus, dev, fun);
   if (hdr->vendor_id == 0xFFFF) {
     return;
@@ -43,10 +52,11 @@ void FunctionDump(uint64_t base, uint64_t bus, uint64_t dev, uint64_t fun) {
   }
   if (hdr->class_code == 0x1) {
     dbgln("SATA Device at: %lx", reinterpret_cast<uint64_t>(hdr) - base);
+    achi_device_offset_ = reinterpret_cast<uint64_t>(hdr) - base;
   }
 }
 
-void DeviceDump(uint64_t base, uint64_t bus, uint64_t dev) {
+void PciReader::DeviceDump(uint64_t base, uint64_t bus, uint64_t dev) {
   PciDeviceHeader* hdr = PciHeader(base, bus, dev, 0);
   if (hdr->vendor_id == 0xFFFF) {
     return;
@@ -62,13 +72,13 @@ void DeviceDump(uint64_t base, uint64_t bus, uint64_t dev) {
   }
 }
 
-void BusDump(uint64_t base, uint64_t bus) {
+void PciReader::BusDump(uint64_t base, uint64_t bus) {
   for (uint64_t dev = 0; dev < 0x20; dev++) {
     DeviceDump(base, bus, dev);
   }
 }
 
-void PciDump(uint64_t base) {
+void PciReader::PciDump(uint64_t base) {
   PciDeviceHeader* hdr = PciHeader(base, 0, 0, 0);
   if ((hdr->header_type & 0x80) == 0) {
     // Single bus system.
@@ -81,21 +91,4 @@ void PciDump(uint64_t base) {
       }
     }
   }
-}
-
-}  // namespace
-
-void DumpPciEDevices() {
-  dbgln("Creating PCI obj");
-  uint64_t vmmo_cap, vmmo_size;
-  check(ZTempPcieConfigObjectCreate(&vmmo_cap, &vmmo_size));
-
-  dbgln("Creating addr space");
-  uint64_t vaddr;
-  check(ZAddressSpaceMap(gSelfVmasCap, 0, vmmo_cap, &vaddr));
-  dbgln("Addr %lx", vaddr);
-
-  dbgln("Dumping PCI");
-  PciDump(vaddr);
-  dbgln("Done");
 }
