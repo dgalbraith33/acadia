@@ -7,6 +7,7 @@
 
 class PortClient {
  public:
+  PortClient() {}
   static PortClient AdoptPort(z_cap_t port_cap);
 
   template <typename T>
@@ -16,8 +17,10 @@ class PortClient {
 
   z_cap_t cap() { return port_cap_; }
 
+  bool empty() { return port_cap_ == 0; }
+
  private:
-  z_cap_t port_cap_;
+  z_cap_t port_cap_ = 0;
 
   PortClient(z_cap_t port_cap);
 };

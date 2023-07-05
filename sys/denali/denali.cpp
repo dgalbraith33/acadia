@@ -19,24 +19,11 @@ uint64_t main(uint64_t init_port_cap) {
   ASSIGN_OR_RETURN(MappedMemoryRegion ahci_region, stub.GetAhciConfig());
   ASSIGN_OR_RETURN(auto driver, AhciDriver::Init(ahci_region));
 
-  YellowstoneGetReq req{
-      .type = kYellowstoneGetRegistration,
-  };
-  auto resp_cap_or =
-      yellowstone->CallEndpointGetCap<YellowstoneGetReq,
-                                      YellowstoneGetRegistrationResp>(req);
-  if (!resp_cap_or.ok()) {
-    dbgln("Bad call");
-    check(resp_cap_or.error());
-  }
-  auto resp_cap = resp_cap_or.value();
-  PortClient notify = PortClient::AdoptPort(resp_cap.second());
-
   ASSIGN_OR_RETURN(glcr::UniquePtr<EndpointServer> endpoint,
                    EndpointServer::Create());
   ASSIGN_OR_RETURN(glcr::UniquePtr<EndpointClient> client,
                    endpoint->CreateClient());
-  notify.WriteMessage("denali", client->GetCap());
+  check(stub.Register("denali", *client));
 
   DenaliServer server(glcr::Move(endpoint), *driver);
   RET_ERR(server.RunServer());

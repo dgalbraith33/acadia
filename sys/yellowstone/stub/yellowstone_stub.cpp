@@ -21,3 +21,19 @@ glcr::ErrorOr<MappedMemoryRegion> YellowstoneStub::GetAhciConfig() {
            ->CallEndpoint<YellowstoneGetReq, YellowstoneGetAhciResp>(req)));
   return MappedMemoryRegion::DirectPhysical(resp.ahci_phys_offset, kPciSize);
 }
+
+glcr::ErrorCode YellowstoneStub::Register(glcr::String name,
+                                          const EndpointClient& client) {
+  if (register_port_.empty()) {
+    YellowstoneGetReq req{
+        .type = kYellowstoneGetRegistration,
+    };
+    ASSIGN_OR_RETURN(
+        auto resp_cap,
+        (yellowstone_stub_->CallEndpointGetCap<
+            YellowstoneGetReq, YellowstoneGetRegistrationResp>(req)));
+    register_port_ = PortClient::AdoptPort(resp_cap.second());
+  }
+
+  return register_port_.WriteString(name, client.GetCap());
+}
