@@ -55,6 +55,7 @@ glcr::ErrorCode GptReader::ParsePartitionTables() {
                    denali_->ReadSectors(0, 0, 2));
   uint16_t* mbr_sig = reinterpret_cast<uint16_t*>(lba_1_and_2.vaddr() + 0x1FE);
   if (*mbr_sig != 0xAA55) {
+    dbgln("Invalid MBR Sig: %x", *mbr_sig);
     return glcr::FAILED_PRECONDITION;
   }
   MbrPartition* first_partition =
