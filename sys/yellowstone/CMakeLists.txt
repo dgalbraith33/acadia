@@ -4,7 +4,8 @@ add_executable(yellowstone
   yellowstone.cpp
   yellowstone_server.cpp
   )
- target_include_directories(yellowstone
+
+target_include_directories(yellowstone
    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(yellowstone
@@ -26,6 +27,10 @@ add_library(yellowstone_stub
 target_include_directories(yellowstone_stub
    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
    PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
+target_link_libraries(yellowstone_stub
+  mammoth
+  )
 
 set_target_properties(yellowstone_stub PROPERTIES
   COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${BASE_COMPILE_FLAGS}"

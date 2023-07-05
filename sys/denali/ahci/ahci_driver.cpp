@@ -8,8 +8,6 @@
 
 namespace {
 
-const uint64_t kPciSize = 0x1000;
-
 const uint64_t kGhc_InteruptEnable = 0x2;
 
 void interrupt_thread(void* void_driver) {
@@ -20,18 +18,11 @@ void interrupt_thread(void* void_driver) {
   crash("Driver returned from interrupt loop", glcr::INTERNAL);
 }
 
-PciDeviceHeader* LoadPciDeviceHeader(uint64_t ahci_phys) {
-  MappedMemoryRegion pci_region =
-      MappedMemoryRegion::DirectPhysical(ahci_phys, kPciSize);
-  return reinterpret_cast<PciDeviceHeader*>(pci_region.vaddr());
-}
-
 }  // namespace
 
 glcr::ErrorOr<glcr::UniquePtr<AhciDriver>> AhciDriver::Init(
-    uint64_t ahci_phys) {
-  PciDeviceHeader* header = LoadPciDeviceHeader(ahci_phys);
-  glcr::UniquePtr<AhciDriver> driver(new AhciDriver(header));
+    MappedMemoryRegion pci_region) {
+  glcr::UniquePtr<AhciDriver> driver(new AhciDriver(pci_region));
   // RET_ERR(driver->LoadCapabilities());
   RET_ERR(driver->LoadHbaRegisters());
   RET_ERR(driver->LoadDevices());
