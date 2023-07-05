@@ -9,35 +9,38 @@ AhciDevice::AhciDevice(AhciPort* port) : port_struct_(port) {
   if ((port_struct_->sata_status & 0x103) != 0x103) {
     return;
   }
-  uint64_t cl_page = port_struct_->command_list_base & (~0xFFF);
-  uint64_t fis_page = port_struct_->fis_base & (~0xFFF);
 
-  if (cl_page != fis_page) {
-    crash("Non adjacent cl & fis", glcr::UNIMPLEMENTED);
-  }
+  // 0x0-0x400 -> Command List
+  // 0x400-0x500 -> Received FIS
+  // 0x500-0x2500 -> Command Tables (0x100 each) (Max PRDT Length is 8 for now)
+  command_structures_ = MappedMemoryRegion::ContiguousPhysical(0x2500);
+  uint64_t paddr = command_structures_.paddr();
 
-  command_structures_ = MappedMemoryRegion::DirectPhysical(cl_page, 0x1000);
+  command_list_ = reinterpret_cast<CommandList*>(command_structures_.vaddr());
+  port_struct_->command_list_base = paddr;
 
-  uint64_t cl_off = port_struct_->command_list_base & 0xFFF;
-  command_list_ =
-      reinterpret_cast<CommandList*>(command_structures_.vaddr() + cl_off);
-
-  uint64_t fis_off = port_struct_->fis_base & 0xFFF;
   received_fis_ =
-      reinterpret_cast<ReceivedFis*>(command_structures_.vaddr() + fis_off);
+      reinterpret_cast<ReceivedFis*>(command_structures_.vaddr() + 0x400);
+  port_struct_->fis_base = paddr + 0x400;
 
-  // FIXME: Hacky
-  uint64_t ct_off =
-      command_list_->command_headers[0].command_table_base_addr & 0xFFF;
-  command_table_ =
-      reinterpret_cast<CommandTable*>(command_structures_.vaddr() + ct_off);
+  command_tables_ =
+      reinterpret_cast<CommandTable*>(command_structures_.vaddr() + 0x500);
 
+  for (uint64_t i = 0; i < 32; i++) {
+    command_list_->command_headers[i].command_table_base_addr =
+        (paddr + 0x500) + (0x100 * i);
+  }
   port_struct_->interrupt_enable = 0xFFFFFFFF;
+  // Reset the CMD and FRE bits since we move these structures.
+  // FIXME: I think we need to poll these bits to make sure they become
+  // 0 before setting them back to one.
+  port_struct_->command &= ~(0x00000011);
+  port_struct_->command |= 0x00000011;
 }
 
 glcr::ErrorCode AhciDevice::IssueCommand(Command* command) {
-  command->PopulateFis(command_table_->command_fis);
-  command->PopulatePrdt(command_table_->prdt);
+  command->PopulateFis(command_tables_->command_fis);
+  command->PopulatePrdt(command_tables_->prdt);
 
   command_list_->command_headers[0].command =
       (sizeof(HostToDeviceRegisterFis) / 2) & 0x1F;
@@ -62,7 +65,7 @@ void AhciDevice::DumpInfo() {
   dbgln("Int enable: %x", port_struct_->interrupt_enable);
 
   // Just dump one command info for now.
-  for (uint64_t i = 0; i < 1; i++) {
+  for (uint64_t i = 0; i < 32; i++) {
     dbgln("Command Header: %u", i);
     dbgln("Command %x", command_list_->command_headers[i].command);
     dbgln("PRD Len: %x", command_list_->command_headers[i].prd_table_length);
@@ -72,7 +75,7 @@ void AhciDevice::DumpInfo() {
 }
 
 void AhciDevice::HandleIrq() {
-  uint64_t int_status = port_struct_->interrupt_status;
+  uint32_t int_status = port_struct_->interrupt_status;
   // FIXME: Probably only clear the interrupts we know how to handle.
   port_struct_->interrupt_status = int_status;
 

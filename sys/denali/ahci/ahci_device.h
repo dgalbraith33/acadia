@@ -30,7 +30,7 @@ class AhciDevice {
 
   CommandList* command_list_ = nullptr;
   ReceivedFis* received_fis_ = nullptr;
-  CommandTable* command_table_ = nullptr;
+  CommandTable* command_tables_ = nullptr;
 
   Command* commands_[32];
   volatile uint32_t commands_issued_ = 0;

@@ -96,7 +96,7 @@ struct CommandTable {
   uint8_t command_fis[64];
   uint8_t atapi_command[16];
   uint8_t reserved[48];
-  PhysicalRegionDescriptor prdt[65535];
+  PhysicalRegionDescriptor prdt[8];
 } __attribute__((packed));
 
 typedef enum {

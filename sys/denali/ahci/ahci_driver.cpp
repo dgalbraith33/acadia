@@ -32,12 +32,12 @@ glcr::ErrorOr<glcr::UniquePtr<AhciDriver>> AhciDriver::Init(
     uint64_t ahci_phys) {
   PciDeviceHeader* header = LoadPciDeviceHeader(ahci_phys);
   glcr::UniquePtr<AhciDriver> driver(new AhciDriver(header));
-  // RET_ERR(driver.LoadCapabilities());
+  // RET_ERR(driver->LoadCapabilities());
   RET_ERR(driver->LoadHbaRegisters());
   RET_ERR(driver->LoadDevices());
   RET_ERR(driver->RegisterIrq());
-  // driver.DumpCapabilities();
-  // driver.DumpPorts();
+  // driver->DumpCapabilities();
+  // driver->DumpPorts();
   return driver;
 }
 
