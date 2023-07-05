@@ -19,7 +19,7 @@ class ErrorOr {
   ErrorOr(T&& obj) : obj_(glcr::Move(obj)), ok_(true) {}
 
   bool ok() { return ok_; }
-  operator bool() { return ok_; }
+  explicit operator bool() { return ok_; }
 
   T& value() { return obj_; }
 
