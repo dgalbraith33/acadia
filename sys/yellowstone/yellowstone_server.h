@@ -30,6 +30,8 @@ class YellowstoneServer {
 
   // TODO: Store these in a data structure.
   z_cap_t denali_cap_ = 0;
+  uint64_t device_id_ = 0;
+  uint64_t lba_offset_ = 0;
   z_cap_t victoria_falls_cap_ = 0;
 
   PciReader pci_reader_;

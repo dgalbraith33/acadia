@@ -1,5 +1,7 @@
 #include "include/yellowstone_stub.h"
 
+#include <denali/denali_client.h>
+
 #include "include/yellowstone.h"
 
 namespace {
@@ -20,6 +22,19 @@ glcr::ErrorOr<MappedMemoryRegion> YellowstoneStub::GetAhciConfig() {
       (yellowstone_stub_
            ->CallEndpoint<YellowstoneGetReq, YellowstoneGetAhciResp>(req)));
   return MappedMemoryRegion::DirectPhysical(resp.ahci_phys_offset, kPciSize);
+}
+
+glcr::ErrorOr<ScopedDenaliClient> YellowstoneStub::GetDenali() {
+  YellowstoneGetReq req{
+      .type = kYellowstoneGetDenali,
+  };
+  ASSIGN_OR_RETURN(
+      auto resp_and_cap,
+      (yellowstone_stub_->CallEndpointGetCap<YellowstoneGetReq,
+                                             YellowstoneGetDenaliResp>(req)));
+  return ScopedDenaliClient(
+      EndpointClient::AdoptEndpoint(resp_and_cap.second()), 0,
+      resp_and_cap.first().lba_offset);
 }
 
 glcr::ErrorCode YellowstoneStub::Register(glcr::String name,

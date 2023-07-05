@@ -29,6 +29,7 @@ target_include_directories(yellowstone_stub
    PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 target_link_libraries(yellowstone_stub
+  denali_stub
   mammoth
   )
 

@@ -9,6 +9,9 @@ const uint64_t kSectorSize = 512;
 
 const uint64_t kGptPartitionSignature = 0x54524150'20494645;
 
+const uint64_t kLfsDataLow = 0x477284830fc63daf;
+const uint64_t kLfsDataHigh = 0xe47d47d8693d798e;
+
 struct MbrPartition {
   uint8_t boot_indicator;
   uint8_t starting_chs[3];
@@ -99,6 +102,13 @@ glcr::ErrorCode GptReader::ParsePartitionTables() {
       dbgln("P Guid: %lx-%lx", entry->part_guid_high, entry->part_guid_low);
       dbgln("LBA: %lx, %lx", entry->lba_start, entry->lba_end);
       dbgln("Attrs: %lx", entry->attributes);
+      // For now we hardcode these values to the type that is created in our
+      // setup script.
+      // FIXME: Set up our own root partition type guid at some point.
+      if (entry->type_guid_low == kLfsDataLow &&
+          entry->type_guid_high == kLfsDataHigh) {
+        primary_partition_lba_ = entry->lba_start;
+      }
     }
   }
 
