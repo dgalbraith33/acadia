@@ -98,6 +98,7 @@ void YellowstoneServer::ServerThread() {
         };
         check(ZReplyPortSend(reply_port_cap, sizeof(resp), &resp, 1,
                              &new_denali));
+        break;
       }
       default:
         dbgln("Unknown request type: %x", req->type);

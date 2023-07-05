@@ -8,6 +8,7 @@ target_include_directories(victoriafalls
 target_link_libraries(victoriafalls
   glacier
   mammoth
+  yellowstone_stub
   )
 
 set_target_properties(victoriafalls PROPERTIES
