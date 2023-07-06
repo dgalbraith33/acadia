@@ -5,6 +5,7 @@
 
 #include "fs/ext2/ext2.h"
 #include "fs/ext2/ext2_block_reader.h"
+#include "fs/ext2/inode_table.h"
 
 class Ext2Driver {
  public:
@@ -14,6 +15,7 @@ class Ext2Driver {
 
  private:
   Ext2BlockReader ext2_reader_;
+  glcr::UniquePtr<InodeTable> inode_table_;
 
   Ext2Driver(Ext2BlockReader&& reader) : ext2_reader_(glcr::Move(reader)) {}
 };

@@ -4,6 +4,7 @@
 glcr::ErrorOr<Ext2Driver> Ext2Driver::Init(ScopedDenaliClient&& denali) {
   ASSIGN_OR_RETURN(Ext2BlockReader reader,
                    Ext2BlockReader::Init(glcr::Move(denali)));
+  Superblock* superblock = reader.GetSuperblock();
   return Ext2Driver(glcr::Move(reader));
 }
 
@@ -19,6 +20,7 @@ glcr::ErrorCode Ext2Driver::ProbePartition() {
         superblock->blocks_per_group);
   dbgln("Inodes: 0x%x (0x%x per group)", superblock->inodes_count,
         superblock->inodes_per_group);
+  dbgln("Inode size: 0x%x", superblock->inode_size);
 
   dbgln("Mounts: 0x%x out of 0x%x", superblock->mnt_count,
         superblock->max_mnt_count);
@@ -45,6 +47,17 @@ glcr::ErrorCode Ext2Driver::ProbePartition() {
     dbgln("Free blocks: %x", bgds[i].free_blocks_count);
     dbgln("Free inodes: %x", bgds[i].free_inodes_count);
   }
+
+  // FIXME: Move this to initialization.
+  inode_table_ =
+      glcr::UniquePtr<InodeTable>(new InodeTable(ext2_reader_, bgds));
+
+  ASSIGN_OR_RETURN(Inode * root, inode_table_->GetInode(2));
+
+  dbgln("Inode %lx", root);
+  dbgln("Mode: %x", root->mode);
+  dbgln("Blocks: %x", root->blocks);
+  dbgln("Size: %x", root->size);
 
   return glcr::OK;
 }

@@ -1,6 +1,7 @@
 add_executable(victoriafalls
   fs/ext2/ext2_block_reader.cpp
   fs/ext2/ext2_driver.cpp
+  fs/ext2/inode_table.cpp
   victoriafalls.cpp)
 
 target_include_directories(victoriafalls

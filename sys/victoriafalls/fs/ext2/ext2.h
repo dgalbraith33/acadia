@@ -28,6 +28,8 @@ struct Superblock {
   uint32_t rev_level;
   uint16_t def_resuid;
   uint16_t def_resgid;
+  uint32_t first_ino;
+  uint16_t inode_size;
 } __attribute__((__packed__));
 
 struct BlockGroupDescriptor {
