@@ -14,9 +14,6 @@ class InodeTable {
  private:
   Ext2BlockReader& ext2_reader_;
   BlockGroupDescriptor* bgdt_;
-  uint64_t num_block_groups_;
-  uint64_t inodes_per_group_;
-  uint64_t inode_size_;
 
   glcr::Vector<MappedMemoryRegion> inode_tables_;
 

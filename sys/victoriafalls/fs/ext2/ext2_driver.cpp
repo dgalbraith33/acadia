@@ -28,17 +28,13 @@ glcr::ErrorCode Ext2Driver::ProbePartition() {
 
   dbgln("Created by: %x", superblock->creator_os);
 
-  uint64_t num_block_groups =
-      superblock->blocks_count / superblock->blocks_per_group;
-  dbgln("\nReading %u blocks groups", num_block_groups);
-  uint64_t bgdt_bytes = sizeof(BlockGroupDescriptor) * num_block_groups;
-  uint64_t bgdt_block = (superblock->log_block_size == 0) ? 2 : 1;
   ASSIGN_OR_RETURN(MappedMemoryRegion bgdt,
-                   ext2_reader_.ReadBlocks(bgdt_block, bgdt_bytes))
-
+                   ext2_reader_.ReadBlocks(ext2_reader_.BgdtBlockNum(),
+                                           ext2_reader_.BgdtBlockSize()));
   BlockGroupDescriptor* bgds =
       reinterpret_cast<BlockGroupDescriptor*>(bgdt.vaddr());
 
+  uint64_t num_block_groups = ext2_reader_.NumberOfBlockGroups();
   for (uint64_t i = 0; i < num_block_groups; i++) {
     dbgln("BGD %x", i);
     dbgln("Block Bitmap: %x", bgds[i].block_bitmap);

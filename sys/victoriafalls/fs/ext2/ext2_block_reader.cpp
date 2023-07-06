@@ -16,6 +16,36 @@ uint64_t Ext2BlockReader::SectorsPerBlock() {
   return 1 << (GetSuperblock()->log_block_size + 1);
 }
 
+uint64_t Ext2BlockReader::BlockSize() {
+  return 1024 << (GetSuperblock()->log_block_size);
+}
+
+uint64_t Ext2BlockReader::NumberOfBlockGroups() {
+  return ((GetSuperblock()->blocks_count - 1) /
+          GetSuperblock()->blocks_per_group) +
+         1;
+}
+
+uint64_t Ext2BlockReader::BgdtBlockNum() {
+  return (BlockSize() == 1024) ? 2 : 1;
+}
+
+uint64_t Ext2BlockReader::BgdtBlockSize() {
+  return ((NumberOfBlockGroups() * sizeof(BlockGroupDescriptor) - 1) /
+          BlockSize()) +
+         1;
+}
+
+uint64_t Ext2BlockReader::InodeSize() {
+  constexpr uint64_t kDefaultInodeSize = 0x80;
+  return GetSuperblock()->rev_level >= 1 ? GetSuperblock()->inode_size
+                                         : kDefaultInodeSize;
+}
+
+uint64_t Ext2BlockReader::InodeTableBlockSize() {
+  return (InodeSize() * GetSuperblock()->inodes_per_group) / BlockSize();
+}
+
 glcr::ErrorOr<MappedMemoryRegion> Ext2BlockReader::ReadBlock(
     uint64_t block_number) {
   return denali_.ReadSectors(block_number * SectorsPerBlock(),
