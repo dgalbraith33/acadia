@@ -1,4 +1,5 @@
 add_executable(victoriafalls
+  fs/ext2/ext2_block_reader.cpp
   fs/ext2/ext2_driver.cpp
   victoriafalls.cpp)
 

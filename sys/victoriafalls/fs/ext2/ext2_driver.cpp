@@ -1,37 +1,38 @@
 #include "fs/ext2/ext2_driver.h"
 
 #include <mammoth/debug.h>
+glcr::ErrorOr<Ext2Driver> Ext2Driver::Init(ScopedDenaliClient&& denali) {
+  ASSIGN_OR_RETURN(Ext2BlockReader reader,
+                   Ext2BlockReader::Init(glcr::Move(denali)));
+  return Ext2Driver(glcr::Move(reader));
+}
 
 glcr::ErrorCode Ext2Driver::ProbePartition() {
-  // Read 1024 bytes from 1024 offset.
-  // FIXME: Don't assume 512 byte sectors somehow.
-  ASSIGN_OR_RETURN(MappedMemoryRegion superblock, denali_.ReadSectors(2, 2));
-  superblock_ = reinterpret_cast<Superblock*>(superblock.vaddr());
-
-  if (superblock_->magic != 0xEF53) {
+  Superblock* superblock = ext2_reader_.GetSuperblock();
+  if (superblock->magic != 0xEF53) {
     dbgln("Invalid EXT2 magic code: %x");
     return glcr::INVALID_ARGUMENT;
   }
-  dbgln("Block size: 0x%x", 1024 << superblock_->log_block_size);
+  dbgln("Block size: 0x%x", 1024 << superblock->log_block_size);
 
-  dbgln("Blocks: 0x%x (0x%x per group)", superblock_->blocks_count,
-        superblock_->blocks_per_group);
-  dbgln("Inodes: 0x%x (0x%x per group)", superblock_->inodes_count,
-        superblock_->inodes_per_group);
+  dbgln("Blocks: 0x%x (0x%x per group)", superblock->blocks_count,
+        superblock->blocks_per_group);
+  dbgln("Inodes: 0x%x (0x%x per group)", superblock->inodes_count,
+        superblock->inodes_per_group);
 
-  dbgln("Mounts: 0x%x out of 0x%x", superblock_->mnt_count,
-        superblock_->max_mnt_count);
-  dbgln("State: %x", superblock_->state);
+  dbgln("Mounts: 0x%x out of 0x%x", superblock->mnt_count,
+        superblock->max_mnt_count);
+  dbgln("State: %x", superblock->state);
 
-  dbgln("Created by: %x", superblock_->creator_os);
+  dbgln("Created by: %x", superblock->creator_os);
 
   uint64_t num_block_groups =
-      superblock_->blocks_count / superblock_->blocks_per_group;
+      superblock->blocks_count / superblock->blocks_per_group;
   dbgln("\nReading %u blocks groups", num_block_groups);
   uint64_t bgdt_bytes = sizeof(BlockGroupDescriptor) * num_block_groups;
-  uint64_t bgdt_block = (superblock_->log_block_size == 0) ? 2 : 1;
+  uint64_t bgdt_block = (superblock->log_block_size == 0) ? 2 : 1;
   ASSIGN_OR_RETURN(MappedMemoryRegion bgdt,
-                   ReadBlocks(bgdt_block, BytesToBlockCount(bgdt_bytes)));
+                   ext2_reader_.ReadBlocks(bgdt_block, bgdt_bytes))
 
   BlockGroupDescriptor* bgds =
       reinterpret_cast<BlockGroupDescriptor*>(bgdt.vaddr());
@@ -45,6 +46,5 @@ glcr::ErrorCode Ext2Driver::ProbePartition() {
     dbgln("Free inodes: %x", bgds[i].free_inodes_count);
   }
 
-  uint64_t root_inode = 2;
   return glcr::OK;
 }

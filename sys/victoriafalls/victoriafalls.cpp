@@ -11,7 +11,7 @@ uint64_t main(uint64_t init_cap) {
 
   YellowstoneStub yellowstone(gInitEndpointCap);
   ASSIGN_OR_RETURN(ScopedDenaliClient denali, yellowstone.GetDenali());
-  Ext2Driver ext2(glcr::Move(denali));
+  ASSIGN_OR_RETURN(Ext2Driver ext2, Ext2Driver::Init(glcr::Move(denali)));
 
   check(ext2.ProbePartition());
 
