@@ -13,6 +13,8 @@ class Ext2Driver {
 
   glcr::ErrorCode ProbePartition();
 
+  glcr::ErrorCode ProbeDirectory(Inode* inode);
+
  private:
   Ext2BlockReader ext2_reader_;
   glcr::UniquePtr<InodeTable> inode_table_;

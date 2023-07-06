@@ -62,3 +62,11 @@ struct Inode {
   uint32_t faddr;
   uint32_t osd2[3];
 } __attribute__((__packed__));
+
+struct DirEntry {
+  uint32_t inode;
+  uint32_t record_length;
+  uint8_t name_len;
+  uint8_t file_type;
+  char name[256];
+} __attribute__((__packed__));
