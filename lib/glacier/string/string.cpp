@@ -14,12 +14,14 @@ uint64_t cstrlen(const char* cstr) {
 
 }  // namespace
 
-String::String(const char* str) {
-  length_ = cstrlen(str);
+String::String(const char* str) : String(str, cstrlen(str)) {}
+
+String::String(const char* cstr, uint64_t str_len) : length_(str_len) {
   cstr_ = new char[length_ + 1];
-  for (uint64_t i = 0; i <= length_; i++) {
-    cstr_[i] = str[i];
+  for (uint64_t i = 0; i < length_; i++) {
+    cstr_[i] = cstr[i];
   }
+  cstr_[length_] = '\0';
 }
 
 bool String::operator==(const String& other) {
