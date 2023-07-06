@@ -1,4 +1,5 @@
 add_executable(victoriafalls
+  fs/ext2/ext2_driver.cpp
   victoriafalls.cpp)
 
 target_include_directories(victoriafalls
