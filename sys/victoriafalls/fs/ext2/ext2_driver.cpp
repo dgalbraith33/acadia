@@ -81,13 +81,13 @@ glcr::ErrorCode Ext2Driver::ProbeDirectory(Inode* inode) {
     uint64_t addr = block.vaddr();
     while (addr < block.vaddr() + ext2_reader_.BlockSize()) {
       DirEntry* entry = reinterpret_cast<DirEntry*>(addr);
-      dbgln("Entry: inode: %x, rec_len %x, name_len %x", entry->inode,
-            entry->record_length, entry->name_len);
+      dbgln("Entry: inode: %x, rec_len %x, name_len %x, file_type: %x",
+            entry->inode, entry->record_length, entry->name_len,
+            entry->file_type);
       // FIXME: We need a method to construct a string that is *up to* a certain
       // length. As illustrated below the provided name_len is 0x2e but the
       // first character is \0 since this is the self-referencial inode.
       glcr::String name(entry->name, entry->name_len);
-      dbgln("%x, %x", name.length(), glcr::String(entry->name).length());
       dbgln("%s", name.cstr());
       addr += entry->record_length;
     }

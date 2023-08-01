@@ -65,7 +65,7 @@ struct Inode {
 
 struct DirEntry {
   uint32_t inode;
-  uint32_t record_length;
+  uint16_t record_length;
   uint8_t name_len;
   uint8_t file_type;
   char name[256];
