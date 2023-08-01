@@ -51,11 +51,6 @@ glcr::ErrorCode Ext2Driver::ProbePartition() {
       glcr::UniquePtr<InodeTable>(new InodeTable(ext2_reader_, bgds));
 
   ASSIGN_OR_RETURN(Inode * root, inode_table_->GetInode(2));
-  dbgln("Inode %lx", root);
-  dbgln("Mode: %x", root->mode);
-  dbgln("Blocks: %x", root->blocks);
-  dbgln("Size: %x", root->size);
-
   return ProbeDirectory(root);
 }
 
@@ -81,14 +76,17 @@ glcr::ErrorCode Ext2Driver::ProbeDirectory(Inode* inode) {
     uint64_t addr = block.vaddr();
     while (addr < block.vaddr() + ext2_reader_.BlockSize()) {
       DirEntry* entry = reinterpret_cast<DirEntry*>(addr);
-      dbgln("Entry: inode: %x, rec_len %x, name_len %x, file_type: %x",
-            entry->inode, entry->record_length, entry->name_len,
-            entry->file_type);
-      // FIXME: We need a method to construct a string that is *up to* a certain
-      // length. As illustrated below the provided name_len is 0x2e but the
-      // first character is \0 since this is the self-referencial inode.
       glcr::String name(entry->name, entry->name_len);
-      dbgln("%s", name.cstr());
+      switch (entry->file_type) {
+        case kExt2FtFile:
+          dbgln("FILE (0x%x): %s", entry->inode, name.cstr());
+          break;
+        case kExt2FtDirectory:
+          dbgln("DIR  (0x%x): %s", entry->inode, name.cstr());
+          break;
+        default:
+          dbgln("UNK  (0x%x): %s", entry->inode, name.cstr());
+      }
       addr += entry->record_length;
     }
   }

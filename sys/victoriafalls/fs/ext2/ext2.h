@@ -63,6 +63,10 @@ struct Inode {
   uint32_t osd2[3];
 } __attribute__((__packed__));
 
+constexpr uint8_t kExt2FtUnknown = 0;
+constexpr uint8_t kExt2FtFile = 1;
+constexpr uint8_t kExt2FtDirectory = 2;
+
 struct DirEntry {
   uint32_t inode;
   uint16_t record_length;
