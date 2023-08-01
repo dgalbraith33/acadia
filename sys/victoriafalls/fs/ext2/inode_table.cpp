@@ -2,31 +2,32 @@
 
 #include <mammoth/debug.h>
 
-InodeTable::InodeTable(Ext2BlockReader& reader, BlockGroupDescriptor* bgdt)
+InodeTable::InodeTable(const glcr::SharedPtr<Ext2BlockReader>& reader,
+                       BlockGroupDescriptor* bgdt)
     : ext2_reader_(reader), bgdt_(bgdt) {
-  inode_tables_.Resize(ext2_reader_.NumberOfBlockGroups());
+  inode_tables_.Resize(ext2_reader_->NumberOfBlockGroups());
 }
 
-glcr::ErrorOr<Inode*> InodeTable::GetInode(uint64_t inode_num) {
-  uint64_t inodes_per_group = ext2_reader_.GetSuperblock()->inodes_per_group;
+glcr::ErrorOr<Inode*> InodeTable::GetInode(uint32_t inode_num) {
+  uint64_t inodes_per_group = ext2_reader_->GetSuperblock()->inodes_per_group;
   uint64_t block_group_num = (inode_num - 1) / inodes_per_group;
   ASSIGN_OR_RETURN(Inode * root, GetRootOfInodeTable(block_group_num));
   uint64_t local_index = (inode_num - 1) % inodes_per_group;
   return reinterpret_cast<Inode*>(reinterpret_cast<uint64_t>(root) +
-                                  local_index * ext2_reader_.InodeSize());
+                                  local_index * ext2_reader_->InodeSize());
 }
 
 glcr::ErrorOr<Inode*> InodeTable::GetRootOfInodeTable(
     uint64_t block_group_num) {
-  if (block_group_num > ext2_reader_.NumberOfBlockGroups()) {
+  if (block_group_num > ext2_reader_->NumberOfBlockGroups()) {
     return glcr::INVALID_ARGUMENT;
   }
 
   if (!inode_tables_[block_group_num]) {
     ASSIGN_OR_RETURN(
         inode_tables_[block_group_num],
-        ext2_reader_.ReadBlocks(bgdt_[block_group_num].inode_table,
-                                ext2_reader_.InodeTableBlockSize()));
+        ext2_reader_->ReadBlocks(bgdt_[block_group_num].inode_table,
+                                 ext2_reader_->InodeTableBlockSize()));
   }
   return reinterpret_cast<Inode*>(inode_tables_[block_group_num].vaddr());
 }

@@ -13,11 +13,14 @@ class Ext2Driver {
 
   glcr::ErrorCode ProbePartition();
 
+  glcr::ErrorOr<Inode*> GetInode(uint32_t inode_number);
   glcr::ErrorCode ProbeDirectory(Inode* inode);
 
  private:
-  Ext2BlockReader ext2_reader_;
+  glcr::SharedPtr<Ext2BlockReader> ext2_reader_;
   glcr::UniquePtr<InodeTable> inode_table_;
 
-  Ext2Driver(Ext2BlockReader&& reader) : ext2_reader_(glcr::Move(reader)) {}
+  Ext2Driver(const glcr::SharedPtr<Ext2BlockReader>& reader,
+             glcr::UniquePtr<InodeTable> inode_table)
+      : ext2_reader_(reader), inode_table_(glcr::Move(inode_table)) {}
 };

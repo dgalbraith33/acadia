@@ -7,12 +7,13 @@
 
 class InodeTable {
  public:
-  InodeTable(Ext2BlockReader& driver, BlockGroupDescriptor* bgdt);
+  InodeTable(const glcr::SharedPtr<Ext2BlockReader>& driver,
+             BlockGroupDescriptor* bgdt);
 
-  glcr::ErrorOr<Inode*> GetInode(uint64_t inode_num);
+  glcr::ErrorOr<Inode*> GetInode(uint32_t inode_num);
 
  private:
-  Ext2BlockReader& ext2_reader_;
+  glcr::SharedPtr<Ext2BlockReader> ext2_reader_;
   BlockGroupDescriptor* bgdt_;
 
   glcr::Vector<MappedMemoryRegion> inode_tables_;

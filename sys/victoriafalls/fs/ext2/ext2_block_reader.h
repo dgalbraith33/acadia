@@ -1,6 +1,7 @@
 #pragma once
 
 #include <denali/denali_client.h>
+#include <glacier/memory/shared_ptr.h>
 #include <glacier/status/error_or.h>
 #include <mammoth/memory_region.h>
 
@@ -13,7 +14,8 @@
  * */
 class Ext2BlockReader {
  public:
-  static glcr::ErrorOr<Ext2BlockReader> Init(ScopedDenaliClient&& denali);
+  static glcr::ErrorOr<glcr::SharedPtr<Ext2BlockReader>> Init(
+      ScopedDenaliClient&& denali);
 
   // TODO: Consider creating a new class wrapper with these computations.
   Superblock* GetSuperblock();

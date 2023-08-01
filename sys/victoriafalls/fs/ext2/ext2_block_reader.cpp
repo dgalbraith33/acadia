@@ -1,11 +1,12 @@
 #include "fs/ext2/ext2_block_reader.h"
 
-glcr::ErrorOr<Ext2BlockReader> Ext2BlockReader::Init(
+glcr::ErrorOr<glcr::SharedPtr<Ext2BlockReader>> Ext2BlockReader::Init(
     ScopedDenaliClient&& denali) {
   // Read 1024 bytes from 1024 offset.
   // FIXME: Don't assume 512 byte sectors somehow.
   ASSIGN_OR_RETURN(MappedMemoryRegion superblock, denali.ReadSectors(2, 2));
-  return Ext2BlockReader(glcr::Move(denali), superblock);
+  return glcr::SharedPtr<Ext2BlockReader>(
+      new Ext2BlockReader(glcr::Move(denali), superblock));
 }
 
 Superblock* Ext2BlockReader::GetSuperblock() {
