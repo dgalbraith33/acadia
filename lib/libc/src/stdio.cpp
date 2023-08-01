@@ -111,6 +111,7 @@ int vsprintf(char *str, const char *format, va_list arg) {
           *(str++) = *(instr++);
           width++;
         }
+        format++;
         break;
       }
       default:
