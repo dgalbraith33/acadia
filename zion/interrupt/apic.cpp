@@ -113,16 +113,15 @@ void InspectApic() {
 #endif
 }
 
+// For now set these based on the presets in the following spec.
+// FIXME: However in the future we should likely use the MADT for legacy
+// interrupts and AML for PCI etc.
+//
+// http://web.archive.org/web/20161130153145/http://download.intel.com/design/chipsets/datashts/29056601.pdf
 void EnableApic() {
   MaskPic();
   // Map Timer.
   SetIoEntry(0x14, 0x20);
-  // Skip Keyboard for now.
-  // SetIoEntry(0x12, 0x21);
-
-  // TODO: This also works with the interrupt numbers provided by the MADT
-  // I need to do further investigation on the difference in this case and
-  // also how to find a declarative spec for where the PCI Lines are mapped.
 
   // PCI Line 1-4
   // FIXME: These should be level triggered according to spec I believe
