@@ -18,6 +18,8 @@ echo "Loopback device: ${dev}"
 cleanup() {
   umount efi
   rm -rf efi
+  umount sysroot
+  rm -rf sysroot
   losetup -d $dev
 }
 trap cleanup EXIT
@@ -40,5 +42,10 @@ mkdir -p efi/sys
 cp sys/yellowstone/yellowstone efi/sys/yellowstone
 cp sys/denali/denali efi/sys/denali
 cp sys/victoriafalls/victoriafalls efi/sys/victoriafalls
+
+mkdir -p sysroot
+mount "${dev}p2" sysroot/
+rsync -a ../sysroot .
+ls sysroot/
 
 chown drew:drew $1
