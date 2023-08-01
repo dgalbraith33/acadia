@@ -26,7 +26,8 @@ uint64_t main(uint64_t init_port_cap) {
                    server->CreateClient());
   check(stub.Register("denali", *client));
 
-  RET_ERR(server->RunServer());
-  // FIXME: Add thread join.
+  Thread server_thread = server->RunServer();
+
+  check(server_thread.Join());
   return 0;
 }
