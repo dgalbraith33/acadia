@@ -5,7 +5,7 @@
 #define DENALI_INVALID 0
 #define DENALI_READ 100
 
-struct DenaliRead {
+struct DenaliReadRequest {
   uint64_t request_type = DENALI_READ;
   uint64_t device_id;
 

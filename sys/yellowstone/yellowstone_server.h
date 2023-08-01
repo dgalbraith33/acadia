@@ -8,20 +8,19 @@
 
 #include "hw/pcie.h"
 
-class YellowstoneServer {
+class YellowstoneServer : public EndpointServer {
  public:
   static glcr::ErrorOr<glcr::UniquePtr<YellowstoneServer>> Create();
 
-  Thread RunServer();
   Thread RunRegistration();
 
-  void ServerThread();
   void RegistrationThread();
 
-  glcr::ErrorOr<glcr::UniquePtr<EndpointClient>> GetServerClient();
+  virtual glcr::ErrorCode HandleRequest(RequestContext& request,
+                                        ResponseContext& response) override;
 
  private:
-  glcr::UniquePtr<EndpointServer> server_;
+  // FIXME: Separate this to its own service.
   PortServer register_port_;
 
   static const uint64_t kBufferSize = 128;
@@ -36,5 +35,5 @@ class YellowstoneServer {
 
   PciReader pci_reader_;
 
-  YellowstoneServer(glcr::UniquePtr<EndpointServer> server, PortServer port);
+  YellowstoneServer(z_cap_t endpoint_cap, PortServer port);
 };

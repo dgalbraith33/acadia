@@ -6,13 +6,14 @@
 
 glcr::ErrorOr<MappedMemoryRegion> DenaliClient::ReadSectors(
     uint64_t device_id, uint64_t lba, uint64_t num_sectors) {
-  DenaliRead read{
+  DenaliReadRequest read{
       .device_id = device_id,
       .lba = lba,
       .size = num_sectors,
   };
   auto pair_or =
-      endpoint_->CallEndpointGetCap<DenaliRead, DenaliReadResponse>(read);
+      endpoint_->CallEndpointGetCap<DenaliReadRequest, DenaliReadResponse>(
+          read);
   if (!pair_or) {
     return pair_or.error();
   }

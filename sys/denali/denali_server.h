@@ -6,21 +6,26 @@
 #include "ahci/ahci_driver.h"
 #include "denali/denali.h"
 
-class DenaliServer {
+class DenaliServer : public EndpointServer {
  public:
-  DenaliServer(glcr::UniquePtr<EndpointServer> server, AhciDriver& driver);
+  static glcr::ErrorOr<glcr::UniquePtr<DenaliServer>> Create(
+      AhciDriver& driver);
 
-  glcr::ErrorCode RunServer();
-
-  void HandleResponse(z_cap_t reply_port, uint64_t lba, uint64_t size,
+  void HandleResponse(ResponseContext& response, uint64_t lba, uint64_t size,
                       z_cap_t cap);
+
+  virtual glcr::ErrorCode HandleRequest(RequestContext& request,
+                                        ResponseContext& response) override;
 
  private:
   static const uint64_t kBuffSize = 1024;
-  glcr::UniquePtr<EndpointServer> server_;
   uint8_t read_buffer_[kBuffSize];
 
   AhciDriver& driver_;
 
-  glcr::ErrorCode HandleRead(const DenaliRead& read, z_cap_t reply_port);
+  DenaliServer(z_cap_t endpoint_cap, AhciDriver& driver)
+      : EndpointServer(endpoint_cap), driver_(driver) {}
+
+  glcr::ErrorCode HandleRead(DenaliReadRequest* request,
+                             ResponseContext& context);
 };

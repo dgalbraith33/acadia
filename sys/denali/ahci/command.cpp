@@ -7,8 +7,8 @@
 Command::~Command() {}
 
 DmaReadCommand::DmaReadCommand(uint64_t lba, uint64_t sector_cnt,
-                               DmaCallback callback, z_cap_t reply_port)
-    : reply_port_(reply_port),
+                               DmaCallback callback, ResponseContext& response)
+    : response_(response),
       lba_(lba),
       sector_cnt_(sector_cnt),
       callback_(callback) {
@@ -50,5 +50,5 @@ void DmaReadCommand::PopulatePrdt(PhysicalRegionDescriptor* prdt) {
   prdt[0].byte_count = region_.size();
 }
 void DmaReadCommand::Callback() {
-  callback_(reply_port_, lba_, sector_cnt_, region_.cap());
+  callback_(response_, lba_, sector_cnt_, region_.cap());
 }

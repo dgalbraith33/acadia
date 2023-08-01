@@ -19,14 +19,14 @@ uint64_t main(uint64_t init_port_cap) {
   ASSIGN_OR_RETURN(MappedMemoryRegion ahci_region, stub.GetAhciConfig());
   ASSIGN_OR_RETURN(auto driver, AhciDriver::Init(ahci_region));
 
-  ASSIGN_OR_RETURN(glcr::UniquePtr<EndpointServer> endpoint,
-                   EndpointServer::Create());
+  ASSIGN_OR_RETURN(glcr::UniquePtr<DenaliServer> server,
+                   DenaliServer::Create(*driver));
+
   ASSIGN_OR_RETURN(glcr::UniquePtr<EndpointClient> client,
-                   endpoint->CreateClient());
+                   server->CreateClient());
   check(stub.Register("denali", *client));
 
-  DenaliServer server(glcr::Move(endpoint), *driver);
-  RET_ERR(server.RunServer());
+  RET_ERR(server->RunServer());
   // FIXME: Add thread join.
   return 0;
 }
