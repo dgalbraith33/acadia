@@ -86,7 +86,6 @@ void Scheduler::Yield() {
     if (runnable_threads_.size() == 0) {
       current_thread_ = sleep_thread_;
       dbgln("Sleeping");
-      gProcMan->DumpProcessStates();
     } else {
       current_thread_ = runnable_threads_.PopFront();
     }
