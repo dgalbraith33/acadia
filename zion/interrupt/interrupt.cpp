@@ -30,12 +30,12 @@ struct InterruptDescriptor {
 
 static InterruptDescriptor gIdt[256];
 
-InterruptDescriptor CreateDescriptor(void isr(void)) {
+InterruptDescriptor CreateDescriptor(void isr(void), uint8_t ist = 0) {
   uint64_t offset = reinterpret_cast<uint64_t>(isr);
   return InterruptDescriptor{
       .offset_low = static_cast<uint16_t>(offset),
       .selector = KERNEL_CS,
-      .ist = 0,
+      .ist = ist,
       .flags = IDT_INTERRUPT_GATE,
       .offset_medium = static_cast<uint16_t>(offset >> 16),
       .offset_high = static_cast<uint32_t>(offset >> 32),
@@ -184,6 +184,17 @@ void InitIdt() {
   gIdt[0x31] = CreateDescriptor(isr_pci2);
   gIdt[0x32] = CreateDescriptor(isr_pci3);
   gIdt[0x33] = CreateDescriptor(isr_pci4);
+
+  InterruptDescriptorTablePointer idtp{
+      .size = sizeof(gIdt),
+      .base = reinterpret_cast<uint64_t>(gIdt),
+  };
+  asm volatile("lidt %0" ::"m"(idtp));
+}
+
+void UpdateFaultHandlersToIst1() {
+  gIdt[13] = CreateDescriptor(isr_protection_fault, 1);
+  gIdt[14] = CreateDescriptor(isr_page_fault, 1);
 
   InterruptDescriptorTablePointer idtp{
       .size = sizeof(gIdt),

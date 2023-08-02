@@ -1,5 +1,6 @@
 #include "memory/kernel_stack_manager.h"
 
+#include "common/gdt.h"
 #include "debug/debug.h"
 #include "memory/paging_util.h"
 
@@ -11,6 +12,8 @@ KernelStackManager* gKernelStackManager;
 
 void KernelStackManager::Init() {
   gKernelStackManager = new KernelStackManager();
+
+  SetIst1(gKernelStackManager->AllocateKernelStack());
 }
 
 KernelStackManager::KernelStackManager()

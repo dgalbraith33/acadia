@@ -38,6 +38,10 @@ extern "C" void zion() {
   dbgln("[boot] Init Kernel Stack Manager.");
   KernelStackManager::Init();
 
+  // The KernelStackManager sets Ist1 as a part of initialization so we can use
+  // it now.
+  UpdateFaultHandlersToIst1();
+
   dbgln("[boot] Init syscalls.");
   InitSyscall();
 
