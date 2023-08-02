@@ -22,7 +22,8 @@ class Channel : public IpcObject {
  public:
   uint64_t TypeTag() override { return KernelObject::CHANNEL; }
   static uint64_t DefaultPermissions() {
-    return kZionPerm_Read | kZionPerm_Write | kZionPerm_Duplicate;
+    return kZionPerm_Read | kZionPerm_Write | kZionPerm_Duplicate |
+           kZionPerm_Transmit;
   }
 
   static glcr::Pair<glcr::RefPtr<Channel>, glcr::RefPtr<Channel>>

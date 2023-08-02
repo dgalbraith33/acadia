@@ -105,7 +105,7 @@ glcr::ErrorCode EndpointSend(ZEndpointSendReq* req) {
   auto reply_port = ReplyPort::Create();
   *req->reply_port_cap = proc.AddNewCapability(reply_port, kZionPerm_Read);
   uint64_t reply_port_cap_to_send =
-      proc.AddNewCapability(reply_port, kZionPerm_Write);
+      proc.AddNewCapability(reply_port, kZionPerm_Write | kZionPerm_Transmit);
   return endpoint->Send(req->num_bytes, req->data, 1, &reply_port_cap_to_send);
 }
 

@@ -37,7 +37,9 @@ class AddressSpace : public KernelObject {
  public:
   uint64_t TypeTag() override { return KernelObject::ADDRESS_SPACE; }
 
-  static uint64_t DefaultPermissions() { return kZionPerm_Write; }
+  static uint64_t DefaultPermissions() {
+    return kZionPerm_Write | kZionPerm_Transmit;
+  }
 
   enum MemoryType {
     UNSPECIFIED,

@@ -20,10 +20,17 @@ z_err_t UnboundedMessageQueue::PushBack(uint64_t num_bytes, const void* bytes,
 
   for (uint64_t i = 0; i < num_caps; i++) {
     // FIXME: This would feel safer closer to the relevant syscall.
-    auto cap = gScheduler->CurrentProcess().ReleaseCapability(caps[i]);
+    // FIXME: Race conditions on get->check->release here. Would be better to
+    // have that as a single call on the process. (This pattern repeats other
+    // places too).
+    auto cap = gScheduler->CurrentProcess().GetCapability(caps[i]);
     if (!cap) {
       return glcr::CAP_NOT_FOUND;
     }
+    if (!cap->HasPermissions(kZionPerm_Transmit)) {
+      return glcr::CAP_PERMISSION_DENIED;
+    }
+    cap = gScheduler->CurrentProcess().ReleaseCapability(caps[i]);
     message->caps.PushBack(cap);
   }
 
@@ -109,10 +116,14 @@ glcr::ErrorCode SingleMessageQueue::PushBack(uint64_t num_bytes,
 
   for (uint64_t i = 0; i < num_caps; i++) {
     // FIXME: This would feel safer closer to the relevant syscall.
-    auto cap = gScheduler->CurrentProcess().ReleaseCapability(caps[i]);
+    auto cap = gScheduler->CurrentProcess().GetCapability(caps[i]);
     if (!cap) {
       return glcr::CAP_NOT_FOUND;
     }
+    if (!cap->HasPermissions(kZionPerm_Transmit)) {
+      return glcr::CAP_PERMISSION_DENIED;
+    }
+    cap = gScheduler->CurrentProcess().ReleaseCapability(caps[i]);
     caps_.PushBack(cap);
   }
 
