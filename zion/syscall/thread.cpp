@@ -7,18 +7,18 @@
 glcr::ErrorCode ThreadCreate(ZThreadCreateReq* req) {
   auto& curr_proc = gScheduler->CurrentProcess();
   auto cap = curr_proc.GetCapability(req->proc_cap);
-  RET_ERR(ValidateCapability<Process>(cap, ZC_PROC_SPAWN_THREAD));
+  RET_ERR(ValidateCapability<Process>(cap, kZionPerm_SpawnThread));
 
   auto parent_proc = cap->obj<Process>();
   auto thread = parent_proc->CreateThread();
-  *req->thread_cap = curr_proc.AddNewCapability(thread, ZC_WRITE | ZC_READ);
+  *req->thread_cap = curr_proc.AddNewCapability(thread);
   return glcr::OK;
 }
 
 glcr::ErrorCode ThreadStart(ZThreadStartReq* req) {
   auto& curr_proc = gScheduler->CurrentProcess();
   auto cap = curr_proc.GetCapability(req->thread_cap);
-  RET_ERR(ValidateCapability<Thread>(cap, ZC_WRITE));
+  RET_ERR(ValidateCapability<Thread>(cap, kZionPerm_Write));
 
   auto thread = cap->obj<Thread>();
   // FIXME: validate entry point is in user space.
@@ -36,7 +36,7 @@ glcr::ErrorCode ThreadExit(ZThreadExitReq*) {
 glcr::ErrorCode ThreadWait(ZThreadWaitReq* req) {
   auto& curr_proc = gScheduler->CurrentProcess();
   auto cap = curr_proc.GetCapability(req->thread_cap);
-  RET_ERR(ValidateCapability<Thread>(cap, ZC_READ));
+  RET_ERR(ValidateCapability<Thread>(cap, kZionPerm_Read));
   auto thread = cap->obj<Thread>();
   thread->Wait();
   return glcr::OK;

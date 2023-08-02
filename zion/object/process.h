@@ -22,6 +22,11 @@ struct KernelObjectTag<Process> {
 class Process : public KernelObject {
  public:
   uint64_t TypeTag() override { return KernelObject::PROCESS; }
+  static uint64_t DefaultPermissions() {
+    return kZionPerm_Write | kZionPerm_Read | kZionPerm_SpawnThread |
+           kZionPerm_SpawnProcess;
+  }
+
   enum State {
     UNSPECIFIED,
     SETUP,
@@ -43,6 +48,10 @@ class Process : public KernelObject {
   template <typename T>
   uint64_t AddNewCapability(const glcr::RefPtr<T>& obj, uint64_t permissions) {
     return caps_.AddNewCapability(obj, permissions);
+  }
+  template <typename T>
+  uint64_t AddNewCapability(const glcr::RefPtr<T>& obj) {
+    return caps_.AddNewCapability(obj);
   }
   uint64_t AddExistingCapability(const glcr::RefPtr<Capability>& cap);
 

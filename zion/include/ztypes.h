@@ -63,15 +63,18 @@ const uint64_t kZionDebug = 0x1'0000;
 
 typedef uint64_t z_cap_t;
 
-#define Z_INVALID 0x0
-
 // General Capability Permissions
-#define ZC_WRITE 0x01
-#define ZC_READ 0x02
+const uint64_t kZionPerm_Write = 0x1;
+const uint64_t kZionPerm_Read = 0x2;
+
+const uint64_t kZionPerm_Transmit = 0x10;
+const uint64_t kZionPerm_Duplicate = 0x20;
 
 // Capability Specific Permissions
-#define ZC_PROC_SPAWN_PROC 0x100
-#define ZC_PROC_SPAWN_THREAD 0x200
+
+// Permissions held on process capabilities.
+const uint64_t kZionPerm_SpawnProcess = 0x100;
+const uint64_t kZionPerm_SpawnThread = 0x200;
 
 /* ------------------------------
  * Process Init Types

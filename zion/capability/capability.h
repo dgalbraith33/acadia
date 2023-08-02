@@ -21,6 +21,10 @@ class Capability : public glcr::RefCounted<Capability> {
       : Capability(StaticCastRefPtr<KernelObject>(obj), permissions) {}
 
   template <typename T>
+  Capability(const glcr::RefPtr<T>& obj)
+      : Capability(obj, T::DefaultPermissions()) {}
+
+  template <typename T>
   glcr::RefPtr<T> obj();
 
   glcr::RefPtr<KernelObject> raw_obj() { return obj_; }

@@ -21,6 +21,9 @@ struct KernelObjectTag<Port> {
 class Port : public IpcObject {
  public:
   uint64_t TypeTag() override { return KernelObject::PORT; }
+  static uint64_t DefaultPermissions() {
+    return kZionPerm_Write | kZionPerm_Read;
+  }
 
   Port() = default;
 

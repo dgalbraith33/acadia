@@ -14,9 +14,12 @@ class CapabilityTable {
   CapabilityTable& operator=(CapabilityTable&) = delete;
 
   template <typename T>
-  uint64_t AddNewCapability(const glcr::RefPtr<T>& object,
-                            uint64_t permissions);
-  uint64_t AddExistingCapability(const glcr::RefPtr<Capability>& cap);
+  z_cap_t AddNewCapability(const glcr::RefPtr<T>& object, uint64_t permissions);
+  template <typename T>
+  z_cap_t AddNewCapability(const glcr::RefPtr<T>& object) {
+    return AddNewCapability<T>(object, T::DefaultPermissions());
+  }
+  z_cap_t AddExistingCapability(const glcr::RefPtr<Capability>& cap);
 
   glcr::RefPtr<Capability> GetCapability(uint64_t id);
   glcr::RefPtr<Capability> ReleaseCapability(uint64_t id);

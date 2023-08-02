@@ -4,6 +4,7 @@
 #include <glacier/memory/ref_ptr.h>
 #include <stdint.h>
 
+#include "include/ztypes.h"
 #include "object/kernel_object.h"
 
 // Forward decl due to cyclic dependency.
@@ -18,6 +19,10 @@ struct KernelObjectTag<Thread> {
 class Thread : public KernelObject, public glcr::IntrusiveListNode<Thread> {
  public:
   uint64_t TypeTag() override { return KernelObject::THREAD; }
+  static uint64_t DefaultPermissions() {
+    return kZionPerm_Read | kZionPerm_Write;
+  }
+
   enum State {
     UNSPECIFIED,
     CREATED,

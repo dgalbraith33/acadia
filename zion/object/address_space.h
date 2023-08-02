@@ -4,6 +4,7 @@
 #include <glacier/memory/ref_ptr.h>
 #include <stdint.h>
 
+#include "include/ztypes.h"
 #include "memory/user_stack_manager.h"
 #include "object/memory_object.h"
 
@@ -35,6 +36,8 @@ struct KernelObjectTag<AddressSpace> {
 class AddressSpace : public KernelObject {
  public:
   uint64_t TypeTag() override { return KernelObject::ADDRESS_SPACE; }
+
+  static uint64_t DefaultPermissions() { return kZionPerm_Write; }
 
   enum MemoryType {
     UNSPECIFIED,

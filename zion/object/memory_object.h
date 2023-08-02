@@ -4,6 +4,7 @@
 #include <glacier/memory/ref_ptr.h>
 #include <glacier/status/error_or.h>
 
+#include "include/ztypes.h"
 #include "object/kernel_object.h"
 
 class MemoryObject;
@@ -21,6 +22,10 @@ struct KernelObjectTag<MemoryObject> {
 class MemoryObject : public KernelObject {
  public:
   uint64_t TypeTag() override { return KernelObject::MEMORY_OBJECT; }
+  static uint64_t DefaultPermissions() {
+    return kZionPerm_Write | kZionPerm_Read;
+  }
+
   MemoryObject(uint64_t size);
 
   uint64_t size() { return size_; }

@@ -17,14 +17,13 @@ z_err_t ProcessExit(ZProcessExitReq* req) {
 z_err_t ProcessSpawn(ZProcessSpawnReq* req) {
   auto& curr_proc = gScheduler->CurrentProcess();
   auto cap = curr_proc.GetCapability(req->proc_cap);
-  RET_ERR(ValidateCapability<Process>(cap, ZC_PROC_SPAWN_PROC));
+  RET_ERR(ValidateCapability<Process>(cap, kZionPerm_SpawnProcess));
 
   glcr::RefPtr<Process> proc = Process::Create();
   gProcMan->InsertProcess(proc);
 
-  *req->new_proc_cap = curr_proc.AddNewCapability(
-      proc, ZC_PROC_SPAWN_PROC | ZC_PROC_SPAWN_THREAD | ZC_WRITE);
-  *req->new_vmas_cap = curr_proc.AddNewCapability(proc->vmas(), ZC_WRITE);
+  *req->new_proc_cap = curr_proc.AddNewCapability(proc);
+  *req->new_vmas_cap = curr_proc.AddNewCapability(proc->vmas());
 
   if (req->bootstrap_cap != 0) {
     auto cap = curr_proc.ReleaseCapability(req->bootstrap_cap);

@@ -124,8 +124,7 @@ void WriteInitProgram(glcr::RefPtr<Port> port, glcr::String name, uint64_t id) {
       glcr::MakeRefCounted<MemoryObject>(prog.size);
   prog_vmmo->CopyBytesToObject(reinterpret_cast<uint64_t>(prog.address),
                                prog.size);
-  port->WriteKernel(id,
-                    MakeRefCounted<Capability>(prog_vmmo, ZC_READ | ZC_WRITE));
+  port->WriteKernel(id, MakeRefCounted<Capability>(prog_vmmo));
 }
 
 glcr::ErrorCode WritePciVmmo(glcr::RefPtr<Port> port, uint64_t id) {
@@ -133,7 +132,7 @@ glcr::ErrorCode WritePciVmmo(glcr::RefPtr<Port> port, uint64_t id) {
   auto vmmo =
       glcr::MakeRefCounted<FixedMemoryObject>(config.base, config.offset);
 
-  port->WriteKernel(id, MakeRefCounted<Capability>(vmmo, ZC_READ | ZC_WRITE));
+  port->WriteKernel(id, MakeRefCounted<Capability>(vmmo));
 
   return glcr::OK;
 }
@@ -149,12 +148,9 @@ void LoadInitProgram() {
 
   // Write init data.
   auto port = glcr::MakeRefCounted<Port>();
-  uint64_t port_cap = proc->AddNewCapability(port, ZC_READ | ZC_WRITE);
-  port->WriteKernel(Z_INIT_SELF_PROC,
-                    MakeRefCounted<Capability>(
-                        proc, ZC_PROC_SPAWN_PROC | ZC_PROC_SPAWN_THREAD));
-  port->WriteKernel(Z_INIT_SELF_VMAS,
-                    MakeRefCounted<Capability>(proc->vmas(), ZC_WRITE));
+  uint64_t port_cap = proc->AddNewCapability(port);
+  port->WriteKernel(Z_INIT_SELF_PROC, MakeRefCounted<Capability>(proc));
+  port->WriteKernel(Z_INIT_SELF_VMAS, MakeRefCounted<Capability>(proc->vmas()));
   WriteInitProgram(port, "/sys/denali", Z_BOOT_DENALI_VMMO);
   WriteInitProgram(port, "/sys/victoriafalls", Z_BOOT_VICTORIA_FALLS_VMMO);
 

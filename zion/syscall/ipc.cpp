@@ -9,16 +9,15 @@
 z_err_t ChannelCreate(ZChannelCreateReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto chan_pair = Channel::CreateChannelPair();
-  *req->channel1 = proc.AddNewCapability(chan_pair.first(), ZC_WRITE | ZC_READ);
-  *req->channel2 =
-      proc.AddNewCapability(chan_pair.second(), ZC_WRITE | ZC_READ);
+  *req->channel1 = proc.AddNewCapability(chan_pair.first());
+  *req->channel2 = proc.AddNewCapability(chan_pair.second());
   return glcr::OK;
 }
 
 z_err_t ChannelSend(ZChannelSendReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto chan_cap = proc.GetCapability(req->chan_cap);
-  RET_ERR(ValidateCapability<Channel>(chan_cap, ZC_WRITE));
+  RET_ERR(ValidateCapability<Channel>(chan_cap, kZionPerm_Write));
 
   auto chan = chan_cap->obj<Channel>();
   return chan->Send(req->num_bytes, req->data, req->num_caps, req->caps);
@@ -27,7 +26,7 @@ z_err_t ChannelSend(ZChannelSendReq* req) {
 z_err_t ChannelRecv(ZChannelRecvReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto chan_cap = proc.GetCapability(req->chan_cap);
-  RET_ERR(ValidateCapability<Channel>(chan_cap, ZC_READ));
+  RET_ERR(ValidateCapability<Channel>(chan_cap, kZionPerm_Read));
 
   auto chan = chan_cap->obj<Channel>();
   return chan->Recv(req->num_bytes, req->data, req->num_caps, req->caps);
@@ -36,14 +35,14 @@ z_err_t ChannelRecv(ZChannelRecvReq* req) {
 z_err_t PortCreate(ZPortCreateReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto port = glcr::MakeRefCounted<Port>();
-  *req->port_cap = proc.AddNewCapability(port, ZC_WRITE | ZC_READ);
+  *req->port_cap = proc.AddNewCapability(port);
   return glcr::OK;
 }
 
 z_err_t PortSend(ZPortSendReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto port_cap = proc.GetCapability(req->port_cap);
-  RET_ERR(ValidateCapability<Port>(port_cap, ZC_WRITE));
+  RET_ERR(ValidateCapability<Port>(port_cap, kZionPerm_Write));
 
   auto port = port_cap->obj<Port>();
   return port->Send(req->num_bytes, req->data, req->num_caps, req->caps);
@@ -52,7 +51,7 @@ z_err_t PortSend(ZPortSendReq* req) {
 z_err_t PortRecv(ZPortRecvReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto port_cap = proc.GetCapability(req->port_cap);
-  RET_ERR(ValidateCapability<Port>(port_cap, ZC_READ));
+  RET_ERR(ValidateCapability<Port>(port_cap, kZionPerm_Read));
 
   auto port = port_cap->obj<Port>();
   ZMessage message{
@@ -67,7 +66,7 @@ z_err_t PortRecv(ZPortRecvReq* req) {
 z_err_t PortPoll(ZPortPollReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto port_cap = proc.GetCapability(req->port_cap);
-  RET_ERR(ValidateCapability<Port>(port_cap, ZC_READ));
+  RET_ERR(ValidateCapability<Port>(port_cap, kZionPerm_Read));
 
   auto port = port_cap->obj<Port>();
   // FIXME: Race condition here where this call could block if the last message
@@ -85,15 +84,14 @@ z_err_t IrqRegister(ZIrqRegisterReq* req) {
     return glcr::UNIMPLEMENTED;
   }
   glcr::RefPtr<Port> port = glcr::MakeRefCounted<Port>();
-  *req->port_cap = proc.AddNewCapability(port, ZC_READ | ZC_WRITE);
+  *req->port_cap = proc.AddNewCapability(port);
   RegisterPciPort(port);
   return glcr::OK;
 }
 
 glcr::ErrorCode EndpointCreate(ZEndpointCreateReq* req) {
   auto& proc = gScheduler->CurrentProcess();
-  *req->endpoint_cap =
-      proc.AddNewCapability(Endpoint::Create(), ZC_READ | ZC_WRITE);
+  *req->endpoint_cap = proc.AddNewCapability(Endpoint::Create());
   return glcr::OK;
 }
 
@@ -101,12 +99,13 @@ glcr::ErrorCode EndpointSend(ZEndpointSendReq* req) {
   auto& proc = gScheduler->CurrentProcess();
 
   auto endpoint_cap = proc.GetCapability(req->endpoint_cap);
-  ValidateCapability<Endpoint>(endpoint_cap, ZC_WRITE);
+  ValidateCapability<Endpoint>(endpoint_cap, kZionPerm_Write);
   auto endpoint = endpoint_cap->obj<Endpoint>();
 
   auto reply_port = ReplyPort::Create();
-  *req->reply_port_cap = proc.AddNewCapability(reply_port, ZC_READ);
-  uint64_t reply_port_cap_to_send = proc.AddNewCapability(reply_port, ZC_WRITE);
+  *req->reply_port_cap = proc.AddNewCapability(reply_port, kZionPerm_Read);
+  uint64_t reply_port_cap_to_send =
+      proc.AddNewCapability(reply_port, kZionPerm_Write);
   return endpoint->Send(req->num_bytes, req->data, 1, &reply_port_cap_to_send);
 }
 
@@ -114,7 +113,7 @@ glcr::ErrorCode EndpointRecv(ZEndpointRecvReq* req) {
   auto& proc = gScheduler->CurrentProcess();
 
   auto endpoint_cap = proc.GetCapability(req->endpoint_cap);
-  ValidateCapability<Endpoint>(endpoint_cap, ZC_READ);
+  ValidateCapability<Endpoint>(endpoint_cap, kZionPerm_Read);
   auto endpoint = endpoint_cap->obj<Endpoint>();
 
   uint64_t num_caps = 1;
@@ -129,7 +128,7 @@ glcr::ErrorCode EndpointRecv(ZEndpointRecvReq* req) {
 glcr::ErrorCode ReplyPortSend(ZReplyPortSendReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto reply_port_cap = proc.GetCapability(req->reply_port_cap);
-  ValidateCapability<ReplyPort>(reply_port_cap, ZC_WRITE);
+  ValidateCapability<ReplyPort>(reply_port_cap, kZionPerm_Read);
   auto reply_port = reply_port_cap->obj<ReplyPort>();
 
   return reply_port->Send(req->num_bytes, req->data, req->num_caps, req->caps);
@@ -138,7 +137,7 @@ glcr::ErrorCode ReplyPortRecv(ZReplyPortRecvReq* req) {
   auto& proc = gScheduler->CurrentProcess();
 
   auto reply_port_cap = proc.GetCapability(req->reply_port_cap);
-  ValidateCapability<ReplyPort>(reply_port_cap, ZC_READ);
+  ValidateCapability<ReplyPort>(reply_port_cap, kZionPerm_Read);
   auto reply_port = reply_port_cap->obj<ReplyPort>();
 
   return reply_port->Recv(req->num_bytes, req->data, req->num_caps, req->caps);

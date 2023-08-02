@@ -20,6 +20,10 @@ struct KernelObjectTag<Endpoint> {
 class Endpoint : public IpcObject {
  public:
   uint64_t TypeTag() override { return KernelObject::ENDPOINT; }
+  static uint64_t DefaultPermissions() {
+    return kZionPerm_Read | kZionPerm_Write;
+  }
+
   static glcr::RefPtr<Endpoint> Create();
 
   glcr::ErrorCode Read(uint64_t* num_bytes, void* data,
