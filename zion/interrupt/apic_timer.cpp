@@ -4,11 +4,15 @@
 #include "interrupt/apic.h"
 #include "interrupt/timer.h"
 
+const uint32_t kScheduleFrequency = 20;
 ApicTimer* gApicTimer = nullptr;
 
 void ApicTimer::Init() {
   gApicTimer = new ApicTimer();
   gApicTimer->StartCalibration();
+  asm("sti;");
+  gApicTimer->WaitCalibration();
+  asm("cli;");
 }
 
 void ApicTimer::StartCalibration() {
@@ -33,5 +37,6 @@ void ApicTimer::Calibrate() {
 
 void ApicTimer::FinishCalibration() {
   MaskPit();
-  SetLocalTimer(calculated_frequency_ / 20, LAPIC_TIMER_PERIODIC);
+  SetLocalTimer(calculated_frequency_ / kScheduleFrequency,
+                LAPIC_TIMER_PERIODIC);
 }

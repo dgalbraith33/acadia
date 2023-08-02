@@ -39,11 +39,7 @@ extern "C" void zion() {
   dbgln("[boot] Init scheduler.");
   ProcessManager::Init();
   Scheduler::Init();
-  // Schedule every 50ms.
   ApicTimer::Init();
-  asm("sti;");
-  gApicTimer->WaitCalibration();
-  asm("cli;");
 
   dbgln("[boot] Loading sys init program.");
   LoadInitProgram();

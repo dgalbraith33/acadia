@@ -11,12 +11,6 @@ class ApicTimer {
   // after implementing HPET.
   void Calibrate();
 
-  void WaitCalibration() {
-    while (calculated_frequency_ == 0) {
-      asm("hlt;");
-    }
-  }
-
  private:
   struct Calibration {
     uint32_t initial_measurement = 0;
@@ -29,6 +23,12 @@ class ApicTimer {
   ApicTimer() {}
   void StartCalibration();
   void FinishCalibration();
+
+  void WaitCalibration() {
+    while (calculated_frequency_ == 0) {
+      asm("hlt;");
+    }
+  }
 };
 
 extern ApicTimer* gApicTimer;
