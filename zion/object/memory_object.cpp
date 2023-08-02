@@ -67,3 +67,13 @@ uint64_t MemoryObject::PageNumberToPhysAddr(uint64_t page_num) {
   }
   return *iter;
 }
+
+glcr::ErrorOr<glcr::RefPtr<MemoryObject>> FixedMemoryObject::Duplicate(
+    uint64_t offset, uint64_t length) {
+  if (offset + length > size()) {
+    return glcr::INVALID_ARGUMENT;
+  }
+
+  return glcr::StaticCastRefPtr<MemoryObject>(
+      glcr::MakeRefCounted<FixedMemoryObject>(physical_addr_ + offset, length));
+}

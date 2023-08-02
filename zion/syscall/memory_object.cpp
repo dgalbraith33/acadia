@@ -29,3 +29,16 @@ z_err_t MemoryObjectCreateContiguous(ZMemoryObjectCreateContiguousReq* req) {
   *req->paddr = paddr;
   return glcr::OK;
 }
+
+z_err_t MemoryObjectDuplicate(ZMemoryObjectDuplicateReq* req) {
+  auto& curr_proc = gScheduler->CurrentProcess();
+  auto vmmo_cap = curr_proc.GetCapability(req->vmmo_cap);
+  // FIXME: Check a duplication permission here.
+  RET_ERR(ValidateCapability<MemoryObject>(vmmo_cap, ZC_WRITE));
+
+  ASSIGN_OR_RETURN(
+      glcr::RefPtr<MemoryObject> new_vmmo,
+      vmmo_cap->obj<MemoryObject>()->Duplicate(req->base_offset, req->length));
+  *req->new_vmmo_cap = curr_proc.AddNewCapability(new_vmmo, ZC_WRITE | ZC_READ);
+  return glcr::OK;
+}

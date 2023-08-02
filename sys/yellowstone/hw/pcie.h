@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <ztypes.h>
 
 struct PciDeviceHeader {
   uint16_t vendor_id;
@@ -17,16 +18,19 @@ struct PciDeviceHeader {
   uint8_t bist;
 } __attribute__((packed));
 
+// TODO: Figure out if it safe to hardcode this.
+// For the memory mapped access to PCI, it may be true that
+// each configuration item is always the size of a single page.
+const uint64_t kPcieConfigurationSize = 0x1000;
+
 class PciReader {
  public:
   PciReader();
 
-  uint64_t GetAhciPhysical();
+  z_cap_t GetAhciVmmo();
 
  private:
   PciDeviceHeader* header_;
-  // FIXME: Don't hardcode this (It is available from ACPI).
-  uint64_t phys_mem_offset_ = 0xB000'0000;
 
   uint64_t achi_device_offset_ = 0;
 

@@ -8,6 +8,7 @@
 #include <stdlib.h>
 
 #include "hw/gpt.h"
+#include "hw/pcie.h"
 #include "include/yellowstone.h"
 
 namespace {
@@ -55,9 +56,11 @@ glcr::ErrorCode YellowstoneServer::HandleRequest(RequestContext& request,
       dbgln("Yellowstone::GetAHCI");
       YellowstoneGetAhciResp resp{
           .type = kYellowstoneGetAhci,
-          .ahci_phys_offset = pci_reader_.GetAhciPhysical(),
+          .ahci_length = kPcieConfigurationSize,
       };
-      RET_ERR(response.WriteStruct<YellowstoneGetAhciResp>(resp));
+      z_cap_t vmmo_cap = pci_reader_.GetAhciVmmo();
+      RET_ERR(
+          response.WriteStructWithCap<YellowstoneGetAhciResp>(resp, vmmo_cap));
       break;
     }
     case kYellowstoneGetRegistration: {

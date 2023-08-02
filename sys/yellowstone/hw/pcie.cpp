@@ -27,8 +27,11 @@ PciReader::PciReader() {
   header_ = PciHeader(vaddr, 0, 0, 0);
 }
 
-uint64_t PciReader::GetAhciPhysical() {
-  return phys_mem_offset_ + achi_device_offset_;
+z_cap_t PciReader::GetAhciVmmo() {
+  uint64_t new_cap;
+  check(ZMemoryObjectDuplicate(gBootPciVmmoCap, achi_device_offset_,
+                               kPcieConfigurationSize, &new_cap));
+  return new_cap;
 }
 
 void PciReader::FunctionDump(uint64_t base, uint64_t bus, uint64_t dev,

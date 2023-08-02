@@ -4,12 +4,6 @@
 
 #include "include/yellowstone.h"
 
-namespace {
-
-const uint64_t kPciSize = 0x1000;
-
-}  // namespace
-
 YellowstoneStub::YellowstoneStub(z_cap_t yellowstone_cap)
     : yellowstone_stub_(EndpointClient::AdoptEndpoint(yellowstone_cap)) {}
 
@@ -18,10 +12,10 @@ glcr::ErrorOr<MappedMemoryRegion> YellowstoneStub::GetAhciConfig() {
       .type = kYellowstoneGetAhci,
   };
   ASSIGN_OR_RETURN(
-      YellowstoneGetAhciResp resp,
-      (yellowstone_stub_
-           ->CallEndpoint<YellowstoneGetReq, YellowstoneGetAhciResp>(req)));
-  return MappedMemoryRegion::DirectPhysical(resp.ahci_phys_offset, kPciSize);
+      auto resp_cap_pair,
+      (yellowstone_stub_->CallEndpointGetCap<YellowstoneGetReq,
+                                             YellowstoneGetAhciResp>(req)));
+  return MappedMemoryRegion::FromCapability(resp_cap_pair.second());
 }
 
 glcr::ErrorOr<ScopedDenaliClient> YellowstoneStub::GetDenali() {

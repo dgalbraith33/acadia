@@ -1,6 +1,8 @@
 #pragma once
 
 #include <glacier/container/linked_list.h>
+#include <glacier/memory/ref_ptr.h>
+#include <glacier/status/error_or.h>
 
 #include "object/kernel_object.h"
 
@@ -28,6 +30,11 @@ class MemoryObject : public KernelObject {
 
   void CopyBytesToObject(uint64_t source, uint64_t length);
 
+  virtual glcr::ErrorOr<glcr::RefPtr<MemoryObject>> Duplicate(uint64_t offset,
+                                                              uint64_t length) {
+    return glcr::UNIMPLEMENTED;
+  }
+
  protected:
   // Hacky to avoid linked_list creation.
   MemoryObject(uint64_t size, bool) : size_(size) {}
@@ -46,6 +53,9 @@ class FixedMemoryObject : public MemoryObject {
   // FIXME: Validate that this is 4k aligned.
   FixedMemoryObject(uint64_t physical_addr, uint64_t size)
       : MemoryObject(size, true), physical_addr_(physical_addr) {}
+
+  virtual glcr::ErrorOr<glcr::RefPtr<MemoryObject>> Duplicate(
+      uint64_t offset, uint64_t length) override;
 
  private:
   uint64_t physical_addr_;

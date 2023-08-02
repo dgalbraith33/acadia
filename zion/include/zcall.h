@@ -107,6 +107,9 @@ SYS3(MemoryObjectCreatePhysical, uint64_t, paddr, uint64_t, size, z_cap_t*,
 SYS3(MemoryObjectCreateContiguous, uint64_t, size, z_cap_t*, vmmo_cap,
      uint64_t*, paddr);
 
+SYS4(MemoryObjectDuplicate, z_cap_t, vmmo_cap, uint64_t, base_offset, uint64_t,
+     length, z_cap_t*, new_vmmo_cap);
+
 SYS2(ChannelCreate, z_cap_t*, channel1, z_cap_t*, channel2);
 SYS5(ChannelSend, z_cap_t, chan_cap, uint64_t, num_bytes, const void*, data,
      uint64_t, num_caps, z_cap_t*, caps);

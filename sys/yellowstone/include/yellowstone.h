@@ -13,7 +13,7 @@ struct YellowstoneGetReq {
 struct YellowstoneGetRegistrationResp {};
 struct YellowstoneGetAhciResp {
   uint64_t type;
-  uint64_t ahci_phys_offset;
+  uint64_t ahci_length;
 };
 
 // Has a denali cap attached.

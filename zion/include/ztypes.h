@@ -27,6 +27,8 @@ const uint64_t kZionMemoryObjectCreate = 0x30;
 const uint64_t kZionMemoryObjectCreatePhysical = 0x31;
 const uint64_t kZionMemoryObjectCreateContiguous = 0x32;
 
+const uint64_t kZionMemoryObjectDuplicate = 0x38;
+
 // IPC Calls
 const uint64_t kZionChannelCreate = 0x40;
 const uint64_t kZionChannelSend = 0x41;
