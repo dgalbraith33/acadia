@@ -16,49 +16,20 @@ namespace {
 #define IA32_APIC_BASE_MSR_BSP 0x100  // Processor is a BSP
 #define IA32_APIC_BASE_MSR_ENABLE 0x800
 
-const uint64_t kEoiOffset = 0xB0;
-const uint64_t kLvtTimerOffset = 0x320;
-const uint64_t kTimerInitOffset = 0x380;
-const uint64_t kTimerCurrOffset = 0x390;
-const uint64_t kTimerDivOffset = 0x3E0;
+#define LAPIC_TIMER_ONESHOT 0
+#define LAPIC_TIMER_PERIODIC 1 << 17
 
-// FIXME: parse these from madt.
-constexpr uint64_t kLApicBase = 0xFEE0'0000;
-constexpr uint64_t kIoApicAddr = 0xFEC0'0000;
-constexpr uint64_t kIoApicData = 0xFEC0'0010;
+#define APIC_MASK 0x10000
+
+const uint16_t kEoiOffset = 0xB0;
+const uint16_t kLvtTimerOffset = 0x320;
+const uint16_t kTimerInitOffset = 0x380;
+const uint16_t kTimerCurrOffset = 0x390;
+const uint16_t kTimerDivOffset = 0x3E0;
 
 uint32_t volatile* GetPhys(uint64_t base, uint64_t offset = 0) {
   return reinterpret_cast<uint32_t*>(boot::GetHigherHalfDirectMap() + base +
                                      offset);
-}
-
-uint32_t GetLocalReg(uint64_t offset) {
-  uint32_t volatile* reg = GetPhys(kLApicBase, offset);
-  return *reg;
-}
-
-void WriteLocalReg(uint64_t offset, uint32_t value) {
-  *GetPhys(kLApicBase, offset) = value;
-}
-
-uint32_t GetIoReg(uint8_t reg) {
-  *GetPhys(kIoApicAddr) = reg;
-  return *GetPhys(kIoApicData);
-}
-
-uint64_t GetIoEntry(uint8_t reg) {
-  *GetPhys(kIoApicAddr) = reg;
-  uint64_t entry = *GetPhys(kIoApicData);
-  *GetPhys(kIoApicAddr) = reg + 1;
-  entry |= ((uint64_t)*GetPhys(kIoApicData)) << 32;
-  return entry;
-}
-
-void SetIoEntry(uint8_t reg, uint64_t value) {
-  *GetPhys(kIoApicAddr) = reg;
-  *GetPhys(kIoApicData) = value & 0xFFFFFFFF;
-  *GetPhys(kIoApicAddr) = reg + 1;
-  *GetPhys(kIoApicData) = value >> 32;
 }
 
 #define PIC1_COMMAND 0x20
@@ -86,7 +57,17 @@ void MaskPic() {
 
 }  // namespace
 
-void InspectApic() {
+Apic* gApic = nullptr;
+
+void Apic::Init() {
+  auto config_or = GetApicConfiguration();
+  if (!config_or.ok()) {
+    panic("Error fetching APIC info from ACPI: %x", config_or.error());
+  }
+  gApic = new Apic(config_or.value());
+}
+
+void Apic::DumpInfo() {
 #if APIC_DEBUG
   dbgln("APIC:");
   dbgln("ID: %x", GetLocalReg(0x20));
@@ -118,36 +99,85 @@ void InspectApic() {
 #endif
 }
 
-// For now set these based on the presets in the following spec.
-// FIXME: However in the future we should likely use the MADT for legacy
-// interrupts and AML for PCI etc.
-//
-// http://web.archive.org/web/20161130153145/http://download.intel.com/design/chipsets/datashts/29056601.pdf
-void EnableApic() {
-  MaskPic();
-  // Map Timer.
-  SetIoEntry(0x14, 0x10020);
+uint32_t Apic::GetLocalTimerValue() { return GetLocalReg(kTimerCurrOffset); }
+void Apic::InitializeLocalTimer(uint32_t init_cnt, TimerMode mode) {
+  // FIXME: Don't hardcode this.
+  uint32_t vector = 0x21;
+  switch (mode) {
+    case ONESHOT:
+      vector |= LAPIC_TIMER_ONESHOT;
+      break;
+    case PERIODIC:
+      vector |= LAPIC_TIMER_PERIODIC;
+      break;
+    default:
+      panic("Unhandled timer mode.");
+  }
+  SetLocalReg(kLvtTimerOffset, vector);
 
+  SetLocalReg(kTimerInitOffset, init_cnt);
+}
+
+void Apic::SignalEOI() { SetLocalReg(kEoiOffset, 0x0); }
+
+void Apic::UnmaskPit() {
+  SetIoDoubleReg(0x14, GetIoDoubleReg(0x14) & ~(APIC_MASK));
+}
+void Apic::MaskPit() { SetIoDoubleReg(0x14, GetIoDoubleReg(0x14) | APIC_MASK); }
+
+Apic::Apic(const ApicConfiguration& config)
+    : l_apic_base_(config.lapic_base),
+      io_apic_addr_(
+          reinterpret_cast<volatile uint8_t*>(GetPhys(config.ioapic_base))),
+      io_apic_data_(GetPhys(config.ioapic_base, 0x10)) {
+  MaskPic();
+
+  // Map Timer.
+  // FIXME: Get this offset from ACPI.
+  SetIoDoubleReg(0x14, 0x20 | APIC_MASK);
+
+  // For now set these based on the presets in the following spec.
+  // http://web.archive.org/web/20161130153145/http://download.intel.com/design/chipsets/datashts/29056601.pdf
+  // FIXME: However in the future we should likely use the MADT for legacy
+  // interrupts and AML for PCI etc.
   // PCI Line 1-4
   // FIXME: These should be level triggered according to spec I believe
   // but because we handle the interrupt outside of the kernel it is tricky
   // to wait to send the end of interrupt message.
   // Because of this leave them as edge triggered and send EOI immediately.
-  SetIoEntry(0x30, 0x30);
-  SetIoEntry(0x32, 0x31);
-  SetIoEntry(0x34, 0x32);
-  SetIoEntry(0x36, 0x33);
+  SetIoDoubleReg(0x30, 0x30);
+  SetIoDoubleReg(0x32, 0x31);
+  SetIoDoubleReg(0x34, 0x32);
+  SetIoDoubleReg(0x36, 0x33);
 
-  InspectApic();
+  DumpInfo();
 }
 
-void SetLocalTimer(uint32_t init_cnt, uint64_t mode) {
-  WriteLocalReg(kTimerInitOffset, init_cnt);
-  WriteLocalReg(kLvtTimerOffset, mode | 0x21);
+uint32_t Apic::GetLocalReg(uint16_t offset) {
+  uint32_t volatile* reg = GetPhys(l_apic_base_, offset);
+  return *reg;
 }
-uint32_t GetLocalTimer() { return GetLocalReg(kTimerCurrOffset); }
 
-void UnmaskPit() { SetIoEntry(0x14, GetIoEntry(0x14) & ~(0x10000)); }
-void MaskPit() { SetIoEntry(0x14, GetIoEntry(0x14) | 0x10000); }
+void Apic::SetLocalReg(uint16_t offset, uint32_t value) {
+  *GetPhys(l_apic_base_, offset) = value;
+}
 
-void SignalEOI() { WriteLocalReg(kEoiOffset, 0x0); }
+uint32_t Apic::GetIoReg(uint8_t offset) {
+  *io_apic_addr_ = offset;
+  return *io_apic_data_;
+}
+
+uint64_t Apic::GetIoDoubleReg(uint8_t offset) {
+  *io_apic_addr_ = offset;
+  uint64_t entry = *io_apic_data_;
+  *io_apic_addr_ = offset + 1;
+  entry |= ((uint64_t)*io_apic_data_) << 32;
+  return entry;
+}
+
+void Apic::SetIoDoubleReg(uint8_t offset, uint64_t value) {
+  *io_apic_addr_ = offset;
+  *io_apic_data_ = value & 0xFFFFFFFF;
+  *io_apic_addr_ = offset + 1;
+  *io_apic_data_ = value >> 32;
+}

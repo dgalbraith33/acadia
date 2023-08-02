@@ -12,3 +12,9 @@ struct PcieConfiguration {
   uint64_t offset;
 };
 glcr::ErrorOr<PcieConfiguration> GetPciExtendedConfiguration();
+
+struct ApicConfiguration {
+  uint64_t lapic_base;
+  uint64_t ioapic_base;
+};
+glcr::ErrorOr<ApicConfiguration> GetApicConfiguration();

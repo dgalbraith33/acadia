@@ -12,6 +12,9 @@ namespace {
 static uint64_t gPcieEcBase = 0x0;
 static uint64_t gPcieEcSize = 0x0;
 
+static uint64_t gLApicBase = 0x0;
+static uint64_t gIOApicBase = 0x0;
+
 struct RsdpDescriptor {
   char signature[8];
   uint8_t checksum;
@@ -136,12 +139,12 @@ void ParseMcfg(SdtHeader* rsdt) {
 }
 
 void ParseMadt(SdtHeader* rsdt) {
-#if K_ACPI_DEBUG
   dbgsz(rsdt->signature, 4);
   uint64_t max_addr = reinterpret_cast<uint64_t>(rsdt) + rsdt->length;
   MadtHeader* header = reinterpret_cast<MadtHeader*>(rsdt);
 
   dbgln("Local APIC %x", header->local_apic_address);
+  gLApicBase = header->local_apic_address;
   dbgln("Flags: %x", header->flags);
 
   MadtEntry* entry = &header->first_entry;
@@ -158,6 +161,10 @@ void ParseMadt(SdtHeader* rsdt) {
         MadtIoApic* io = reinterpret_cast<MadtIoApic*>(entry);
         dbgln("IO Apic (id, addr, gsi base): %x, %x, %x", io->io_apic_id,
               io->io_apic_address, io->global_system_interrupt_base);
+        if (gIOApicBase != 0) {
+          dbgln("More than one IOApic, unhandled");
+        }
+        gIOApicBase = io->io_apic_address;
         break;
       }
       case 2: {
@@ -181,7 +188,6 @@ void ParseMadt(SdtHeader* rsdt) {
     entry = reinterpret_cast<MadtEntry*>(reinterpret_cast<uint64_t>(entry) +
                                          entry->length);
   }
-#endif
 }
 
 void ParseSdt(SdtHeader* rsdt) {
@@ -261,4 +267,12 @@ glcr::ErrorOr<PcieConfiguration> GetPciExtendedConfiguration() {
   }
 
   return PcieConfiguration{gPcieEcBase, gPcieEcSize};
+}
+
+glcr::ErrorOr<ApicConfiguration> GetApicConfiguration() {
+  if (gLApicBase == 0 || gIOApicBase == 0) {
+    return glcr::NOT_FOUND;
+  }
+
+  return ApicConfiguration{gLApicBase, gIOApicBase};
 }

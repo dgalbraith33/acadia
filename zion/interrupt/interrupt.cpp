@@ -128,7 +128,7 @@ extern "C" void interrupt_page_fault(InterruptFrame* frame) {
 extern "C" void isr_timer();
 extern "C" void interrupt_timer(InterruptFrame*) {
   gApicTimer->Calibrate();
-  SignalEOI();
+  gApic->SignalEOI();
 }
 
 uint64_t cnt = 0;
@@ -141,7 +141,7 @@ extern "C" void interrupt_apic_timer(InterruptFrame*) {
     }
     dbgln("timer: %us", cnt * 50 / 1000);
   }
-  SignalEOI();
+  gApic->SignalEOI();
   gScheduler->Preempt();
 }
 
@@ -150,25 +150,25 @@ extern "C" void isr_pci1();
 extern "C" void interrupt_pci1(InterruptFrame*) {
   dbgln("Interrupt PCI line 1");
   pci1_port->Send(0, nullptr, 0, nullptr);
-  SignalEOI();
+  gApic->SignalEOI();
 }
 
 extern "C" void isr_pci2();
 extern "C" void interrupt_pci2(InterruptFrame*) {
   dbgln("Interrupt PCI line 2");
-  SignalEOI();
+  gApic->SignalEOI();
 }
 
 extern "C" void isr_pci3();
 extern "C" void interrupt_pci3(InterruptFrame*) {
   dbgln("Interrupt PCI line 3");
-  SignalEOI();
+  gApic->SignalEOI();
 }
 
 extern "C" void isr_pci4();
 extern "C" void interrupt_pci4(InterruptFrame*) {
   dbgln("Interrupt PCI line 4");
-  SignalEOI();
+  gApic->SignalEOI();
 }
 
 void InitIdt() {
@@ -189,8 +189,6 @@ void InitIdt() {
       .base = reinterpret_cast<uint64_t>(gIdt),
   };
   asm volatile("lidt %0" ::"m"(idtp));
-
-  EnableApic();
 }
 
 void RegisterPciPort(const glcr::RefPtr<Port>& port) { pci1_port = port; }

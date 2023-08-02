@@ -17,26 +17,26 @@ void ApicTimer::Init() {
 
 void ApicTimer::StartCalibration() {
   SetFrequency(100);
-  SetLocalTimer(0xFFFFFFFF, 0);
-  UnmaskPit();
+  gApic->InitializeLocalTimer(0xFFFFFFFF, Apic::ONESHOT);
+  gApic->UnmaskPit();
 }
 
 void ApicTimer::Calibrate() {
   if (calibration_.initial_measurement == 0) {
-    calibration_.initial_measurement = GetLocalTimer();
+    calibration_.initial_measurement = gApic->GetLocalTimerValue();
     return;
   }
   calibration_.tick_count++;
 
   if (calibration_.tick_count == 10) {
     calculated_frequency_ =
-        10 * (calibration_.initial_measurement - GetLocalTimer());
+        10 * (calibration_.initial_measurement - gApic->GetLocalTimerValue());
     FinishCalibration();
   }
 }
 
 void ApicTimer::FinishCalibration() {
-  MaskPit();
-  SetLocalTimer(calculated_frequency_ / kScheduleFrequency,
-                LAPIC_TIMER_PERIODIC);
+  gApic->MaskPit();
+  gApic->InitializeLocalTimer(calculated_frequency_ / kScheduleFrequency,
+                              Apic::PERIODIC);
 }

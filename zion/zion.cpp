@@ -3,6 +3,7 @@
 #include "boot/acpi.h"
 #include "common/gdt.h"
 #include "debug/debug.h"
+#include "interrupt/apic.h"
 #include "interrupt/apic_timer.h"
 #include "interrupt/interrupt.h"
 #include "interrupt/timer.h"
@@ -30,6 +31,10 @@ extern "C" void zion() {
   dbgln("[boot] Probing Hardware");
   ProbeRsdp();
 
+  // These two need to occur after memory allocation is available.
+  Apic::Init();
+  ApicTimer::Init();
+
   dbgln("[boot] Init Kernel Stack Manager.");
   KernelStackManager::Init();
 
@@ -39,7 +44,6 @@ extern "C" void zion() {
   dbgln("[boot] Init scheduler.");
   ProcessManager::Init();
   Scheduler::Init();
-  ApicTimer::Init();
 
   dbgln("[boot] Loading sys init program.");
   LoadInitProgram();
