@@ -3,6 +3,7 @@
 #include "boot/acpi.h"
 #include "common/gdt.h"
 #include "debug/debug.h"
+#include "interrupt/apic_timer.h"
 #include "interrupt/interrupt.h"
 #include "interrupt/timer.h"
 #include "loader/init_loader.h"
@@ -39,7 +40,10 @@ extern "C" void zion() {
   ProcessManager::Init();
   Scheduler::Init();
   // Schedule every 50ms.
-  SetFrequency(/* hertz= */ 20);
+  ApicTimer::Init();
+  asm("sti;");
+  gApicTimer->WaitCalibration();
+  asm("cli;");
 
   dbgln("[boot] Loading sys init program.");
   LoadInitProgram();

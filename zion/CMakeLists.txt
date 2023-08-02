@@ -7,6 +7,7 @@ add_executable(zion
   common/msr.cpp
   debug/debug.cpp
   interrupt/apic.cpp
+  interrupt/apic_timer.cpp
   interrupt/interrupt.cpp
   interrupt/interrupt_enter.s
   interrupt/timer.cpp

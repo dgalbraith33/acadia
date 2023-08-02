@@ -5,6 +5,7 @@
 #include "common/port.h"
 #include "debug/debug.h"
 #include "interrupt/apic.h"
+#include "interrupt/apic_timer.h"
 #include "memory/kernel_heap.h"
 #include "scheduler/scheduler.h"
 
@@ -124,9 +125,15 @@ extern "C" void interrupt_page_fault(InterruptFrame* frame) {
   panic("PF");
 }
 
-uint64_t cnt = 0;
 extern "C" void isr_timer();
 extern "C" void interrupt_timer(InterruptFrame*) {
+  gApicTimer->Calibrate();
+  SignalEOI();
+}
+
+uint64_t cnt = 0;
+extern "C" void isr_apic_timer();
+extern "C" void interrupt_apic_timer(InterruptFrame*) {
   cnt++;
   if (cnt % 20 == 0) {
     if (cnt == 20) {
@@ -170,6 +177,7 @@ void InitIdt() {
   gIdt[14] = CreateDescriptor(isr_page_fault);
 
   gIdt[0x20] = CreateDescriptor(isr_timer);
+  gIdt[0x21] = CreateDescriptor(isr_apic_timer);
 
   gIdt[0x30] = CreateDescriptor(isr_pci1);
   gIdt[0x31] = CreateDescriptor(isr_pci2);

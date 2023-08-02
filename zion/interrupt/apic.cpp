@@ -6,6 +6,7 @@
 #include "common/msr.h"
 #include "common/port.h"
 #include "debug/debug.h"
+#include "interrupt/apic_timer.h"
 
 #define APIC_DEBUG 0
 
@@ -16,6 +17,10 @@ namespace {
 #define IA32_APIC_BASE_MSR_ENABLE 0x800
 
 const uint64_t kEoiOffset = 0xB0;
+const uint64_t kLvtTimerOffset = 0x320;
+const uint64_t kTimerInitOffset = 0x380;
+const uint64_t kTimerCurrOffset = 0x390;
+const uint64_t kTimerDivOffset = 0x3E0;
 
 // FIXME: parse these from madt.
 constexpr uint64_t kLApicBase = 0xFEE0'0000;
@@ -121,7 +126,7 @@ void InspectApic() {
 void EnableApic() {
   MaskPic();
   // Map Timer.
-  SetIoEntry(0x14, 0x20);
+  SetIoEntry(0x14, 0x10020);
 
   // PCI Line 1-4
   // FIXME: These should be level triggered according to spec I believe
@@ -135,5 +140,14 @@ void EnableApic() {
 
   InspectApic();
 }
+
+void SetLocalTimer(uint32_t init_cnt, uint64_t mode) {
+  WriteLocalReg(kTimerInitOffset, init_cnt);
+  WriteLocalReg(kLvtTimerOffset, mode | 0x21);
+}
+uint32_t GetLocalTimer() { return GetLocalReg(kTimerCurrOffset); }
+
+void UnmaskPit() { SetIoEntry(0x14, GetIoEntry(0x14) & ~(0x10000)); }
+void MaskPit() { SetIoEntry(0x14, GetIoEntry(0x14) | 0x10000); }
 
 void SignalEOI() { WriteLocalReg(kEoiOffset, 0x0); }
