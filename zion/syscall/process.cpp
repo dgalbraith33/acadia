@@ -26,12 +26,15 @@ z_err_t ProcessSpawn(ZProcessSpawnReq* req) {
   *req->new_vmas_cap = curr_proc.AddNewCapability(proc->vmas());
 
   if (req->bootstrap_cap != 0) {
-    auto cap = curr_proc.ReleaseCapability(req->bootstrap_cap);
+    auto cap = curr_proc.GetCapability(req->bootstrap_cap);
     if (!cap) {
       return glcr::CAP_NOT_FOUND;
     }
-    // FIXME: Check permissions.
-    *req->new_bootstrap_cap = proc->AddExistingCapability(cap);
+    if (!(cap->HasPermissions(kZionPerm_Transmit))) {
+      return glcr::CAP_PERMISSION_DENIED;
+    }
+    *req->new_bootstrap_cap = proc->AddExistingCapability(
+        curr_proc.ReleaseCapability(req->bootstrap_cap));
   }
 
   return glcr::OK;

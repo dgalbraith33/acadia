@@ -22,7 +22,8 @@ class Port : public IpcObject {
  public:
   uint64_t TypeTag() override { return KernelObject::PORT; }
   static uint64_t DefaultPermissions() {
-    return kZionPerm_Write | kZionPerm_Read | kZionPerm_Duplicate;
+    return kZionPerm_Write | kZionPerm_Read | kZionPerm_Duplicate |
+           kZionPerm_Transmit;
   }
 
   Port() = default;

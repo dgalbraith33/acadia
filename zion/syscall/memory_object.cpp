@@ -39,6 +39,7 @@ z_err_t MemoryObjectDuplicate(ZMemoryObjectDuplicateReq* req) {
   ASSIGN_OR_RETURN(
       glcr::RefPtr<MemoryObject> new_vmmo,
       vmmo_cap->obj<MemoryObject>()->Duplicate(req->base_offset, req->length));
-  *req->new_vmmo_cap = curr_proc.AddNewCapability(new_vmmo);
+  *req->new_vmmo_cap =
+      curr_proc.AddNewCapability(new_vmmo, vmmo_cap->permissions());
   return glcr::OK;
 }
