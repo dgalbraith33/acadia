@@ -24,7 +24,7 @@ class Process : public KernelObject {
   uint64_t TypeTag() override { return KernelObject::PROCESS; }
   static uint64_t DefaultPermissions() {
     return kZionPerm_Write | kZionPerm_Read | kZionPerm_SpawnThread |
-           kZionPerm_SpawnProcess;
+           kZionPerm_SpawnProcess | kZionPerm_Duplicate;
   }
 
   enum State {

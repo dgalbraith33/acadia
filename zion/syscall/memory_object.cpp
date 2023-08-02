@@ -34,7 +34,7 @@ z_err_t MemoryObjectDuplicate(ZMemoryObjectDuplicateReq* req) {
   auto& curr_proc = gScheduler->CurrentProcess();
   auto vmmo_cap = curr_proc.GetCapability(req->vmmo_cap);
   // FIXME: Check a duplication permission here.
-  RET_ERR(ValidateCapability<MemoryObject>(vmmo_cap, kZionPerm_Write));
+  RET_ERR(ValidateCapability<MemoryObject>(vmmo_cap, kZionPerm_Duplicate));
 
   ASSIGN_OR_RETURN(
       glcr::RefPtr<MemoryObject> new_vmmo,

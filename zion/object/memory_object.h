@@ -23,7 +23,7 @@ class MemoryObject : public KernelObject {
  public:
   uint64_t TypeTag() override { return KernelObject::MEMORY_OBJECT; }
   static uint64_t DefaultPermissions() {
-    return kZionPerm_Write | kZionPerm_Read;
+    return kZionPerm_Write | kZionPerm_Read | kZionPerm_Duplicate;
   }
 
   MemoryObject(uint64_t size);
