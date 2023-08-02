@@ -18,11 +18,47 @@ KernelHeap& GetKernelHeap() {
 }  // namespace
 
 KernelHeap::KernelHeap(uint64_t lower_bound, uint64_t upper_bound)
-    : next_addr_(lower_bound), upper_bound_(upper_bound) {
+    : next_slab_addr_(lower_bound),
+      first_unsized_addr_(lower_bound + (upper_bound - lower_bound) / 2),
+      next_addr_(first_unsized_addr_),
+      upper_bound_(upper_bound) {
   gKernelHeap = this;
 }
 
+void KernelHeap::InitializeSlabAllocators() {
+  slab_8_ = glcr::MakeUnique<SlabAllocator<8>>(next_slab_addr_, 4);
+  next_slab_addr_ += 0x4000;
+  slab_16_ = glcr::MakeUnique<SlabAllocator<16>>(next_slab_addr_, 6);
+  next_slab_addr_ += 0x6000;
+  slab_32_ = glcr::MakeUnique<SlabAllocator<32>>(next_slab_addr_, 6);
+  next_slab_addr_ += 0x6000;
+}
+
 void* KernelHeap::Allocate(uint64_t size) {
+#if K_HEAP_DEBUG
+  dbgln("Alloc (%x)", size);
+#endif
+  if ((size <= 8) && slab_8_) {
+    auto ptr_or = slab_8_->Allocate();
+    if (ptr_or.ok()) {
+      return ptr_or.value();
+    }
+    dbgln("Failed allocation (slab 8): %x", ptr_or.error());
+  }
+  if ((size <= 16) && slab_16_) {
+    auto ptr_or = slab_16_->Allocate();
+    if (ptr_or.ok()) {
+      return ptr_or.value();
+    }
+    dbgln("Failed allocation (slab 16): %x", ptr_or.error());
+  }
+  if ((size <= 32) && slab_32_) {
+    auto ptr_or = slab_32_->Allocate();
+    if (ptr_or.ok()) {
+      return ptr_or.value();
+    }
+    dbgln("Failed allocation (slab 32): %x", ptr_or.error());
+  }
   if (next_addr_ + size >= upper_bound_) {
     panic("Kernel Heap Overrun (next, size, max): %m, %x, %m", next_addr_, size,
           upper_bound_);
@@ -67,5 +103,5 @@ void KernelHeap::RecordSize(uint64_t size) {
 void* operator new(uint64_t size) { return GetKernelHeap().Allocate(size); }
 void* operator new[](uint64_t size) { return GetKernelHeap().Allocate(size); }
 
-void operator delete(void*, uint64_t) {}
+void operator delete(void*, uint64_t size) {}
 void operator delete[](void*) {}

@@ -1,18 +1,30 @@
 #pragma once
 
+#include <glacier/memory/unique_ptr.h>
 #include <stdint.h>
+
+#include "memory/slab_allocator.h"
 
 class KernelHeap {
  public:
   KernelHeap(uint64_t lower_bound, uint64_t upper_bound);
+  void InitializeSlabAllocators();
 
   void* Allocate(uint64_t size);
+
+  void Free(void* address);
 
   static void DumpDistribution();
 
  private:
+  uint64_t next_slab_addr_;
+  uint64_t first_unsized_addr_;
   uint64_t next_addr_;
   uint64_t upper_bound_;
+
+  glcr::UniquePtr<SlabAllocator<8>> slab_8_;
+  glcr::UniquePtr<SlabAllocator<16>> slab_16_;
+  glcr::UniquePtr<SlabAllocator<32>> slab_32_;
 
   // Distribution collection for the purpose of investigating a slab allocator.
   // 0: 0-4B
