@@ -5,4 +5,3 @@
 z_err_t MemoryObjectCreate(ZMemoryObjectCreateReq* req);
 z_err_t MemoryObjectCreatePhysical(ZMemoryObjectCreatePhysicalReq* req);
 z_err_t MemoryObjectCreateContiguous(ZMemoryObjectCreateContiguousReq* req);
-z_err_t TempPcieConfigObjectCreate(ZTempPcieConfigObjectCreateReq* req);

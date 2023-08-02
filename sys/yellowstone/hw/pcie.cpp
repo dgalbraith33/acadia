@@ -15,13 +15,9 @@ PciDeviceHeader* PciHeader(uint64_t base, uint64_t bus, uint64_t dev,
 }  // namespace
 
 PciReader::PciReader() {
-  dbgln("Creating PCI obj");
-  uint64_t vmmo_cap, vmmo_size;
-  check(ZTempPcieConfigObjectCreate(&vmmo_cap, &vmmo_size));
-
   dbgln("Creating addr space");
   uint64_t vaddr;
-  check(ZAddressSpaceMap(gSelfVmasCap, 0, vmmo_cap, &vaddr));
+  check(ZAddressSpaceMap(gSelfVmasCap, 0, gBootPciVmmoCap, &vaddr));
   dbgln("Addr %lx", vaddr);
 
   dbgln("Dumping PCI");

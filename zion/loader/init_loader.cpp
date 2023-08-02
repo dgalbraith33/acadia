@@ -3,6 +3,7 @@
 #include <glacier/memory/ref_ptr.h>
 #include <glacier/string/string.h>
 
+#include "boot/acpi.h"
 #include "boot/boot_info.h"
 #include "debug/debug.h"
 #include "include/zcall.h"
@@ -127,6 +128,16 @@ void WriteInitProgram(glcr::RefPtr<Port> port, glcr::String name, uint64_t id) {
                     MakeRefCounted<Capability>(prog_vmmo, ZC_READ | ZC_WRITE));
 }
 
+glcr::ErrorCode WritePciVmmo(glcr::RefPtr<Port> port, uint64_t id) {
+  ASSIGN_OR_RETURN(PcieConfiguration config, GetPciExtendedConfiguration());
+  auto vmmo =
+      glcr::MakeRefCounted<FixedMemoryObject>(config.base, config.offset);
+
+  port->WriteKernel(id, MakeRefCounted<Capability>(vmmo, ZC_READ | ZC_WRITE));
+
+  return glcr::OK;
+}
+
 }  // namespace
 
 void LoadInitProgram() {
@@ -146,6 +157,10 @@ void LoadInitProgram() {
                     MakeRefCounted<Capability>(proc->vmas(), ZC_WRITE));
   WriteInitProgram(port, "/sys/denali", Z_BOOT_DENALI_VMMO);
   WriteInitProgram(port, "/sys/victoriafalls", Z_BOOT_VICTORIA_FALLS_VMMO);
+
+  if (WritePciVmmo(port, Z_BOOT_PCI_VMMO) != glcr::OK) {
+    panic("Failed to provide PCI info to init.");
+  }
 
   // Start process.
   const limine_file& init_prog = GetInitProgram("/sys/yellowstone");

@@ -63,7 +63,6 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req) {
     CASE(MemoryObjectCreate);
     CASE(MemoryObjectCreatePhysical);
     CASE(MemoryObjectCreateContiguous);
-    CASE(TempPcieConfigObjectCreate);
     // syscall/ipc.h
     CASE(ChannelCreate);
     CASE(ChannelSend);

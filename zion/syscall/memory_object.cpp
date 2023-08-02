@@ -29,14 +29,3 @@ z_err_t MemoryObjectCreateContiguous(ZMemoryObjectCreateContiguousReq* req) {
   *req->paddr = paddr;
   return glcr::OK;
 }
-
-z_err_t TempPcieConfigObjectCreate(ZTempPcieConfigObjectCreateReq* req) {
-  auto& curr_proc = gScheduler->CurrentProcess();
-  ASSIGN_OR_RETURN(PcieConfiguration config, GetPciExtendedConfiguration());
-  auto vmmo_ref =
-      glcr::MakeRefCounted<FixedMemoryObject>(config.base, config.offset);
-  *req->vmmo_cap = curr_proc.AddNewCapability(
-      StaticCastRefPtr<MemoryObject>(vmmo_ref), ZC_WRITE);
-  *req->vmmo_size = config.offset;
-  return glcr::OK;
-}

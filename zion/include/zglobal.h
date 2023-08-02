@@ -9,3 +9,4 @@ extern uint64_t gInitEndpointCap;
 
 extern uint64_t gBootDenaliVmmoCap;
 extern uint64_t gBootVictoriaFallsVmmoCap;
+extern uint64_t gBootPciVmmoCap;

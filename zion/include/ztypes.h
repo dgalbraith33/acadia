@@ -27,8 +27,6 @@ const uint64_t kZionMemoryObjectCreate = 0x30;
 const uint64_t kZionMemoryObjectCreatePhysical = 0x31;
 const uint64_t kZionMemoryObjectCreateContiguous = 0x32;
 
-const uint64_t kZionTempPcieConfigObjectCreate = 0x3F;
-
 // IPC Calls
 const uint64_t kZionChannelCreate = 0x40;
 const uint64_t kZionChannelSend = 0x41;
@@ -90,3 +88,4 @@ typedef uint64_t z_cap_t;
 
 #define Z_BOOT_DENALI_VMMO 0x4200'0000
 #define Z_BOOT_VICTORIA_FALLS_VMMO 0x4200'0001
+#define Z_BOOT_PCI_VMMO 0x4200'0002
