@@ -95,7 +95,8 @@ extern "C" void interrupt_page_fault(InterruptFrame* frame) {
   uint64_t err = frame->error_code;
   if ((err & 0x1) == 0) {
     // Page not present error may be resolveable.
-    if (gScheduler->CurrentProcess().vmas()->HandlePageFault(frame->cr2)) {
+    if (gScheduler &&
+        gScheduler->CurrentProcess().vmas()->HandlePageFault(frame->cr2)) {
       return;
     }
   }
