@@ -1,5 +1,5 @@
 interface VFS {
-  method open (OpenFileRequest) -> (FileResponse);
+  method open (OpenFileRequest) -> (File);
 }
 
 message OpenFileRequest {

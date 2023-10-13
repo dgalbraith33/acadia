@@ -186,7 +186,9 @@ class Parser():
 
         self.consume_check(LexemeType.RIGHT_BRACE)
 
-        return Interface(name, methods)
+        i = Interface(name, methods)
+        name_dict[name] = i
+        return i
 
     def method(self):
         self.consume_check_identifier("method")
@@ -244,6 +246,19 @@ class Parser():
         self.consume_check(LexemeType.SEMICOLON)
         return Field(field_type, name)
 
+def type_check(decls: list[Decl]):
+    for decl in decls:
+        if type(decl) is Interface:
+            for method in decl.methods:
+                if method.request not in name_dict.keys():
+                    sys.exit("Request type '%s' for '%s.%s' does not exist" % (method.request, decl.name, method.name))
+                if type(name_dict[method.request]) is not Message:
+                    sys.exit("Request type '%s' for '%s.%s' should be a message" % (method.request, decl.name, method.name))
+                if method.response not in name_dict.keys():
+                    sys.exit("Response type '%s' for '%s.%s' does not exist" % (method.response, decl.name, method.name))
+                if type(name_dict[method.response]) is not Message:
+                    sys.exit("Response type '%s' for '%s.%s' should be a message" % (method.response, decl.name, method.name))
+
 def print_ast(decls: list[Decl]):
     for decl in decls:
         if type(decl) is Interface:
@@ -269,7 +284,9 @@ def main():
         lexemes = lexer(filedata)
 
         parser = Parser(lexemes)
-        print_ast(parser.parse())
+        ast = parser.parse()
+        type_check(ast)
+        print_ast(ast)
 
 if __name__ == "__main__":
     main()
