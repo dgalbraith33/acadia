@@ -10,6 +10,7 @@ def main():
 
     filename = sys.argv[1]
 
+    ast = None
     with open(filename, mode='r') as f:
         filedata = f.read()
         lexemes = lexer(filedata)
@@ -18,7 +19,11 @@ def main():
         ast = parser.parse()
         type_check(ast)
 
-        print(generate_message_impl(filename, ast))
+
+    with open(filename + '.h', mode='w') as f:
+        f.write(generate_message_header(ast))
+    with open(filename + '.cpp', mode='w') as f:
+        f.write(generate_message_impl(filename, ast))
 
 if __name__ == "__main__":
     main()
