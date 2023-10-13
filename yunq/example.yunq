@@ -1,0 +1,14 @@
+interface File {
+  method open (OpenFileRequest) -> (FileResponse);
+}
+
+message OpenFileRequest {
+  string path;
+  u64 options;
+}
+
+message File {
+  string path;
+  u64 attrs;
+  capability mem_cap;
+}
