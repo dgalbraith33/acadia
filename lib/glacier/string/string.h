@@ -6,6 +6,7 @@ namespace glcr {
 
 class String {
  public:
+  String();
   String(const char* cstr);
   String(const char* cstr, uint64_t str_len);
 

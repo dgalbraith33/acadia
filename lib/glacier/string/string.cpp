@@ -14,6 +14,8 @@ uint64_t cstrlen(const char* cstr) {
 
 }  // namespace
 
+String::String() : cstr_(nullptr), length_(0) {}
+
 String::String(const char* str) : String(str, cstrlen(str)) {}
 
 String::String(const char* cstr, uint64_t str_len) : length_(str_len) {
