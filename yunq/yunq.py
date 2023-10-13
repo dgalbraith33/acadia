@@ -115,6 +115,8 @@ class Message():
 
 Decl = Interface | Message
 
+name_dict: dict[str, Decl] = {}
+
 class Parser():
     def __init__(self, tokens: list[Lexeme]):
         self.tokens = tokens
@@ -168,11 +170,19 @@ class Parser():
         # "interface" consumed by decl.
         name = self.consume_identifier()
 
+        if name in name_dict.keys():
+            sys.exit("Name '%s' already exists." % name)
+
         self.consume_check(LexemeType.LEFT_BRACE)
 
         methods: list[Method] = []
+        method_names = set()
         while self.peektype() != LexemeType.RIGHT_BRACE:
-            methods.append(self.method())
+            m = self.method()
+            if m.name in method_names:
+                sys.exit("Method %s declared twice on %s" % (m.name, name))
+            method_names.add(m.name)
+            methods.append(m)
 
         self.consume_check(LexemeType.RIGHT_BRACE)
 
@@ -203,15 +213,25 @@ class Parser():
 
         name = self.consume_identifier()
 
+        if name in name_dict:
+            sys.exit("Name '%s' already exists." % name)
+
         self.consume_check(LexemeType.LEFT_BRACE)
 
         fields: list[Field] = []
+        field_names = set()
         while self.peektype() != LexemeType.RIGHT_BRACE:
-            fields.append(self.field())
+            f = self.field()
+            if f.name in field_names:
+                sys.exit("Field %s declared twice on %s" % (f.name, name))
+            field_names.add(f.name)
+            fields.append(f)
 
         self.consume_check(LexemeType.RIGHT_BRACE)
 
-        return Message(name, fields)
+        m = Message(name, fields)
+        name_dict[name] = m
+        return m
 
     def field(self):
 

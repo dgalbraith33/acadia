@@ -1,4 +1,4 @@
-interface File {
+interface VFS {
   method open (OpenFileRequest) -> (FileResponse);
 }
 
