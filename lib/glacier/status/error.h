@@ -30,6 +30,7 @@ static const uint64_t FAILED_PRECONDITION = 0x8;
 static const uint64_t INTERNAL = 0x100;
 static const uint64_t UNIMPLEMENTED = 0x101;
 static const uint64_t EXHAUSTED = 0x102;
+static const uint64_t INVALID_RESPONSE = 0x103;
 
 // Kernel specific error codes (relating to capabilities).
 static const uint64_t CAP_NOT_FOUND = 0x1000;

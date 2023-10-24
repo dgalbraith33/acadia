@@ -38,6 +38,25 @@ def main():
         message_impl =  message_impl_tmpl.render(file=filename, messages=messages)
         f.write(message_impl)
 
+    client_header_tmpl = jinja_env.get_template("client.h.jinja")
+    with open(filename + '.client.h', mode='w') as f:
+        client_header = client_header_tmpl.render(file=filename, interfaces=interfaces)
+        f.write(client_header)
+
+    client_impl_tmpl = jinja_env.get_template("client.cpp.jinja")
+    with open(filename + '.client.cpp', mode='w') as f:
+        client_impl = client_impl_tmpl.render(file=filename, interfaces=interfaces)
+        f.write(client_impl)
+
+    server_header_tmpl = jinja_env.get_template("server.h.jinja")
+    with open(filename + '.server.h', mode='w') as f:
+        server_header = server_header_tmpl.render(file=filename, interfaces=interfaces)
+        f.write(server_header)
+
+    server_impl_tmpl = jinja_env.get_template("server.cpp.jinja")
+    with open(filename + '.server.cpp', mode='w') as f:
+        server_impl = client_impl_tmpl.render(file=filename, interfaces=interfaces)
+        f.write(server_impl)
 
 if __name__ == "__main__":
     main()

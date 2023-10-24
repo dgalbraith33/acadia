@@ -1,0 +1,33 @@
+// Generated File -- DO NOT MODIFY.
+#pragma once
+
+#include <mammoth/thread.h>
+#include <ztypes.h>
+
+#include "{{file}}.h"
+
+{% for interface in interfaces %}
+
+class {{interface.name}}ServerBase {
+ public:
+  {{interface.name}}ServerBase(z_cap_t {{interface.name}}_cap) : {}
+  {{interface.name}}ServerBase(const {{interface.name}}ServerBase&) = delete;
+  {{interface.name}}ServerBase({{interface.name}}ServerBase&&) = delete;
+
+  [[nodiscard]] Thread RunServer();
+
+{% for method in interface.methods %}
+  [[nodiscard]] virtual glcr::ErrorCode Handle{{method.name}}(const {{method.request}}&, {{method.response}}&) = 0;
+{% endfor %}
+
+ private:
+  z_cap_t endpoint_;
+
+  friend void {{interface.name}}ServerBaseThreadBootstrap(void*);
+  void ServerThread();
+
+  [[nodiscard]] glcr::ErrorCode HandleRequest(const glcr::ByteBuffer& request, glcr::ByteBuffer& response,
+                                              glcr::CapBuffer& resp_caps);
+};
+
+{% endfor %}
