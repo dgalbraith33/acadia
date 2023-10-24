@@ -8,7 +8,7 @@ const uint64_t header_size = 24;  // 4x uint32, 1x uint64
 struct ExtPointer {
   uint32_t offset;
   uint32_t length;
-}
+};
 
 void CheckHeader(const glcr::ByteBuffer& bytes) {
   // TODO: Check ident.
@@ -29,7 +29,7 @@ void WriteHeader(glcr::ByteBuffer& bytes, uint32_t core_size, uint32_t extension
 }  // namespace
 
 void OpenFileRequest::ParseFromBytes(const glcr::ByteBuffer& bytes) {
-  CheckHeader();
+  CheckHeader(bytes);
 
   auto path_pointer = bytes.At<ExtPointer>(header_size + (8 * 0));
 
@@ -40,7 +40,7 @@ void OpenFileRequest::ParseFromBytes(const glcr::ByteBuffer& bytes) {
 }
 
 void OpenFileRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, const glcr::CapBuffer& caps) {
-  CheckHeader();
+  CheckHeader(bytes);
 
   auto path_pointer = bytes.At<ExtPointer>(header_size + (8 * 0));
 
@@ -50,7 +50,7 @@ void OpenFileRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, const glcr::
 
 }
 
-OpenFileRequest::SerializeToBytes(glcr::ByteBuffer& bytes) {
+void OpenFileRequest::SerializeToBytes(glcr::ByteBuffer& bytes) {
 
   uint32_t next_extension = header_size + 8 * 2;
   const uint32_t core_size = next_extension;
@@ -58,7 +58,7 @@ OpenFileRequest::SerializeToBytes(glcr::ByteBuffer& bytes) {
   ExtPointer path_ptr{
     .offset = next_extension,
     // FIXME: Check downcast of str length.
-    .length = path().length(),
+    .length = (uint32_t)path().length(),
   };
 
   bytes.WriteStringAt(next_extension, path());
@@ -72,7 +72,7 @@ OpenFileRequest::SerializeToBytes(glcr::ByteBuffer& bytes) {
   WriteHeader(bytes, core_size, next_extension);
 }
 
-OpenFileRequest::SerializeToBytes(glcr::ByteBuffer& bytes, glcr::CapBuffer& caps) {
+void OpenFileRequest::SerializeToBytes(glcr::ByteBuffer& bytes, glcr::CapBuffer& caps) {
 
   uint32_t next_extension = header_size + 8 * 2;
   const uint32_t core_size = next_extension;
@@ -81,7 +81,7 @@ OpenFileRequest::SerializeToBytes(glcr::ByteBuffer& bytes, glcr::CapBuffer& caps
   ExtPointer path_ptr{
     .offset = next_extension,
     // FIXME: Check downcast of str length.
-    .length = path().length(),
+    .length = (uint32_t)path().length(),
   };
 
   bytes.WriteStringAt(next_extension, path());
@@ -96,7 +96,7 @@ OpenFileRequest::SerializeToBytes(glcr::ByteBuffer& bytes, glcr::CapBuffer& caps
 }
 
 void File::ParseFromBytes(const glcr::ByteBuffer& bytes) {
-  CheckHeader();
+  CheckHeader(bytes);
 
   auto path_pointer = bytes.At<ExtPointer>(header_size + (8 * 0));
 
@@ -109,7 +109,7 @@ void File::ParseFromBytes(const glcr::ByteBuffer& bytes) {
 }
 
 void File::ParseFromBytes(const glcr::ByteBuffer& bytes, const glcr::CapBuffer& caps) {
-  CheckHeader();
+  CheckHeader(bytes);
 
   auto path_pointer = bytes.At<ExtPointer>(header_size + (8 * 0));
 
@@ -119,11 +119,11 @@ void File::ParseFromBytes(const glcr::ByteBuffer& bytes, const glcr::CapBuffer& 
 
   uint64_t mem_cap_ptr = bytes.At<uint64_t>(header_size + (8 * 2));
 
-  set_mem_cap(caps.at(mem_cap_ptr));
+  set_mem_cap(caps.At(mem_cap_ptr));
 
 }
 
-File::SerializeToBytes(glcr::ByteBuffer& bytes) {
+void File::SerializeToBytes(glcr::ByteBuffer& bytes) {
 
   uint32_t next_extension = header_size + 8 * 3;
   const uint32_t core_size = next_extension;
@@ -131,7 +131,7 @@ File::SerializeToBytes(glcr::ByteBuffer& bytes) {
   ExtPointer path_ptr{
     .offset = next_extension,
     // FIXME: Check downcast of str length.
-    .length = path().length(),
+    .length = (uint32_t)path().length(),
   };
 
   bytes.WriteStringAt(next_extension, path());
@@ -147,7 +147,7 @@ File::SerializeToBytes(glcr::ByteBuffer& bytes) {
   WriteHeader(bytes, core_size, next_extension);
 }
 
-File::SerializeToBytes(glcr::ByteBuffer& bytes, glcr::CapBuffer& caps) {
+void File::SerializeToBytes(glcr::ByteBuffer& bytes, glcr::CapBuffer& caps) {
 
   uint32_t next_extension = header_size + 8 * 3;
   const uint32_t core_size = next_extension;
@@ -156,7 +156,7 @@ File::SerializeToBytes(glcr::ByteBuffer& bytes, glcr::CapBuffer& caps) {
   ExtPointer path_ptr{
     .offset = next_extension,
     // FIXME: Check downcast of str length.
-    .length = path().length(),
+    .length = (uint32_t)path().length(),
   };
 
   bytes.WriteStringAt(next_extension, path());
@@ -166,7 +166,7 @@ File::SerializeToBytes(glcr::ByteBuffer& bytes, glcr::CapBuffer& caps) {
 
   bytes.WriteAt<uint64_t>(header_size + (8 * 1), attrs());
 
-  caps.Write(next_cap, mem_cap());
+  caps.WriteAt(next_cap, mem_cap());
   bytes.WriteAt<uint64_t>(header_size + (8 * 2), next_cap++);
 
   // The next extension pointer is the length of the message. 

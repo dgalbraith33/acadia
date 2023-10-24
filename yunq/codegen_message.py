@@ -5,6 +5,8 @@ HEADER_PRELUDE = """
 // Generated file - DO NOT MODIFY
 #pragma once
 
+#include <glacier/buffer/byte_buffer.h>
+#include <glacier/buffer/cap_buffer.h>
 #include <glacier/string/string.h>
 #include <ztypes.h>
 
@@ -90,7 +92,7 @@ const uint64_t header_size = 24;  // 4x uint32, 1x uint64
 struct ExtPointer {{
   uint32_t offset;
   uint32_t length;
-}}
+}};
 
 void CheckHeader(const glcr::ByteBuffer& bytes) {{
   // TODO: Check ident.
@@ -113,12 +115,12 @@ void WriteHeader(glcr::ByteBuffer& bytes, uint32_t core_size, uint32_t extension
 
 IMPL_PARSE_DEF = """
 void {name}::ParseFromBytes(const glcr::ByteBuffer& bytes) {{
-  CheckHeader();
+  CheckHeader(bytes);
 """
 
 IMPL_PARSE_DEF_CAP = """
 void {name}::ParseFromBytes(const glcr::ByteBuffer& bytes, const glcr::CapBuffer& caps) {{
-  CheckHeader();
+  CheckHeader(bytes);
 """
 
 IMPL_PARSE_U64 = """
@@ -142,7 +144,7 @@ IMPL_SET_CAP_EMPTY = """
 IMPL_PARSE_CAP = """
   uint64_t {name}_ptr = bytes.At<uint64_t>(header_size + (8 * {offset}));
 
-  set_{name}(caps.at({name}_ptr));
+  set_{name}(caps.At({name}_ptr));
 """
 
 IMPL_PARSE_DEF_END = """
@@ -174,14 +176,14 @@ def _generate_message_parse_impl(message: Message) -> str:
     return impl
 
 IMPL_SER_DEF = """
-{name}::SerializeToBytes(glcr::ByteBuffer& bytes) {{
+void {name}::SerializeToBytes(glcr::ByteBuffer& bytes) {{
 
   uint32_t next_extension = header_size + 8 * {num_fields};
   const uint32_t core_size = next_extension;
 """
 
 IMPL_SER_CAP_DEF = """
-{name}::SerializeToBytes(glcr::ByteBuffer& bytes, glcr::CapBuffer& caps) {{
+void {name}::SerializeToBytes(glcr::ByteBuffer& bytes, glcr::CapBuffer& caps) {{
 
   uint32_t next_extension = header_size + 8 * {num_fields};
   const uint32_t core_size = next_extension;
@@ -200,7 +202,7 @@ IMPL_SER_STRING = """
   ExtPointer {name}_ptr{{
     .offset = next_extension,
     // FIXME: Check downcast of str length.
-    .length = {name}().length(),
+    .length = (uint32_t){name}().length(),
   }};
 
   bytes.WriteStringAt(next_extension, {name}());
@@ -214,7 +216,7 @@ IMPL_SER_CAP_EMPTY = """
 """
 
 IMPL_SER_CAP = """
-  caps.Write(next_cap, {name}());
+  caps.WriteAt(next_cap, {name}());
   bytes.WriteAt<uint64_t>(header_size + (8 * {offset}), next_cap++);
 """
 

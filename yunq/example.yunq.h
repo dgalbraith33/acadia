@@ -2,6 +2,8 @@
 // Generated file - DO NOT MODIFY
 #pragma once
 
+#include <glacier/buffer/byte_buffer.h>
+#include <glacier/buffer/cap_buffer.h>
 #include <glacier/string/string.h>
 #include <ztypes.h>
 

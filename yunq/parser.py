@@ -1,4 +1,5 @@
 from enum import Enum
+import sys
 
 class LexemeType(Enum):
     NONE = 0
