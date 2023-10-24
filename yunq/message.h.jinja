@@ -1,0 +1,34 @@
+// Generated file - DO NOT MODIFY
+#pragma once
+
+#include <glacier/buffer/byte_buffer.h>
+#include <glacier/buffer/cap_buffer.h>
+#include <glacier/string/string.h>
+#include <ztypes.h>
+
+
+{%- for message in messages %}
+class {{message.name}} {
+ public:
+  {{message.name}}() {}
+  // Delete copy and move until implemented.
+  {{message.name}}(const {{message.name}}&) = delete;
+  {{message.name}}({{message.name}}&&) = delete;
+
+  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
+  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset);
+  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&);
+
+{%- for field in message.fields %}
+  {{field.cpp_type()}} {{field.name}}() { return {{field.name}}_; }
+  void set_{{field.name}}(const {{field.cpp_type()}}& value) { {{field.name}}_ = value; }
+{%- endfor %}
+
+ private:
+{%- for field in message.fields %}
+  {{field.cpp_type()}} {{field.name}}_;
+{%- endfor %}
+
+};
+{%- endfor %}

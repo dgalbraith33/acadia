@@ -102,10 +102,21 @@ type_str_dict = {
         "capability": Type.CAPABILITY,
         }
 
+type_to_cppstr = {
+        Type.U64: "uint64_t",
+        Type.I64: "int64_t",
+        Type.STRING: "glcr::String",
+        Type.CAPABILITY: "z_cap_t",
+        Type.BYTES: "glcr::Vector<uint8_t>"
+        }
+
 class Field():
     def __init__(self, fieldtype: Type, name: str):
         self.type = fieldtype
         self.name = name
+
+    def cpp_type(self):
+        return type_to_cppstr[self.type]
 
 class Message():
     def __init__(self, name: str, fields: list[Field]):

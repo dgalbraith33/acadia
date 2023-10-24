@@ -1,0 +1,147 @@
+// Generated file -- DO NOT MODIFY.
+#include "{{file}}.h"
+
+namespace {
+
+const uint64_t header_size = 24;  // 4x uint32, 1x uint64
+
+struct ExtPointer {
+  uint32_t offset;
+  uint32_t length;
+};
+
+void CheckHeader(const glcr::ByteBuffer& bytes) {
+  // TODO: Check ident.
+  // TODO: Parse core size.
+  // TODO: Parse extension size.
+  // TODO: Check CRC32
+  // TODO: Parse options.
+}
+
+void WriteHeader(glcr::ByteBuffer& bytes, uint64_t offset, uint32_t core_size, uint32_t extension_size) {
+  bytes.WriteAt<uint32_t>(offset + 0, 0xDEADBEEF);  // TODO: Chose a more unique ident sequence.
+  bytes.WriteAt<uint32_t>(offset + 4, core_size);
+  bytes.WriteAt<uint32_t>(offset + 8, extension_size);
+  bytes.WriteAt<uint32_t>(offset + 12, 0); // TODO: Calculate CRC32.
+  bytes.WriteAt<uint64_t>(offset + 16, 0); // TODO: Add options.
+}
+
+}  // namespace
+
+{%- for message in messages %}
+void {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  CheckHeader(bytes);
+
+{%- for field in message.fields %}
+  // Parse {{field.name}}.
+{%- if field.type == Type.U64 %}
+  set_{{field.name}}(bytes.At<uint64_t>(offset + header_size + (8 * {{loop.index0}})));
+{%- elif field.type == Type.I64 %}
+  set_{{field.name}}(bytes.At<int64_t>(offset + header_size + (8 * {{loop.index0}})));
+{%- elif field.type == Type.STRING %}
+  auto {{field.name}}_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * {{loop.index0}}));
+
+  set_{{field.name}}(bytes.StringAt(offset + {{field.name}}_pointer.offset, {{field.name}}_pointer.length));
+{%- elif field.type == Type.CAPABILITY %}
+  // FIXME: Implement in-buffer capabilities for inprocess serialization.
+  set_{{field.name}}(0);
+{%- else %}
+  // TODO: Unimplemented parsing {{field.type}}
+{%- endif %}
+{%- endfor %}
+}
+
+void {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
+  CheckHeader(bytes);
+
+{%- for field in message.fields %}
+  // Parse {{field.name}}.
+{%- if field.type == Type.U64 %}
+  set_{{field.name}}(bytes.At<uint64_t>(offset + header_size + (8 * {{loop.index0}})));
+{%- elif field.type == Type.I64 %}
+  set_{{field.name}}(bytes.At<int64_t>(offset + header_size + (8 * {{loop.index0}})));
+{%- elif field.type == Type.STRING %}
+  auto {{field.name}}_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * {{loop.index0}}));
+
+  set_{{field.name}}(bytes.StringAt(offset + {{field.name}}_pointer.offset, {{field.name}}_pointer.length));
+{%- elif field.type == Type.CAPABILITY %}
+  uint64_t {{field.name}}_ptr = bytes.At<uint64_t>(offset + header_size + (8 * {{loop.index0}}));
+
+  set_{{field.name}}(caps.At({{field.name}}_ptr));
+{%- else %}
+  // TODO: Unimplemented parsing {{field.type}}
+{%- endif %}
+{%- endfor %}
+}
+
+uint64_t {{message.name}}::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) {
+  uint32_t next_extension = header_size + 8 * {{ message.fields | length }};
+  const uint32_t core_size = next_extension;
+
+{%- for field in message.fields %}
+  // Write {{field.name}}.
+{%- if field.type == Type.U64 %}
+  bytes.WriteAt<uint64_t>(offset + header_size + (8 * {{loop.index0}}), {{field.name}}());
+{%- elif field.type == Type.I64 %}
+  bytes.WriteAt<int64_t>(offset + header_size + (8 * {{loop.index0}}), {{field.name}}());
+{%- elif field.type == Type.STRING %}
+  ExtPointer {{field.name}}_ptr{
+    .offset = next_extension,
+    // FIXME: Check downcast of str length.
+    .length = (uint32_t){{field.name}}().length(),
+  };
+
+  bytes.WriteStringAt(offset + next_extension, {{field.name}}());
+  next_extension += {{field.name}}_ptr.length;
+
+  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * {{loop.index0}}), {{field.name}}_ptr);
+{%- elif field.type == Type.CAPABILITY %}
+  // FIXME: Implement inbuffer capabilities.
+  bytes.WriteAt<uint64_t>(offset + header_size + (8 * {{loop.index0}}), 0);
+{%- else %}
+  // TODO: Unimplemented serialization {{field.type}}
+{%- endif %}
+{%- endfor %}
+
+  // The next extension pointer is the length of the message. 
+  WriteHeader(bytes, offset, core_size, next_extension);
+
+  return next_extension;
+}
+
+uint64_t {{message.name}}::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) {
+  uint32_t next_extension = header_size + 8 * {{ message.fields | length}};
+  const uint32_t core_size = next_extension;
+  uint64_t next_cap = 0;
+
+{%- for field in message.fields %}
+  // Write {{field.name}}.
+{%- if field.type == Type.U64 %}
+  bytes.WriteAt<uint64_t>(offset + header_size + (8 * {{loop.index0}}), {{field.name}}());
+{%- elif field.type == Type.I64 %}
+  bytes.WriteAt<int64_t>(offset + header_size + (8 * {{loop.index0}}), {{field.name}}());
+{%- elif field.type == Type.STRING %}
+  ExtPointer {{field.name}}_ptr{
+    .offset = next_extension,
+    // FIXME: Check downcast of str length.
+    .length = (uint32_t){{field.name}}().length(),
+  };
+
+  bytes.WriteStringAt(offset + next_extension, {{field.name}}());
+  next_extension += {{field.name}}_ptr.length;
+
+  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * {{loop.index0}}), {{field.name}}_ptr);
+{%- elif field.type == Type.CAPABILITY %}
+  caps.WriteAt(next_cap, {{field.name}}());
+  bytes.WriteAt<uint64_t>(offset + header_size + (8 * {{loop.index0}}), next_cap++);
+{%- else %}
+  // TODO: Unimplemented serialization {{field.type}}
+{%- endif %}
+{%- endfor %}
+
+  // The next extension pointer is the length of the message. 
+  WriteHeader(bytes, offset, core_size, next_extension);
+
+  return next_extension;
+}
+{%- endfor %}
