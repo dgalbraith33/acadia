@@ -38,4 +38,9 @@ bool String::operator==(const String& other) {
   return true;
 }
 
+char String::operator[](uint64_t offset) const {
+  // FIXME: bounds check.
+  return cstr_[offset];
+}
+
 }  // namespace glcr

@@ -15,6 +15,8 @@ class String {
 
   bool operator==(const String& str);
 
+  char operator[](uint64_t offset) const;
+
  private:
   char* cstr_;
   uint64_t length_;
