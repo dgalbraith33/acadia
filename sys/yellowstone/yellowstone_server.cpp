@@ -43,54 +43,36 @@ glcr::ErrorOr<glcr::UniquePtr<YellowstoneServer>> YellowstoneServer::Create() {
 }
 
 YellowstoneServer::YellowstoneServer(z_cap_t endpoint_cap, PortServer port)
-    : EndpointServer(endpoint_cap), register_port_(port) {}
+    : YellowstoneServerBase(endpoint_cap), register_port_(port) {}
 
 Thread YellowstoneServer::RunRegistration() {
   return Thread(RegistrationThreadBootstrap, this);
 }
 
-glcr::ErrorCode YellowstoneServer::HandleRequest(RequestContext& request,
-                                                 ResponseContext& response) {
-  switch (request.request_id()) {
-    case kYellowstoneGetAhci: {
-      dbgln("Yellowstone::GetAHCI");
-      YellowstoneGetAhciResp resp{
-          .type = kYellowstoneGetAhci,
-          .ahci_length = kPcieConfigurationSize,
-      };
-      z_cap_t vmmo_cap = pci_reader_.GetAhciVmmo();
-      RET_ERR(
-          response.WriteStructWithCap<YellowstoneGetAhciResp>(resp, vmmo_cap));
-      break;
-    }
-    case kYellowstoneGetRegistration: {
-      dbgln("Yellowstone::GetRegistration");
-      auto client_or = register_port_.CreateClient();
-      if (!client_or.ok()) {
-        check(client_or.error());
-      }
-      YellowstoneGetRegistrationResp resp;
-      uint64_t reg_cap = client_or.value().cap();
-      RET_ERR(response.WriteStructWithCap(resp, reg_cap));
-      break;
-    }
-    case kYellowstoneGetDenali: {
-      dbgln("Yellowstone::GetDenali");
-      z_cap_t new_denali;
-      check(ZCapDuplicate(denali_cap_, &new_denali));
-      YellowstoneGetDenaliResp resp{
-          .type = kYellowstoneGetDenali,
-          .device_id = device_id_,
-          .lba_offset = lba_offset_,
-      };
-      RET_ERR(response.WriteStructWithCap(resp, new_denali));
-      break;
-    }
-    default:
-      dbgln("Unknown request type: %x", request.request_id());
-      return glcr::UNIMPLEMENTED;
-      break;
+glcr::ErrorCode YellowstoneServer::HandleGetAhciInfo(const Empty&,
+                                                     AhciInfo& info) {
+  info.set_ahci_region(pci_reader_.GetAhciVmmo());
+  info.set_region_length(kPcieConfigurationSize);
+  return glcr::OK;
+}
+
+glcr::ErrorCode YellowstoneServer::HandleGetDenali(const Empty&,
+                                                   DenaliInfo& info) {
+  z_cap_t new_denali;
+  check(ZCapDuplicate(denali_cap_, &new_denali));
+  info.set_denali_endpoint(new_denali);
+  info.set_device_id(device_id_);
+  info.set_lba_offset(lba_offset_);
+  return glcr::OK;
+}
+glcr::ErrorCode YellowstoneServer::HandleGetRegister(const Empty&,
+                                                     RegisterInfo& info) {
+  auto client_or = register_port_.CreateClient();
+  if (!client_or.ok()) {
+    dbgln("Error creating register client: %u", client_or.error());
+    return glcr::INTERNAL;
   }
+  info.set_register_port(client_or.value().cap());
   return glcr::OK;
 }
 
@@ -118,7 +100,7 @@ void YellowstoneServer::RegistrationThread() {
       if (!client_or.ok()) {
         check(client_or.error());
       }
-      check(SpawnProcessFromElfRegion(vaddr, glcr::Move(client_or.value())));
+      check(SpawnProcessFromElfRegion(vaddr, client_or.value().Capability()));
       continue;
     }
 

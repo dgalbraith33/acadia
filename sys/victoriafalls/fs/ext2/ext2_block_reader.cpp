@@ -1,5 +1,7 @@
 #include "fs/ext2/ext2_block_reader.h"
 
+#include "mammoth/debug.h"
+
 glcr::ErrorOr<glcr::SharedPtr<Ext2BlockReader>> Ext2BlockReader::Init(
     ScopedDenaliClient&& denali) {
   // Read 1024 bytes from 1024 offset.

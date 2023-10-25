@@ -1,0 +1,24 @@
+interface Yellowstone {
+  method GetRegister(Empty) -> (RegisterInfo);
+  method GetAhciInfo(Empty) -> (AhciInfo);
+  method GetDenali(Empty) -> (DenaliInfo);
+}
+
+message Empty {
+
+}
+
+message RegisterInfo {
+  capability register_port;
+}
+
+message AhciInfo {
+  capability ahci_region;
+  u64 region_length;
+}
+
+message DenaliInfo {
+  capability denali_endpoint;
+  u64 device_id;
+  u64 lba_offset;
+}

@@ -6,7 +6,7 @@
 namespace {
 class NaiveAllocator {
  public:
-  constexpr static uint64_t kSize = 0x4000;
+  constexpr static uint64_t kSize = 0x10000;
   NaiveAllocator() {}
   bool is_init() { return next_addr_ != 0; }
   void Init() {
@@ -23,6 +23,7 @@ class NaiveAllocator {
     uint64_t addr = next_addr_;
     next_addr_ += size;
     if (next_addr_ >= max_addr_) {
+      ZProcessExit(0xBEEF);
       return 0;
     }
     return reinterpret_cast<void*>(addr);

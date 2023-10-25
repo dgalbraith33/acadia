@@ -88,6 +88,8 @@ class PhysicalMemoryManager {
 
     MemBlock* block = front_;
     while (block != nullptr && block->num_pages < num_pages) {
+      dbgln("Skipping block of size %u seeking %u", block->num_pages,
+            num_pages);
       block = block->next;
     }
 

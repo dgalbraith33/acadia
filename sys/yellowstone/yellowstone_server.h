@@ -7,8 +7,9 @@
 #include <mammoth/thread.h>
 
 #include "hw/pcie.h"
+#include "include/yellowstone/yellowstone.yunq.server.h"
 
-class YellowstoneServer : public EndpointServer {
+class YellowstoneServer : public YellowstoneServerBase {
  public:
   static glcr::ErrorOr<glcr::UniquePtr<YellowstoneServer>> Create();
 
@@ -16,8 +17,9 @@ class YellowstoneServer : public EndpointServer {
 
   void RegistrationThread();
 
-  virtual glcr::ErrorCode HandleRequest(RequestContext& request,
-                                        ResponseContext& response) override;
+  glcr::ErrorCode HandleGetAhciInfo(const Empty&, AhciInfo&) override;
+  glcr::ErrorCode HandleGetDenali(const Empty&, DenaliInfo&) override;
+  glcr::ErrorCode HandleGetRegister(const Empty&, RegisterInfo&) override;
 
  private:
   // FIXME: Separate this to its own service.

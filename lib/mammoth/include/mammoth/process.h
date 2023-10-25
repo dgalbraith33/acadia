@@ -5,5 +5,5 @@
 
 #include "mammoth/endpoint_client.h"
 
-glcr::ErrorCode SpawnProcessFromElfRegion(
-    uint64_t program, glcr::UniquePtr<EndpointClient> client);
+glcr::ErrorCode SpawnProcessFromElfRegion(uint64_t program,
+                                          z_cap_t yellowstone_client);

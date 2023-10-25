@@ -5,7 +5,7 @@
 #include <mammoth/port_client.h>
 #include <stdint.h>
 #include <yellowstone.h>
-#include <yellowstone_stub.h>
+#include <yellowstone/yellowstone.yunq.client.h>
 
 #include "ahci/ahci_driver.h"
 #include "denali_server.h"
@@ -15,8 +15,12 @@ uint64_t main(uint64_t init_port_cap) {
   glcr::UniquePtr<EndpointClient> yellowstone =
       EndpointClient::AdoptEndpoint(gInitEndpointCap);
 
-  YellowstoneStub stub(gInitEndpointCap);
-  ASSIGN_OR_RETURN(MappedMemoryRegion ahci_region, stub.GetAhciConfig());
+  YellowstoneClient stub(gInitEndpointCap);
+  Empty empty;
+  AhciInfo ahci;
+  RET_ERR(stub.GetAhciInfo(empty, ahci));
+  MappedMemoryRegion ahci_region =
+      MappedMemoryRegion::FromCapability(ahci.ahci_region());
   ASSIGN_OR_RETURN(auto driver, AhciDriver::Init(ahci_region));
 
   ASSIGN_OR_RETURN(glcr::UniquePtr<DenaliServer> server,
@@ -24,7 +28,14 @@ uint64_t main(uint64_t init_port_cap) {
 
   ASSIGN_OR_RETURN(glcr::UniquePtr<EndpointClient> client,
                    server->CreateClient());
-  check(stub.Register("denali", *client));
+
+  RegisterInfo reg;
+  Empty empty2;
+  check(stub.GetRegister(empty2, reg));
+
+  PortClient register_port = PortClient::AdoptPort(reg.register_port());
+
+  check(register_port.WriteString("denali", client->GetCap()));
 
   Thread server_thread = server->RunServer();
 

@@ -18,9 +18,8 @@ uint64_t main(uint64_t port_cap) {
 
   uint64_t vaddr;
   check(ZAddressSpaceMap(gSelfVmasCap, 0, gBootDenaliVmmoCap, &vaddr));
-  ASSIGN_OR_RETURN(glcr::UniquePtr<EndpointClient> client,
-                   server->CreateClient());
-  check(SpawnProcessFromElfRegion(vaddr, glcr::Move(client)));
+  ASSIGN_OR_RETURN(YellowstoneClient client, server->CreateClient());
+  check(SpawnProcessFromElfRegion(vaddr, client.Capability()));
 
   check(server_thread.Join());
   check(registration_thread.Join());

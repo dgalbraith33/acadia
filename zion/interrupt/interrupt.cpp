@@ -69,7 +69,10 @@ struct InterruptFrame {
 };
 
 extern "C" void isr_divide_by_zero();
-extern "C" void interrupt_divide_by_zero(void* frame) { panic("DIV0"); }
+extern "C" void interrupt_divide_by_zero(InterruptFrame* frame) {
+  dbgln("RIP: %m", frame->rip);
+  panic("DIV0");
+}
 
 extern "C" void isr_protection_fault();
 extern "C" void interrupt_protection_fault(InterruptFrame* frame) {
