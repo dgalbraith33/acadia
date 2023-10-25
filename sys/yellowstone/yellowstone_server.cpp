@@ -9,7 +9,6 @@
 
 #include "hw/gpt.h"
 #include "hw/pcie.h"
-#include "include/yellowstone.h"
 
 namespace {
 

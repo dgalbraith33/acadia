@@ -7,7 +7,7 @@
 #include <mammoth/thread.h>
 
 #include "hw/pcie.h"
-#include "include/yellowstone/yellowstone.yunq.server.h"
+#include "lib/yellowstone/yellowstone.yunq.server.h"
 
 class YellowstoneServer : public YellowstoneServerBase {
  public:

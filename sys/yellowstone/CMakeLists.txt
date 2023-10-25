@@ -22,14 +22,13 @@ set_target_properties(yellowstone PROPERTIES
 
 
 add_library(yellowstone_yunq
-  include/yellowstone/yellowstone.yunq.cpp
-  include/yellowstone/yellowstone.yunq.client.cpp
-  include/yellowstone/yellowstone.yunq.server.cpp
+  lib/yellowstone/yellowstone.yunq.cpp
+  lib/yellowstone/yellowstone.yunq.client.cpp
+  lib/yellowstone/yellowstone.yunq.server.cpp
   )
 
 target_include_directories(yellowstone_yunq
-   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-   PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+  PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 
 target_link_libraries(yellowstone_yunq
   denali_stub

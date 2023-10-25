@@ -4,7 +4,6 @@
 #include <mammoth/init.h>
 #include <mammoth/port_client.h>
 #include <stdint.h>
-#include <yellowstone.h>
 #include <yellowstone/yellowstone.yunq.client.h>
 
 #include "ahci/ahci_driver.h"
