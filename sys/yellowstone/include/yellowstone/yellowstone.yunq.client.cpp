@@ -16,12 +16,12 @@ glcr::ErrorCode YellowstoneClient::GetRegister(const Empty& request, RegisterInf
   buffer_.WriteAt<uint32_t>(0, kSentinel);
   buffer_.WriteAt<uint64_t>(8, 0);
 
+  // FIXME: We need to reset the cap buffer here.
   uint64_t length = request.SerializeToBytes(buffer_, /*offset=*/16, cap_buffer_);
   buffer_.WriteAt<uint32_t>(4, 16 + length);
 
   z_cap_t reply_port_cap;
-  // FIXME: We need to be able to send capabilities via endpoint call.
-  RET_ERR(ZEndpointSend(endpoint_, 16 + length, buffer_.RawPtr(), &reply_port_cap)); 
+  RET_ERR(ZEndpointSend(endpoint_, 16 + length, buffer_.RawPtr(), cap_buffer_.UsedSlots(), cap_buffer_.RawPtr(), &reply_port_cap)); 
 
   // FIXME: Add a way to zero out the first buffer.
   RET_ERR(ZReplyPortRecv(reply_port_cap, &buffer_size, buffer_.RawPtr(), &cap_size, cap_buffer_.RawPtr()));
@@ -48,12 +48,12 @@ glcr::ErrorCode YellowstoneClient::GetAhciInfo(const Empty& request, AhciInfo& r
   buffer_.WriteAt<uint32_t>(0, kSentinel);
   buffer_.WriteAt<uint64_t>(8, 1);
 
+  // FIXME: We need to reset the cap buffer here.
   uint64_t length = request.SerializeToBytes(buffer_, /*offset=*/16, cap_buffer_);
   buffer_.WriteAt<uint32_t>(4, 16 + length);
 
   z_cap_t reply_port_cap;
-  // FIXME: We need to be able to send capabilities via endpoint call.
-  RET_ERR(ZEndpointSend(endpoint_, 16 + length, buffer_.RawPtr(), &reply_port_cap)); 
+  RET_ERR(ZEndpointSend(endpoint_, 16 + length, buffer_.RawPtr(), cap_buffer_.UsedSlots(), cap_buffer_.RawPtr(), &reply_port_cap)); 
 
   // FIXME: Add a way to zero out the first buffer.
   RET_ERR(ZReplyPortRecv(reply_port_cap, &buffer_size, buffer_.RawPtr(), &cap_size, cap_buffer_.RawPtr()));
@@ -80,12 +80,12 @@ glcr::ErrorCode YellowstoneClient::GetDenali(const Empty& request, DenaliInfo& r
   buffer_.WriteAt<uint32_t>(0, kSentinel);
   buffer_.WriteAt<uint64_t>(8, 2);
 
+  // FIXME: We need to reset the cap buffer here.
   uint64_t length = request.SerializeToBytes(buffer_, /*offset=*/16, cap_buffer_);
   buffer_.WriteAt<uint32_t>(4, 16 + length);
 
   z_cap_t reply_port_cap;
-  // FIXME: We need to be able to send capabilities via endpoint call.
-  RET_ERR(ZEndpointSend(endpoint_, 16 + length, buffer_.RawPtr(), &reply_port_cap)); 
+  RET_ERR(ZEndpointSend(endpoint_, 16 + length, buffer_.RawPtr(), cap_buffer_.UsedSlots(), cap_buffer_.RawPtr(), &reply_port_cap)); 
 
   // FIXME: Add a way to zero out the first buffer.
   RET_ERR(ZReplyPortRecv(reply_port_cap, &buffer_size, buffer_.RawPtr(), &cap_size, cap_buffer_.RawPtr()));

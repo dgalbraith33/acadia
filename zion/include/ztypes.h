@@ -63,6 +63,8 @@ const uint64_t kZionDebug = 0x1'0000;
 
 typedef uint64_t z_cap_t;
 
+const uint64_t kZionInvalidCapability = 0x0;
+
 // General Capability Permissions
 const uint64_t kZionPerm_Write = 0x1;
 const uint64_t kZionPerm_Read = 0x2;

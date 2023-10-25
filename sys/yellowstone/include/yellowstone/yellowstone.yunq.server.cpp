@@ -42,14 +42,15 @@ Thread YellowstoneServerBase::RunServer() {
 
 void YellowstoneServerBase::ServerThread() {
   glcr::ByteBuffer recv_buffer(0x1000);
+  glcr::CapBuffer recv_cap(0x10);
   glcr::ByteBuffer resp_buffer(0x1000);
-  uint64_t resp_cap_size = 0x10;
-  glcr::CapBuffer resp_cap(resp_cap_size);
+  glcr::CapBuffer resp_cap(0x10);
   z_cap_t reply_port_cap;
 
   while (true) {
+    uint64_t recv_cap_size = 0x10;
     uint64_t recv_buf_size = 0x1000;
-    glcr::ErrorCode recv_err = ZEndpointRecv(endpoint_, &recv_buf_size, recv_buffer.RawPtr(), &reply_port_cap);
+    glcr::ErrorCode recv_err = ZEndpointRecv(endpoint_, &recv_buf_size, recv_buffer.RawPtr(), &recv_cap_size, recv_cap.RawPtr(), &reply_port_cap);
     if (recv_err != glcr::OK) {
       dbgln("Error in receive: %x", recv_err);
       continue;
@@ -58,7 +59,7 @@ void YellowstoneServerBase::ServerThread() {
     uint64_t resp_length = 0;
     
     glcr::ErrorCode reply_err = glcr::OK;
-    glcr::ErrorCode err = HandleRequest(recv_buffer, resp_buffer, resp_length, resp_cap);
+    glcr::ErrorCode err = HandleRequest(recv_buffer, recv_cap, resp_buffer, resp_length, resp_cap);
     if (err != glcr::OK) {
       WriteError(resp_buffer, err);
       reply_err = ZReplyPortSend(reply_port_cap, kHeaderSize, resp_buffer.RawPtr(), 0, nullptr);
@@ -74,6 +75,7 @@ void YellowstoneServerBase::ServerThread() {
 }
 
 glcr::ErrorCode YellowstoneServerBase::HandleRequest(const glcr::ByteBuffer& request,
+                                                            const glcr::CapBuffer& req_caps,
                                                             glcr::ByteBuffer& response, uint64_t& resp_length,
                                                             glcr::CapBuffer& resp_caps) {
   if (request.At<uint32_t>(0) != kSentinel) {
@@ -87,7 +89,7 @@ glcr::ErrorCode YellowstoneServerBase::HandleRequest(const glcr::ByteBuffer& req
       Empty yunq_request;
       RegisterInfo yunq_response;
 
-      yunq_request.ParseFromBytes(request, kHeaderSize);
+      yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
 
       RET_ERR(HandleGetRegister(yunq_request, yunq_response));
 
@@ -98,7 +100,7 @@ glcr::ErrorCode YellowstoneServerBase::HandleRequest(const glcr::ByteBuffer& req
       Empty yunq_request;
       AhciInfo yunq_response;
 
-      yunq_request.ParseFromBytes(request, kHeaderSize);
+      yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
 
       RET_ERR(HandleGetAhciInfo(yunq_request, yunq_response));
 
@@ -109,7 +111,7 @@ glcr::ErrorCode YellowstoneServerBase::HandleRequest(const glcr::ByteBuffer& req
       Empty yunq_request;
       DenaliInfo yunq_response;
 
-      yunq_request.ParseFromBytes(request, kHeaderSize);
+      yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
 
       RET_ERR(HandleGetDenali(yunq_request, yunq_response));
 

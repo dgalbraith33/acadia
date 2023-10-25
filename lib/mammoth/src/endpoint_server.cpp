@@ -22,8 +22,10 @@ void EndpointServer::ServerThread() {
   while (true) {
     uint64_t message_size = kBufferSize;
     uint64_t reply_port_cap = 0;
-    glcr::ErrorCode err = ZEndpointRecv(endpoint_cap_, &message_size,
-                                        recieve_buffer_, &reply_port_cap);
+    uint64_t num_caps = 0;
+    glcr::ErrorCode err =
+        ZEndpointRecv(endpoint_cap_, &message_size, recieve_buffer_, &num_caps,
+                      nullptr, &reply_port_cap);
     if (err != glcr::OK) {
       dbgln("Error in receive: %x", err);
       continue;

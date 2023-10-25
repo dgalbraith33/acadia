@@ -13,6 +13,11 @@ class CapBuffer {
 
   ~CapBuffer() { delete[] buffer_; }
 
+  void Reset() {
+    // FIXME: Zero out caps here?
+    used_slots_ = 0;
+  }
+
   uint64_t* RawPtr() { return buffer_; }
 
   uint64_t UsedSlots() { return used_slots_; }

@@ -31,7 +31,7 @@ template <typename Req, typename Resp>
 glcr::ErrorOr<glcr::Pair<Resp, z_cap_t>> EndpointClient::CallEndpointGetCap(
     const Req& req) {
   uint64_t reply_port_cap;
-  RET_ERR(ZEndpointSend(cap_, sizeof(Req), &req, &reply_port_cap));
+  RET_ERR(ZEndpointSend(cap_, sizeof(Req), &req, 0, nullptr, &reply_port_cap));
 
   Resp resp;
   z_cap_t cap = 0;
@@ -49,7 +49,7 @@ glcr::ErrorOr<glcr::Pair<Resp, z_cap_t>> EndpointClient::CallEndpointGetCap(
 template <typename Req, typename Resp>
 glcr::ErrorOr<Resp> EndpointClient::CallEndpoint(const Req& req) {
   uint64_t reply_port_cap;
-  RET_ERR(ZEndpointSend(cap_, sizeof(Req), &req, &reply_port_cap));
+  RET_ERR(ZEndpointSend(cap_, sizeof(Req), &req, 0, nullptr, &reply_port_cap));
 
   Resp resp;
   uint64_t num_bytes = sizeof(Resp);

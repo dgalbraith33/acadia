@@ -39,6 +39,7 @@
 
 - Add syscalls for inspecting capabilities.
 - Randomize/obfuscate capability numbers passed to user space.
+- Remove ReplyPort capabilities once the response is sent.
 
 ## Scheduling
 

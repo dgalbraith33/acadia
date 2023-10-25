@@ -15,9 +15,11 @@ class MessageQueue {
   virtual ~MessageQueue() {}
 
   virtual glcr::ErrorCode PushBack(uint64_t num_bytes, const void* bytes,
-                                   uint64_t num_caps, const z_cap_t* caps) = 0;
+                                   uint64_t num_caps, const z_cap_t* caps,
+                                   z_cap_t reply_cap = 0) = 0;
   virtual glcr::ErrorCode PopFront(uint64_t* num_bytes, void* bytes,
-                                   uint64_t* num_caps, z_cap_t* caps) = 0;
+                                   uint64_t* num_caps, z_cap_t* caps,
+                                   z_cap_t* reply_cap = nullptr) = 0;
   virtual bool empty() = 0;
 
  protected:
@@ -35,9 +37,10 @@ class UnboundedMessageQueue : public MessageQueue {
   virtual ~UnboundedMessageQueue() override {}
 
   glcr::ErrorCode PushBack(uint64_t num_bytes, const void* bytes,
-                           uint64_t num_caps, const z_cap_t* caps) override;
+                           uint64_t num_caps, const z_cap_t* caps,
+                           z_cap_t reply_cap) override;
   glcr::ErrorCode PopFront(uint64_t* num_bytes, void* bytes, uint64_t* num_caps,
-                           z_cap_t* caps) override;
+                           z_cap_t* caps, z_cap_t* reply_cap) override;
 
   void WriteKernel(uint64_t init, glcr::RefPtr<Capability> cap);
 
@@ -52,6 +55,7 @@ class UnboundedMessageQueue : public MessageQueue {
     uint8_t* bytes;
 
     glcr::LinkedList<glcr::RefPtr<Capability>> caps;
+    glcr::RefPtr<Capability> reply_cap;
   };
 
   glcr::LinkedList<glcr::SharedPtr<Message>> pending_messages_;
@@ -65,9 +69,10 @@ class SingleMessageQueue : public MessageQueue {
   virtual ~SingleMessageQueue() override {}
 
   glcr::ErrorCode PushBack(uint64_t num_bytes, const void* bytes,
-                           uint64_t num_caps, const z_cap_t* caps) override;
+                           uint64_t num_caps, const z_cap_t* caps,
+                           z_cap_t reply_cap) override;
   glcr::ErrorCode PopFront(uint64_t* num_bytes, void* bytes, uint64_t* num_caps,
-                           z_cap_t* caps) override;
+                           z_cap_t* caps, z_cap_t* reply_cap) override;
 
   bool empty() override {
     MutexHolder h(mutex_);

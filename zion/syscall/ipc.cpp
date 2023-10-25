@@ -106,7 +106,8 @@ glcr::ErrorCode EndpointSend(ZEndpointSendReq* req) {
   *req->reply_port_cap = proc.AddNewCapability(reply_port, kZionPerm_Read);
   uint64_t reply_port_cap_to_send =
       proc.AddNewCapability(reply_port, kZionPerm_Write | kZionPerm_Transmit);
-  return endpoint->Send(req->num_bytes, req->data, 1, &reply_port_cap_to_send);
+  return endpoint->Send(req->num_bytes, req->data, req->num_caps, req->caps,
+                        reply_port_cap_to_send);
 }
 
 glcr::ErrorCode EndpointRecv(ZEndpointRecvReq* req) {
@@ -117,7 +118,7 @@ glcr::ErrorCode EndpointRecv(ZEndpointRecvReq* req) {
   auto endpoint = endpoint_cap->obj<Endpoint>();
 
   uint64_t num_caps = 1;
-  RET_ERR(endpoint->Recv(req->num_bytes, req->data, &num_caps,
+  RET_ERR(endpoint->Recv(req->num_bytes, req->data, req->num_caps, req->caps,
                          req->reply_port_cap));
   if (num_caps != 1) {
     return glcr::INTERNAL;

@@ -2,89 +2,8 @@
 
 #include <stdint.h>
 
+#include "zcall_macros.h"
 #include "ztypes.h"
-
-#define SYS0(name)                         \
-  struct Z##name##Req {};                  \
-  [[nodiscard]] inline z_err_t Z##name() { \
-    Z##name##Req req{};                    \
-    return SysCall1(kZion##name, &req);    \
-  }
-
-#define SYS1(name, t1, a1)                      \
-  struct Z##name##Req {                         \
-    t1 a1;                                      \
-  };                                            \
-  [[nodiscard]] inline z_err_t Z##name(t1 a1) { \
-    Z##name##Req req{                           \
-        .a1 = a1,                               \
-    };                                          \
-    return SysCall1(kZion##name, &req);         \
-  }
-
-#define SYS2(name, t1, a1, t2, a2)                     \
-  struct Z##name##Req {                                \
-    t1 a1;                                             \
-    t2 a2;                                             \
-  };                                                   \
-  [[nodiscard]] inline z_err_t Z##name(t1 a1, t2 a2) { \
-    Z##name##Req req{                                  \
-        .a1 = a1,                                      \
-        .a2 = a2,                                      \
-    };                                                 \
-    return SysCall1(kZion##name, &req);                \
-  }
-
-#define SYS3(name, t1, a1, t2, a2, t3, a3)                    \
-  struct Z##name##Req {                                       \
-    t1 a1;                                                    \
-    t2 a2;                                                    \
-    t3 a3;                                                    \
-  };                                                          \
-  [[nodiscard]] inline z_err_t Z##name(t1 a1, t2 a2, t3 a3) { \
-    Z##name##Req req{                                         \
-        .a1 = a1,                                             \
-        .a2 = a2,                                             \
-        .a3 = a3,                                             \
-    };                                                        \
-    return SysCall1(kZion##name, &req);                       \
-  }
-
-#define SYS4(name, t1, a1, t2, a2, t3, a3, t4, a4)                   \
-  struct Z##name##Req {                                              \
-    t1 a1;                                                           \
-    t2 a2;                                                           \
-    t3 a3;                                                           \
-    t4 a4;                                                           \
-  };                                                                 \
-  [[nodiscard]] inline z_err_t Z##name(t1 a1, t2 a2, t3 a3, t4 a4) { \
-    Z##name##Req req{                                                \
-        .a1 = a1,                                                    \
-        .a2 = a2,                                                    \
-        .a3 = a3,                                                    \
-        .a4 = a4,                                                    \
-    };                                                               \
-    return SysCall1(kZion##name, &req);                              \
-  }
-
-#define SYS5(name, t1, a1, t2, a2, t3, a3, t4, a4, t5, a5)                  \
-  struct Z##name##Req {                                                     \
-    t1 a1;                                                                  \
-    t2 a2;                                                                  \
-    t3 a3;                                                                  \
-    t4 a4;                                                                  \
-    t5 a5;                                                                  \
-  };                                                                        \
-  [[nodiscard]] inline z_err_t Z##name(t1 a1, t2 a2, t3 a3, t4 a4, t5 a5) { \
-    Z##name##Req req{                                                       \
-        .a1 = a1,                                                           \
-        .a2 = a2,                                                           \
-        .a3 = a3,                                                           \
-        .a4 = a4,                                                           \
-        .a5 = a5,                                                           \
-    };                                                                      \
-    return SysCall1(kZion##name, &req);                                     \
-  }
 
 z_err_t SysCall1(uint64_t code, const void* req);
 
@@ -127,10 +46,10 @@ SYS5(PortPoll, z_cap_t, port_cap, uint64_t*, num_bytes, void*, data, uint64_t*,
 SYS2(IrqRegister, uint64_t, irq_num, z_cap_t*, port_cap);
 
 SYS1(EndpointCreate, z_cap_t*, endpoint_cap);
-SYS4(EndpointSend, z_cap_t, endpoint_cap, uint64_t, num_bytes, const void*,
-     data, z_cap_t*, reply_port_cap);
-SYS4(EndpointRecv, z_cap_t, endpoint_cap, uint64_t*, num_bytes, void*, data,
-     z_cap_t*, reply_port_cap);
+SYS6(EndpointSend, z_cap_t, endpoint_cap, uint64_t, num_bytes, const void*,
+     data, uint64_t, num_caps, const z_cap_t*, caps, z_cap_t*, reply_port_cap);
+SYS6(EndpointRecv, z_cap_t, endpoint_cap, uint64_t*, num_bytes, void*, data,
+     uint64_t*, num_caps, z_cap_t*, caps, z_cap_t*, reply_port_cap);
 SYS5(ReplyPortSend, z_cap_t, reply_port_cap, uint64_t, num_bytes, const void*,
      data, uint64_t, num_caps, z_cap_t*, caps);
 SYS5(ReplyPortRecv, z_cap_t, reply_port_cap, uint64_t*, num_bytes, void*, data,

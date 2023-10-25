@@ -4,8 +4,8 @@
 #include "scheduler/scheduler.h"
 
 z_err_t UnboundedMessageQueue::PushBack(uint64_t num_bytes, const void* bytes,
-                                        uint64_t num_caps,
-                                        const z_cap_t* caps) {
+                                        uint64_t num_caps, const z_cap_t* caps,
+                                        z_cap_t reply_cap) {
   if (num_bytes > 0x1000) {
     dbgln("Large message size unimplemented: %x", num_bytes);
     return glcr::UNIMPLEMENTED;
@@ -16,6 +16,12 @@ z_err_t UnboundedMessageQueue::PushBack(uint64_t num_bytes, const void* bytes,
   message->bytes = new uint8_t[num_bytes];
   for (uint64_t i = 0; i < num_bytes; i++) {
     message->bytes[i] = static_cast<const uint8_t*>(bytes)[i];
+  }
+
+  if (reply_cap != kZionInvalidCapability) {
+    // FIXME: We're just trusting that capability has the correct permissions.
+    message->reply_cap =
+        gScheduler->CurrentProcess().ReleaseCapability(reply_cap);
   }
 
   for (uint64_t i = 0; i < num_caps; i++) {
@@ -46,7 +52,8 @@ z_err_t UnboundedMessageQueue::PushBack(uint64_t num_bytes, const void* bytes,
 }
 
 z_err_t UnboundedMessageQueue::PopFront(uint64_t* num_bytes, void* bytes,
-                                        uint64_t* num_caps, z_cap_t* caps) {
+                                        uint64_t* num_caps, z_cap_t* caps,
+                                        z_cap_t* reply_cap) {
   mutex_.Lock();
   while (pending_messages_.empty()) {
     auto thread = gScheduler->CurrentThread();
@@ -75,8 +82,16 @@ z_err_t UnboundedMessageQueue::PopFront(uint64_t* num_bytes, void* bytes,
     static_cast<uint8_t*>(bytes)[i] = next_msg->bytes[i];
   }
 
-  *num_caps = next_msg->caps.size();
   auto& proc = gScheduler->CurrentProcess();
+  if (reply_cap != nullptr) {
+    if (!next_msg->reply_cap) {
+      dbgln("Tried to read reply capability off of a message without one");
+      return glcr::INTERNAL;
+    }
+    *reply_cap = proc.AddExistingCapability(next_msg->reply_cap);
+  }
+
+  *num_caps = next_msg->caps.size();
   for (uint64_t i = 0; i < *num_caps; i++) {
     caps[i] = proc.AddExistingCapability(next_msg->caps.PopFront());
   }
@@ -102,7 +117,8 @@ void UnboundedMessageQueue::WriteKernel(uint64_t init,
 glcr::ErrorCode SingleMessageQueue::PushBack(uint64_t num_bytes,
                                              const void* bytes,
                                              uint64_t num_caps,
-                                             const z_cap_t* caps) {
+                                             const z_cap_t* caps,
+                                             z_cap_t reply_port) {
   MutexHolder h(mutex_);
   if (has_written_) {
     return glcr::FAILED_PRECONDITION;
@@ -112,6 +128,11 @@ glcr::ErrorCode SingleMessageQueue::PushBack(uint64_t num_bytes,
 
   for (uint64_t i = 0; i < num_bytes; i++) {
     bytes_[i] = reinterpret_cast<const uint8_t*>(bytes)[i];
+  }
+
+  if (reply_port != kZionInvalidCapability) {
+    dbgln("Sent a reply port to a single message queue");
+    return glcr::INTERNAL;
   }
 
   for (uint64_t i = 0; i < num_caps; i++) {
@@ -139,8 +160,8 @@ glcr::ErrorCode SingleMessageQueue::PushBack(uint64_t num_bytes,
 }
 
 glcr::ErrorCode SingleMessageQueue::PopFront(uint64_t* num_bytes, void* bytes,
-                                             uint64_t* num_caps,
-                                             z_cap_t* caps) {
+                                             uint64_t* num_caps, z_cap_t* caps,
+                                             z_cap_t* reply_port) {
   mutex_.Lock();
   while (!has_written_) {
     auto thread = gScheduler->CurrentThread();
@@ -167,6 +188,11 @@ glcr::ErrorCode SingleMessageQueue::PopFront(uint64_t* num_bytes, void* bytes,
   *num_bytes = num_bytes_;
   for (uint64_t i = 0; i < num_bytes_; i++) {
     reinterpret_cast<uint8_t*>(bytes)[i] = bytes_[i];
+  }
+
+  if (reply_port != nullptr) {
+    dbgln("Tried to read a reply port a single message queue");
+    return glcr::INTERNAL;
   }
 
   *num_caps = caps_.size();
