@@ -13,22 +13,12 @@ class YellowstoneServer : public YellowstoneServerBase {
  public:
   static glcr::ErrorOr<glcr::UniquePtr<YellowstoneServer>> Create();
 
-  Thread RunRegistration();
-
-  void RegistrationThread();
-
   glcr::ErrorCode HandleGetAhciInfo(const Empty&, AhciInfo&) override;
   glcr::ErrorCode HandleGetDenali(const Empty&, DenaliInfo&) override;
-  glcr::ErrorCode HandleGetRegister(const Empty&, RegisterInfo&) override;
+  glcr::ErrorCode HandleRegisterEndpoint(const RegisterEndpointRequest&,
+                                         Empty&) override;
 
  private:
-  // FIXME: Separate this to its own service.
-  PortServer register_port_;
-
-  static const uint64_t kBufferSize = 128;
-  uint8_t server_buffer_[kBufferSize];
-  char registration_buffer_[kBufferSize];
-
   // TODO: Store these in a data structure.
   z_cap_t denali_cap_ = 0;
   uint64_t device_id_ = 0;
@@ -37,5 +27,5 @@ class YellowstoneServer : public YellowstoneServerBase {
 
   PciReader pci_reader_;
 
-  YellowstoneServer(z_cap_t endpoint_cap, PortServer port);
+  YellowstoneServer(z_cap_t endpoint_cap);
 };

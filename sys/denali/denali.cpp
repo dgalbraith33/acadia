@@ -29,15 +29,12 @@ uint64_t main(uint64_t init_port_cap) {
   ASSIGN_OR_RETURN(glcr::UniquePtr<EndpointClient> client,
                    server->CreateClient());
 
-  RegisterInfo reg;
-  Empty empty2;
-  check(stub.GetRegister(empty2, reg));
-
-  PortClient register_port = PortClient::AdoptPort(reg.register_port());
-
-  check(register_port.WriteString("denali", client->GetCap()));
-
   Thread server_thread = server->RunServer();
+
+  RegisterEndpointRequest req;
+  req.set_endpoint_name("denali");
+  req.set_endpoint_capability(client->GetCap());
+  check(stub.RegisterEndpoint(req, empty));
 
   check(server_thread.Join());
   return 0;

@@ -2,8 +2,6 @@
 
 ## Yellowstone
 
-- Add registration to the base yellowstone yunq service
-  - Requires: Adding ability to pass capabilities in endpoint calls.
 - Store registered services in a hashmap.
   - Requires: Adding hashmap to Glacier.
 - Start the next service from a configuration file.

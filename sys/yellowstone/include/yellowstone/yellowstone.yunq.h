@@ -5,6 +5,27 @@
 #include <glacier/buffer/cap_buffer.h>
 #include <glacier/string/string.h>
 #include <ztypes.h>
+class RegisterEndpointRequest {
+ public:
+  RegisterEndpointRequest() {}
+  // Delete copy and move until implemented.
+  RegisterEndpointRequest(const RegisterEndpointRequest&) = delete;
+  RegisterEndpointRequest(RegisterEndpointRequest&&) = delete;
+
+  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
+  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
+  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const;
+  glcr::String endpoint_name() const { return endpoint_name_; }
+  void set_endpoint_name(const glcr::String& value) { endpoint_name_ = value; }
+  z_cap_t endpoint_capability() const { return endpoint_capability_; }
+  void set_endpoint_capability(const z_cap_t& value) { endpoint_capability_ = value; }
+
+ private:
+  glcr::String endpoint_name_;
+  z_cap_t endpoint_capability_;
+
+};
 class Empty {
  public:
   Empty() {}
@@ -18,24 +39,6 @@ class Empty {
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const;
 
  private:
-
-};
-class RegisterInfo {
- public:
-  RegisterInfo() {}
-  // Delete copy and move until implemented.
-  RegisterInfo(const RegisterInfo&) = delete;
-  RegisterInfo(RegisterInfo&&) = delete;
-
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
-  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
-  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const;
-  z_cap_t register_port() const { return register_port_; }
-  void set_register_port(const z_cap_t& value) { register_port_ = value; }
-
- private:
-  z_cap_t register_port_;
 
 };
 class AhciInfo {

@@ -8,7 +8,7 @@
 
 
 
-glcr::ErrorCode YellowstoneClient::GetRegister(const Empty& request, RegisterInfo& response) {
+glcr::ErrorCode YellowstoneClient::RegisterEndpoint(const RegisterEndpointRequest& request, Empty& response) {
   uint64_t buffer_size = kBufferSize;
   uint64_t cap_size = kCapBufferSize;
 
@@ -16,7 +16,7 @@ glcr::ErrorCode YellowstoneClient::GetRegister(const Empty& request, RegisterInf
   buffer_.WriteAt<uint32_t>(0, kSentinel);
   buffer_.WriteAt<uint64_t>(8, 0);
 
-  // FIXME: We need to reset the cap buffer here.
+  cap_buffer_.Reset();
   uint64_t length = request.SerializeToBytes(buffer_, /*offset=*/16, cap_buffer_);
   buffer_.WriteAt<uint32_t>(4, 16 + length);
 
@@ -48,7 +48,7 @@ glcr::ErrorCode YellowstoneClient::GetAhciInfo(const Empty& request, AhciInfo& r
   buffer_.WriteAt<uint32_t>(0, kSentinel);
   buffer_.WriteAt<uint64_t>(8, 1);
 
-  // FIXME: We need to reset the cap buffer here.
+  cap_buffer_.Reset();
   uint64_t length = request.SerializeToBytes(buffer_, /*offset=*/16, cap_buffer_);
   buffer_.WriteAt<uint32_t>(4, 16 + length);
 
@@ -80,7 +80,7 @@ glcr::ErrorCode YellowstoneClient::GetDenali(const Empty& request, DenaliInfo& r
   buffer_.WriteAt<uint32_t>(0, kSentinel);
   buffer_.WriteAt<uint64_t>(8, 2);
 
-  // FIXME: We need to reset the cap buffer here.
+  cap_buffer_.Reset();
   uint64_t length = request.SerializeToBytes(buffer_, /*offset=*/16, cap_buffer_);
   buffer_.WriteAt<uint32_t>(4, 16 + length);
 

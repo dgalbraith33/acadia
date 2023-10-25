@@ -38,6 +38,7 @@
 ## Capabilities
 
 - Add syscalls for inspecting capabilities.
+- Add syscalls for restricting capabilities' permissions.
 - Randomize/obfuscate capability numbers passed to user space.
 - Remove ReplyPort capabilities once the response is sent.
 

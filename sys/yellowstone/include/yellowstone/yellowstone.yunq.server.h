@@ -21,7 +21,7 @@ class YellowstoneServerBase {
   [[nodiscard]] Thread RunServer();
 
 
-  [[nodiscard]] virtual glcr::ErrorCode HandleGetRegister(const Empty&, RegisterInfo&) = 0;
+  [[nodiscard]] virtual glcr::ErrorCode HandleRegisterEndpoint(const RegisterEndpointRequest&, Empty&) = 0;
 
   [[nodiscard]] virtual glcr::ErrorCode HandleGetAhciInfo(const Empty&, AhciInfo&) = 0;
 

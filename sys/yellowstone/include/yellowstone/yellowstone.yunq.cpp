@@ -27,6 +27,77 @@ void WriteHeader(glcr::ByteBuffer& bytes, uint64_t offset, uint32_t core_size, u
 }
 
 }  // namespace
+void RegisterEndpointRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  CheckHeader(bytes);
+  // Parse endpoint_name.
+  auto endpoint_name_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
+
+  set_endpoint_name(bytes.StringAt(offset + endpoint_name_pointer.offset, endpoint_name_pointer.length));
+  // Parse endpoint_capability.
+  // FIXME: Implement in-buffer capabilities for inprocess serialization.
+  set_endpoint_capability(0);
+}
+
+void RegisterEndpointRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
+  CheckHeader(bytes);
+  // Parse endpoint_name.
+  auto endpoint_name_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
+
+  set_endpoint_name(bytes.StringAt(offset + endpoint_name_pointer.offset, endpoint_name_pointer.length));
+  // Parse endpoint_capability.
+  uint64_t endpoint_capability_ptr = bytes.At<uint64_t>(offset + header_size + (8 * 1));
+
+  set_endpoint_capability(caps.At(endpoint_capability_ptr));
+}
+
+uint64_t RegisterEndpointRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
+  uint32_t next_extension = header_size + 8 * 2;
+  const uint32_t core_size = next_extension;
+  // Write endpoint_name.
+  ExtPointer endpoint_name_ptr{
+    .offset = next_extension,
+    // FIXME: Check downcast of str length.
+    .length = (uint32_t)endpoint_name().length(),
+  };
+
+  bytes.WriteStringAt(offset + next_extension, endpoint_name());
+  next_extension += endpoint_name_ptr.length;
+
+  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 0), endpoint_name_ptr);
+  // Write endpoint_capability.
+  // FIXME: Implement inbuffer capabilities.
+  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 1), 0);
+
+  // The next extension pointer is the length of the message. 
+  WriteHeader(bytes, offset, core_size, next_extension);
+
+  return next_extension;
+}
+
+uint64_t RegisterEndpointRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
+  uint32_t next_extension = header_size + 8 * 2;
+  const uint32_t core_size = next_extension;
+  uint64_t next_cap = 0;
+  // Write endpoint_name.
+  ExtPointer endpoint_name_ptr{
+    .offset = next_extension,
+    // FIXME: Check downcast of str length.
+    .length = (uint32_t)endpoint_name().length(),
+  };
+
+  bytes.WriteStringAt(offset + next_extension, endpoint_name());
+  next_extension += endpoint_name_ptr.length;
+
+  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 0), endpoint_name_ptr);
+  // Write endpoint_capability.
+  caps.WriteAt(next_cap, endpoint_capability());
+  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 1), next_cap++);
+
+  // The next extension pointer is the length of the message. 
+  WriteHeader(bytes, offset, core_size, next_extension);
+
+  return next_extension;
+}
 void Empty::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
   CheckHeader(bytes);
 }
@@ -49,47 +120,6 @@ uint64_t Empty::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr:
   uint32_t next_extension = header_size + 8 * 0;
   const uint32_t core_size = next_extension;
   uint64_t next_cap = 0;
-
-  // The next extension pointer is the length of the message. 
-  WriteHeader(bytes, offset, core_size, next_extension);
-
-  return next_extension;
-}
-void RegisterInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  CheckHeader(bytes);
-  // Parse register_port.
-  // FIXME: Implement in-buffer capabilities for inprocess serialization.
-  set_register_port(0);
-}
-
-void RegisterInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  CheckHeader(bytes);
-  // Parse register_port.
-  uint64_t register_port_ptr = bytes.At<uint64_t>(offset + header_size + (8 * 0));
-
-  set_register_port(caps.At(register_port_ptr));
-}
-
-uint64_t RegisterInfo::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
-  uint32_t next_extension = header_size + 8 * 1;
-  const uint32_t core_size = next_extension;
-  // Write register_port.
-  // FIXME: Implement inbuffer capabilities.
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 0), 0);
-
-  // The next extension pointer is the length of the message. 
-  WriteHeader(bytes, offset, core_size, next_extension);
-
-  return next_extension;
-}
-
-uint64_t RegisterInfo::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
-  uint32_t next_extension = header_size + 8 * 1;
-  const uint32_t core_size = next_extension;
-  uint64_t next_cap = 0;
-  // Write register_port.
-  caps.WriteAt(next_cap, register_port());
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 0), next_cap++);
 
   // The next extension pointer is the length of the message. 
   WriteHeader(bytes, offset, core_size, next_extension);

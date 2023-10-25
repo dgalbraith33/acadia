@@ -17,7 +17,7 @@ class YellowstoneClient {
   z_cap_t Capability() { return endpoint_; }
 
 
-  [[nodiscard]] glcr::ErrorCode GetRegister(const Empty& request, RegisterInfo& response);
+  [[nodiscard]] glcr::ErrorCode RegisterEndpoint(const RegisterEndpointRequest& request, Empty& response);
 
   [[nodiscard]] glcr::ErrorCode GetAhciInfo(const Empty& request, AhciInfo& response);
 

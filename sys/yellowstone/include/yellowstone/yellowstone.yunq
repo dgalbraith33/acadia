@@ -1,15 +1,16 @@
 interface Yellowstone {
-  method GetRegister(Empty) -> (RegisterInfo);
+  method RegisterEndpoint(RegisterEndpointRequest) -> (Empty);
   method GetAhciInfo(Empty) -> (AhciInfo);
   method GetDenali(Empty) -> (DenaliInfo);
 }
 
+message RegisterEndpointRequest {
+  string endpoint_name;
+  capability endpoint_capability;
+  }
+
 message Empty {
 
-}
-
-message RegisterInfo {
-  capability register_port;
 }
 
 message AhciInfo {

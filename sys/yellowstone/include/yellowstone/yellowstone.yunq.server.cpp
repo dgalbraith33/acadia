@@ -86,12 +86,12 @@ glcr::ErrorCode YellowstoneServerBase::HandleRequest(const glcr::ByteBuffer& req
 
   switch(method_select) {
     case 0: {
-      Empty yunq_request;
-      RegisterInfo yunq_response;
+      RegisterEndpointRequest yunq_request;
+      Empty yunq_response;
 
       yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
 
-      RET_ERR(HandleGetRegister(yunq_request, yunq_response));
+      RET_ERR(HandleRegisterEndpoint(yunq_request, yunq_response));
 
       resp_length = yunq_response.SerializeToBytes(response, kHeaderSize, resp_caps);
       break;
