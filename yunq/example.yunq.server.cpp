@@ -1,45 +1,102 @@
-// Generated file - DO NOT MODIFY
-#include "example.yunq.client.h"
+// Generated file -- DO NOT MODIFY.
+#include "example.yunq.server.h"
 
-#include <glacier/buffer/byte_buffer.h>
-#include <glacier/buffer/cap_buffer.h>
+#include <mammoth/debug.h>
+#include <zcall.h>
 
+namespace {
 
+const uint32_t kSentinel = 0xBEEFDEAD;
+const uint32_t kHeaderSize = 0x10;
 
-
-glcr::ErrorCode open(const OpenFileRequest& request, File& response) {
-  uint64_t buffer_size = 0x1000;
-  // FIXME: Maybe raise this limit.
-  uint64_t cap_size = 100;
-  glcr::ByteBuffer buffer(buffer_size);
-  glcr::CapBuffer caps(cap_size);
-
-  const uint32_t kSentinel = 0xBEEFDEAD;
+void WriteError(glcr::ByteBuffer& buffer, glcr::ErrorCode err) {
   buffer.WriteAt<uint32_t>(0, kSentinel);
-  buffer.WriteAt<uint64_t>(8, {method_number});
-
-  uint64_t length = request.SerializeToBytes(buffer, /*offset=*/16, caps);
-  buffer.WriteAt<uint32_t>(4, 16 + length);
-
-  z_cap_t reply_port_cap;
-  // FIXME: We need to be able to send capabilities via endpoint call.
-  RET_ERR(ZEndpointSend(endpoint_, 16 + length, buffer.RawPtr())); 
-
-  // FIXME: Add a way to zero out the first buffer.
-  glcr::ByteBuffer recv_buffer(buffer_size);
-  glcr::CapBuffer recv_caps(cap_size);
-  RET_ERR(ZReplyPortRecv(reply_port_cap, &buffer_size, recv_buffer.RawPtr(), &cap_size, recv_caps.RawPtr()));
-
-  if (recv_buffer.At<uint32_t>(0) != kSentinel) {
-    return glcr::INVALID_RESPONSE;
-  }
-
-  // Check Response Code.
-  RET_ERR(recv_buffer.At<uint64_t>(8));
-
-  response.ParseFromBytes(recv_buffer, 16, recv_caps);
-
-  return glcr::OK;
+  buffer.WriteAt<uint32_t>(4, kHeaderSize);
+  buffer.WriteAt<uint64_t>(8, err); 
 }
 
+void WriteHeader(glcr::ByteBuffer& buffer, uint64_t message_length) {
+  buffer.WriteAt<uint32_t>(0, kSentinel);
+  buffer.WriteAt<uint32_t>(4, kHeaderSize + message_length);
+  buffer.WriteAt<uint64_t>(8, glcr::OK); 
+}
 
+}  // namespace
+
+
+
+void VFSServerBaseThreadBootstrap(void* server_base) {
+  ((VFSServerBase*)server_base)->ServerThread();
+}
+
+glcr::ErrorOr<VFSClient> VFSServerBase::CreateClient() {
+  uint64_t client_cap;
+  // FIXME: Restrict permissions to send-only here.
+  RET_ERR(ZCapDuplicate(endpoint_, &client_cap));
+  return VFSClient(client_cap);
+}
+
+Thread VFSServerBase::RunServer() {
+  return Thread(VFSServerBaseThreadBootstrap, this);
+}
+
+void VFSServerBase::ServerThread() {
+  glcr::ByteBuffer recv_buffer(0x1000);
+  glcr::ByteBuffer resp_buffer(0x1000);
+  uint64_t resp_cap_size = 0x10;
+  glcr::CapBuffer resp_cap(resp_cap_size);
+  z_cap_t reply_port_cap;
+
+  while (true) {
+    uint64_t recv_buf_size = 0x1000;
+    glcr::ErrorCode recv_err = ZEndpointRecv(endpoint_, &recv_buf_size, recv_buffer.RawPtr(), &reply_port_cap);
+    if (recv_err != glcr::OK) {
+      dbgln("Error in receive: %x", recv_err);
+      continue;
+    }
+
+    uint64_t resp_length = 0;
+    
+    glcr::ErrorCode reply_err = glcr::OK;
+    glcr::ErrorCode err = HandleRequest(recv_buffer, resp_buffer, resp_length, resp_cap);
+    if (err != glcr::OK) {
+      WriteError(resp_buffer, err);
+      reply_err = ZReplyPortSend(reply_port_cap, kHeaderSize, resp_buffer.RawPtr(), 0, nullptr);
+    } else {
+      WriteHeader(resp_buffer, resp_length);
+      reply_err = ZReplyPortSend(reply_port_cap, kHeaderSize + resp_length, resp_buffer.RawPtr(), resp_cap.UsedSlots(), resp_cap.RawPtr());
+    }
+    if (reply_err != glcr::OK) {
+      dbgln("Error in reply: %x", recv_err);
+    }
+  }
+
+}
+
+glcr::ErrorCode VFSServerBase::HandleRequest(const glcr::ByteBuffer& request,
+                                                            glcr::ByteBuffer& response, uint64_t& resp_length,
+                                                            glcr::CapBuffer& resp_caps) {
+  if (request.At<uint32_t>(0) != kSentinel) {
+    return glcr::INVALID_ARGUMENT;
+  } 
+  
+  uint64_t method_select = request.At<uint64_t>(8);
+
+  switch(method_select) {
+    case 0: {
+      OpenFileRequest yunq_request;
+      File yunq_response;
+
+      yunq_request.ParseFromBytes(request, kHeaderSize);
+
+      RET_ERR(Handleopen(yunq_request, yunq_response));
+
+      resp_length = yunq_response.SerializeToBytes(response, kHeaderSize, resp_caps);
+      break;
+    }
+    default: {
+      return glcr::UNIMPLEMENTED;
+    }
+  }
+  return glcr::OK;
+}

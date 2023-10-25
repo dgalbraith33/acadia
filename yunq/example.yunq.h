@@ -14,11 +14,11 @@ class OpenFileRequest {
 
   void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
   void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
-  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset);
-  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&);
-  glcr::String path() { return path_; }
+  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
+  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const;
+  glcr::String path() const { return path_; }
   void set_path(const glcr::String& value) { path_ = value; }
-  uint64_t options() { return options_; }
+  uint64_t options() const { return options_; }
   void set_options(const uint64_t& value) { options_ = value; }
 
  private:
@@ -35,13 +35,13 @@ class File {
 
   void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
   void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
-  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset);
-  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&);
-  glcr::String path() { return path_; }
+  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
+  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const;
+  glcr::String path() const { return path_; }
   void set_path(const glcr::String& value) { path_ = value; }
-  uint64_t attrs() { return attrs_; }
+  uint64_t attrs() const { return attrs_; }
   void set_attrs(const uint64_t& value) { attrs_ = value; }
-  z_cap_t mem_cap() { return mem_cap_; }
+  z_cap_t mem_cap() const { return mem_cap_; }
   void set_mem_cap(const z_cap_t& value) { mem_cap_ = value; }
 
  private:

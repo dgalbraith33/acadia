@@ -26,14 +26,21 @@ void WriteHeader(glcr::ByteBuffer& buffer, uint64_t message_length) {
 
 {% for interface in interfaces %}
 void {{interface.name}}ServerBaseThreadBootstrap(void* server_base) {
-  ({{interface.name}}ServerBase*)(server_base)->ServerThread();
+  (({{interface.name}}ServerBase*)server_base)->ServerThread();
 }
 
-Thread {{interface.name}}::RunServer() {
+glcr::ErrorOr<{{interface.name}}Client> {{interface.name}}ServerBase::CreateClient() {
+  uint64_t client_cap;
+  // FIXME: Restrict permissions to send-only here.
+  RET_ERR(ZCapDuplicate(endpoint_, &client_cap));
+  return {{interface.name}}Client(client_cap);
+}
+
+Thread {{interface.name}}ServerBase::RunServer() {
   return Thread({{interface.name}}ServerBaseThreadBootstrap, this);
 }
 
-void {{interface.name}}::ServerThread() {
+void {{interface.name}}ServerBase::ServerThread() {
   glcr::ByteBuffer recv_buffer(0x1000);
   glcr::ByteBuffer resp_buffer(0x1000);
   uint64_t resp_cap_size = 0x10;
@@ -50,37 +57,42 @@ void {{interface.name}}::ServerThread() {
 
     uint64_t resp_length = 0;
     
-    glcr::ErrorCode err = HandlRequest(recv_buffer, resp_buffer, resp_length, resp_cap);
+    glcr::ErrorCode reply_err = glcr::OK;
+    glcr::ErrorCode err = HandleRequest(recv_buffer, resp_buffer, resp_length, resp_cap);
     if (err != glcr::OK) {
       WriteError(resp_buffer, err);
-      ZReplyPortSend(reply_port_cap, kHeaderSize, resp_buffer.RawPtr(), 0, nullptr);
+      reply_err = ZReplyPortSend(reply_port_cap, kHeaderSize, resp_buffer.RawPtr(), 0, nullptr);
     } else {
       WriteHeader(resp_buffer, resp_length);
-      ZReplyPortSend(reply_port_cap, resp_length, resp_buffer.RawPtr(), resp_cap.UsedSlots(), resp_cap.RawPtr());
+      reply_err = ZReplyPortSend(reply_port_cap, kHeaderSize + resp_length, resp_buffer.RawPtr(), resp_cap.UsedSlots(), resp_cap.RawPtr());
+    }
+    if (reply_err != glcr::OK) {
+      dbgln("Error in reply: %x", recv_err);
     }
   }
 
 }
 
-glcr::ErrorCode {{interface.name}}::HandleRequest(const glcr::ByteBuffer& request, glcr::ByteBuffer& response, uint64_t& resp_length
-                                                  glcr::CapBuffer& resp_caps) {
-  if (recv_buffer.At<uint32_t>(0) != kSentinel) {
-    return glcr::INVALID_INPUT;
+glcr::ErrorCode {{interface.name}}ServerBase::HandleRequest(const glcr::ByteBuffer& request,
+                                                            glcr::ByteBuffer& response, uint64_t& resp_length,
+                                                            glcr::CapBuffer& resp_caps) {
+  if (request.At<uint32_t>(0) != kSentinel) {
+    return glcr::INVALID_ARGUMENT;
   } 
   
-  uint64_t method_select = recv_buffer.At<uint64_t>(8);
+  uint64_t method_select = request.At<uint64_t>(8);
 
   switch(method_select) {
 {%- for method in interface.methods %}
     case {{loop.index0}}: {
-      {{method.request}} request;
-      {{method.response}} response;
+      {{method.request}} yunq_request;
+      {{method.response}} yunq_response;
 
-      request.ParseFromBytes(recv_buffer, kHeaderSize);
+      yunq_request.ParseFromBytes(request, kHeaderSize);
 
-      RET_ERR(Handle{{method.name}}(request, response));
+      RET_ERR(Handle{{method.name}}(yunq_request, yunq_response));
 
-      resp_length = response.SerializeToBytes(resp_buffer, kHeaderSize, resp_cap);
+      resp_length = yunq_response.SerializeToBytes(response, kHeaderSize, resp_caps);
       break;
     }
 {%- endfor %}

@@ -14,6 +14,9 @@ class ByteBuffer {
 
   ~ByteBuffer() { delete[] buffer_; }
 
+  uint8_t* RawPtr() { return buffer_; }
+  const uint8_t* RawPtr() const { return buffer_; }
+
   template <typename T>
   void WriteAt(uint64_t offset, const T& object) {
     // FIXME: Add bounds check here.

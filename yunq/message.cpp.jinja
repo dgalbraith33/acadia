@@ -74,7 +74,7 @@ void {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t of
 {%- endfor %}
 }
 
-uint64_t {{message.name}}::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) {
+uint64_t {{message.name}}::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
   uint32_t next_extension = header_size + 8 * {{ message.fields | length }};
   const uint32_t core_size = next_extension;
 
@@ -109,7 +109,7 @@ uint64_t {{message.name}}::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t of
   return next_extension;
 }
 
-uint64_t {{message.name}}::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) {
+uint64_t {{message.name}}::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
   uint32_t next_extension = header_size + 8 * {{ message.fields | length}};
   const uint32_t core_size = next_extension;
   uint64_t next_cap = 0;

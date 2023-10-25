@@ -55,7 +55,7 @@ def main():
 
     server_impl_tmpl = jinja_env.get_template("server.cpp.jinja")
     with open(filename + '.server.cpp', mode='w') as f:
-        server_impl = client_impl_tmpl.render(file=filename, interfaces=interfaces)
+        server_impl = server_impl_tmpl.render(file=filename, interfaces=interfaces)
         f.write(server_impl)
 
 if __name__ == "__main__":

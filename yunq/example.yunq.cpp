@@ -47,7 +47,7 @@ void OpenFileRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t off
   set_options(bytes.At<uint64_t>(offset + header_size + (8 * 1)));
 }
 
-uint64_t OpenFileRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) {
+uint64_t OpenFileRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
   uint32_t next_extension = header_size + 8 * 2;
   const uint32_t core_size = next_extension;
   // Write path.
@@ -70,7 +70,7 @@ uint64_t OpenFileRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t off
   return next_extension;
 }
 
-uint64_t OpenFileRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) {
+uint64_t OpenFileRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
   uint32_t next_extension = header_size + 8 * 2;
   const uint32_t core_size = next_extension;
   uint64_t next_cap = 0;
@@ -120,7 +120,7 @@ void File::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const 
   set_mem_cap(caps.At(mem_cap_ptr));
 }
 
-uint64_t File::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) {
+uint64_t File::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
   uint32_t next_extension = header_size + 8 * 3;
   const uint32_t core_size = next_extension;
   // Write path.
@@ -146,7 +146,7 @@ uint64_t File::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) {
   return next_extension;
 }
 
-uint64_t File::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) {
+uint64_t File::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
   uint32_t next_extension = header_size + 8 * 3;
   const uint32_t core_size = next_extension;
   uint64_t next_cap = 0;

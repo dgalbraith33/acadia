@@ -1,6 +1,9 @@
 // Generated file - DO NOT MODIFY
 #pragma once
 
+#include <glacier/buffer/byte_buffer.h>
+#include <glacier/buffer/cap_buffer.h>
+#include <glacier/status/error.h>
 #include <ztypes.h>
 
 #include "{{file}}.h"
@@ -10,12 +13,19 @@ class {{interface.name}}Client {
  public:
   {{interface.name}}Client(z_cap_t {{interface.name}}_cap) : endpoint_({{interface.name}}_cap) {}
   {{interface.name}}Client(const {{interface.name}}Client&) = delete;
-  {{interface.name}}Client({{interface.name}}Client&&) = delete;
+  {{interface.name}}Client({{interface.name}}Client&& other) : endpoint_(other.endpoint_) {other.endpoint_ = 0;};
+
+  z_cap_t Capability() { return endpoint_; }
+
 {% for method in interface.methods %}
   [[nodiscard]] glcr::ErrorCode {{method.name}}(const {{method.request}}& request, {{method.response}}& response);
 {% endfor %}
  private:
   z_cap_t endpoint_;
+  uint64_t kBufferSize = 0x1000;
+  glcr::ByteBuffer buffer_{kBufferSize};
+  uint64_t kCapBufferSize = 0x10;
+  glcr::CapBuffer cap_buffer_{kCapBufferSize};
 };
 
 {%- endfor %}

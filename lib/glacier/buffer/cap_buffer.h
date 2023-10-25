@@ -13,12 +13,23 @@ class CapBuffer {
 
   ~CapBuffer() { delete[] buffer_; }
 
+  uint64_t* RawPtr() { return buffer_; }
+
+  uint64_t UsedSlots() { return used_slots_; }
+
   uint64_t At(uint64_t offset) const { return buffer_[offset]; }
 
-  void WriteAt(uint64_t offset, uint64_t cap) { buffer_[offset] = cap; }
+  void WriteAt(uint64_t offset, uint64_t cap) {
+    buffer_[offset] = cap;
+    // This is fairly hacky considering we pass out the raw ptr.
+    if (used_slots_ < (offset + 1)) {
+      used_slots_ = offset + 1;
+    }
+  }
 
  private:
   uint64_t* buffer_;
+  uint64_t used_slots_ = 0;
 };
 
 }  // namespace glcr
