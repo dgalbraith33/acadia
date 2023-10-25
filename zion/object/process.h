@@ -6,9 +6,9 @@
 
 #include "capability/capability.h"
 #include "capability/capability_table.h"
-#include "lib/mutex.h"
 #include "object/address_space.h"
 #include "object/channel.h"
+#include "object/mutex.h"
 #include "object/port.h"
 
 // Forward decl due to cyclic dependency.
@@ -66,7 +66,7 @@ class Process : public KernelObject {
   Process();
   Process(uint64_t id) : id_(id), vmas_(AddressSpace::ForRoot()) {}
 
-  Mutex mutex_{"Process"};
+  glcr::RefPtr<Mutex> mutex_ = Mutex::Create();
 
   uint64_t id_;
   glcr::RefPtr<AddressSpace> vmas_;

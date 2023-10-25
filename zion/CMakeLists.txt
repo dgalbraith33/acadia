@@ -11,7 +11,6 @@ add_executable(zion
   interrupt/interrupt.cpp
   interrupt/interrupt_enter.s
   interrupt/timer.cpp
-  lib/mutex.cpp
   lib/message_queue.cpp
   loader/init_loader.cpp
   memory/kernel_heap.cpp
@@ -24,6 +23,7 @@ add_executable(zion
   object/endpoint.cpp
   object/ipc_object.cpp
   object/memory_object.cpp
+  object/mutex.cpp
   object/port.cpp
   object/process.cpp
   object/reply_port.cpp
@@ -38,6 +38,7 @@ add_executable(zion
   syscall/ipc.cpp
   syscall/memory_object.cpp
   syscall/process.cpp
+  syscall/synchronization.cpp
   syscall/syscall.cpp
   syscall/syscall_enter.s
   syscall/thread.cpp

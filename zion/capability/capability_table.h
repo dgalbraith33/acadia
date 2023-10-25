@@ -4,7 +4,7 @@
 #include <glacier/memory/ref_ptr.h>
 
 #include "capability/capability.h"
-#include "lib/mutex.h"
+#include "object/mutex.h"
 
 class CapabilityTable {
  public:
@@ -25,7 +25,7 @@ class CapabilityTable {
   glcr::RefPtr<Capability> ReleaseCapability(uint64_t id);
 
  private:
-  Mutex lock_{"cap table"};
+  glcr::RefPtr<Mutex> lock_ = Mutex::Create();
   // TODO: Do some randomization.
   uint64_t next_cap_id_ = 0x100;
   // FIXME: use a map data structure.

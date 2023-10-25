@@ -54,6 +54,11 @@ const uint64_t kZionEndpointCall = 0x65;
 // Capability Calls
 const uint64_t kZionCapDuplicate = 0x70;
 
+// Syncronization Calls
+const uint64_t kZionMutexCreate = 0x80;
+const uint64_t kZionMutexLock = 0x81;
+const uint64_t kZionMutexRelease = 0x82;
+
 // Debugging Calls.
 const uint64_t kZionDebug = 0x1'0000;
 
@@ -77,6 +82,10 @@ const uint64_t kZionPerm_Duplicate = 0x20;
 // Permissions held on process capabilities.
 const uint64_t kZionPerm_SpawnProcess = 0x100;
 const uint64_t kZionPerm_SpawnThread = 0x200;
+
+// Permissions on mutexes.
+const uint64_t kZionPerm_Lock = 0x100;
+const uint64_t kZionPerm_Release = 0x200;
 
 /* ------------------------------
  * Process Init Types

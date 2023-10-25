@@ -57,4 +57,8 @@ SYS5(ReplyPortRecv, z_cap_t, reply_port_cap, uint64_t*, num_bytes, void*, data,
 
 SYS2(CapDuplicate, z_cap_t, cap_in, z_cap_t*, cap_out);
 
+SYS1(MutexCreate, z_cap_t*, mutex_cap);
+SYS1(MutexLock, z_cap_t, mutex_cap);
+SYS1(MutexRelease, z_cap_t, mutex_cap);
+
 SYS1(Debug, const char*, message);

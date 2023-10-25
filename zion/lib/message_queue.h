@@ -8,7 +8,7 @@
 
 #include "capability/capability.h"
 #include "include/ztypes.h"
-#include "lib/mutex.h"
+#include "object/mutex.h"
 
 class MessageQueue {
  public:
@@ -23,7 +23,7 @@ class MessageQueue {
   virtual bool empty() = 0;
 
  protected:
-  Mutex mutex_{"message"};
+  glcr::RefPtr<Mutex> mutex_ = Mutex::Create();
   // FIXME: This maybe shouldn't be shared between classes since the
   // SingleMessageQueue should only ever have one blocked thread.
   glcr::IntrusiveList<Thread> blocked_threads_;

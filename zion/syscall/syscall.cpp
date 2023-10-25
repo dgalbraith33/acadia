@@ -11,6 +11,7 @@
 #include "syscall/ipc.h"
 #include "syscall/memory_object.h"
 #include "syscall/process.h"
+#include "syscall/synchronization.h"
 #include "syscall/thread.h"
 
 #define EFER 0xC0000080
@@ -80,6 +81,10 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req) {
     CASE(ReplyPortRecv);
     // syscall/capability.h
     CASE(CapDuplicate);
+    // syscall/syncronization.h
+    CASE(MutexCreate);
+    CASE(MutexLock);
+    CASE(MutexRelease);
     // syscall/debug.h
     CASE(Debug);
     default:

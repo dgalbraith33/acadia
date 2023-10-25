@@ -6,7 +6,6 @@
 #include "capability/capability.h"
 #include "include/ztypes.h"
 #include "lib/message_queue.h"
-#include "lib/mutex.h"
 #include "object/ipc_object.h"
 #include "object/kernel_object.h"
 #include "usr/zcall_internal.h"

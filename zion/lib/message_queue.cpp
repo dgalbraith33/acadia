@@ -54,16 +54,16 @@ z_err_t UnboundedMessageQueue::PushBack(uint64_t num_bytes, const void* bytes,
 z_err_t UnboundedMessageQueue::PopFront(uint64_t* num_bytes, void* bytes,
                                         uint64_t* num_caps, z_cap_t* caps,
                                         z_cap_t* reply_cap) {
-  mutex_.Lock();
+  mutex_->Lock();
   while (pending_messages_.empty()) {
     auto thread = gScheduler->CurrentThread();
     thread->SetState(Thread::BLOCKED);
     blocked_threads_.PushBack(thread);
-    mutex_.Unlock();
+    mutex_->Release();
     gScheduler->Yield();
-    mutex_.Lock();
+    mutex_->Lock();
   }
-  mutex_.Unlock();
+  mutex_->Release();
 
   MutexHolder lock(mutex_);
   auto next_msg = pending_messages_.PeekFront();
@@ -162,16 +162,16 @@ glcr::ErrorCode SingleMessageQueue::PushBack(uint64_t num_bytes,
 glcr::ErrorCode SingleMessageQueue::PopFront(uint64_t* num_bytes, void* bytes,
                                              uint64_t* num_caps, z_cap_t* caps,
                                              z_cap_t* reply_port) {
-  mutex_.Lock();
+  mutex_->Lock();
   while (!has_written_) {
     auto thread = gScheduler->CurrentThread();
     thread->SetState(Thread::BLOCKED);
     blocked_threads_.PushBack(thread);
-    mutex_.Unlock();
+    mutex_->Release();
     gScheduler->Yield();
-    mutex_.Lock();
+    mutex_->Lock();
   }
-  mutex_.Unlock();
+  mutex_->Release();
 
   MutexHolder lock(mutex_);
   if (has_read_) {
