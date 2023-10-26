@@ -68,7 +68,7 @@ void YellowstoneServerBase::ServerThread() {
       reply_err = ZReplyPortSend(reply_port_cap, kHeaderSize + resp_length, resp_buffer.RawPtr(), resp_cap.UsedSlots(), resp_cap.RawPtr());
     }
     if (reply_err != glcr::OK) {
-      dbgln("Error in reply: %x", recv_err);
+      dbgln("Error in reply: %x", reply_err);
     }
   }
 

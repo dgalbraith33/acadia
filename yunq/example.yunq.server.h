@@ -30,8 +30,8 @@ class VFSServerBase {
   friend void VFSServerBaseThreadBootstrap(void*);
   void ServerThread();
 
-  [[nodiscard]] glcr::ErrorCode HandleRequest(const glcr::ByteBuffer& request, glcr::ByteBuffer& response,
-                                              uint64_t& resp_length,
+  [[nodiscard]] glcr::ErrorCode HandleRequest(const glcr::ByteBuffer& request, const glcr::CapBuffer& req_caps,
+                                              glcr::ByteBuffer& response, uint64_t& resp_length,
                                               glcr::CapBuffer& resp_caps);
 };
 
