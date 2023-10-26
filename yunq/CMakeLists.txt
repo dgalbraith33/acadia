@@ -1,6 +1,3 @@
-set(PYTHON "${CMAKE_SOURCE_DIR}/yunq/venv/bin/python")
-set(YUNQ "${CMAKE_SOURCE_DIR}/yunq/yunq.py")
-
 macro(yunq_gen dir include_dir name)
   set(file_bundle ${name}_yunq_files)
   set(target ${name}_yunq)
@@ -25,6 +22,9 @@ macro(yunq_gen dir include_dir name)
     COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${BASE_COMPILE_FLAGS}"
     LINK_FLAGS "${CMAKE_EXE_LINK_FLAGS} ${BASE_LINK_FLAGS}"
     )
+
+  set(PYTHON "${CMAKE_SOURCE_DIR}/yunq/venv/bin/python")
+  set(YUNQ "${CMAKE_SOURCE_DIR}/yunq/yunq.py")
 
   add_custom_command(
     OUTPUT ${${file_bundle}}
