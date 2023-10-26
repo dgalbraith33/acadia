@@ -30,13 +30,19 @@ glcr::ErrorOr<PartitionInfo> HandleDenaliRegistration(z_cap_t endpoint_cap) {
 }  // namespace
 
 glcr::ErrorOr<glcr::UniquePtr<YellowstoneServer>> YellowstoneServer::Create() {
-  z_cap_t cap;
-  RET_ERR(ZEndpointCreate(&cap));
-  return glcr::UniquePtr<YellowstoneServer>(new YellowstoneServer(cap));
+  z_cap_t endpoint_cap;
+  RET_ERR(ZEndpointCreate(&endpoint_cap));
+
+  ASSIGN_OR_RETURN(Mutex mut, Mutex::Create());
+  RET_ERR(mut.Lock());
+
+  return glcr::UniquePtr<YellowstoneServer>(
+      new YellowstoneServer(endpoint_cap, glcr::Move(mut)));
 }
 
-YellowstoneServer::YellowstoneServer(z_cap_t endpoint_cap)
-    : YellowstoneServerBase(endpoint_cap) {}
+YellowstoneServer::YellowstoneServer(z_cap_t endpoint_cap, Mutex&& mutex)
+    : YellowstoneServerBase(endpoint_cap),
+      has_denali_mutex_(glcr::Move(mutex)) {}
 
 glcr::ErrorCode YellowstoneServer::HandleGetAhciInfo(const Empty&,
                                                      AhciInfo& info) {
@@ -69,17 +75,16 @@ glcr::ErrorCode YellowstoneServer::HandleRegisterEndpoint(
     device_id_ = part_info_or.value().device_id;
     lba_offset_ = part_info_or.value().partition_lba;
 
-    uint64_t vaddr;
-    check(ZAddressSpaceMap(gSelfVmasCap, 0, gBootVictoriaFallsVmmoCap, &vaddr));
-    auto client_or = CreateClient();
-    if (!client_or.ok()) {
-      check(client_or.error());
-    }
-    check(SpawnProcessFromElfRegion(vaddr, client_or.value().Capability()));
+    check(has_denali_mutex_.Release());
   } else if (req.endpoint_name() == "victoriafalls") {
     victoria_falls_cap_ = req.endpoint_capability();
   } else {
     dbgln("[WARN] Got endpoint cap type: %s", req.endpoint_name().cstr());
   }
   return glcr::OK;
+}
+
+glcr::ErrorCode YellowstoneServer::WaitDenaliRegistered() {
+  RET_ERR(has_denali_mutex_.Lock());
+  return has_denali_mutex_.Release();
 }
