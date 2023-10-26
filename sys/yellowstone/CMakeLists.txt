@@ -20,21 +20,5 @@ set_target_properties(yellowstone PROPERTIES
   LINK_FLAGS "${CMAKE_EXE_LINK_FLAGS} ${BASE_LINK_FLAGS}"
   )
 
+yunq_gen(lib/yellowstone lib yellowstone)
 
-add_library(yellowstone_yunq
-  lib/yellowstone/yellowstone.yunq.cpp
-  lib/yellowstone/yellowstone.yunq.client.cpp
-  lib/yellowstone/yellowstone.yunq.server.cpp
-  )
-
-target_include_directories(yellowstone_yunq
-  PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/lib")
-
-target_link_libraries(yellowstone_yunq
-  mammoth
-  )
-
-set_target_properties(yellowstone_yunq PROPERTIES
-  COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${BASE_COMPILE_FLAGS}"
-  LINK_FLAGS "${CMAKE_EXE_LINK_FLAGS} ${BASE_LINK_FLAGS}"
-  )
