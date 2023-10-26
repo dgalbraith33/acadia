@@ -5,6 +5,7 @@ add_library(mammoth STATIC
   src/endpoint_server.cpp
   src/init.cpp
   src/memory_region.cpp
+  src/mutex.cpp
   src/new.cpp
   src/process.cpp
   src/port_client.cpp
