@@ -50,6 +50,7 @@ void DenaliServerBase::ServerThread() {
   while (true) {
     uint64_t recv_cap_size = 0x10;
     uint64_t recv_buf_size = 0x1000;
+    recv_cap.Reset();
     glcr::ErrorCode recv_err = ZEndpointRecv(endpoint_, &recv_buf_size, recv_buffer.RawPtr(), &recv_cap_size, recv_cap.RawPtr(), &reply_port_cap);
     if (recv_err != glcr::OK) {
       dbgln("Error in receive: %x", recv_err);
@@ -59,6 +60,7 @@ void DenaliServerBase::ServerThread() {
     uint64_t resp_length = 0;
     
     glcr::ErrorCode reply_err = glcr::OK;
+    resp_cap.Reset();
     glcr::ErrorCode err = HandleRequest(recv_buffer, recv_cap, resp_buffer, resp_length, resp_cap);
     if (err != glcr::OK) {
       WriteError(resp_buffer, err);
