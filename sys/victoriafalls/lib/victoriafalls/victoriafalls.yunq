@@ -1,0 +1,12 @@
+interface VFS {
+  method OpenFile(OpenFileRequest) -> (OpenFileResponse);
+}
+
+message OpenFileRequest {
+  string path;
+}
+
+message OpenFileResponse {
+  string path;
+  capability memory;
+}
