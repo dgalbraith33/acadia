@@ -4,15 +4,15 @@
 #include <mammoth/endpoint_server.h>
 
 #include "ahci/ahci_driver.h"
-#include "denali/denali.h"
+#include "lib/denali/denali.yunq.server.h"
 
-class DenaliServer : public EndpointServer {
+class DenaliServer : public DenaliServerBase {
  public:
   static glcr::ErrorOr<glcr::UniquePtr<DenaliServer>> Create(
       AhciDriver& driver);
 
-  virtual glcr::ErrorCode HandleRequest(RequestContext& request,
-                                        ResponseContext& response) override;
+  glcr::ErrorCode HandleRead(const ReadRequest& req,
+                             ReadResponse& resp) override;
 
  private:
   static const uint64_t kBuffSize = 1024;
@@ -21,8 +21,5 @@ class DenaliServer : public EndpointServer {
   AhciDriver& driver_;
 
   DenaliServer(z_cap_t endpoint_cap, AhciDriver& driver)
-      : EndpointServer(endpoint_cap), driver_(driver) {}
-
-  glcr::ErrorCode HandleRead(DenaliReadRequest* request,
-                             ResponseContext& context);
+      : DenaliServerBase(endpoint_cap), driver_(driver) {}
 };

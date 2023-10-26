@@ -1,6 +1,6 @@
 #pragma once
 
-#include <denali/denali_client.h>
+#include <denali/scoped_denali_client.h>
 #include <glacier/memory/shared_ptr.h>
 #include <glacier/status/error_or.h>
 #include <mammoth/memory_region.h>

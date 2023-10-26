@@ -1,7 +1,9 @@
 #include "hw/gpt.h"
 
+#include <glacier/memory/move.h>
 #include <glacier/status/error.h>
 #include <mammoth/debug.h>
+#include <mammoth/memory_region.h>
 #include <zcall.h>
 #include <zglobal.h>
 
@@ -54,8 +56,14 @@ GptReader::GptReader(glcr::UniquePtr<DenaliClient> denali)
     : denali_(glcr::Move(denali)) {}
 
 glcr::ErrorCode GptReader::ParsePartitionTables() {
-  ASSIGN_OR_RETURN(MappedMemoryRegion lba_1_and_2,
-                   denali_->ReadSectors(0, 0, 2));
+  ReadRequest req;
+  req.set_device_id(0);
+  req.set_lba(0);
+  req.set_size(2);
+  ReadResponse resp;
+  RET_ERR(denali_->Read(req, resp));
+  MappedMemoryRegion lba_1_and_2 =
+      MappedMemoryRegion::FromCapability(resp.memory());
   uint16_t* mbr_sig = reinterpret_cast<uint16_t*>(lba_1_and_2.vaddr() + 0x1FE);
   if (*mbr_sig != 0xAA55) {
     dbgln("Invalid MBR Sig: %x", *mbr_sig);
@@ -89,9 +97,12 @@ glcr::ErrorCode GptReader::ParsePartitionTables() {
   dbgln("partition_entry_size: %x", entry_size);
   dbgln("Num blocks: %x", num_blocks);
 
-  ASSIGN_OR_RETURN(
-      MappedMemoryRegion part_table,
-      denali_->ReadSectors(0, header->lba_partition_entries, num_blocks));
+  req.set_device_id(0);
+  req.set_lba(header->lba_partition_entries);
+  req.set_size(num_blocks);
+  RET_ERR(denali_->Read(req, resp));
+  MappedMemoryRegion part_table =
+      MappedMemoryRegion::FromCapability(resp.memory());
   dbgln("Entries");
   for (uint64_t i = 0; i < num_partitions; i++) {
     PartitionEntry* entry = reinterpret_cast<PartitionEntry*>(
@@ -102,9 +113,10 @@ glcr::ErrorCode GptReader::ParsePartitionTables() {
       dbgln("P Guid: %lx-%lx", entry->part_guid_high, entry->part_guid_low);
       dbgln("LBA: %lx, %lx", entry->lba_start, entry->lba_end);
       dbgln("Attrs: %lx", entry->attributes);
-      // For now we hardcode these values to the type that is created in our
-      // setup script.
-      // FIXME: Set up our own root partition type guid at some point.
+      // For now we hardcode these values to the type that is
+      // created in our setup script.
+      // FIXME: Set up our own root partition type guid at some
+      // point.
       if (entry->type_guid_low == kLfsDataLow &&
           entry->type_guid_high == kLfsDataHigh) {
         primary_partition_lba_ = entry->lba_start;

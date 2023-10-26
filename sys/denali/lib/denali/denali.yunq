@@ -1,0 +1,16 @@
+interface Denali {
+  method Read(ReadRequest) -> (ReadResponse); 
+}
+
+message ReadRequest {
+  u64 device_id;
+  u64 lba;
+  u64 size;
+}
+
+message ReadResponse {
+  u64 device_id;
+  u64 lba;
+  u64 size;
+  capability memory;
+}

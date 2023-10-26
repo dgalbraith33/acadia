@@ -1,6 +1,8 @@
 #pragma once
 
-#include <denali/denali_client.h>
+#include <denali/denali.yunq.client.h>
+#include <glacier/memory/unique_ptr.h>
+#include <glacier/status/error.h>
 #include <stdint.h>
 #include <ztypes.h>
 

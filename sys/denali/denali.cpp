@@ -25,14 +25,13 @@ uint64_t main(uint64_t init_port_cap) {
   ASSIGN_OR_RETURN(glcr::UniquePtr<DenaliServer> server,
                    DenaliServer::Create(*driver));
 
-  ASSIGN_OR_RETURN(glcr::UniquePtr<EndpointClient> client,
-                   server->CreateClient());
+  ASSIGN_OR_RETURN(DenaliClient client, server->CreateClient());
 
   Thread server_thread = server->RunServer();
 
   RegisterEndpointRequest req;
   req.set_endpoint_name("denali");
-  req.set_endpoint_capability(client->GetCap());
+  req.set_endpoint_capability(client.Capability());
   check(stub.RegisterEndpoint(req, empty));
 
   check(server_thread.Join());

@@ -9,6 +9,7 @@ target_include_directories(victoriafalls
    "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 target_link_libraries(victoriafalls
+  denali_yunq
   glacier
   mammoth
   yellowstone_yunq

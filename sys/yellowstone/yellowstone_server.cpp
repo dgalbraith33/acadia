@@ -1,6 +1,6 @@
 #include "yellowstone_server.h"
 
-#include <denali/denali.h>
+#include <denali/denali.yunq.client.h>
 #include <glacier/string/string.h>
 #include <mammoth/debug.h>
 #include <mammoth/init.h>
@@ -18,8 +18,8 @@ struct PartitionInfo {
 };
 
 glcr::ErrorOr<PartitionInfo> HandleDenaliRegistration(z_cap_t endpoint_cap) {
-  GptReader reader(glcr::UniquePtr<DenaliClient>(
-      new DenaliClient(EndpointClient::AdoptEndpoint(endpoint_cap))));
+  GptReader reader(
+      glcr::UniquePtr<DenaliClient>(new DenaliClient(endpoint_cap)));
 
   RET_ERR(reader.ParsePartitionTables());
 

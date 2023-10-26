@@ -7,11 +7,8 @@
 Command::~Command() {}
 
 DmaReadCommand::DmaReadCommand(uint64_t lba, uint64_t sector_cnt,
-                               Mutex& callback_mutex, ResponseContext& response)
-    : response_(response),
-      lba_(lba),
-      sector_cnt_(sector_cnt),
-      callback_mutex_(callback_mutex) {
+                               Mutex& callback_mutex)
+    : lba_(lba), sector_cnt_(sector_cnt), callback_mutex_(callback_mutex) {
   region_ = MappedMemoryRegion::ContiguousPhysical(sector_cnt * 512);
 }
 

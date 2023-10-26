@@ -9,9 +9,9 @@ target_include_directories(yellowstone
    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(yellowstone
+  denali_yunq
   mammoth
   glacier
-  denali_stub
   yellowstone_yunq
   )
 
@@ -31,7 +31,6 @@ target_include_directories(yellowstone_yunq
   PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 
 target_link_libraries(yellowstone_yunq
-  denali_stub
   mammoth
   )
 
