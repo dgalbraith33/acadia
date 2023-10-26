@@ -7,11 +7,11 @@
 Command::~Command() {}
 
 DmaReadCommand::DmaReadCommand(uint64_t lba, uint64_t sector_cnt,
-                               DmaCallback callback, ResponseContext& response)
+                               Mutex& callback_mutex, ResponseContext& response)
     : response_(response),
       lba_(lba),
       sector_cnt_(sector_cnt),
-      callback_(callback) {
+      callback_mutex_(callback_mutex) {
   region_ = MappedMemoryRegion::ContiguousPhysical(sector_cnt * 512);
 }
 
@@ -49,6 +49,4 @@ void DmaReadCommand::PopulatePrdt(PhysicalRegionDescriptor* prdt) {
   prdt[0].region_address = region_.paddr();
   prdt[0].byte_count = region_.size();
 }
-void DmaReadCommand::Callback() {
-  callback_(response_, lba_, sector_cnt_, region_.cap());
-}
+void DmaReadCommand::Callback() { callback_mutex_.Release(); }

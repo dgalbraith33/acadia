@@ -5,14 +5,6 @@
 #include <mammoth/debug.h>
 #include <zcall.h>
 
-namespace {
-DenaliServer* gServer = nullptr;
-void HandleResponse(ResponseContext& response, uint64_t lba, uint64_t size,
-                    z_cap_t mem) {
-  gServer->HandleResponse(response, lba, size, mem);
-}
-}  // namespace
-
 glcr::ErrorOr<glcr::UniquePtr<DenaliServer>> DenaliServer::Create(
     AhciDriver& driver) {
   z_cap_t cap;
@@ -45,19 +37,20 @@ glcr::ErrorCode DenaliServer::HandleRequest(RequestContext& request,
 glcr::ErrorCode DenaliServer::HandleRead(DenaliReadRequest* request,
                                          ResponseContext& context) {
   ASSIGN_OR_RETURN(AhciDevice * device, driver_.GetDevice(request->device_id));
+  ASSIGN_OR_RETURN(Mutex mutex, Mutex::Create());
+  RET_ERR(mutex.Lock());
 
-  device->IssueCommand(new DmaReadCommand(request->lba, request->size,
-                                          ::HandleResponse, context));
+  DmaReadCommand command(request->lba, request->size, mutex, context);
+  device->IssueCommand(&command);
 
-  return glcr::OK;
-}
-
-void DenaliServer::HandleResponse(ResponseContext& response, uint64_t lba,
-                                  uint64_t size, z_cap_t mem) {
+  // Wait for read operation to complete.
+  RET_ERR(mutex.Lock());
+  RET_ERR(mutex.Release());
   DenaliReadResponse resp{
-      .device_id = 0,
-      .lba = lba,
-      .size = size,
+      .device_id = request->device_id,
+      .lba = request->lba,
+      .size = request->size,
   };
-  check(response.WriteStructWithCap<DenaliReadResponse>(resp, mem));
+  return context.WriteStructWithCap<DenaliReadResponse>(
+      resp, command.GetMemoryRegion());
 }

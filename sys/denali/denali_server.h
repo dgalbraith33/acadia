@@ -11,9 +11,6 @@ class DenaliServer : public EndpointServer {
   static glcr::ErrorOr<glcr::UniquePtr<DenaliServer>> Create(
       AhciDriver& driver);
 
-  void HandleResponse(ResponseContext& response, uint64_t lba, uint64_t size,
-                      z_cap_t cap);
-
   virtual glcr::ErrorCode HandleRequest(RequestContext& request,
                                         ResponseContext& response) override;
 

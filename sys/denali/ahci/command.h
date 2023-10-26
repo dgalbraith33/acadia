@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mammoth/memory_region.h>
+#include <mammoth/mutex.h>
 #include <mammoth/response_context.h>
 #include <stdint.h>
 
@@ -16,8 +17,7 @@ class Command {
 
 class DmaReadCommand : public Command {
  public:
-  typedef void (*DmaCallback)(ResponseContext&, uint64_t, uint64_t, z_cap_t);
-  DmaReadCommand(uint64_t lba, uint64_t sector_cnt, DmaCallback callback,
+  DmaReadCommand(uint64_t lba, uint64_t sector_cnt, Mutex& callback_mutex_,
                  ResponseContext& reply_port);
 
   virtual ~DmaReadCommand() override;
@@ -27,10 +27,12 @@ class DmaReadCommand : public Command {
 
   void Callback() override;
 
+  z_cap_t GetMemoryRegion() { return region_.cap(); }
+
  private:
   ResponseContext& response_;
   uint64_t lba_;
   uint64_t sector_cnt_;
-  DmaCallback callback_;
+  Mutex& callback_mutex_;
   MappedMemoryRegion region_;
 };
