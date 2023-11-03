@@ -153,7 +153,7 @@ glcr::RefPtr<Port> pci1_port;
 extern "C" void isr_pci1();
 extern "C" void interrupt_pci1(InterruptFrame*) {
   dbgln("Interrupt PCI line 1");
-  pci1_port->Send({}, {});
+  pci1_port->Send({});
   gApic->SignalEOI();
 }
 

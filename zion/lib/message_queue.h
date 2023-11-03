@@ -26,9 +26,7 @@ class MessageQueue {
  public:
   virtual ~MessageQueue() {}
 
-  virtual glcr::ErrorCode PushBack(const glcr::ArrayView<uint8_t>& message,
-                                   const glcr::ArrayView<z_cap_t>& caps,
-                                   z_cap_t reply_cap) = 0;
+  virtual glcr::ErrorCode PushBack(IpcMessage&&) = 0;
   virtual glcr::ErrorOr<IpcMessage> PopFront(uint64_t data_buf_size,
                                              uint64_t cap_buf_size) = 0;
   virtual bool empty() = 0;
@@ -47,9 +45,7 @@ class UnboundedMessageQueue : public MessageQueue {
   UnboundedMessageQueue& operator=(const UnboundedMessageQueue&) = delete;
   virtual ~UnboundedMessageQueue() override {}
 
-  glcr::ErrorCode PushBack(const glcr::ArrayView<uint8_t>& message,
-                           const glcr::ArrayView<z_cap_t>& caps,
-                           z_cap_t reply_cap) override;
+  glcr::ErrorCode PushBack(IpcMessage&& message) override;
   glcr::ErrorOr<IpcMessage> PopFront(uint64_t data_buf_size,
                                      uint64_t cap_buf_size) override;
 
@@ -71,9 +67,7 @@ class SingleMessageQueue : public MessageQueue {
   SingleMessageQueue(SingleMessageQueue&&) = delete;
   virtual ~SingleMessageQueue() override {}
 
-  glcr::ErrorCode PushBack(const glcr::ArrayView<uint8_t>& message,
-                           const glcr::ArrayView<z_cap_t>& caps,
-                           z_cap_t reply_cap) override;
+  glcr::ErrorCode PushBack(IpcMessage&&) override;
   glcr::ErrorOr<IpcMessage> PopFront(uint64_t data_buf_size,
                                      uint64_t cap_buf_size) override;
 

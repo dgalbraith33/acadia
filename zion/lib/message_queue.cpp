@@ -3,42 +3,9 @@
 #include "debug/debug.h"
 #include "scheduler/scheduler.h"
 
-glcr::ErrorCode UnboundedMessageQueue::PushBack(
-    const glcr::ArrayView<uint8_t>& message,
-    const glcr::ArrayView<z_cap_t>& caps, z_cap_t reply_cap) {
-  if (message.size() > 0x1000) {
-    dbgln("Large message size unimplemented: %x", message.size());
-    return glcr::UNIMPLEMENTED;
-  }
-
-  IpcMessage msg_struct;
-  msg_struct.data = glcr::Array<uint8_t>(message);
-
-  if (reply_cap != kZionInvalidCapability) {
-    // FIXME: We're just trusting that capability has the correct permissions.
-    msg_struct.reply_cap =
-        gScheduler->CurrentProcess().ReleaseCapability(reply_cap);
-  }
-
-  msg_struct.caps.Resize(caps.size());
-  for (uint64_t i = 0; i < caps.size(); i++) {
-    // FIXME: This would feel safer closer to the relevant syscall.
-    // FIXME: Race conditions on get->check->release here. Would be better to
-    // have that as a single call on the process. (This pattern repeats other
-    // places too).
-    auto cap = gScheduler->CurrentProcess().GetCapability(caps[i]);
-    if (!cap) {
-      return glcr::CAP_NOT_FOUND;
-    }
-    if (!cap->HasPermissions(kZionPerm_Transmit)) {
-      return glcr::CAP_PERMISSION_DENIED;
-    }
-    cap = gScheduler->CurrentProcess().ReleaseCapability(caps[i]);
-    msg_struct.caps.PushBack(cap);
-  }
-
+glcr::ErrorCode UnboundedMessageQueue::PushBack(IpcMessage&& message) {
   MutexHolder h(mutex_);
-  pending_messages_.PushBack(glcr::Move(msg_struct));
+  pending_messages_.PushBack(glcr::Move(message));
 
   if (blocked_threads_.size() > 0) {
     auto thread = blocked_threads_.PopFront();
@@ -88,34 +55,19 @@ void UnboundedMessageQueue::WriteKernel(uint64_t init,
   pending_messages_.PushBack(glcr::Move(msg));
 }
 
-glcr::ErrorCode SingleMessageQueue::PushBack(
-    const glcr::ArrayView<uint8_t>& message,
-    const glcr::ArrayView<z_cap_t>& caps, z_cap_t reply_port) {
-  MutexHolder h(mutex_);
-  if (has_written_) {
-    return glcr::FAILED_PRECONDITION;
-  }
-  message_.data = message;
-
-  if (reply_port != kZionInvalidCapability) {
+glcr::ErrorCode SingleMessageQueue::PushBack(IpcMessage&& message) {
+  if (message.reply_cap) {
     dbgln("Sent a reply port to a single message queue");
     return glcr::INTERNAL;
   }
 
-  message_.caps.Resize(caps.size());
-  for (uint64_t i = 0; i < caps.size(); i++) {
-    // FIXME: This would feel safer closer to the relevant syscall.
-    auto cap = gScheduler->CurrentProcess().GetCapability(caps[i]);
-    if (!cap) {
-      return glcr::CAP_NOT_FOUND;
-    }
-    if (!cap->HasPermissions(kZionPerm_Transmit)) {
-      return glcr::CAP_PERMISSION_DENIED;
-    }
-    cap = gScheduler->CurrentProcess().ReleaseCapability(caps[i]);
-    message_.caps.PushBack(cap);
+  MutexHolder h(mutex_);
+  if (has_written_) {
+    dbgln("Double write to reply port.");
+    return glcr::FAILED_PRECONDITION;
   }
 
+  message_ = glcr::Move(message);
   has_written_ = true;
 
   if (blocked_threads_.size() > 0) {
@@ -142,6 +94,7 @@ glcr::ErrorOr<IpcMessage> SingleMessageQueue::PopFront(uint64_t data_buf_size,
 
   MutexHolder lock(mutex_);
   if (has_read_) {
+    dbgln("Double read from reply port.");
     return glcr::FAILED_PRECONDITION;
   }
 

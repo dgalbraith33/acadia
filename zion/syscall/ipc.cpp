@@ -15,6 +15,38 @@ glcr::ArrayView<uint8_t> Buffer(const void* bytes, uint64_t num_bytes) {
 }
 
 template <typename T>
+glcr::ErrorOr<IpcMessage> TranslateRequestToIpcMessage(const T& req) {
+  if (req.num_bytes > 0x1000) {
+    dbgln("Large message size unimplemented: %x", req.num_bytes);
+    return glcr::UNIMPLEMENTED;
+  }
+
+  IpcMessage message;
+  message.data = Buffer(req.data, req.num_bytes);
+
+  glcr::ArrayView<const z_cap_t> caps(req.caps, req.num_caps);
+
+  message.caps.Resize(caps.size());
+  for (uint64_t i = 0; i < caps.size(); i++) {
+    // FIXME: This would feel safer closer to the relevant syscall.
+    // FIXME: Race conditions on get->check->release here. Would be better to
+    // have that as a single call on the process. (This pattern repeats other
+    // places too).
+    auto cap = gScheduler->CurrentProcess().GetCapability(caps[i]);
+    if (!cap) {
+      return glcr::CAP_NOT_FOUND;
+    }
+    if (!cap->HasPermissions(kZionPerm_Transmit)) {
+      return glcr::CAP_PERMISSION_DENIED;
+    }
+    message.caps.PushBack(
+        gScheduler->CurrentProcess().ReleaseCapability(caps[i]));
+  }
+
+  return message;
+}
+
+template <typename T>
 glcr::ErrorCode TranslateIpcMessageToResponse(const IpcMessage& message,
                                               T* resp) {
   if (message.data.size() > *resp->num_bytes) {
@@ -67,8 +99,8 @@ glcr::ErrorCode ChannelSend(ZChannelSendReq* req) {
   RET_ERR(ValidateCapability<Channel>(chan_cap, kZionPerm_Write));
 
   auto chan = chan_cap->obj<Channel>();
-  return chan->Send(Buffer(req->data, req->num_bytes),
-                    glcr::ArrayView<z_cap_t>(req->caps, req->num_caps));
+  ASSIGN_OR_RETURN(IpcMessage message, TranslateRequestToIpcMessage(*req));
+  return chan->Send(glcr::Move(message));
 }
 
 glcr::ErrorCode ChannelRecv(ZChannelRecvReq* req) {
@@ -94,8 +126,8 @@ glcr::ErrorCode PortSend(ZPortSendReq* req) {
   RET_ERR(ValidateCapability<Port>(port_cap, kZionPerm_Write));
 
   auto port = port_cap->obj<Port>();
-  return port->Send(Buffer(req->data, req->num_bytes),
-                    glcr::ArrayView<z_cap_t>(req->caps, req->num_caps));
+  ASSIGN_OR_RETURN(IpcMessage message, TranslateRequestToIpcMessage(*req));
+  return port->Send(glcr::Move(message));
 }
 
 glcr::ErrorCode PortRecv(ZPortRecvReq* req) {
@@ -150,12 +182,11 @@ glcr::ErrorCode EndpointSend(ZEndpointSendReq* req) {
 
   auto reply_port = ReplyPort::Create();
   *req->reply_port_cap = proc.AddNewCapability(reply_port, kZionPerm_Read);
-  uint64_t reply_port_cap_to_send =
-      proc.AddNewCapability(reply_port, kZionPerm_Write | kZionPerm_Transmit);
-  return endpoint->Send(
-      Buffer(req->data, req->num_bytes),
-      glcr::ArrayView<z_cap_t>(const_cast<z_cap_t*>(req->caps), req->num_caps),
-      reply_port_cap_to_send);
+
+  ASSIGN_OR_RETURN(IpcMessage message, TranslateRequestToIpcMessage(*req));
+  message.reply_cap = glcr::MakeRefCounted<Capability>(
+      reply_port, kZionPerm_Write | kZionPerm_Transmit);
+  return endpoint->Send(glcr::Move(message));
 }
 
 glcr::ErrorCode EndpointRecv(ZEndpointRecvReq* req) {
@@ -176,8 +207,8 @@ glcr::ErrorCode ReplyPortSend(ZReplyPortSendReq* req) {
   ValidateCapability<ReplyPort>(reply_port_cap, kZionPerm_Read);
   auto reply_port = reply_port_cap->obj<ReplyPort>();
 
-  return reply_port->Send(Buffer(req->data, req->num_bytes),
-                          glcr::ArrayView<z_cap_t>(req->caps, req->num_caps));
+  ASSIGN_OR_RETURN(IpcMessage message, TranslateRequestToIpcMessage(*req));
+  return reply_port->Send(glcr::Move(message));
 }
 glcr::ErrorCode ReplyPortRecv(ZReplyPortRecvReq* req) {
   auto& proc = gScheduler->CurrentProcess();

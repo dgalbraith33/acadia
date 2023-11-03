@@ -11,11 +11,7 @@ class IpcObject : public KernelObject {
   IpcObject(){};
   virtual ~IpcObject() {}
 
-  virtual glcr::ErrorCode Send(const glcr::ArrayView<uint8_t>& message,
-                               const glcr::ArrayView<z_cap_t>& caps) final;
-  virtual glcr::ErrorCode Send(const glcr::ArrayView<uint8_t>& message,
-                               const glcr::ArrayView<z_cap_t>& caps,
-                               const z_cap_t reply_port) final;
+  virtual glcr::ErrorCode Send(IpcMessage&& message) final;
 
   virtual glcr::ErrorOr<IpcMessage> Recv(uint64_t data_buf_size,
                                          uint64_t cap_buf_size) final;
