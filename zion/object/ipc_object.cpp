@@ -14,14 +14,7 @@ glcr::ErrorCode IpcObject::Send(const glcr::ArrayView<uint8_t>& message,
   return message_queue.PushBack(message, caps, reply_port);
 }
 
-glcr::ErrorCode IpcObject::Recv(uint64_t* num_bytes, void* bytes,
-                                uint64_t* num_caps, z_cap_t* caps) {
-  return Recv(num_bytes, bytes, num_caps, caps, nullptr);
-}
-
-glcr::ErrorCode IpcObject::Recv(uint64_t* num_bytes, void* bytes,
-                                uint64_t* num_caps, z_cap_t* caps,
-                                z_cap_t* reply_port) {
-  auto& message_queue = GetRecvMessageQueue();
-  return message_queue.PopFront(num_bytes, bytes, num_caps, caps, reply_port);
+glcr::ErrorOr<IpcMessage> IpcObject::Recv(uint64_t data_buf_size,
+                                          uint64_t cap_buf_size) {
+  return GetRecvMessageQueue().PopFront(data_buf_size, cap_buf_size);
 }

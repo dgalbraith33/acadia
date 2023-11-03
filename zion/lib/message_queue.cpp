@@ -48,10 +48,8 @@ glcr::ErrorCode UnboundedMessageQueue::PushBack(
   return glcr::OK;
 }
 
-glcr::ErrorCode UnboundedMessageQueue::PopFront(uint64_t* num_bytes,
-                                                void* bytes, uint64_t* num_caps,
-                                                z_cap_t* caps,
-                                                z_cap_t* reply_cap) {
+glcr::ErrorOr<IpcMessage> UnboundedMessageQueue::PopFront(
+    uint64_t data_buf_size, uint64_t cap_buf_size) {
   mutex_->Lock();
   while (pending_messages_.empty()) {
     auto thread = gScheduler->CurrentThread();
@@ -65,35 +63,14 @@ glcr::ErrorCode UnboundedMessageQueue::PopFront(uint64_t* num_bytes,
 
   MutexHolder lock(mutex_);
   auto& next_msg = pending_messages_.PeekFront();
-  if (next_msg.data.size() > *num_bytes) {
+  if (next_msg.data.size() > data_buf_size) {
     return glcr::BUFFER_SIZE;
   }
-  if (next_msg.caps.size() > *num_caps) {
+  if (next_msg.caps.size() > cap_buf_size) {
     return glcr::BUFFER_SIZE;
   }
 
-  next_msg = pending_messages_.PopFront();
-
-  *num_bytes = next_msg.data.size();
-
-  for (uint64_t i = 0; i < *num_bytes; i++) {
-    static_cast<uint8_t*>(bytes)[i] = next_msg.data[i];
-  }
-
-  auto& proc = gScheduler->CurrentProcess();
-  if (reply_cap != nullptr) {
-    if (!next_msg.reply_cap) {
-      dbgln("Tried to read reply capability off of a message without one");
-      return glcr::INTERNAL;
-    }
-    *reply_cap = proc.AddExistingCapability(next_msg.reply_cap);
-  }
-
-  *num_caps = next_msg.caps.size();
-  for (uint64_t i = 0; i < *num_caps; i++) {
-    caps[i] = proc.AddExistingCapability(next_msg.caps[i]);
-  }
-  return glcr::OK;
+  return pending_messages_.PopFront();
 }
 
 void UnboundedMessageQueue::WriteKernel(uint64_t init,
@@ -150,9 +127,8 @@ glcr::ErrorCode SingleMessageQueue::PushBack(
   return glcr::OK;
 }
 
-glcr::ErrorCode SingleMessageQueue::PopFront(uint64_t* num_bytes, void* bytes,
-                                             uint64_t* num_caps, z_cap_t* caps,
-                                             z_cap_t* reply_port) {
+glcr::ErrorOr<IpcMessage> SingleMessageQueue::PopFront(uint64_t data_buf_size,
+                                                       uint64_t cap_buf_size) {
   mutex_->Lock();
   while (!has_written_) {
     auto thread = gScheduler->CurrentThread();
@@ -169,29 +145,14 @@ glcr::ErrorCode SingleMessageQueue::PopFront(uint64_t* num_bytes, void* bytes,
     return glcr::FAILED_PRECONDITION;
   }
 
-  if (message_.data.size() > *num_bytes) {
+  if (message_.data.size() > data_buf_size) {
     return glcr::BUFFER_SIZE;
   }
-  if (message_.caps.size() > *num_caps) {
+  if (message_.caps.size() > cap_buf_size) {
     return glcr::BUFFER_SIZE;
   }
 
-  *num_bytes = message_.data.size();
-  for (uint64_t i = 0; i < message_.data.size(); i++) {
-    reinterpret_cast<uint8_t*>(bytes)[i] = message_.data[i];
-  }
-
-  if (reply_port != nullptr) {
-    dbgln("Tried to read a reply port a single message queue");
-    return glcr::INTERNAL;
-  }
-
-  *num_caps = message_.caps.size();
-  auto& proc = gScheduler->CurrentProcess();
-  for (uint64_t i = 0; i < *num_caps; i++) {
-    caps[i] = proc.AddExistingCapability(message_.caps[i]);
-  }
   has_read_ = true;
 
-  return glcr::OK;
+  return glcr::Move(message_);
 }

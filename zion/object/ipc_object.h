@@ -17,11 +17,8 @@ class IpcObject : public KernelObject {
                                const glcr::ArrayView<z_cap_t>& caps,
                                const z_cap_t reply_port) final;
 
-  virtual glcr::ErrorCode Recv(uint64_t* num_bytes, void* bytes,
-                               uint64_t* num_caps, z_cap_t* caps) final;
-  virtual glcr::ErrorCode Recv(uint64_t* num_bytes, void* bytes,
-                               uint64_t* num_caps, z_cap_t* caps,
-                               z_cap_t* reply_port) final;
+  virtual glcr::ErrorOr<IpcMessage> Recv(uint64_t data_buf_size,
+                                         uint64_t cap_buf_size) final;
 
   bool HasMessages() { return !GetRecvMessageQueue().empty(); }
 

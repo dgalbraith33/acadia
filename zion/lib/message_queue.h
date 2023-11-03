@@ -8,6 +8,7 @@
 #include <glacier/memory/ref_ptr.h>
 #include <glacier/memory/shared_ptr.h>
 #include <glacier/status/error.h>
+#include <glacier/status/error_or.h>
 
 #include "capability/capability.h"
 #include "include/ztypes.h"
@@ -28,9 +29,8 @@ class MessageQueue {
   virtual glcr::ErrorCode PushBack(const glcr::ArrayView<uint8_t>& message,
                                    const glcr::ArrayView<z_cap_t>& caps,
                                    z_cap_t reply_cap) = 0;
-  virtual glcr::ErrorCode PopFront(uint64_t* num_bytes, void* bytes,
-                                   uint64_t* num_caps, z_cap_t* caps,
-                                   z_cap_t* reply_cap) = 0;
+  virtual glcr::ErrorOr<IpcMessage> PopFront(uint64_t data_buf_size,
+                                             uint64_t cap_buf_size) = 0;
   virtual bool empty() = 0;
 
  protected:
@@ -50,8 +50,8 @@ class UnboundedMessageQueue : public MessageQueue {
   glcr::ErrorCode PushBack(const glcr::ArrayView<uint8_t>& message,
                            const glcr::ArrayView<z_cap_t>& caps,
                            z_cap_t reply_cap) override;
-  glcr::ErrorCode PopFront(uint64_t* num_bytes, void* bytes, uint64_t* num_caps,
-                           z_cap_t* caps, z_cap_t* reply_cap) override;
+  glcr::ErrorOr<IpcMessage> PopFront(uint64_t data_buf_size,
+                                     uint64_t cap_buf_size) override;
 
   void WriteKernel(uint64_t init, glcr::RefPtr<Capability> cap);
 
@@ -74,8 +74,8 @@ class SingleMessageQueue : public MessageQueue {
   glcr::ErrorCode PushBack(const glcr::ArrayView<uint8_t>& message,
                            const glcr::ArrayView<z_cap_t>& caps,
                            z_cap_t reply_cap) override;
-  glcr::ErrorCode PopFront(uint64_t* num_bytes, void* bytes, uint64_t* num_caps,
-                           z_cap_t* caps, z_cap_t* reply_cap) override;
+  glcr::ErrorOr<IpcMessage> PopFront(uint64_t data_buf_size,
+                                     uint64_t cap_buf_size) override;
 
   bool empty() override {
     MutexHolder h(mutex_);

@@ -1,6 +1,7 @@
 #include "syscall/ipc.h"
 
 #include "capability/capability.h"
+#include "debug/debug.h"
 #include "interrupt/interrupt.h"
 #include "object/endpoint.h"
 #include "object/reply_port.h"
@@ -12,6 +13,44 @@ glcr::ArrayView<uint8_t> Buffer(const void* bytes, uint64_t num_bytes) {
   return glcr::ArrayView(reinterpret_cast<uint8_t*>(const_cast<void*>(bytes)),
                          num_bytes);
 }
+
+template <typename T>
+glcr::ErrorCode TranslateIpcMessageToResponse(const IpcMessage& message,
+                                              T* resp) {
+  if (message.data.size() > *resp->num_bytes) {
+    return glcr::BUFFER_SIZE;
+  }
+  if (message.caps.size() > *resp->num_caps) {
+    return glcr::BUFFER_SIZE;
+  }
+
+  *resp->num_bytes = message.data.size();
+  for (uint64_t i = 0; i < message.data.size(); i++) {
+    reinterpret_cast<uint8_t*>(resp->data)[i] = message.data[i];
+  }
+
+  *resp->num_caps = message.caps.size();
+  auto& proc = gScheduler->CurrentProcess();
+  for (uint64_t i = 0; i < *resp->num_caps; i++) {
+    resp->caps[i] = proc.AddExistingCapability(message.caps[i]);
+  }
+  return glcr::OK;
+}
+
+template <typename T>
+glcr::ErrorCode TranslateIpcMessageToResponseWithReplyPort(
+    const IpcMessage& message, T* resp) {
+  TranslateIpcMessageToResponse(message, resp);
+
+  if (!message.reply_cap) {
+    dbgln("Tried to read reply capability off of a message without one");
+    return glcr::INTERNAL;
+  }
+  auto& proc = gScheduler->CurrentProcess();
+  *resp->reply_port_cap = proc.AddExistingCapability(message.reply_cap);
+  return glcr::OK;
+}
+
 }  // namespace
 
 glcr::ErrorCode ChannelCreate(ZChannelCreateReq* req) {
@@ -38,7 +77,8 @@ glcr::ErrorCode ChannelRecv(ZChannelRecvReq* req) {
   RET_ERR(ValidateCapability<Channel>(chan_cap, kZionPerm_Read));
 
   auto chan = chan_cap->obj<Channel>();
-  return chan->Recv(req->num_bytes, req->data, req->num_caps, req->caps);
+  ASSIGN_OR_RETURN(IpcMessage msg, chan->Recv(*req->num_bytes, *req->num_caps));
+  return TranslateIpcMessageToResponse(msg, req);
 }
 
 glcr::ErrorCode PortCreate(ZPortCreateReq* req) {
@@ -64,7 +104,8 @@ glcr::ErrorCode PortRecv(ZPortRecvReq* req) {
   RET_ERR(ValidateCapability<Port>(port_cap, kZionPerm_Read));
 
   auto port = port_cap->obj<Port>();
-  return port->Recv(req->num_bytes, req->data, req->num_caps, req->caps);
+  ASSIGN_OR_RETURN(IpcMessage msg, port->Recv(*req->num_bytes, *req->num_caps));
+  return TranslateIpcMessageToResponse(msg, req);
 }
 
 glcr::ErrorCode PortPoll(ZPortPollReq* req) {
@@ -78,7 +119,8 @@ glcr::ErrorCode PortPoll(ZPortPollReq* req) {
   if (!port->HasMessages()) {
     return glcr::EMPTY;
   }
-  return port->Recv(req->num_bytes, req->data, req->num_caps, req->caps);
+  ASSIGN_OR_RETURN(IpcMessage msg, port->Recv(*req->num_bytes, *req->num_caps));
+  return TranslateIpcMessageToResponse(msg, req);
 }
 
 glcr::ErrorCode IrqRegister(ZIrqRegisterReq* req) {
@@ -123,13 +165,9 @@ glcr::ErrorCode EndpointRecv(ZEndpointRecvReq* req) {
   ValidateCapability<Endpoint>(endpoint_cap, kZionPerm_Read);
   auto endpoint = endpoint_cap->obj<Endpoint>();
 
-  uint64_t num_caps = 1;
-  RET_ERR(endpoint->Recv(req->num_bytes, req->data, req->num_caps, req->caps,
-                         req->reply_port_cap));
-  if (num_caps != 1) {
-    return glcr::INTERNAL;
-  }
-  return glcr::OK;
+  ASSIGN_OR_RETURN(IpcMessage msg,
+                   endpoint->Recv(*req->num_bytes, *req->num_caps));
+  return TranslateIpcMessageToResponseWithReplyPort(msg, req);
 }
 
 glcr::ErrorCode ReplyPortSend(ZReplyPortSendReq* req) {
@@ -148,5 +186,7 @@ glcr::ErrorCode ReplyPortRecv(ZReplyPortRecvReq* req) {
   ValidateCapability<ReplyPort>(reply_port_cap, kZionPerm_Read);
   auto reply_port = reply_port_cap->obj<ReplyPort>();
 
-  return reply_port->Recv(req->num_bytes, req->data, req->num_caps, req->caps);
+  ASSIGN_OR_RETURN(IpcMessage msg,
+                   reply_port->Recv(*req->num_bytes, *req->num_caps));
+  return TranslateIpcMessageToResponse(msg, req);
 }
