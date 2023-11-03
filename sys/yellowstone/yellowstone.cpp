@@ -40,11 +40,12 @@ uint64_t main(uint64_t port_cap) {
   OpenFileResponse response;
   check(vfs_client->OpenFile(request, response));
 
-  MappedMemoryRegion file =
+  MappedMemoryRegion filemem =
       MappedMemoryRegion::FromCapability(response.memory());
+  glcr::String file(reinterpret_cast<const char*>(filemem.vaddr()),
+                    response.size());
 
-  dbgln("addr: %lu, size: %lu", file.vaddr(), file.size());
-  dbgln("Test: '%s'", file.vaddr());
+  dbgln("Test: '%s'", file.cstr());
 
   check(server_thread.Join());
   dbgln("Yellowstone Finished Successfully.");

@@ -32,11 +32,14 @@ glcr::ErrorCode VFSServer::HandleOpenFile(const OpenFileRequest& request,
     return glcr::NOT_FOUND;
   }
 
+  uint64_t inode_num;
   MappedMemoryRegion region;
   for (uint64_t j = 0; j < files.size(); j++) {
     if (path_tokens.at(path_tokens.size() - 1) ==
         glcr::StringView(files.at(j).name, files.at(j).name_len)) {
+      inode_num = files.at(j).inode;
       ASSIGN_OR_RETURN(region, driver_.ReadFile(files.at(j).inode));
+      break;
     }
   }
   if (!region) {
@@ -46,5 +49,9 @@ glcr::ErrorCode VFSServer::HandleOpenFile(const OpenFileRequest& request,
 
   response.set_path(request.path());
   response.set_memory(region.cap());
+  // TODO: Consider folding this up into the actual read call.
+  ASSIGN_OR_RETURN(Inode * inode, driver_.GetInode(inode_num));
+  // FIXME: This technically only sets the lower 32 bits.
+  response.set_size(inode->size);
   return glcr::OK;
 }

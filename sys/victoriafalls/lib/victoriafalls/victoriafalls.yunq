@@ -8,5 +8,6 @@ message OpenFileRequest {
 
 message OpenFileResponse {
   string path;
+  u64 size;
   capability memory;
 }
