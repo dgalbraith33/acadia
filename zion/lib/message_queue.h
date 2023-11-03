@@ -61,7 +61,7 @@ class UnboundedMessageQueue : public MessageQueue {
   }
 
  private:
-  glcr::LinkedList<glcr::SharedPtr<IpcMessage>> pending_messages_;
+  glcr::LinkedList<IpcMessage> pending_messages_;
 };
 
 class SingleMessageQueue : public MessageQueue {

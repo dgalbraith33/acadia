@@ -21,7 +21,7 @@ class Array {
 
   Array(const Array&) = delete;
 
-  Array(Array&& other) : data_(other.data), size_(other.size_) {
+  Array(Array&& other) : data_(other.data_), size_(other.size_) {
     other.data_ = nullptr;
     other.size_ = 0;
   }

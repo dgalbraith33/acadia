@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+#include "glacier/memory/move.h"
+
 namespace glcr {
 
 template <typename T>
@@ -15,20 +17,19 @@ class LinkedList {
   uint64_t size() const { return size_; }
 
   void PushBack(const T& item) {
-    size_++;
     ListItem* new_item = new ListItem{
         .item = item,
         .next = nullptr,
     };
-    if (front_ == nullptr) {
-      front_ = new_item;
-      return;
-    }
-    ListItem* litem = front_;
-    while (litem->next != nullptr) {
-      litem = litem->next;
-    }
-    litem->next = new_item;
+    PushBackInternal(new_item);
+  }
+
+  void PushBack(T&& item) {
+    ListItem* new_item = new ListItem{
+        .item = glcr::Move(item),
+        .next = nullptr,
+    };
+    PushBackInternal(new_item);
   }
 
   T PopFront() {
@@ -36,12 +37,12 @@ class LinkedList {
 
     ListItem* old_front = front_;
     front_ = front_->next;
-    T ret = old_front->item;
+    T ret = glcr::Move(old_front->item);
     delete old_front;
     return ret;
   }
 
-  T PeekFront() const { return front_->item; }
+  T& PeekFront() const { return front_->item; }
 
   struct ListItem {
     T item;
@@ -73,6 +74,19 @@ class LinkedList {
   uint64_t size_ = 0;
 
   ListItem* front_ = nullptr;
+
+  void PushBackInternal(ListItem* new_item) {
+    size_++;
+    if (front_ == nullptr) {
+      front_ = new_item;
+      return;
+    }
+    ListItem* litem = front_;
+    while (litem->next != nullptr) {
+      litem = litem->next;
+    }
+    litem->next = new_item;
+  }
 };
 
 }  // namespace glcr
