@@ -4,22 +4,47 @@
 #include <mammoth/debug.h>
 #include <zcall.h>
 
-glcr::ErrorOr<glcr::UniquePtr<VFSServer>> VFSServer::Create() {
+glcr::ErrorOr<glcr::UniquePtr<VFSServer>> VFSServer::Create(
+    Ext2Driver& driver) {
   z_cap_t endpoint_cap;
   RET_ERR(ZEndpointCreate(&endpoint_cap));
-  return glcr::UniquePtr<VFSServer>(new VFSServer(endpoint_cap));
+  return glcr::UniquePtr<VFSServer>(new VFSServer(endpoint_cap, driver));
 }
 
 glcr::ErrorCode VFSServer::HandleOpenFile(const OpenFileRequest& request,
-                                          OpenFileResponse&) {
+                                          OpenFileResponse& response) {
   auto path_tokens = glcr::StrSplit(request.path(), '/');
-  for (uint64_t i = 0; i < path_tokens.size(); i++) {
-    dbgln("Token %u: '%s'", i, glcr::String(path_tokens.at(i)).cstr());
-  }
   // Require all paths to be absolute rather than relative.
   // If the path starts with '/' then the first token will be empty.
   if (path_tokens.at(0) != "") {
     return glcr::INVALID_ARGUMENT;
   }
-  return glcr::UNIMPLEMENTED;
+
+  ASSIGN_OR_RETURN(auto files, driver_.ReadDirectory(2));
+  for (uint64_t i = 1; i < path_tokens.size() - 1; i++) {
+    for (uint64_t j = 0; j < files.size(); j++) {
+      if (path_tokens.at(i) ==
+          glcr::StringView(files.at(j).name, files.at(j).name_len)) {
+        ASSIGN_OR_RETURN(files, driver_.ReadDirectory(files.at(j).inode));
+      }
+    }
+    dbgln("Directory '%s' not found.", glcr::String(path_tokens.at(i)).cstr());
+    return glcr::NOT_FOUND;
+  }
+
+  MappedMemoryRegion region;
+  for (uint64_t j = 0; j < files.size(); j++) {
+    if (path_tokens.at(path_tokens.size() - 1) ==
+        glcr::StringView(files.at(j).name, files.at(j).name_len)) {
+      ASSIGN_OR_RETURN(region, driver_.ReadFile(files.at(j).inode));
+    }
+  }
+  if (!region) {
+    dbgln("File '%s' not found.",
+          glcr::String(path_tokens.at(path_tokens.size() - 1)).cstr());
+  }
+
+  response.set_path(request.path());
+  response.set_memory(region.cap());
+  return glcr::OK;
 }

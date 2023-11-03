@@ -15,7 +15,10 @@ class Ext2Driver {
   glcr::ErrorCode ProbePartition();
 
   glcr::ErrorOr<Inode*> GetInode(uint32_t inode_number);
-  glcr::ErrorCode ProbeDirectory(Inode* inode);
+
+  glcr::ErrorOr<glcr::Vector<DirEntry>> ReadDirectory(uint32_t inode_number);
+
+  glcr::ErrorOr<MappedMemoryRegion> ReadFile(uint64_t inode_number);
 
  private:
   glcr::SharedPtr<Ext2BlockReader> ext2_reader_;

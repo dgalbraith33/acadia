@@ -44,6 +44,7 @@ uint64_t main(uint64_t port_cap) {
       MappedMemoryRegion::FromCapability(response.memory());
 
   dbgln("addr: %lu, size: %lu", file.vaddr(), file.size());
+  dbgln("Test: '%s'", file.vaddr());
 
   check(server_thread.Join());
   dbgln("Yellowstone Finished Successfully.");

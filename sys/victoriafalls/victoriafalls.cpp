@@ -20,9 +20,7 @@ uint64_t main(uint64_t init_cap) {
                             denali_info.device_id(), denali_info.lba_offset());
   ASSIGN_OR_RETURN(Ext2Driver ext2, Ext2Driver::Init(glcr::Move(denali)));
 
-  ASSIGN_OR_RETURN(Inode * root, ext2.GetInode(2));
-
-  ASSIGN_OR_RETURN(auto server, VFSServer::Create());
+  ASSIGN_OR_RETURN(auto server, VFSServer::Create(ext2));
 
   Thread server_thread = server->RunServer();
 
@@ -31,7 +29,6 @@ uint64_t main(uint64_t init_cap) {
   ASSIGN_OR_RETURN(auto client, server->CreateClient());
   req.set_endpoint_capability(client.Capability());
   check(yellowstone.RegisterEndpoint(req, empty));
-  check(ext2.ProbeDirectory(root));
 
   RET_ERR(server_thread.Join());
 

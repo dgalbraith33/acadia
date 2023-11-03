@@ -17,6 +17,21 @@ class Vector {
     other.size_ = 0;
     other.capacity_ = 0;
   }
+  Vector& operator=(Vector&& other) {
+    if (data_) {
+      delete[] data_;
+    }
+
+    data_ = other.data_;
+    size_ = other.size_;
+    capacity_ = other.capacity_;
+
+    other.data_ = nullptr;
+    other.size_ = 0;
+    other.capacity_ = 0;
+
+    return *this;
+  }
 
   ~Vector() {
     if (data_) {

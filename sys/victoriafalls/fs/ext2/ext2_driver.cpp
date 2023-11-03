@@ -44,9 +44,11 @@ glcr::ErrorOr<Inode*> Ext2Driver::GetInode(uint32_t inode_number) {
   return inode_table_->GetInode(inode_number);
 }
 
-glcr::ErrorCode Ext2Driver::ProbeDirectory(Inode* inode) {
+glcr::ErrorOr<glcr::Vector<DirEntry>> Ext2Driver::ReadDirectory(
+    uint32_t inode_number) {
+  ASSIGN_OR_RETURN(Inode * inode, inode_table_->GetInode(inode_number));
   if (!(inode->mode & 0x4000)) {
-    dbgln("Probing non-directory");
+    dbgln("Reading non directory.");
     return glcr::INVALID_ARGUMENT;
   }
 
@@ -59,6 +61,7 @@ glcr::ErrorCode Ext2Driver::ProbeDirectory(Inode* inode) {
     return glcr::FAILED_PRECONDITION;
   }
 
+  glcr::Vector<DirEntry> directory;
   for (uint64_t i = 0; i < real_block_cnt; i++) {
     dbgln("Getting block %lx", inode->block[i]);
     ASSIGN_OR_RETURN(MappedMemoryRegion block,
@@ -66,6 +69,7 @@ glcr::ErrorCode Ext2Driver::ProbeDirectory(Inode* inode) {
     uint64_t addr = block.vaddr();
     while (addr < block.vaddr() + ext2_reader_->BlockSize()) {
       DirEntry* entry = reinterpret_cast<DirEntry*>(addr);
+      directory.PushBack(*entry);
       glcr::String name(entry->name, entry->name_len);
       switch (entry->file_type) {
         case kExt2FtFile:
@@ -80,5 +84,25 @@ glcr::ErrorCode Ext2Driver::ProbeDirectory(Inode* inode) {
       addr += entry->record_length;
     }
   }
-  return glcr::OK;
+  return directory;
+}
+
+glcr::ErrorOr<MappedMemoryRegion> Ext2Driver::ReadFile(uint64_t inode_number) {
+  ASSIGN_OR_RETURN(Inode * inode, inode_table_->GetInode(inode_number));
+
+  if (!(inode->mode & 0x8000)) {
+    dbgln("Reading non file.");
+    return glcr::INVALID_ARGUMENT;
+  }
+
+  // This calculation is cursed.
+  uint64_t real_block_cnt =
+      (inode->blocks - 1) / (ext2_reader_->BlockSize() / 512) + 1;
+
+  if (real_block_cnt > 1) {
+    dbgln("Can't handle scatter-gather yet.");
+    return glcr::UNIMPLEMENTED;
+  }
+
+  return ext2_reader_->ReadBlock(inode->block[0]);
 }
