@@ -69,7 +69,7 @@ void Thread::Exit() {
 #endif
   state_ = FINISHED;
   process_.CheckState();
-  while (!blocked_threads_.size() == 0) {
+  while (blocked_threads_.size() != 0) {
     auto thread = blocked_threads_.PopFront();
     thread->SetState(Thread::RUNNABLE);
     gScheduler->Enqueue(thread);
@@ -78,7 +78,16 @@ void Thread::Exit() {
 }
 
 void Thread::Wait() {
-  // FIXME: We need synchronization code here.
+  // TODO: We need synchronization code here.
+  // Race condition is for A waiting on B.
+  // 1. A checks if B is finished.
+  // 2. Context Switch A -> B
+  // 3. B finishes.
+  // 4. Context Switch B -> A
+  // 5. A forever blocks on B.
+  if (state_ == Thread::FINISHED) {
+    return;
+  }
   auto thread = gScheduler->CurrentThread();
   thread->SetState(Thread::BLOCKED);
   blocked_threads_.PushBack(thread);
