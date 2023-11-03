@@ -11,8 +11,8 @@ glcr::ErrorCode UnboundedMessageQueue::PushBack(
     return glcr::UNIMPLEMENTED;
   }
 
-  auto msg_struct = glcr::MakeShared<Message>();
-  msg_struct->message = glcr::Array<uint8_t>(message);
+  auto msg_struct = glcr::MakeShared<IpcMessage>();
+  msg_struct->data = glcr::Array<uint8_t>(message);
 
   if (reply_cap != kZionInvalidCapability) {
     // FIXME: We're just trusting that capability has the correct permissions.
@@ -64,7 +64,7 @@ glcr::ErrorCode UnboundedMessageQueue::PopFront(uint64_t* num_bytes,
 
   MutexHolder lock(mutex_);
   auto next_msg = pending_messages_.PeekFront();
-  if (next_msg->message.size() > *num_bytes) {
+  if (next_msg->data.size() > *num_bytes) {
     return glcr::BUFFER_SIZE;
   }
   if (next_msg->caps.size() > *num_caps) {
@@ -73,10 +73,10 @@ glcr::ErrorCode UnboundedMessageQueue::PopFront(uint64_t* num_bytes,
 
   next_msg = pending_messages_.PopFront();
 
-  *num_bytes = next_msg->message.size();
+  *num_bytes = next_msg->data.size();
 
   for (uint64_t i = 0; i < *num_bytes; i++) {
-    static_cast<uint8_t*>(bytes)[i] = next_msg->message[i];
+    static_cast<uint8_t*>(bytes)[i] = next_msg->data[i];
   }
 
   auto& proc = gScheduler->CurrentProcess();
@@ -98,12 +98,12 @@ glcr::ErrorCode UnboundedMessageQueue::PopFront(uint64_t* num_bytes,
 void UnboundedMessageQueue::WriteKernel(uint64_t init,
                                         glcr::RefPtr<Capability> cap) {
   // FIXME: Add synchronization here in case it is ever used outside of init.
-  auto msg = glcr::MakeShared<Message>();
-  msg->message = glcr::Array<uint8_t>(sizeof(init));
+  auto msg = glcr::MakeShared<IpcMessage>();
+  msg->data = glcr::Array<uint8_t>(sizeof(init));
 
   uint8_t* data = reinterpret_cast<uint8_t*>(&init);
   for (uint8_t i = 0; i < sizeof(init); i++) {
-    msg->message[i] = data[i];
+    msg->data[i] = data[i];
   }
   msg->caps.PushBack(cap);
 
@@ -117,7 +117,7 @@ glcr::ErrorCode SingleMessageQueue::PushBack(
   if (has_written_) {
     return glcr::FAILED_PRECONDITION;
   }
-  message_ = message;
+  message_.data = message;
 
   if (reply_port != kZionInvalidCapability) {
     dbgln("Sent a reply port to a single message queue");
@@ -134,7 +134,7 @@ glcr::ErrorCode SingleMessageQueue::PushBack(
       return glcr::CAP_PERMISSION_DENIED;
     }
     cap = gScheduler->CurrentProcess().ReleaseCapability(caps[i]);
-    caps_.PushBack(cap);
+    message_.caps.PushBack(cap);
   }
 
   has_written_ = true;
@@ -167,16 +167,16 @@ glcr::ErrorCode SingleMessageQueue::PopFront(uint64_t* num_bytes, void* bytes,
     return glcr::FAILED_PRECONDITION;
   }
 
-  if (message_.size() > *num_bytes) {
+  if (message_.data.size() > *num_bytes) {
     return glcr::BUFFER_SIZE;
   }
-  if (caps_.size() > *num_caps) {
+  if (message_.caps.size() > *num_caps) {
     return glcr::BUFFER_SIZE;
   }
 
-  *num_bytes = message_.size();
-  for (uint64_t i = 0; i < message_.size(); i++) {
-    reinterpret_cast<uint8_t*>(bytes)[i] = message_[i];
+  *num_bytes = message_.data.size();
+  for (uint64_t i = 0; i < message_.data.size(); i++) {
+    reinterpret_cast<uint8_t*>(bytes)[i] = message_.data[i];
   }
 
   if (reply_port != nullptr) {
@@ -184,10 +184,10 @@ glcr::ErrorCode SingleMessageQueue::PopFront(uint64_t* num_bytes, void* bytes,
     return glcr::INTERNAL;
   }
 
-  *num_caps = caps_.size();
+  *num_caps = message_.caps.size();
   auto& proc = gScheduler->CurrentProcess();
   for (uint64_t i = 0; i < *num_caps; i++) {
-    caps[i] = proc.AddExistingCapability(caps_.PopFront());
+    caps[i] = proc.AddExistingCapability(message_.caps.PopFront());
   }
   has_read_ = true;
 

@@ -12,6 +12,14 @@
 #include "include/ztypes.h"
 #include "object/mutex.h"
 
+struct IpcMessage {
+  glcr::Array<uint8_t> data;
+
+  glcr::LinkedList<glcr::RefPtr<Capability>> caps;
+
+  glcr::RefPtr<Capability> reply_cap;
+};
+
 class MessageQueue {
  public:
   virtual ~MessageQueue() {}
@@ -52,14 +60,7 @@ class UnboundedMessageQueue : public MessageQueue {
   }
 
  private:
-  struct Message {
-    glcr::Array<uint8_t> message;
-
-    glcr::LinkedList<glcr::RefPtr<Capability>> caps;
-    glcr::RefPtr<Capability> reply_cap;
-  };
-
-  glcr::LinkedList<glcr::SharedPtr<Message>> pending_messages_;
+  glcr::LinkedList<glcr::SharedPtr<IpcMessage>> pending_messages_;
 };
 
 class SingleMessageQueue : public MessageQueue {
@@ -83,6 +84,5 @@ class SingleMessageQueue : public MessageQueue {
  private:
   bool has_written_ = false;
   bool has_read_ = false;
-  glcr::Array<uint8_t> message_;
-  glcr::LinkedList<glcr::RefPtr<Capability>> caps_;
+  IpcMessage message_;
 };
