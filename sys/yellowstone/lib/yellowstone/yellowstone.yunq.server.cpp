@@ -51,7 +51,7 @@ void YellowstoneServerBase::ServerThread() {
     uint64_t recv_cap_size = 0x10;
     uint64_t recv_buf_size = 0x1000;
     recv_cap.Reset();
-    glcr::ErrorCode recv_err = ZEndpointRecv(endpoint_, &recv_buf_size, recv_buffer.RawPtr(), &recv_cap_size, recv_cap.RawPtr(), &reply_port_cap);
+    glcr::ErrorCode recv_err = static_cast<glcr::ErrorCode>(ZEndpointRecv(endpoint_, &recv_buf_size, recv_buffer.RawPtr(), &recv_cap_size, recv_cap.RawPtr(), &reply_port_cap));
     if (recv_err != glcr::OK) {
       dbgln("Error in receive: %x", recv_err);
       continue;
@@ -64,10 +64,10 @@ void YellowstoneServerBase::ServerThread() {
     glcr::ErrorCode err = HandleRequest(recv_buffer, recv_cap, resp_buffer, resp_length, resp_cap);
     if (err != glcr::OK) {
       WriteError(resp_buffer, err);
-      reply_err = ZReplyPortSend(reply_port_cap, kHeaderSize, resp_buffer.RawPtr(), 0, nullptr);
+      reply_err = static_cast<glcr::ErrorCode>(ZReplyPortSend(reply_port_cap, kHeaderSize, resp_buffer.RawPtr(), 0, nullptr));
     } else {
       WriteHeader(resp_buffer, resp_length);
-      reply_err = ZReplyPortSend(reply_port_cap, kHeaderSize + resp_length, resp_buffer.RawPtr(), resp_cap.UsedSlots(), resp_cap.RawPtr());
+      reply_err = static_cast<glcr::ErrorCode>(ZReplyPortSend(reply_port_cap, kHeaderSize + resp_length, resp_buffer.RawPtr(), resp_cap.UsedSlots(), resp_cap.RawPtr()));
     }
     if (reply_err != glcr::OK) {
       dbgln("Error in reply: %x", reply_err);

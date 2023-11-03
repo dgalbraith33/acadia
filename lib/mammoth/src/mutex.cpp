@@ -19,5 +19,9 @@ glcr::ErrorOr<Mutex> Mutex::Create() {
   return Mutex(mutex_cap);
 }
 
-glcr::ErrorCode Mutex::Lock() { return ZMutexLock(mutex_cap_); }
-glcr::ErrorCode Mutex::Release() { return ZMutexRelease(mutex_cap_); }
+glcr::ErrorCode Mutex::Lock() {
+  return static_cast<glcr::ErrorCode>(ZMutexLock(mutex_cap_));
+}
+glcr::ErrorCode Mutex::Release() {
+  return static_cast<glcr::ErrorCode>(ZMutexRelease(mutex_cap_));
+}

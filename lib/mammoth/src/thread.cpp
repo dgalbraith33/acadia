@@ -22,4 +22,6 @@ Thread::Thread(Entry e, const void* arg1) {
                      reinterpret_cast<uint64_t>(arg1)));
 }
 
-glcr::ErrorCode Thread::Join() { return ZThreadWait(thread_cap_); }
+glcr::ErrorCode Thread::Join() {
+  return static_cast<glcr::ErrorCode>(ZThreadWait(thread_cap_));
+}

@@ -29,7 +29,8 @@ class ResponseContext {
         code,
     };
     written_ = true;
-    return ZReplyPortSend(reply_port_, sizeof(response), &response, 0, nullptr);
+    return static_cast<glcr::ErrorCode>(
+        ZReplyPortSend(reply_port_, sizeof(response), &response, 0, nullptr));
   }
 
   bool HasWritten() { return written_; }

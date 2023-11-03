@@ -3,9 +3,11 @@
 #include "debug/debug.h"
 #include "scheduler/scheduler.h"
 
-z_err_t UnboundedMessageQueue::PushBack(uint64_t num_bytes, const void* bytes,
-                                        uint64_t num_caps, const z_cap_t* caps,
-                                        z_cap_t reply_cap) {
+glcr::ErrorCode UnboundedMessageQueue::PushBack(uint64_t num_bytes,
+                                                const void* bytes,
+                                                uint64_t num_caps,
+                                                const z_cap_t* caps,
+                                                z_cap_t reply_cap) {
   if (num_bytes > 0x1000) {
     dbgln("Large message size unimplemented: %x", num_bytes);
     return glcr::UNIMPLEMENTED;
@@ -51,9 +53,10 @@ z_err_t UnboundedMessageQueue::PushBack(uint64_t num_bytes, const void* bytes,
   return glcr::OK;
 }
 
-z_err_t UnboundedMessageQueue::PopFront(uint64_t* num_bytes, void* bytes,
-                                        uint64_t* num_caps, z_cap_t* caps,
-                                        z_cap_t* reply_cap) {
+glcr::ErrorCode UnboundedMessageQueue::PopFront(uint64_t* num_bytes,
+                                                void* bytes, uint64_t* num_caps,
+                                                z_cap_t* caps,
+                                                z_cap_t* reply_cap) {
   mutex_->Lock();
   while (pending_messages_.empty()) {
     auto thread = gScheduler->CurrentThread();

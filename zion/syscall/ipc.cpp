@@ -6,7 +6,7 @@
 #include "object/reply_port.h"
 #include "scheduler/scheduler.h"
 
-z_err_t ChannelCreate(ZChannelCreateReq* req) {
+glcr::ErrorCode ChannelCreate(ZChannelCreateReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto chan_pair = Channel::CreateChannelPair();
   *req->channel1 = proc.AddNewCapability(chan_pair.first());
@@ -14,7 +14,7 @@ z_err_t ChannelCreate(ZChannelCreateReq* req) {
   return glcr::OK;
 }
 
-z_err_t ChannelSend(ZChannelSendReq* req) {
+glcr::ErrorCode ChannelSend(ZChannelSendReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto chan_cap = proc.GetCapability(req->chan_cap);
   RET_ERR(ValidateCapability<Channel>(chan_cap, kZionPerm_Write));
@@ -23,7 +23,7 @@ z_err_t ChannelSend(ZChannelSendReq* req) {
   return chan->Send(req->num_bytes, req->data, req->num_caps, req->caps);
 }
 
-z_err_t ChannelRecv(ZChannelRecvReq* req) {
+glcr::ErrorCode ChannelRecv(ZChannelRecvReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto chan_cap = proc.GetCapability(req->chan_cap);
   RET_ERR(ValidateCapability<Channel>(chan_cap, kZionPerm_Read));
@@ -32,14 +32,14 @@ z_err_t ChannelRecv(ZChannelRecvReq* req) {
   return chan->Recv(req->num_bytes, req->data, req->num_caps, req->caps);
 }
 
-z_err_t PortCreate(ZPortCreateReq* req) {
+glcr::ErrorCode PortCreate(ZPortCreateReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto port = glcr::MakeRefCounted<Port>();
   *req->port_cap = proc.AddNewCapability(port);
   return glcr::OK;
 }
 
-z_err_t PortSend(ZPortSendReq* req) {
+glcr::ErrorCode PortSend(ZPortSendReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto port_cap = proc.GetCapability(req->port_cap);
   RET_ERR(ValidateCapability<Port>(port_cap, kZionPerm_Write));
@@ -48,7 +48,7 @@ z_err_t PortSend(ZPortSendReq* req) {
   return port->Send(req->num_bytes, req->data, req->num_caps, req->caps);
 }
 
-z_err_t PortRecv(ZPortRecvReq* req) {
+glcr::ErrorCode PortRecv(ZPortRecvReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto port_cap = proc.GetCapability(req->port_cap);
   RET_ERR(ValidateCapability<Port>(port_cap, kZionPerm_Read));
@@ -63,7 +63,7 @@ z_err_t PortRecv(ZPortRecvReq* req) {
   return port->Recv(req->num_bytes, req->data, req->num_caps, req->caps);
 }
 
-z_err_t PortPoll(ZPortPollReq* req) {
+glcr::ErrorCode PortPoll(ZPortPollReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto port_cap = proc.GetCapability(req->port_cap);
   RET_ERR(ValidateCapability<Port>(port_cap, kZionPerm_Read));
@@ -77,7 +77,7 @@ z_err_t PortPoll(ZPortPollReq* req) {
   return port->Recv(req->num_bytes, req->data, req->num_caps, req->caps);
 }
 
-z_err_t IrqRegister(ZIrqRegisterReq* req) {
+glcr::ErrorCode IrqRegister(ZIrqRegisterReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   if (req->irq_num != Z_IRQ_PCI_BASE) {
     // FIXME: Don't hardcode this nonsense.

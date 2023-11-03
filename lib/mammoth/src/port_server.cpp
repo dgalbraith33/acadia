@@ -31,7 +31,7 @@ glcr::ErrorCode PortServer::RecvCap(uint64_t *num_bytes, char *msg,
   return glcr::OK;
 }
 
-z_err_t PortServer::PollForIntCap(uint64_t *msg, uint64_t *cap) {
+glcr::ErrorCode PortServer::PollForIntCap(uint64_t *msg, uint64_t *cap) {
   uint64_t bytes = sizeof(uint64_t);
   uint64_t caps = 1;
   RET_ERR(ZPortPoll(port_cap_, &bytes, reinterpret_cast<uint8_t *>(msg), &caps,

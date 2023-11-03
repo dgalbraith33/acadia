@@ -4,37 +4,37 @@
 
 namespace glcr {
 
-typedef uint64_t ErrorCode;
+enum ErrorCode : uint64_t {
+  OK = 0x0,
+  // First set of error codes generally indicate user errors.
+  INVALID_ARGUMENT = 0x1,
+  NOT_FOUND = 0x2,
+  PERMISSION_DENIED = 0x3,
+  NULL_PTR = 0x4,
+  EMPTY = 0x5,
+  ALREADY_EXISTS = 0x6,
+  BUFFER_SIZE = 0x7,
+  FAILED_PRECONDITION = 0x8,
 
-#define RET_ERR(expr)           \
-  {                             \
-    z_err_t _tmp_err = expr;    \
-    if (_tmp_err != glcr::OK) { \
-      return _tmp_err;          \
-    }                           \
+  // Second set of error codes generally indicate service errors.
+  INTERNAL = 0x100,
+  UNIMPLEMENTED = 0x101,
+  EXHAUSTED = 0x102,
+  INVALID_RESPONSE = 0x103,
+
+  // Kernel specific error codes (relating to capabilities).
+  CAP_NOT_FOUND = 0x1000,
+  CAP_WRONG_TYPE = 0x1001,
+  CAP_PERMISSION_DENIED = 0x1002,
+
+};
+
+#define RET_ERR(expr)                                              \
+  {                                                                \
+    glcr::ErrorCode _tmp_err = static_cast<glcr::ErrorCode>(expr); \
+    if (_tmp_err != glcr::OK) {                                    \
+      return _tmp_err;                                             \
+    }                                                              \
   }
-
-static const uint64_t OK = 0x0;
-
-// First set of error codes generally indicate user errors.
-static const uint64_t INVALID_ARGUMENT = 0x1;
-static const uint64_t NOT_FOUND = 0x2;
-static const uint64_t PERMISSION_DENIED = 0x3;
-static const uint64_t NULL_PTR = 0x4;
-static const uint64_t EMPTY = 0x5;
-static const uint64_t ALREADY_EXISTS = 0x6;
-static const uint64_t BUFFER_SIZE = 0x7;
-static const uint64_t FAILED_PRECONDITION = 0x8;
-
-// Second set of error codes generally indicate service errors.
-static const uint64_t INTERNAL = 0x100;
-static const uint64_t UNIMPLEMENTED = 0x101;
-static const uint64_t EXHAUSTED = 0x102;
-static const uint64_t INVALID_RESPONSE = 0x103;
-
-// Kernel specific error codes (relating to capabilities).
-static const uint64_t CAP_NOT_FOUND = 0x1000;
-static const uint64_t CAP_WRONG_TYPE = 0x1001;
-static const uint64_t CAP_PERMISSION_DENIED = 0x1002;
 
 }  // namespace glcr

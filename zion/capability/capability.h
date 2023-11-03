@@ -48,8 +48,8 @@ glcr::RefPtr<T> Capability::obj() {
 }
 
 template <typename T>
-z_err_t ValidateCapability(const glcr::RefPtr<Capability>& cap,
-                           uint64_t permissions) {
+glcr::ErrorCode ValidateCapability(const glcr::RefPtr<Capability>& cap,
+                                   uint64_t permissions) {
   if (!cap) {
     return glcr::CAP_NOT_FOUND;
   }
