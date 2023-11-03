@@ -8,7 +8,6 @@
 #include "object/ipc_object.h"
 #include "object/kernel_object.h"
 #include "object/thread.h"
-#include "usr/zcall_internal.h"
 
 class Port;
 

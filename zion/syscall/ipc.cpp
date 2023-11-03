@@ -54,12 +54,6 @@ glcr::ErrorCode PortRecv(ZPortRecvReq* req) {
   RET_ERR(ValidateCapability<Port>(port_cap, kZionPerm_Read));
 
   auto port = port_cap->obj<Port>();
-  ZMessage message{
-      .num_bytes = *req->num_bytes,
-      .data = const_cast<void*>(req->data),
-      .num_caps = *req->num_caps,
-      .caps = req->caps,
-  };
   return port->Recv(req->num_bytes, req->data, req->num_caps, req->caps);
 }
 

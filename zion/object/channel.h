@@ -8,7 +8,6 @@
 #include "lib/message_queue.h"
 #include "object/ipc_object.h"
 #include "object/kernel_object.h"
-#include "usr/zcall_internal.h"
 
 class Channel;
 
