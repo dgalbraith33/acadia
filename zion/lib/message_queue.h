@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glacier/container/array.h>
+#include <glacier/container/array_view.h>
 #include <glacier/container/intrusive_list.h>
 #include <glacier/container/linked_list.h>
 #include <glacier/memory/ref_ptr.h>
@@ -14,12 +16,12 @@ class MessageQueue {
  public:
   virtual ~MessageQueue() {}
 
-  virtual glcr::ErrorCode PushBack(uint64_t num_bytes, const void* bytes,
-                                   uint64_t num_caps, const z_cap_t* caps,
-                                   z_cap_t reply_cap = 0) = 0;
+  virtual glcr::ErrorCode PushBack(const glcr::ArrayView<uint8_t>& message,
+                                   const glcr::ArrayView<z_cap_t>& caps,
+                                   z_cap_t reply_cap) = 0;
   virtual glcr::ErrorCode PopFront(uint64_t* num_bytes, void* bytes,
                                    uint64_t* num_caps, z_cap_t* caps,
-                                   z_cap_t* reply_cap = nullptr) = 0;
+                                   z_cap_t* reply_cap) = 0;
   virtual bool empty() = 0;
 
  protected:
@@ -36,8 +38,8 @@ class UnboundedMessageQueue : public MessageQueue {
   UnboundedMessageQueue& operator=(const UnboundedMessageQueue&) = delete;
   virtual ~UnboundedMessageQueue() override {}
 
-  glcr::ErrorCode PushBack(uint64_t num_bytes, const void* bytes,
-                           uint64_t num_caps, const z_cap_t* caps,
+  glcr::ErrorCode PushBack(const glcr::ArrayView<uint8_t>& message,
+                           const glcr::ArrayView<z_cap_t>& caps,
                            z_cap_t reply_cap) override;
   glcr::ErrorCode PopFront(uint64_t* num_bytes, void* bytes, uint64_t* num_caps,
                            z_cap_t* caps, z_cap_t* reply_cap) override;
@@ -51,8 +53,7 @@ class UnboundedMessageQueue : public MessageQueue {
 
  private:
   struct Message {
-    uint64_t num_bytes;
-    uint8_t* bytes;
+    glcr::Array<uint8_t> message;
 
     glcr::LinkedList<glcr::RefPtr<Capability>> caps;
     glcr::RefPtr<Capability> reply_cap;
@@ -68,8 +69,8 @@ class SingleMessageQueue : public MessageQueue {
   SingleMessageQueue(SingleMessageQueue&&) = delete;
   virtual ~SingleMessageQueue() override {}
 
-  glcr::ErrorCode PushBack(uint64_t num_bytes, const void* bytes,
-                           uint64_t num_caps, const z_cap_t* caps,
+  glcr::ErrorCode PushBack(const glcr::ArrayView<uint8_t>& message,
+                           const glcr::ArrayView<z_cap_t>& caps,
                            z_cap_t reply_cap) override;
   glcr::ErrorCode PopFront(uint64_t* num_bytes, void* bytes, uint64_t* num_caps,
                            z_cap_t* caps, z_cap_t* reply_cap) override;
@@ -82,7 +83,6 @@ class SingleMessageQueue : public MessageQueue {
  private:
   bool has_written_ = false;
   bool has_read_ = false;
-  uint64_t num_bytes_;
-  uint8_t* bytes_;
+  glcr::Array<uint8_t> message_;
   glcr::LinkedList<glcr::RefPtr<Capability>> caps_;
 };

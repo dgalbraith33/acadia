@@ -26,12 +26,6 @@ class Endpoint : public IpcObject {
 
   static glcr::RefPtr<Endpoint> Create();
 
-  // FIXME: These are hacky "almost" overrides that could lead to bugs.
-  glcr::ErrorCode Send(uint64_t num_bytes, const void* data, uint64_t num_caps,
-                       const z_cap_t* caps, z_cap_t reply_port_cap);
-  glcr::ErrorCode Recv(uint64_t* num_bytes, void* data, uint64_t* num_caps,
-                       z_cap_t* caps, z_cap_t* reply_port_cap);
-
   virtual MessageQueue& GetSendMessageQueue() override {
     return message_queue_;
   }

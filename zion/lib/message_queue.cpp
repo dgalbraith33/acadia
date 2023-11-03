@@ -3,30 +3,24 @@
 #include "debug/debug.h"
 #include "scheduler/scheduler.h"
 
-glcr::ErrorCode UnboundedMessageQueue::PushBack(uint64_t num_bytes,
-                                                const void* bytes,
-                                                uint64_t num_caps,
-                                                const z_cap_t* caps,
-                                                z_cap_t reply_cap) {
-  if (num_bytes > 0x1000) {
-    dbgln("Large message size unimplemented: %x", num_bytes);
+glcr::ErrorCode UnboundedMessageQueue::PushBack(
+    const glcr::ArrayView<uint8_t>& message,
+    const glcr::ArrayView<z_cap_t>& caps, z_cap_t reply_cap) {
+  if (message.size() > 0x1000) {
+    dbgln("Large message size unimplemented: %x", message.size());
     return glcr::UNIMPLEMENTED;
   }
 
-  auto message = glcr::MakeShared<Message>();
-  message->num_bytes = num_bytes;
-  message->bytes = new uint8_t[num_bytes];
-  for (uint64_t i = 0; i < num_bytes; i++) {
-    message->bytes[i] = static_cast<const uint8_t*>(bytes)[i];
-  }
+  auto msg_struct = glcr::MakeShared<Message>();
+  msg_struct->message = glcr::Array<uint8_t>(message);
 
   if (reply_cap != kZionInvalidCapability) {
     // FIXME: We're just trusting that capability has the correct permissions.
-    message->reply_cap =
+    msg_struct->reply_cap =
         gScheduler->CurrentProcess().ReleaseCapability(reply_cap);
   }
 
-  for (uint64_t i = 0; i < num_caps; i++) {
+  for (uint64_t i = 0; i < caps.size(); i++) {
     // FIXME: This would feel safer closer to the relevant syscall.
     // FIXME: Race conditions on get->check->release here. Would be better to
     // have that as a single call on the process. (This pattern repeats other
@@ -39,11 +33,11 @@ glcr::ErrorCode UnboundedMessageQueue::PushBack(uint64_t num_bytes,
       return glcr::CAP_PERMISSION_DENIED;
     }
     cap = gScheduler->CurrentProcess().ReleaseCapability(caps[i]);
-    message->caps.PushBack(cap);
+    msg_struct->caps.PushBack(cap);
   }
 
   MutexHolder h(mutex_);
-  pending_messages_.PushBack(message);
+  pending_messages_.PushBack(msg_struct);
 
   if (blocked_threads_.size() > 0) {
     auto thread = blocked_threads_.PopFront();
@@ -70,7 +64,7 @@ glcr::ErrorCode UnboundedMessageQueue::PopFront(uint64_t* num_bytes,
 
   MutexHolder lock(mutex_);
   auto next_msg = pending_messages_.PeekFront();
-  if (next_msg->num_bytes > *num_bytes) {
+  if (next_msg->message.size() > *num_bytes) {
     return glcr::BUFFER_SIZE;
   }
   if (next_msg->caps.size() > *num_caps) {
@@ -79,10 +73,10 @@ glcr::ErrorCode UnboundedMessageQueue::PopFront(uint64_t* num_bytes,
 
   next_msg = pending_messages_.PopFront();
 
-  *num_bytes = next_msg->num_bytes;
+  *num_bytes = next_msg->message.size();
 
   for (uint64_t i = 0; i < *num_bytes; i++) {
-    static_cast<uint8_t*>(bytes)[i] = next_msg->bytes[i];
+    static_cast<uint8_t*>(bytes)[i] = next_msg->message[i];
   }
 
   auto& proc = gScheduler->CurrentProcess();
@@ -105,40 +99,32 @@ void UnboundedMessageQueue::WriteKernel(uint64_t init,
                                         glcr::RefPtr<Capability> cap) {
   // FIXME: Add synchronization here in case it is ever used outside of init.
   auto msg = glcr::MakeShared<Message>();
-  msg->bytes = new uint8_t[8];
-  msg->num_bytes = sizeof(init);
+  msg->message = glcr::Array<uint8_t>(sizeof(init));
 
   uint8_t* data = reinterpret_cast<uint8_t*>(&init);
   for (uint8_t i = 0; i < sizeof(init); i++) {
-    msg->bytes[i] = data[i];
+    msg->message[i] = data[i];
   }
   msg->caps.PushBack(cap);
 
   pending_messages_.PushBack(msg);
 }
 
-glcr::ErrorCode SingleMessageQueue::PushBack(uint64_t num_bytes,
-                                             const void* bytes,
-                                             uint64_t num_caps,
-                                             const z_cap_t* caps,
-                                             z_cap_t reply_port) {
+glcr::ErrorCode SingleMessageQueue::PushBack(
+    const glcr::ArrayView<uint8_t>& message,
+    const glcr::ArrayView<z_cap_t>& caps, z_cap_t reply_port) {
   MutexHolder h(mutex_);
   if (has_written_) {
     return glcr::FAILED_PRECONDITION;
   }
-  num_bytes_ = num_bytes;
-  bytes_ = new uint8_t[num_bytes];
-
-  for (uint64_t i = 0; i < num_bytes; i++) {
-    bytes_[i] = reinterpret_cast<const uint8_t*>(bytes)[i];
-  }
+  message_ = message;
 
   if (reply_port != kZionInvalidCapability) {
     dbgln("Sent a reply port to a single message queue");
     return glcr::INTERNAL;
   }
 
-  for (uint64_t i = 0; i < num_caps; i++) {
+  for (uint64_t i = 0; i < caps.size(); i++) {
     // FIXME: This would feel safer closer to the relevant syscall.
     auto cap = gScheduler->CurrentProcess().GetCapability(caps[i]);
     if (!cap) {
@@ -181,16 +167,16 @@ glcr::ErrorCode SingleMessageQueue::PopFront(uint64_t* num_bytes, void* bytes,
     return glcr::FAILED_PRECONDITION;
   }
 
-  if (num_bytes_ > *num_bytes) {
+  if (message_.size() > *num_bytes) {
     return glcr::BUFFER_SIZE;
   }
   if (caps_.size() > *num_caps) {
     return glcr::BUFFER_SIZE;
   }
 
-  *num_bytes = num_bytes_;
-  for (uint64_t i = 0; i < num_bytes_; i++) {
-    reinterpret_cast<uint8_t*>(bytes)[i] = bytes_[i];
+  *num_bytes = message_.size();
+  for (uint64_t i = 0; i < message_.size(); i++) {
+    reinterpret_cast<uint8_t*>(bytes)[i] = message_[i];
   }
 
   if (reply_port != nullptr) {

@@ -11,10 +11,17 @@ class IpcObject : public KernelObject {
   IpcObject(){};
   virtual ~IpcObject() {}
 
-  virtual glcr::ErrorCode Send(uint64_t num_bytes, const void* bytes,
-                               uint64_t num_caps, const z_cap_t* caps) final;
+  virtual glcr::ErrorCode Send(const glcr::ArrayView<uint8_t>& message,
+                               const glcr::ArrayView<z_cap_t>& caps) final;
+  virtual glcr::ErrorCode Send(const glcr::ArrayView<uint8_t>& message,
+                               const glcr::ArrayView<z_cap_t>& caps,
+                               const z_cap_t reply_port) final;
+
   virtual glcr::ErrorCode Recv(uint64_t* num_bytes, void* bytes,
                                uint64_t* num_caps, z_cap_t* caps) final;
+  virtual glcr::ErrorCode Recv(uint64_t* num_bytes, void* bytes,
+                               uint64_t* num_caps, z_cap_t* caps,
+                               z_cap_t* reply_port) final;
 
   bool HasMessages() { return !GetRecvMessageQueue().empty(); }
 

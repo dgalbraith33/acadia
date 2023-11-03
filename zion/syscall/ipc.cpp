@@ -6,6 +6,14 @@
 #include "object/reply_port.h"
 #include "scheduler/scheduler.h"
 
+namespace {
+
+glcr::ArrayView<uint8_t> Buffer(const void* bytes, uint64_t num_bytes) {
+  return glcr::ArrayView(reinterpret_cast<uint8_t*>(const_cast<void*>(bytes)),
+                         num_bytes);
+}
+}  // namespace
+
 glcr::ErrorCode ChannelCreate(ZChannelCreateReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto chan_pair = Channel::CreateChannelPair();
@@ -20,7 +28,8 @@ glcr::ErrorCode ChannelSend(ZChannelSendReq* req) {
   RET_ERR(ValidateCapability<Channel>(chan_cap, kZionPerm_Write));
 
   auto chan = chan_cap->obj<Channel>();
-  return chan->Send(req->num_bytes, req->data, req->num_caps, req->caps);
+  return chan->Send(Buffer(req->data, req->num_bytes),
+                    glcr::ArrayView<z_cap_t>(req->caps, req->num_caps));
 }
 
 glcr::ErrorCode ChannelRecv(ZChannelRecvReq* req) {
@@ -45,7 +54,8 @@ glcr::ErrorCode PortSend(ZPortSendReq* req) {
   RET_ERR(ValidateCapability<Port>(port_cap, kZionPerm_Write));
 
   auto port = port_cap->obj<Port>();
-  return port->Send(req->num_bytes, req->data, req->num_caps, req->caps);
+  return port->Send(Buffer(req->data, req->num_bytes),
+                    glcr::ArrayView<z_cap_t>(req->caps, req->num_caps));
 }
 
 glcr::ErrorCode PortRecv(ZPortRecvReq* req) {
@@ -100,8 +110,10 @@ glcr::ErrorCode EndpointSend(ZEndpointSendReq* req) {
   *req->reply_port_cap = proc.AddNewCapability(reply_port, kZionPerm_Read);
   uint64_t reply_port_cap_to_send =
       proc.AddNewCapability(reply_port, kZionPerm_Write | kZionPerm_Transmit);
-  return endpoint->Send(req->num_bytes, req->data, req->num_caps, req->caps,
-                        reply_port_cap_to_send);
+  return endpoint->Send(
+      Buffer(req->data, req->num_bytes),
+      glcr::ArrayView<z_cap_t>(const_cast<z_cap_t*>(req->caps), req->num_caps),
+      reply_port_cap_to_send);
 }
 
 glcr::ErrorCode EndpointRecv(ZEndpointRecvReq* req) {
@@ -126,7 +138,8 @@ glcr::ErrorCode ReplyPortSend(ZReplyPortSendReq* req) {
   ValidateCapability<ReplyPort>(reply_port_cap, kZionPerm_Read);
   auto reply_port = reply_port_cap->obj<ReplyPort>();
 
-  return reply_port->Send(req->num_bytes, req->data, req->num_caps, req->caps);
+  return reply_port->Send(Buffer(req->data, req->num_bytes),
+                          glcr::ArrayView<z_cap_t>(req->caps, req->num_caps));
 }
 glcr::ErrorCode ReplyPortRecv(ZReplyPortRecvReq* req) {
   auto& proc = gScheduler->CurrentProcess();
