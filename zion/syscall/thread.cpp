@@ -4,6 +4,12 @@
 #include "debug/debug.h"
 #include "scheduler/scheduler.h"
 
+namespace {
+
+bool IsKernel(uint64_t addr) { return (addr & 0xFFFF'FF80'0000'0000); }
+
+}  // namespace
+
 glcr::ErrorCode ThreadCreate(ZThreadCreateReq* req) {
   auto& curr_proc = gScheduler->CurrentProcess();
   auto cap = curr_proc.GetCapability(req->proc_cap);
@@ -21,7 +27,11 @@ glcr::ErrorCode ThreadStart(ZThreadStartReq* req) {
   RET_ERR(ValidateCapability<Thread>(cap, kZionPerm_Write));
 
   auto thread = cap->obj<Thread>();
-  // FIXME: validate entry point is in user space.
+
+  if (IsKernel(req->entry) || IsKernel(req->arg1) || IsKernel(req->arg2)) {
+    return glcr::INVALID_ARGUMENT;
+  }
+
   thread->Start(req->entry, req->arg1, req->arg2);
   return glcr::OK;
 }
