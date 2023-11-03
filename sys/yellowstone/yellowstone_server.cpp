@@ -33,16 +33,21 @@ glcr::ErrorOr<glcr::UniquePtr<YellowstoneServer>> YellowstoneServer::Create() {
   z_cap_t endpoint_cap;
   RET_ERR(ZEndpointCreate(&endpoint_cap));
 
-  ASSIGN_OR_RETURN(Mutex mut, Mutex::Create());
-  RET_ERR(mut.Lock());
+  ASSIGN_OR_RETURN(Mutex denali_mut, Mutex::Create());
+  RET_ERR(denali_mut.Lock());
 
-  return glcr::UniquePtr<YellowstoneServer>(
-      new YellowstoneServer(endpoint_cap, glcr::Move(mut)));
+  ASSIGN_OR_RETURN(Mutex victoriafalls_mut, Mutex::Create());
+  RET_ERR(victoriafalls_mut.Lock());
+
+  return glcr::UniquePtr<YellowstoneServer>(new YellowstoneServer(
+      endpoint_cap, glcr::Move(denali_mut), glcr::Move(victoriafalls_mut)));
 }
 
-YellowstoneServer::YellowstoneServer(z_cap_t endpoint_cap, Mutex&& mutex)
+YellowstoneServer::YellowstoneServer(z_cap_t endpoint_cap, Mutex&& denali_mutex,
+                                     Mutex&& victoriafalls_mutex)
     : YellowstoneServerBase(endpoint_cap),
-      has_denali_mutex_(glcr::Move(mutex)) {}
+      has_denali_mutex_(glcr::Move(denali_mutex)),
+      has_victoriafalls_mutex_(glcr::Move(victoriafalls_mutex)) {}
 
 glcr::ErrorCode YellowstoneServer::HandleGetAhciInfo(const Empty&,
                                                      AhciInfo& info) {
@@ -80,6 +85,7 @@ glcr::ErrorCode YellowstoneServer::HandleRegisterEndpoint(
     check(has_denali_mutex_.Release());
   } else if (req.endpoint_name() == "victoriafalls") {
     victoria_falls_cap_ = req.endpoint_capability();
+    check(has_victoriafalls_mutex_.Release());
   } else {
     dbgln("[WARN] Got endpoint cap type: %s", req.endpoint_name().cstr());
   }
@@ -89,4 +95,9 @@ glcr::ErrorCode YellowstoneServer::HandleRegisterEndpoint(
 glcr::ErrorCode YellowstoneServer::WaitDenaliRegistered() {
   RET_ERR(has_denali_mutex_.Lock());
   return has_denali_mutex_.Release();
+}
+
+glcr::ErrorCode YellowstoneServer::WaitVictoriaFallsRegistered() {
+  RET_ERR(has_victoriafalls_mutex_.Lock());
+  return has_victoriafalls_mutex_.Release();
 }

@@ -24,12 +24,16 @@ uint64_t main(uint64_t init_cap) {
 
   ASSIGN_OR_RETURN(auto server, VFSServer::Create());
 
+  Thread server_thread = server->RunServer();
+
   RegisterEndpointRequest req;
   req.set_endpoint_name("victoriafalls");
   ASSIGN_OR_RETURN(auto client, server->CreateClient());
   req.set_endpoint_capability(client.Capability());
   check(yellowstone.RegisterEndpoint(req, empty));
   check(ext2.ProbeDirectory(root));
+
+  RET_ERR(server_thread.Join());
 
   return 0;
 }

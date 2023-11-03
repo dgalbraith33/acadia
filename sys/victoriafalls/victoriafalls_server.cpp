@@ -10,5 +10,5 @@ glcr::ErrorOr<glcr::UniquePtr<VFSServer>> VFSServer::Create() {
 
 glcr::ErrorCode VFSServer::HandleOpenFile(const OpenFileRequest&,
                                           OpenFileResponse&) {
-  return glcr::OK;
+  return glcr::UNIMPLEMENTED;
 }

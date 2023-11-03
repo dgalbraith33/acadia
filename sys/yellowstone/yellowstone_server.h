@@ -20,6 +20,7 @@ class YellowstoneServer : public YellowstoneServerBase {
                                          Empty&) override;
 
   glcr::ErrorCode WaitDenaliRegistered();
+  glcr::ErrorCode WaitVictoriaFallsRegistered();
 
  private:
   // TODO: Store these in a data structure.
@@ -31,6 +32,8 @@ class YellowstoneServer : public YellowstoneServerBase {
   PciReader pci_reader_;
 
   Mutex has_denali_mutex_;
+  Mutex has_victoriafalls_mutex_;
 
-  YellowstoneServer(z_cap_t endpoint_cap, Mutex&& mutex);
+  YellowstoneServer(z_cap_t endpoint_cap, Mutex&& denali_mutex,
+                    Mutex&& victoriafalls_mutex);
 };

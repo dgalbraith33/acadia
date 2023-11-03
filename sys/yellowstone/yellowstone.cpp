@@ -29,6 +29,10 @@ uint64_t main(uint64_t port_cap) {
   ASSIGN_OR_RETURN(YellowstoneClient client2, server->CreateClient());
   check(SpawnProcess(gBootVictoriaFallsVmmoCap, client2.Capability()));
 
+  check(server->WaitVictoriaFallsRegistered());
+
+  dbgln("VFS Available.");
+
   check(server_thread.Join());
   dbgln("Yellowstone Finished Successfully.");
   return 0;
