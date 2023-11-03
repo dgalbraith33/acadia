@@ -11,10 +11,18 @@ class Vector {
   Vector() : data_(nullptr), size_(0), capacity_(0) {}
 
   Vector(const Vector&) = delete;
-  // TODO: Implement Move
-  Vector(Vector&&) = delete;
+  Vector(Vector&& other)
+      : data_(other.data_), size_(other.size_), capacity_(other.capacity_) {
+    other.data_ = nullptr;
+    other.size_ = 0;
+    other.capacity_ = 0;
+  }
 
-  ~Vector() { delete[] data_; }
+  ~Vector() {
+    if (data_) {
+      delete[] data_;
+    }
+  }
 
   // FIXME: Handle downsizing.
   void Resize(uint64_t capacity);

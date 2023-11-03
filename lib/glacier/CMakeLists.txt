@@ -1,5 +1,8 @@
 add_library(glacier STATIC
-  string/string.cpp)
+  string/string.cpp
+  string/string_view.cpp
+  string/str_split.cpp
+  )
 
 target_include_directories(glacier
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}

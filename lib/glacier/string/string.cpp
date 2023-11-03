@@ -26,6 +26,8 @@ String::String(const char* cstr, uint64_t str_len) : length_(str_len) {
   cstr_[length_] = '\0';
 }
 
+String::String(StringView str) : String(str.data(), str.size()) {}
+
 bool String::operator==(const String& other) {
   if (other.length_ != length_) {
     return false;
@@ -42,5 +44,7 @@ char String::operator[](uint64_t offset) const {
   // FIXME: bounds check.
   return cstr_[offset];
 }
+
+String::operator StringView() const { return StringView(cstr_, length_); }
 
 }  // namespace glcr
