@@ -18,9 +18,7 @@ class Scheduler {
   Process& CurrentProcess() { return current_thread_->process(); }
   glcr::RefPtr<Thread> CurrentThread() { return current_thread_; }
 
-  void Enqueue(const glcr::RefPtr<Thread>& thread) {
-    runnable_threads_.PushBack(thread);
-  }
+  void Enqueue(const glcr::RefPtr<Thread>& thread);
 
   void Preempt();
   void Yield();

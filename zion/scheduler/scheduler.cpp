@@ -16,7 +16,6 @@ void Scheduler::Init() { gScheduler = new Scheduler(); }
 Scheduler::Scheduler() {
   Process& root = gProcMan->FromId(0);
   sleep_thread_ = root.GetThread(0);
-  // TODO: Implement a separate sleep thread?
   current_thread_ = sleep_thread_;
 }
 
@@ -32,6 +31,13 @@ void Scheduler::SwapToCurrent(Thread& prev) {
   asm volatile("sti");
 }
 
+void Scheduler::Enqueue(const glcr::RefPtr<Thread>& thread) {
+  runnable_threads_.PushBack(thread);
+  if (current_thread_ == sleep_thread_) {
+    Yield();
+  }
+}
+
 void Scheduler::Preempt() {
   if (!enabled_) {
     return;
@@ -41,14 +47,6 @@ void Scheduler::Preempt() {
   if (current_thread_ == sleep_thread_) {
     // Sleep should never be preempted. (We should yield it if another thread
     // becomes scheduleable).
-    // FIXME: We should yield these threads instead of preempting them.
-    if (runnable_threads_.size() > 0) {
-      current_thread_ = runnable_threads_.PopFront();
-      sleep_thread_->SetState(Thread::RUNNABLE);
-      SwapToCurrent(*sleep_thread_);
-    } else {
-      asm volatile("sti");
-    }
     return;
   }
 
