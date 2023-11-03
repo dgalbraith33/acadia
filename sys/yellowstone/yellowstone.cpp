@@ -1,6 +1,7 @@
 #include <mammoth/debug.h>
 #include <mammoth/endpoint_client.h>
 #include <mammoth/init.h>
+#include <mammoth/memory_region.h>
 #include <mammoth/process.h>
 #include <zcall.h>
 
@@ -32,6 +33,17 @@ uint64_t main(uint64_t port_cap) {
   check(server->WaitVictoriaFallsRegistered());
 
   dbgln("VFS Available.");
+
+  auto vfs_client = server->GetVFSClient();
+  OpenFileRequest request;
+  request.set_path("/init.txt");
+  OpenFileResponse response;
+  check(vfs_client->OpenFile(request, response));
+
+  MappedMemoryRegion file =
+      MappedMemoryRegion::FromCapability(response.memory());
+
+  dbgln("addr: %lu, size: %lu", file.vaddr(), file.size());
 
   check(server_thread.Join());
   dbgln("Yellowstone Finished Successfully.");

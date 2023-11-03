@@ -85,6 +85,9 @@ glcr::ErrorCode YellowstoneServer::HandleRegisterEndpoint(
     check(has_denali_mutex_.Release());
   } else if (req.endpoint_name() == "victoriafalls") {
     victoria_falls_cap_ = req.endpoint_capability();
+    // FIXME: Probably make a separate copy for use within yellowstone vs
+    // transmit to other processes.
+    vfs_client_ = glcr::MakeShared<VFSClient>(victoria_falls_cap_);
     check(has_victoriafalls_mutex_.Release());
   } else {
     dbgln("[WARN] Got endpoint cap type: %s", req.endpoint_name().cstr());
@@ -100,4 +103,8 @@ glcr::ErrorCode YellowstoneServer::WaitDenaliRegistered() {
 glcr::ErrorCode YellowstoneServer::WaitVictoriaFallsRegistered() {
   RET_ERR(has_victoriafalls_mutex_.Lock());
   return has_victoriafalls_mutex_.Release();
+}
+
+glcr::SharedPtr<VFSClient> YellowstoneServer::GetVFSClient() {
+  return vfs_client_;
 }

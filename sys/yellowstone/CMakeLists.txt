@@ -12,6 +12,7 @@ target_link_libraries(yellowstone
   denali_yunq
   mammoth
   glacier
+  victoriafalls_yunq
   yellowstone_yunq
   )
 
