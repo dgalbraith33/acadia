@@ -1,7 +1,6 @@
 
 add_library(c STATIC
   src/malloc.cpp
-  src/stdio.cpp
   src/string.cpp
   )
 

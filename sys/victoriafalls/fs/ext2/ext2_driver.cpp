@@ -63,23 +63,23 @@ glcr::ErrorOr<glcr::Vector<DirEntry>> Ext2Driver::ReadDirectory(
 
   glcr::Vector<DirEntry> directory;
   for (uint64_t i = 0; i < real_block_cnt; i++) {
-    dbgln("Getting block %lx", inode->block[i]);
+    dbgln("Getting block {x}", inode->block[i]);
     ASSIGN_OR_RETURN(MappedMemoryRegion block,
                      ext2_reader_->ReadBlock(inode->block[i]));
     uint64_t addr = block.vaddr();
     while (addr < block.vaddr() + ext2_reader_->BlockSize()) {
       DirEntry* entry = reinterpret_cast<DirEntry*>(addr);
       directory.PushBack(*entry);
-      glcr::String name(entry->name, entry->name_len);
+      glcr::StringView name(entry->name, entry->name_len);
       switch (entry->file_type) {
         case kExt2FtFile:
-          dbgln("FILE (0x%x): %s", entry->inode, name.cstr());
+          dbgln("FILE (0x{x}): {}", entry->inode, name);
           break;
         case kExt2FtDirectory:
-          dbgln("DIR  (0x%x): %s", entry->inode, name.cstr());
+          dbgln("DIR  (0x{x}): {}", entry->inode, name);
           break;
         default:
-          dbgln("UNK  (0x%x): %s", entry->inode, name.cstr());
+          dbgln("UNK  (0x{x}): {}", entry->inode, name);
       }
       addr += entry->record_length;
     }

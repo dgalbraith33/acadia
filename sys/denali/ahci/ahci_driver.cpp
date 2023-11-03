@@ -75,7 +75,7 @@ void AhciDriver::DumpCapabilities() {
   if (caps & 0x4'0000) {
     dbgln("AHCI mode only");
   }
-  dbgln("Speed support: %u", (caps & 0xF0'0000) >> 20);
+  dbgln("Speed support: {}", (caps & 0xF0'0000) >> 20);
   if (caps & 0x100'0000) {
     dbgln("Command list override");
   }
@@ -130,7 +130,7 @@ void AhciDriver::DumpPorts() {
     }
 
     dbgln("");
-    dbgln("Port %u:", i);
+    dbgln("Port {}:", i);
     dev->DumpInfo();
   }
 }
@@ -143,7 +143,7 @@ void AhciDriver::InterruptLoop() {
     for (uint64_t i = 0; i < 32; i++) {
       if (devices_[i] != nullptr && devices_[i]->IsInit() &&
           (ahci_hba_->interrupt_status & (1 << i))) {
-        dbgln("Interrupt for %u", i);
+        dbgln("Interrupt for {}", i);
         devices_[i]->HandleIrq();
         ahci_hba_->interrupt_status &= ~(1 << i);
       }

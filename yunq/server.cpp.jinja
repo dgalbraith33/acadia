@@ -52,7 +52,7 @@ void {{interface.name}}ServerBase::ServerThread() {
     recv_cap.Reset();
     glcr::ErrorCode recv_err = static_cast<glcr::ErrorCode>(ZEndpointRecv(endpoint_, &recv_buf_size, recv_buffer.RawPtr(), &recv_cap_size, recv_cap.RawPtr(), &reply_port_cap));
     if (recv_err != glcr::OK) {
-      dbgln("Error in receive: %x", recv_err);
+      dbgln("Error in receive: {x}", recv_err);
       continue;
     }
 
@@ -69,7 +69,7 @@ void {{interface.name}}ServerBase::ServerThread() {
       reply_err = static_cast<glcr::ErrorCode>(ZReplyPortSend(reply_port_cap, kHeaderSize + resp_length, resp_buffer.RawPtr(), resp_cap.UsedSlots(), resp_cap.RawPtr()));
     }
     if (reply_err != glcr::OK) {
-      dbgln("Error in reply: %x", reply_err);
+      dbgln("Error in reply: {x}", reply_err);
     }
   }
 

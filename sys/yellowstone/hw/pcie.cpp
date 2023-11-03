@@ -18,7 +18,7 @@ PciReader::PciReader() {
   dbgln("Creating addr space");
   uint64_t vaddr;
   check(ZAddressSpaceMap(gSelfVmasCap, 0, gBootPciVmmoCap, &vaddr));
-  dbgln("Addr %lx", vaddr);
+  dbgln("Addr {x}", vaddr);
 
   dbgln("Dumping PCI");
   PciDump(vaddr);
@@ -41,8 +41,8 @@ void PciReader::FunctionDump(uint64_t base, uint64_t bus, uint64_t dev,
     return;
   }
   dbgln(
-      "[%u.%u.%u] (Vendor, Device): (%x, %x), (Type, Class, Sub, PIF): (%u, "
-      "%x, %x, %x)",
+      "[{}.{}.{}] (Vendor, Device): ({x}, {x}), (Type, Class, Sub, PIF): ({}, "
+      "{x}, {x}, {x})",
       bus, dev, fun, hdr->vendor_id, hdr->device_id, hdr->header_type,
       hdr->class_code, hdr->subclass, hdr->prog_interface);
 
@@ -50,7 +50,7 @@ void PciReader::FunctionDump(uint64_t base, uint64_t bus, uint64_t dev,
     dbgln("FIXME: Handle PCI to PCI bridge.");
   }
   if (hdr->class_code == 0x1) {
-    dbgln("SATA Device at: %lx", reinterpret_cast<uint64_t>(hdr) - base);
+    dbgln("SATA Device at: {x}", reinterpret_cast<uint64_t>(hdr) - base);
     achi_device_offset_ = reinterpret_cast<uint64_t>(hdr) - base;
   }
 }

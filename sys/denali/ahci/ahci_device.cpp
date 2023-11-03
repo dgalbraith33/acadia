@@ -56,20 +56,20 @@ glcr::ErrorCode AhciDevice::IssueCommand(Command* command) {
 }
 
 void AhciDevice::DumpInfo() {
-  dbgln("Comlist: %lx", port_struct_->command_list_base);
-  dbgln("FIS: %lx", port_struct_->fis_base);
-  dbgln("Command: %x", port_struct_->command);
-  dbgln("Signature: %x", port_struct_->signature);
-  dbgln("SATA status: %x", port_struct_->sata_status);
-  dbgln("Int status: %x", port_struct_->interrupt_status);
-  dbgln("Int enable: %x", port_struct_->interrupt_enable);
+  dbgln("Comlist: {x}", port_struct_->command_list_base);
+  dbgln("FIS: {x}", port_struct_->fis_base);
+  dbgln("Command: {x}", port_struct_->command);
+  dbgln("Signature: {x}", port_struct_->signature);
+  dbgln("SATA status: {x}", port_struct_->sata_status);
+  dbgln("Int status: {x}", port_struct_->interrupt_status);
+  dbgln("Int enable: {x}", port_struct_->interrupt_enable);
 
   // Just dump one command info for now.
   for (uint64_t i = 0; i < 32; i++) {
-    dbgln("Command Header: %u", i);
-    dbgln("Command %x", command_list_->command_headers[i].command);
-    dbgln("PRD Len: %x", command_list_->command_headers[i].prd_table_length);
-    dbgln("Command Table %lx",
+    dbgln("Command Header: {}", i);
+    dbgln("Command {x}", command_list_->command_headers[i].command);
+    dbgln("PRD Len: {x}", command_list_->command_headers[i].prd_table_length);
+    dbgln("Command Table {x}",
           command_list_->command_headers[i].command_table_base_addr);
   }
 }
@@ -94,23 +94,27 @@ void AhciDevice::HandleIrq() {
     // Device to host.
     DeviceToHostRegisterFis& fis = received_fis_->device_to_host_register_fis;
     if (fis.fis_type != FIS_TYPE_REG_D2H) {
-      dbgln("BAD FIS TYPE (exp,act): %x, %x", FIS_TYPE_REG_D2H, fis.fis_type);
+      dbgln("BAD FIS TYPE (exp,act): {x}, {x}",
+            static_cast<uint64_t>(FIS_TYPE_REG_D2H),
+            static_cast<uint64_t>(fis.fis_type));
       return;
     }
     if (fis.error) {
-      dbgln("D2H err: %x", fis.error);
-      dbgln("status: %x", fis.status);
+      dbgln("D2H err: {x}", fis.error);
+      dbgln("status: {x}", fis.status);
     }
   }
   if (int_status & 0x2) {
     // PIO.
     PioSetupFis& fis = received_fis_->pio_set_fis;
     if (fis.fis_type != FIS_TYPE_PIO_SETUP) {
-      dbgln("BAD FIS TYPE (exp,act): %x, %x", FIS_TYPE_PIO_SETUP, fis.fis_type);
+      dbgln("BAD FIS TYPE (exp,act): {x}, {x}",
+            static_cast<uint64_t>(FIS_TYPE_PIO_SETUP),
+            static_cast<uint64_t>(fis.fis_type));
       return;
     }
     if (fis.error) {
-      dbgln("PIO err: %x", fis.error);
+      dbgln("PIO err: {x}", fis.error);
     }
   }
 }

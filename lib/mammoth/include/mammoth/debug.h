@@ -1,9 +1,17 @@
 #pragma once
 
+#include <glacier/string/str_format.h>
+#include <glacier/string/string_view.h>
 #include <stdint.h>
 #include <ztypes.h>
 
-void dbgln(const char* fmt, ...);
+// TODO: Take StringView here instead.
+void dbgln(const glcr::StringBuilder& builder);
+
+template <typename... Args>
+void dbgln(const glcr::StringView& fmt, Args... args) {
+  dbgln(StrFormat(fmt, args...));
+}
 
 // Checks that the code is ok.
 // if not exits the process.

@@ -1,6 +1,8 @@
 add_library(glacier STATIC
   string/string.cpp
+  string/string_builder.cpp
   string/string_view.cpp
+  string/str_format.cpp
   string/str_split.cpp
   )
 

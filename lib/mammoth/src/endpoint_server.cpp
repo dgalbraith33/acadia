@@ -26,7 +26,7 @@ void EndpointServer::ServerThread() {
         ZEndpointRecv(endpoint_cap_, &message_size, recieve_buffer_, &num_caps,
                       nullptr, &reply_port_cap));
     if (err != glcr::OK) {
-      dbgln("Error in receive: %x", err);
+      dbgln("Error in receive: {x}", err);
       continue;
     }
 
@@ -35,7 +35,7 @@ void EndpointServer::ServerThread() {
     // FIXME: Consider pumping these errors into the response as well.
     check(HandleRequest(request, response));
     if (!response.HasWritten()) {
-      dbgln("Returning without having written a response. Req type %x",
+      dbgln("Returning without having written a response. Req type {x}",
             request.request_id());
     }
   }

@@ -19,6 +19,7 @@ class StringView {
   bool empty() const;
 
   char at(uint64_t pos) const;
+  char operator[](uint64_t pos) const;
 
   uint64_t find(char c, uint64_t pos = 0) const;
 

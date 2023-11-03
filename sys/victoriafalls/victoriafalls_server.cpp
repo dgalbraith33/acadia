@@ -28,7 +28,7 @@ glcr::ErrorCode VFSServer::HandleOpenFile(const OpenFileRequest& request,
         ASSIGN_OR_RETURN(files, driver_.ReadDirectory(files.at(j).inode));
       }
     }
-    dbgln("Directory '%s' not found.", glcr::String(path_tokens.at(i)).cstr());
+    dbgln("Directory '{}' not found.", glcr::String(path_tokens.at(i)).cstr());
     return glcr::NOT_FOUND;
   }
 
@@ -43,7 +43,7 @@ glcr::ErrorCode VFSServer::HandleOpenFile(const OpenFileRequest& request,
     }
   }
   if (!region) {
-    dbgln("File '%s' not found.",
+    dbgln("File '{}' not found.",
           glcr::String(path_tokens.at(path_tokens.size() - 1)).cstr());
   }
 

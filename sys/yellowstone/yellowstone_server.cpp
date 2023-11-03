@@ -90,7 +90,7 @@ glcr::ErrorCode YellowstoneServer::HandleRegisterEndpoint(
     vfs_client_ = glcr::MakeShared<VFSClient>(victoria_falls_cap_);
     check(has_victoriafalls_mutex_.Release());
   } else {
-    dbgln("[WARN] Got endpoint cap type: %s", req.endpoint_name().cstr());
+    dbgln("[WARN] Got endpoint cap type: {}", req.endpoint_name().cstr());
   }
   return glcr::OK;
 }

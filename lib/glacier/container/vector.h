@@ -57,6 +57,8 @@ class Vector {
   uint64_t size() const { return size_; }
   uint64_t capacity() const { return capacity_; }
 
+  const T* RawPtr() const { return data_; }
+
  private:
   T* data_;
   uint64_t size_;

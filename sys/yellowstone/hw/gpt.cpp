@@ -66,36 +66,36 @@ glcr::ErrorCode GptReader::ParsePartitionTables() {
       MappedMemoryRegion::FromCapability(resp.memory());
   uint16_t* mbr_sig = reinterpret_cast<uint16_t*>(lba_1_and_2.vaddr() + 0x1FE);
   if (*mbr_sig != 0xAA55) {
-    dbgln("Invalid MBR Sig: %x", *mbr_sig);
+    dbgln("Invalid MBR Sig: {x}", *mbr_sig);
     return glcr::FAILED_PRECONDITION;
   }
   MbrPartition* first_partition =
       reinterpret_cast<MbrPartition*>(lba_1_and_2.vaddr() + 0x1BE);
   if (first_partition->boot_indicator != 0) {
-    dbgln("Boot indicator set: %u", first_partition->boot_indicator);
+    dbgln("Boot indicator set: {}", first_partition->boot_indicator);
     return glcr::FAILED_PRECONDITION;
   }
   if (first_partition->os_type != 0xEE) {
-    dbgln("Incorrect OS type: %x", first_partition->os_type);
+    dbgln("Incorrect OS type: {x}", first_partition->os_type);
     return glcr::FAILED_PRECONDITION;
   }
-  dbgln("LBAs: (%x, %x)", first_partition->starting_lba,
+  dbgln("LBAs: ({x}, {x})", first_partition->starting_lba,
         first_partition->ending_lba);
 
   // FIXME: Don't hardcode sector size.
   ParititionHeader* header =
       reinterpret_cast<ParititionHeader*>(lba_1_and_2.vaddr() + 512);
 
-  dbgln("signature %lx", header->signature);
+  dbgln("signature {}", header->signature);
 
   uint64_t num_partitions = header->num_partitions;
   uint64_t entry_size = header->parition_entry_size;
   uint64_t num_blocks = (num_partitions * entry_size) / 512;
 
-  dbgln("lba_partition_entries %lx", header->lba_partition_entries);
-  dbgln("num_partitions: %x", num_partitions);
-  dbgln("partition_entry_size: %x", entry_size);
-  dbgln("Num blocks: %x", num_blocks);
+  dbgln("lba_partition_entries {x}", header->lba_partition_entries);
+  dbgln("num_partitions: {x}", num_partitions);
+  dbgln("partition_entry_size: {x}", entry_size);
+  dbgln("Num blocks: {x}", num_blocks);
 
   req.set_device_id(0);
   req.set_lba(header->lba_partition_entries);
@@ -108,11 +108,11 @@ glcr::ErrorCode GptReader::ParsePartitionTables() {
     PartitionEntry* entry = reinterpret_cast<PartitionEntry*>(
         part_table.vaddr() + (i * entry_size));
     if (entry->type_guid_low != 0 || entry->type_guid_high != 0) {
-      dbgln("Entry %u", i);
-      dbgln("T Guid: %lx-%lx", entry->type_guid_high, entry->type_guid_low);
-      dbgln("P Guid: %lx-%lx", entry->part_guid_high, entry->part_guid_low);
-      dbgln("LBA: %lx, %lx", entry->lba_start, entry->lba_end);
-      dbgln("Attrs: %lx", entry->attributes);
+      dbgln("Entry {}", i);
+      dbgln("T Guid: {x}-{x}", entry->type_guid_high, entry->type_guid_low);
+      dbgln("P Guid: {x}-{x}", entry->part_guid_high, entry->part_guid_low);
+      dbgln("LBA: {x}, {x}", entry->lba_start, entry->lba_end);
+      dbgln("Attrs: {x}", entry->attributes);
       // For now we hardcode these values to the type that is
       // created in our setup script.
       // FIXME: Set up our own root partition type guid at some

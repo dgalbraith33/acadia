@@ -25,6 +25,7 @@ uint64_t StringView::size() const { return size_; }
 bool StringView::empty() const { return size_ == 0; }
 
 char StringView::at(uint64_t pos) const { return value_[pos]; }
+char StringView::operator[](uint64_t pos) const { return at(pos); };
 
 uint64_t StringView::find(char c, uint64_t pos) const {
   for (uint64_t i = pos; i < size_; i++) {
