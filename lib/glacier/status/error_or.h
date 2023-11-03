@@ -11,8 +11,11 @@ class ErrorOr {
   ErrorOr() = delete;
   ErrorOr(const ErrorOr&) = delete;
   ErrorOr(ErrorOr&&) = delete;
-  // FIXME: Do we have to call ~T manually here.
-  ~ErrorOr() {}
+  ~ErrorOr() {
+    if (ok_) {
+      obj_.~T();
+    }
+  }
 
   ErrorOr(ErrorCode code) : error_(code), ok_(false) {}
   ErrorOr(const T& obj) : obj_(obj), ok_(true) {}
