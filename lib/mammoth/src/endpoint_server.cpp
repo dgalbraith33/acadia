@@ -9,8 +9,7 @@ void EndpointServerThreadBootstrap(void* endpoint_server) {
 
 glcr::ErrorOr<glcr::UniquePtr<EndpointClient>> EndpointServer::CreateClient() {
   uint64_t client_cap;
-  // FIXME: Restrict permissions to send-only here.
-  RET_ERR(ZCapDuplicate(endpoint_cap_, &client_cap));
+  RET_ERR(ZCapDuplicate(endpoint_cap_, ~(kZionPerm_Read), &client_cap));
   return EndpointClient::AdoptEndpoint(client_cap);
 }
 

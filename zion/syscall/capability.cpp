@@ -13,6 +13,8 @@ z_err_t CapDuplicate(ZCapDuplicateReq* req) {
   if (!(cap->permissions() & kZionPerm_Duplicate)) {
     return glcr::CAP_PERMISSION_DENIED;
   }
-  *req->cap_out = proc.AddExistingCapability(cap);
+
+  *req->cap_out = proc.AddNewCapability(cap->raw_obj(),
+                                        cap->permissions() & req->perm_mask);
   return glcr::OK;
 }

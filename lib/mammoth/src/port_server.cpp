@@ -13,9 +13,8 @@ PortServer PortServer::AdoptCap(z_cap_t cap) { return PortServer(cap); }
 PortServer::PortServer(z_cap_t port_cap) : port_cap_(port_cap) {}
 
 glcr::ErrorOr<PortClient> PortServer::CreateClient() {
-  // FIXME: Restrict permissions.
   z_cap_t new_port;
-  RET_ERR(ZCapDuplicate(port_cap_, &new_port));
+  RET_ERR(ZCapDuplicate(port_cap_, ~(kZionPerm_Read), &new_port));
   return PortClient::AdoptPort(new_port);
 }
 

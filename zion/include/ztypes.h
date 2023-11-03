@@ -67,6 +67,7 @@ const uint64_t kZionDebug = 0x1'0000;
  * ------------------------------*/
 
 typedef uint64_t z_cap_t;
+typedef uint64_t z_perm_t;
 
 const uint64_t kZionInvalidCapability = 0x0;
 
@@ -86,6 +87,9 @@ const uint64_t kZionPerm_SpawnThread = 0x200;
 // Permissions on mutexes.
 const uint64_t kZionPerm_Lock = 0x100;
 const uint64_t kZionPerm_Release = 0x200;
+
+const z_perm_t kZionPerm_None = 0;
+const z_perm_t kZionPerm_All = -1;
 
 /* ------------------------------
  * Process Init Types

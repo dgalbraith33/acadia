@@ -31,8 +31,7 @@ void DenaliServerBaseThreadBootstrap(void* server_base) {
 
 glcr::ErrorOr<DenaliClient> DenaliServerBase::CreateClient() {
   uint64_t client_cap;
-  // FIXME: Restrict permissions to send-only here.
-  RET_ERR(ZCapDuplicate(endpoint_, &client_cap));
+  RET_ERR(ZCapDuplicate(endpoint_, ~(kZionPerm_Read), &client_cap));
   return DenaliClient(client_cap);
 }
 

@@ -55,7 +55,7 @@ SYS5(ReplyPortSend, z_cap_t, reply_port_cap, uint64_t, num_bytes, const void*,
 SYS5(ReplyPortRecv, z_cap_t, reply_port_cap, uint64_t*, num_bytes, void*, data,
      uint64_t*, num_caps, z_cap_t*, caps);
 
-SYS2(CapDuplicate, z_cap_t, cap_in, z_cap_t*, cap_out);
+SYS3(CapDuplicate, z_cap_t, cap_in, z_perm_t, perm_mask, z_cap_t*, cap_out);
 
 SYS1(MutexCreate, z_cap_t*, mutex_cap);
 SYS1(MutexLock, z_cap_t, mutex_cap);

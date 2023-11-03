@@ -60,7 +60,7 @@ glcr::ErrorCode YellowstoneServer::HandleGetAhciInfo(const Empty&,
 glcr::ErrorCode YellowstoneServer::HandleGetDenali(const Empty&,
                                                    DenaliInfo& info) {
   z_cap_t new_denali;
-  check(ZCapDuplicate(denali_cap_, &new_denali));
+  check(ZCapDuplicate(denali_cap_, kZionPerm_All, &new_denali));
   info.set_denali_endpoint(new_denali);
   info.set_device_id(device_id_);
   info.set_lba_offset(lba_offset_);

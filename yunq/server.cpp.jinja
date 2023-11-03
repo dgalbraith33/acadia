@@ -31,8 +31,7 @@ void {{interface.name}}ServerBaseThreadBootstrap(void* server_base) {
 
 glcr::ErrorOr<{{interface.name}}Client> {{interface.name}}ServerBase::CreateClient() {
   uint64_t client_cap;
-  // FIXME: Restrict permissions to send-only here.
-  RET_ERR(ZCapDuplicate(endpoint_, &client_cap));
+  RET_ERR(ZCapDuplicate(endpoint_, ~(kZionPerm_Read), &client_cap));
   return {{interface.name}}Client(client_cap);
 }
 
