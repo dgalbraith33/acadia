@@ -20,6 +20,7 @@ glcr::ErrorCode UnboundedMessageQueue::PushBack(
         gScheduler->CurrentProcess().ReleaseCapability(reply_cap);
   }
 
+  msg_struct->caps.Resize(caps.size());
   for (uint64_t i = 0; i < caps.size(); i++) {
     // FIXME: This would feel safer closer to the relevant syscall.
     // FIXME: Race conditions on get->check->release here. Would be better to
@@ -90,7 +91,7 @@ glcr::ErrorCode UnboundedMessageQueue::PopFront(uint64_t* num_bytes,
 
   *num_caps = next_msg->caps.size();
   for (uint64_t i = 0; i < *num_caps; i++) {
-    caps[i] = proc.AddExistingCapability(next_msg->caps.PopFront());
+    caps[i] = proc.AddExistingCapability(next_msg->caps[i]);
   }
   return glcr::OK;
 }
@@ -124,6 +125,7 @@ glcr::ErrorCode SingleMessageQueue::PushBack(
     return glcr::INTERNAL;
   }
 
+  message_.caps.Resize(caps.size());
   for (uint64_t i = 0; i < caps.size(); i++) {
     // FIXME: This would feel safer closer to the relevant syscall.
     auto cap = gScheduler->CurrentProcess().GetCapability(caps[i]);
@@ -187,7 +189,7 @@ glcr::ErrorCode SingleMessageQueue::PopFront(uint64_t* num_bytes, void* bytes,
   *num_caps = message_.caps.size();
   auto& proc = gScheduler->CurrentProcess();
   for (uint64_t i = 0; i < *num_caps; i++) {
-    caps[i] = proc.AddExistingCapability(message_.caps.PopFront());
+    caps[i] = proc.AddExistingCapability(message_.caps[i]);
   }
   has_read_ = true;
 

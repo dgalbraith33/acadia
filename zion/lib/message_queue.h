@@ -4,6 +4,7 @@
 #include <glacier/container/array_view.h>
 #include <glacier/container/intrusive_list.h>
 #include <glacier/container/linked_list.h>
+#include <glacier/container/vector.h>
 #include <glacier/memory/ref_ptr.h>
 #include <glacier/memory/shared_ptr.h>
 #include <glacier/status/error.h>
@@ -15,7 +16,7 @@
 struct IpcMessage {
   glcr::Array<uint8_t> data;
 
-  glcr::LinkedList<glcr::RefPtr<Capability>> caps;
+  glcr::Vector<glcr::RefPtr<Capability>> caps;
 
   glcr::RefPtr<Capability> reply_cap;
 };
