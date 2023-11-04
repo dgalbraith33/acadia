@@ -51,6 +51,8 @@ class RefPtr {
   T* get() const { return ptr_; };
   T& operator*() const { return *ptr_; }
   T* operator->() const { return ptr_; }
+
+  bool empty() const { return ptr_ == nullptr; }
   operator bool() const { return ptr_ != nullptr; }
 
   bool operator==(decltype(nullptr)) const { return (ptr_ == nullptr); }
