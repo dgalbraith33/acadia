@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glacier/container/linked_list.h>
+#include <glacier/container/binary_tree.h>
 #include <glacier/memory/ref_ptr.h>
 #include <stdint.h>
 
@@ -92,7 +92,8 @@ class AddressSpace : public KernelObject {
     uint64_t vaddr;
     glcr::RefPtr<MemoryObject> mem_obj;
   };
-  glcr::LinkedList<MemoryMapping> memory_mappings_;
+  glcr::BinaryTree<uint64_t, MemoryMapping> memory_mappings_;
 
-  MemoryMapping* GetMemoryMappingForAddr(uint64_t vaddr);
+  glcr::Optional<glcr::Ref<MemoryMapping>> GetMemoryMappingForAddr(
+      uint64_t vaddr);
 };

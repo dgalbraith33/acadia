@@ -39,13 +39,13 @@ uint64_t AddressSpace::GetNextMemMapAddr(uint64_t size) {
 
 void AddressSpace::MapInMemoryObject(
     uint64_t vaddr, const glcr::RefPtr<MemoryObject>& mem_obj) {
-  memory_mappings_.PushBack({.vaddr = vaddr, .mem_obj = mem_obj});
+  memory_mappings_.Insert(vaddr, {.vaddr = vaddr, .mem_obj = mem_obj});
 }
 
 uint64_t AddressSpace::MapInMemoryObject(
     const glcr::RefPtr<MemoryObject>& mem_obj) {
   uint64_t vaddr = GetNextMemMapAddr(mem_obj->size());
-  memory_mappings_.PushBack({.vaddr = vaddr, .mem_obj = mem_obj});
+  memory_mappings_.Insert(vaddr, {.vaddr = vaddr, .mem_obj = mem_obj});
   return vaddr;
 }
 
@@ -62,12 +62,13 @@ bool AddressSpace::HandlePageFault(uint64_t vaddr) {
     return true;
   }
 
-  MemoryMapping* mapping = GetMemoryMappingForAddr(vaddr);
-  if (mapping == nullptr) {
+  auto mapping_or = GetMemoryMappingForAddr(vaddr);
+  if (!mapping_or) {
     return false;
   }
-  uint64_t offset = vaddr - mapping->vaddr;
-  uint64_t physical_addr = mapping->mem_obj->PhysicalPageAtOffset(offset);
+  MemoryMapping& mapping = mapping_or.value();
+  uint64_t offset = vaddr - mapping.vaddr;
+  uint64_t physical_addr = mapping.mem_obj->PhysicalPageAtOffset(offset);
   if (physical_addr == 0) {
     dbgln("WARN: Memory object returned invalid physical addr.");
     return false;
@@ -79,16 +80,15 @@ bool AddressSpace::HandlePageFault(uint64_t vaddr) {
   return true;
 }
 
-AddressSpace::MemoryMapping* AddressSpace::GetMemoryMappingForAddr(
-    uint64_t vaddr) {
-  auto iter = memory_mappings_.begin();
-  while (iter != memory_mappings_.end()) {
-    if ((vaddr >= (*iter).vaddr) &&
-        (vaddr < ((*iter).vaddr + (*iter).mem_obj->size()))) {
-      return &(*iter);
-    }
-    ++iter;
+glcr::Optional<glcr::Ref<AddressSpace::MemoryMapping>>
+AddressSpace::GetMemoryMappingForAddr(uint64_t vaddr) {
+  auto mapping_or = memory_mappings_.Predecessor(vaddr + 1);
+  if (!mapping_or) {
+    return mapping_or;
   }
-
-  return 0;
+  MemoryMapping& mapping = mapping_or.value();
+  if (mapping.vaddr + mapping.mem_obj->size() <= vaddr) {
+    return {};
+  }
+  return mapping_or;
 }
