@@ -68,8 +68,40 @@ void BinaryTree<K, V>::Insert(K key, V&& value) {
 
 template <typename K, typename V>
 void BinaryTree<K, V>::Delete(K key) {
-  // TODO: Implement Delete.
-  return;
+  auto node = FindOrInsertionParent(key);
+  if (node.empty() || node->key != key) {
+    return;
+  }
+
+  RefPtr<BinaryNode> new_child = nullptr;
+  if (!node.left) {
+    // No children.
+    // Right child only.
+    new_child = node.right;
+  } else if (!node.right) {
+    // Left child only.
+    new_child = node.left;
+  } else {
+    // Find Successor.
+    auto successor = node.right;
+    while (successor.left) {
+      successor = successor.left;
+    }
+    new_child = successor;
+    if (successor != node.right) {
+      successor.parent.left = successor.right;
+    }
+  }
+
+  if (node == root_) {
+    root_ = new_child;
+  } else {
+    if (node.parent.right == node) {
+      node.parent.right = new_child;
+    } else {
+      node.parent.left = new_child;
+    }
+  }
 }
 
 template <typename K, typename V>
