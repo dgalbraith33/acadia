@@ -92,6 +92,13 @@ class AddressSpace : public KernelObject {
     uint64_t vaddr;
     glcr::RefPtr<MemoryObject> mem_obj;
   };
+
+  // TODO: Consider adding a red-black tree implementation here.
+  // As is this tree functions about as well as a linked list
+  // because mappings are likely to be added in near-perfect ascedning order.
+  // Also worth considering creating a special tree implementation for
+  // just this purpose, or maybe a BinaryTree implementation that accepts
+  // ranges rather than a single key.
   glcr::BinaryTree<uint64_t, MemoryMapping> memory_mappings_;
 
   glcr::Optional<glcr::Ref<MemoryMapping>> GetMemoryMappingForAddr(
