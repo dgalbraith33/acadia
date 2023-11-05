@@ -20,22 +20,22 @@ glcr::ErrorOr<Ext2Driver> Ext2Driver::Init(ScopedDenaliClient&& denali) {
 glcr::ErrorCode Ext2Driver::ProbePartition() {
   Superblock* superblock = ext2_reader_->GetSuperblock();
   if (superblock->magic != 0xEF53) {
-    dbgln("Invalid EXT2 magic code: %x");
+    dbgln("Invalid EXT2 magic code: {x}");
     return glcr::INVALID_ARGUMENT;
   }
-  dbgln("Block size: 0x%x", 1024 << superblock->log_block_size);
+  dbgln("Block size: 0x{x}", 1024 << superblock->log_block_size);
 
-  dbgln("Blocks: 0x%x (0x%x per group)", superblock->blocks_count,
+  dbgln("Blocks: 0x{x} (0x{x} per group)", superblock->blocks_count,
         superblock->blocks_per_group);
-  dbgln("Inodes: 0x%x (0x%x per group)", superblock->inodes_count,
+  dbgln("Inodes: 0x{x} (0x{x} per group)", superblock->inodes_count,
         superblock->inodes_per_group);
-  dbgln("Inode size: 0x%x", superblock->inode_size);
+  dbgln("Inode size: 0x{x}", superblock->inode_size);
 
-  dbgln("Mounts: 0x%x out of 0x%x", superblock->mnt_count,
+  dbgln("Mounts: 0x{x} out of 0x{x}", superblock->mnt_count,
         superblock->max_mnt_count);
-  dbgln("State: %x", superblock->state);
+  dbgln("State: {x}", superblock->state);
 
-  dbgln("Created by: %x", superblock->creator_os);
+  dbgln("Created by: {x}", superblock->creator_os);
 
   return glcr::OK;
 }

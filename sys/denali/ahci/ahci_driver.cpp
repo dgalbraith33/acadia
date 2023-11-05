@@ -119,7 +119,7 @@ void AhciDriver::DumpCapabilities() {
     dbgln("Aggressive device sleep management");
   }
 
-  dbgln("Control %x", ahci_hba_->global_host_control);
+  dbgln("Control {x}", ahci_hba_->global_host_control);
 }
 
 void AhciDriver::DumpPorts() {
