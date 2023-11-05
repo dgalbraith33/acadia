@@ -37,7 +37,7 @@ class PhysicalMemoryManager {
     for (uint64_t i = 0; i < memmap.entry_count; i++) {
       const limine_memmap_entry& entry = *memmap.entries[i];
 #if K_PHYS_DEBUG
-      dbgln("Region(%u) at %m:%x", entry.type, entry.base, entry.length);
+      dbgln("Region({}) at {x}:{x}", entry.type, entry.base, entry.length);
 #endif
       if (entry.type == 0) {
         uint64_t base = entry.base;
@@ -46,7 +46,7 @@ class PhysicalMemoryManager {
           base = gBootstrap.next_page;
           uint64_t bootstrap_used = gBootstrap.next_page - gBootstrap.init_page;
 #if K_PHYS_DEBUG
-          dbgln("[PMM] Taking over from bootstrap, used: %x", bootstrap_used);
+          dbgln("[PMM] Taking over from bootstrap, used: {x}", bootstrap_used);
 #endif
           size -= bootstrap_used;
         }
@@ -73,7 +73,7 @@ class PhysicalMemoryManager {
       delete temp;
     }
 #if K_PHYS_DEBUG
-    dbgln("Single %m", page);
+    dbgln("Single {x}", page);
 #endif
     return page;
   }
@@ -88,7 +88,7 @@ class PhysicalMemoryManager {
 
     MemBlock* block = front_;
     while (block != nullptr && block->num_pages < num_pages) {
-      dbgln("Skipping block of size %u seeking %u", block->num_pages,
+      dbgln("Skipping block of size {} seeking {}", block->num_pages,
             num_pages);
       block = block->next;
     }
@@ -106,7 +106,7 @@ class PhysicalMemoryManager {
       delete temp;
     }
 #if K_PHYS_DEBUG
-    dbgln("Continuous %m:%u", page, num_pages);
+    dbgln("Continuous {x}:{}", page, num_pages);
 #endif
     return page;
   }

@@ -19,7 +19,7 @@ uint64_t UserStackManager::NewUserStack() {
 
 void UserStackManager::FreeUserStack(uint64_t stack_ptr) {
   freed_stacks_++;
-  dbgln("%u freed user stacks", freed_stacks_);
+  dbgln("{} freed user stacks", freed_stacks_);
 }
 
 bool UserStackManager::IsValidStack(uint64_t vaddr) {

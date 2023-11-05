@@ -40,7 +40,7 @@ glcr::RefPtr<Thread> Process::CreateThread() {
 glcr::RefPtr<Thread> Process::GetThread(uint64_t tid) {
   MutexHolder lock(mutex_);
   if (tid >= threads_.size()) {
-    panic("Bad thread access %u on process %u with %u threads.", tid, id_,
+    panic("Bad thread access {} on process {} with {} threads.", tid, id_,
           threads_.size());
   }
   return threads_[tid];

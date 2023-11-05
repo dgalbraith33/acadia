@@ -17,7 +17,7 @@ glcr::ArrayView<uint8_t> Buffer(const void* bytes, uint64_t num_bytes) {
 template <typename T>
 glcr::ErrorOr<IpcMessage> TranslateRequestToIpcMessage(const T& req) {
   if (req.num_bytes > 0x1000) {
-    dbgln("Large message size unimplemented: %x", req.num_bytes);
+    dbgln("Large message size unimplemented: {x}", req.num_bytes);
     return glcr::UNIMPLEMENTED;
   }
 

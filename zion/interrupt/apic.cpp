@@ -62,7 +62,7 @@ Apic* gApic = nullptr;
 void Apic::Init() {
   auto config_or = GetApicConfiguration();
   if (!config_or.ok()) {
-    panic("Error fetching APIC info from ACPI: %x", config_or.error());
+    panic("Error fetching APIC info from ACPI: {x}", config_or.error());
   }
   gApic = new Apic(config_or.value());
 }
@@ -70,32 +70,32 @@ void Apic::Init() {
 void Apic::DumpInfo() {
 #if APIC_DEBUG
   dbgln("APIC:");
-  dbgln("ID: %x", GetLocalReg(0x20));
-  dbgln("VER: %x", GetLocalReg(0x30));
-  dbgln("TPR: %x", GetLocalReg(0x80));
-  dbgln("APR: %x", GetLocalReg(0x90));
-  dbgln("PPR: %x", GetLocalReg(0xA0));
-  dbgln("LDR: %x", GetLocalReg(0xD0));
-  dbgln("DFR: %x", GetLocalReg(0xE0));
-  dbgln("SIV: %x", GetLocalReg(0xF0));
+  dbgln("ID: {x}", GetLocalReg(0x20));
+  dbgln("VER: {x}", GetLocalReg(0x30));
+  dbgln("TPR: {x}", GetLocalReg(0x80));
+  dbgln("APR: {x}", GetLocalReg(0x90));
+  dbgln("PPR: {x}", GetLocalReg(0xA0));
+  dbgln("LDR: {x}", GetLocalReg(0xD0));
+  dbgln("DFR: {x}", GetLocalReg(0xE0));
+  dbgln("SIV: {x}", GetLocalReg(0xF0));
   for (uint64_t i = 0; i < 8; i++) {
-    dbgln("ISR(%u): %x", i, GetLocalReg(0x100 + (0x10 * i)));
+    dbgln("ISR({}): {x}", i, GetLocalReg(0x100 + (0x10 * i)));
   }
   for (uint64_t i = 0; i < 8; i++) {
-    dbgln("TMR(%u): %x", i, GetLocalReg(0x180 + (0x10 * i)));
+    dbgln("TMR({}): {x}", i, GetLocalReg(0x180 + (0x10 * i)));
   }
   for (uint64_t i = 0; i < 8; i++) {
-    dbgln("IRR(%u): %x", i, GetLocalReg(0x200 + (0x10 * i)));
+    dbgln("IRR({}): {x}", i, GetLocalReg(0x200 + (0x10 * i)));
   }
-  dbgln("ESR: %x", GetLocalReg(0x280));
+  dbgln("ESR: {x}", GetLocalReg(0x280));
 
-  dbgln("IO ID: %x", GetIoReg(0x0));
-  dbgln("IO VER: %x", GetIoReg(0x1));
-  dbgln("IO ARB: %x", GetIoReg(0x2));
+  dbgln("IO ID: {x}", GetIoReg(0x0));
+  dbgln("IO VER: {x}", GetIoReg(0x1));
+  dbgln("IO ARB: {x}", GetIoReg(0x2));
   for (uint8_t i = 0x10; i < 0x3F; i += 2) {
-    dbgln("IO (%u): %x", i, GetIoEntry(i));
+    dbgln("IO ({}): {x}", i, GetIoEntry(i));
   }
-  dbgln("APIC MSR: %x", GetMSR(0x1B));
+  dbgln("APIC MSR: {x}", GetMSR(0x1B));
 #endif
 }
 

@@ -50,7 +50,7 @@ target_include_directories(zion
   )
 
 target_link_libraries(zion
-  glacier)
+  glacier_kernel)
 
 # -c -- Don't run the linker (only necessary for the assembler)
 # -ffreestanding

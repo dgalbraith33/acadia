@@ -74,7 +74,7 @@ bool AddressSpace::HandlePageFault(uint64_t vaddr) {
     return false;
   }
 #if K_VMAS_DEBUG
-  dbgln("[VMAS] Mapping P(%m) at V(%m)", physical_addr, vaddr);
+  dbgln("[VMAS] Mapping P({x}) at V({x})", physical_addr, vaddr);
 #endif
   MapPage(cr3_, vaddr, physical_addr);
   return true;

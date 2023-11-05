@@ -36,32 +36,32 @@ void KernelHeap::InitializeSlabAllocators() {
 
 void* KernelHeap::Allocate(uint64_t size) {
 #if K_HEAP_DEBUG
-  dbgln("Alloc (%x)", size);
+  dbgln("Alloc ({x})", size);
 #endif
   if ((size <= 8) && slab_8_) {
     auto ptr_or = slab_8_->Allocate();
     if (ptr_or.ok()) {
       return ptr_or.value();
     }
-    dbgln("Failed allocation (slab 8): %x", ptr_or.error());
+    dbgln("Failed allocation (slab 8): {x}", ptr_or.error());
   }
   if ((size <= 16) && slab_16_) {
     auto ptr_or = slab_16_->Allocate();
     if (ptr_or.ok()) {
       return ptr_or.value();
     }
-    dbgln("Failed allocation (slab 16): %x", ptr_or.error());
+    dbgln("Failed allocation (slab 16): {x}", ptr_or.error());
   }
   if ((size <= 32) && slab_32_) {
     auto ptr_or = slab_32_->Allocate();
     if (ptr_or.ok()) {
       return ptr_or.value();
     }
-    dbgln("Failed allocation (slab 32): %x", ptr_or.error());
+    dbgln("Failed allocation (slab 32): {x}", ptr_or.error());
   }
   if (next_addr_ + size >= upper_bound_) {
-    panic("Kernel Heap Overrun (next, size, max): %m, %x, %m", next_addr_, size,
-          upper_bound_);
+    panic("Kernel Heap Overrun (next, size, max): {x}, {x}, {x}", next_addr_,
+          size, upper_bound_);
   }
 #if K_HEAP_DEBUG
   RecordSize(size);
@@ -75,18 +75,18 @@ void* KernelHeap::Allocate(uint64_t size) {
 void KernelHeap::DumpDistribution() {
 #if K_HEAP_DEBUG
   uint64_t* distributions = gKernelHeap->distributions;
-  dbgln("<=4B:   %u", distributions[0]);
-  dbgln("<=8B:   %u", distributions[1]);
-  dbgln("<=16B:  %u", distributions[2]);
-  dbgln("<=32B:  %u", distributions[3]);
-  dbgln("<=64B:  %u", distributions[4]);
-  dbgln("<=128B: %u", distributions[5]);
-  dbgln("<=256B: %u", distributions[6]);
-  dbgln("<=512B: %u", distributions[7]);
-  dbgln("<=1KiB: %u", distributions[8]);
-  dbgln("<=2KiB: %u", distributions[9]);
-  dbgln("<=4KiB: %u", distributions[10]);
-  dbgln("> 4KiB: %u", distributions[11]);
+  dbgln("<=4B:   {}", distributions[0]);
+  dbgln("<=8B:   {}", distributions[1]);
+  dbgln("<=16B:  {}", distributions[2]);
+  dbgln("<=32B:  {}", distributions[3]);
+  dbgln("<=64B:  {}", distributions[4]);
+  dbgln("<=128B: {}", distributions[5]);
+  dbgln("<=256B: {}", distributions[6]);
+  dbgln("<=512B: {}", distributions[7]);
+  dbgln("<=1KiB: {}", distributions[8]);
+  dbgln("<=2KiB: {}", distributions[9]);
+  dbgln("<=4KiB: {}", distributions[10]);
+  dbgln("> 4KiB: {}", distributions[11]);
 #endif
 }
 

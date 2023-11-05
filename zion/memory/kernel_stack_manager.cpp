@@ -30,5 +30,5 @@ uint64_t* KernelStackManager::AllocateKernelStack() {
 
 void KernelStackManager::FreeKernelStack(uint64_t stack_base) {
   freed_stack_cnt_++;
-  dbgln("Freed kernel stacks using %u KiB", freed_stack_cnt_ * 12);
+  dbgln("Freed kernel stacks using {} KiB", freed_stack_cnt_ * 12);
 }

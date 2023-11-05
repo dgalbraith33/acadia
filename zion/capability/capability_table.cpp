@@ -21,8 +21,8 @@ glcr::RefPtr<Capability> CapabilityTable::GetCapability(uint64_t id) {
     }
     ++iter;
   }
-  dbgln("Bad cap access %u", id);
-  dbgln("Num caps: %u", capabilities_.size());
+  dbgln("Bad cap access {}", id);
+  dbgln("Num caps: {}", capabilities_.size());
   return {};
 }
 
@@ -38,7 +38,7 @@ glcr::RefPtr<Capability> CapabilityTable::ReleaseCapability(uint64_t id) {
     }
     ++iter;
   }
-  dbgln("Bad cap release: %u", id);
-  dbgln("Num caps: %u", capabilities_.size());
+  dbgln("Bad cap release: {}", id);
+  dbgln("Num caps: {}", capabilities_.size());
   return {};
 }

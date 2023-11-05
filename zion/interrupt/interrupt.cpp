@@ -70,7 +70,7 @@ struct InterruptFrame {
 
 extern "C" void isr_divide_by_zero();
 extern "C" void interrupt_divide_by_zero(InterruptFrame* frame) {
-  dbgln("RIP: %m", frame->rip);
+  dbgln("RIP: {x}", frame->rip);
   panic("DIV0");
 }
 
@@ -86,9 +86,9 @@ extern "C" void interrupt_protection_fault(InterruptFrame* frame) {
   } else {
     dbgln("GDT");
   }
-  dbgln("Index: %u", err >> 3);
-  dbgln("RIP: %m", frame->rip);
-  dbgln("RSP: %m", frame->rsp);
+  dbgln("Index: {}", err >> 3);
+  dbgln("RIP: {x}", frame->rip);
+  dbgln("RSP: {x}", frame->rsp);
 
   panic("GP");
 }
@@ -124,8 +124,8 @@ extern "C" void interrupt_page_fault(InterruptFrame* frame) {
     dbgln("Instruction Fetch");
   }
 
-  dbgln("rip:  %m", frame->rip);
-  dbgln("addr: %m", frame->cr2);
+  dbgln("rip:  {x}", frame->rip);
+  dbgln("addr: {x}", frame->cr2);
   panic("PF");
 }
 
@@ -143,7 +143,7 @@ extern "C" void interrupt_apic_timer(InterruptFrame*) {
     if (cnt == 20) {
       KernelHeap::DumpDistribution();
     }
-    dbgln("timer: %us", cnt * 50 / 1000);
+    dbgln("timer: {}s", cnt * 50 / 1000);
   }
   gApic->SignalEOI();
   gScheduler->Preempt();

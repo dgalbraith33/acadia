@@ -61,7 +61,7 @@ typedef struct {
 uint64_t LoadElfProgram(Process& dest_proc, uint64_t base, uint64_t offset) {
   Elf64Header* header = reinterpret_cast<Elf64Header*>(base);
 #if K_INIT_DEBUG
-  dbgln("phoff: %u phnum: %u", header->phoff, header->phnum);
+  dbgln("phoff: {} phnum: {}", header->phoff, header->phnum);
 #endif
   Elf64ProgramHeader* programs =
       reinterpret_cast<Elf64ProgramHeader*>(base + header->phoff);
@@ -69,8 +69,8 @@ uint64_t LoadElfProgram(Process& dest_proc, uint64_t base, uint64_t offset) {
     Elf64ProgramHeader& program = programs[i];
 #if K_INIT_DEBUG
     dbgln(
-        "prog: type: %u, flags: %u, offset: %u\n  vaddr: %m, paddr: %m\n  "
-        "filesz: %x, memsz: %x, align: %x",
+        "prog: type: {}, flags: {}, offset: {}\n  vaddr: {x}, paddr: {x}\n  "
+        "filesz: {x}, memsz: {x}, align: {x}",
         program.type, program.flags, program.offset, program.vaddr,
         program.paddr, program.filesz, program.memsz, program.align);
 #endif
@@ -101,7 +101,7 @@ void DumpModules() {
   dbgln("[boot] Dumping bootloader modules.");
   for (uint64_t i = 0; i < resp.module_count; i++) {
     const limine_file& file = *resp.modules[i];
-    dbgln("    %s,%m,%x", file.path, file.address, file.size);
+    dbgln("    {},{x},{}", file.path, file.address, file.size);
   }
 #endif
 }
@@ -114,7 +114,7 @@ const limine_file& GetInitProgram(glcr::String path) {
       return file;
     }
   }
-  panic("Program not found: %s", path);
+  panic("Program not found: {}", path);
   UNREACHABLE
 }
 

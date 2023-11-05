@@ -55,6 +55,11 @@ void StrFormatValue(StringBuilder& builder, ErrorCode value, StringView opts) {
 }
 
 template <>
+void StrFormatValue(StringBuilder& builder, char value, StringView opts) {
+  builder.PushBack(value);
+}
+
+template <>
 void StrFormatValue(StringBuilder& builder, const char* value,
                     StringView opts) {
   StrFormatValue(builder, StringView(value), opts);
@@ -62,6 +67,11 @@ void StrFormatValue(StringBuilder& builder, const char* value,
 
 template <>
 void StrFormatValue(StringBuilder& builder, StringView value, StringView opts) {
+  StrFormatInternal(builder, value);
+}
+
+template <>
+void StrFormatValue(StringBuilder& builder, String value, StringView opts) {
   StrFormatInternal(builder, value);
 }
 

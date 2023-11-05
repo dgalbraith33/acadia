@@ -88,7 +88,7 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req) {
     // syscall/debug.h
     CASE(Debug);
     default:
-      dbgln("Unhandled syscall number: %x", call_id);
+      dbgln("Unhandled syscall number: {x}", call_id);
       return glcr::UNIMPLEMENTED;
   }
   UNREACHABLE

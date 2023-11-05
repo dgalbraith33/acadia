@@ -133,7 +133,7 @@ void ParseMcfg(SdtHeader* rsdt) {
     uint64_t bytes_per_fn = 0x1000;
     gPcieEcSize = num_busses * dev_per_bus * fns_per_dev * bytes_per_fn;
 #if K_ACPI_DEBUG
-    dbgln("PCI Map: %m:%x", gPcieEcBase, gPcieEcSize);
+    dbgln("PCI Map: {x}:{x}", gPcieEcBase, gPcieEcSize);
 #endif
   }
 }
@@ -143,9 +143,9 @@ void ParseMadt(SdtHeader* rsdt) {
   uint64_t max_addr = reinterpret_cast<uint64_t>(rsdt) + rsdt->length;
   MadtHeader* header = reinterpret_cast<MadtHeader*>(rsdt);
 
-  dbgln("Local APIC %x", header->local_apic_address);
+  dbgln("Local APIC {x}", header->local_apic_address);
   gLApicBase = header->local_apic_address;
-  dbgln("Flags: %x", header->flags);
+  dbgln("Flags: {x}", header->flags);
 
   MadtEntry* entry = &header->first_entry;
 
@@ -153,13 +153,13 @@ void ParseMadt(SdtHeader* rsdt) {
     switch (entry->type) {
       case 0: {
         MadtLocalApic* local = reinterpret_cast<MadtLocalApic*>(entry);
-        dbgln("Local APIC (Proc id, id, flags): %x, %x, %x",
+        dbgln("Local APIC (Proc id, id, flags): {x}, {x}, {x}",
               local->processor_id, local->apic_id, local->flags);
         break;
       }
       case 1: {
         MadtIoApic* io = reinterpret_cast<MadtIoApic*>(entry);
-        dbgln("IO Apic (id, addr, gsi base): %x, %x, %x", io->io_apic_id,
+        dbgln("IO Apic (id, addr, gsi base): {x}, {x}, {x}", io->io_apic_id,
               io->io_apic_address, io->global_system_interrupt_base);
         if (gIOApicBase != 0) {
           dbgln("More than one IOApic, unhandled");
@@ -170,7 +170,7 @@ void ParseMadt(SdtHeader* rsdt) {
       case 2: {
         MadtIoApicInterruptSource* src =
             reinterpret_cast<MadtIoApicInterruptSource*>(entry);
-        dbgln("IO Source (Bus, IRQ, GSI, flags): %x, %x, %x, %x",
+        dbgln("IO Source (Bus, IRQ, GSI, flags): {x}, {x}, {x}, {x}",
               src->bus_source, src->irq_source, src->global_system_interrupt,
               src->flags);
         break;
@@ -178,12 +178,12 @@ void ParseMadt(SdtHeader* rsdt) {
       case 4: {
         MadtLocalApicNonMaskable* lnmi =
             reinterpret_cast<MadtLocalApicNonMaskable*>(entry);
-        dbgln("Local NMI (proc id, flags, lint#): %x, %x, %x",
+        dbgln("Local NMI (proc id, flags, lint#): {x}, {x}, {x}",
               lnmi->apic_processor_id, lnmi->flags, lnmi->lint_num);
         break;
       }
       default:
-        dbgln("Unhandled entry type: %u", entry->type);
+        dbgln("Unhandled entry type: {}", entry->type);
     }
     entry = reinterpret_cast<MadtEntry*>(reinterpret_cast<uint64_t>(entry) +
                                          entry->length);
@@ -240,8 +240,8 @@ void ProbeRsdp() {
   }
 
 #if K_ACPI_DEBUG
-  dbgln("ACPI Ver %u", rsdp->revision);
-  dbgln("RSDT Addr: %m", rsdp->rsdt_addr);
+  dbgln("ACPI Ver {}", rsdp->revision);
+  dbgln("RSDT Addr: {x}", rsdp->rsdt_addr);
 #endif
 
   ProbeRsdt(reinterpret_cast<SdtHeader*>(rsdp->rsdt_addr));
@@ -257,7 +257,7 @@ void ProbeRsdp() {
   }
 
 #if K_ACPI_DEBUG
-  dbgln("XSDT Addr: %m", rsdp->xsdt_addr);
+  dbgln("XSDT Addr: {x}", rsdp->xsdt_addr);
 #endif
 }
 

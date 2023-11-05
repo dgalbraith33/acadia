@@ -21,6 +21,12 @@ void dbgcstr(const char* str) {
   }
 }
 
+void dbg(const glcr::StringView& str) {
+  for (uint64_t i = 0; i < str.size(); i++) {
+    dbgputchar(str[i]);
+  }
+}
+
 void U64ToStr(uint64_t u, char* str) {
   uint64_t len = 0;
   uint64_t u2 = u;
@@ -77,7 +83,7 @@ void MemToStr(uint64_t u, char* str) {
 void AddProcPrefix() {
   if (gScheduler != nullptr) {
     auto t = gScheduler->CurrentThread();
-    dbg("[%u.%u] ", t->pid(), t->tid());
+    dbg(glcr::StrFormat("[{}.{}] ", t->pid(), t->tid()));
   }
 }
 
@@ -133,6 +139,12 @@ void dbg_internal(const char* fmt, va_list args) {
 }  // namespace
 
 void early_dbgln(const char* str) { dbgcstr(str); }
+
+void dbgln(const glcr::StringView& str) {
+  AddProcPrefix();
+  dbg(str);
+  dbg("\n");
+}
 
 void dbg(const char* fmt, ...) {
   va_list arg;

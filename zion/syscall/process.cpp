@@ -7,7 +7,7 @@
 
 z_err_t ProcessExit(ZProcessExitReq* req) {
   auto curr_thread = gScheduler->CurrentThread();
-  dbgln("Exit code: %x", req->code);
+  dbgln("Exit code: {x}", req->code);
   // FIXME: kill process here.
   curr_thread->Exit();
   panic("Returned from thread exit");

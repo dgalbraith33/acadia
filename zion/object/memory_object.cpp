@@ -10,7 +10,7 @@ MemoryObject::MemoryObject(uint64_t size) : size_(size) {
   if ((size & 0xFFF) != 0) {
     size_ = (size & ~0xFFF) + 0x1000;
 #if K_MEM_DEBUG
-    dbgln("MemoryObject: aligned %x to %x", size, size_);
+    dbgln("MemoryObject: aligned {x} to {x}", size, size_);
 #endif
   }
   // FIXME: Do this lazily.
@@ -30,7 +30,7 @@ uint64_t MemoryObject::PhysicalPageAtOffset(uint64_t offset) {
 
 void MemoryObject::CopyBytesToObject(uint64_t source, uint64_t length) {
   if (length > size_) {
-    panic("Copy overruns memory object: %x too large for %x", length, size_);
+    panic("Copy overruns memory object: {x} too large for {x}", length, size_);
   }
   uint64_t hhdm = boot::GetHigherHalfDirectMap();
   uint64_t page_number = 0;
@@ -61,7 +61,7 @@ uint64_t MemoryObject::PageNumberToPhysAddr(uint64_t page_num) {
 
   if (*iter == 0) {
 #if K_MEM_DEBUG
-    dbgln("Allocating page num %u for mem object", page_num);
+    dbgln("Allocating page num {} for mem object", page_num);
 #endif
     *iter = phys_mem::AllocatePage();
   }
