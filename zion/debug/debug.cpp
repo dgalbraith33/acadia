@@ -132,6 +132,8 @@ void dbg_internal(const char* fmt, va_list args) {
 
 }  // namespace
 
+void early_dbgln(const char* str) { dbgcstr(str); }
+
 void dbg(const char* fmt, ...) {
   va_list arg;
   va_start(arg, fmt);
