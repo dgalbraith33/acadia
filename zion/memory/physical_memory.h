@@ -13,6 +13,8 @@ void InitBootstrapPageAllocation();
 // Initializes the main physical memory manager.
 void InitPhysicalMemoryManager();
 
+void DumpRegions();
+
 uint64_t AllocatePage();
 uint64_t AllocateAndZeroPage();
 

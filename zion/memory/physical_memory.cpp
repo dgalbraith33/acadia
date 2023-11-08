@@ -36,9 +36,6 @@ class PhysicalMemoryManager {
     const limine_memmap_response& memmap = boot::GetMemoryMap();
     for (uint64_t i = 0; i < memmap.entry_count; i++) {
       const limine_memmap_entry& entry = *memmap.entries[i];
-#if K_PHYS_DEBUG
-      dbgln("Region({}) at {x}:{x}", entry.type, entry.base, entry.length);
-#endif
       if (entry.type == 0) {
         uint64_t base = entry.base;
         uint64_t size = entry.length;
@@ -155,6 +152,38 @@ void InitBootstrapPageAllocation() {
 
 void InitPhysicalMemoryManager() { gPmm = new PhysicalMemoryManager(); }
 
+glcr::StringView MemoryRegionStr(uint64_t type) {
+  switch (type) {
+    case LIMINE_MEMMAP_USABLE:
+      return "USABLE";
+    case LIMINE_MEMMAP_RESERVED:
+      return "RESRVD";
+    case LIMINE_MEMMAP_ACPI_RECLAIMABLE:
+      return "ACPIREC";
+    case LIMINE_MEMMAP_ACPI_NVS:
+      return "ACPINVS";
+    case LIMINE_MEMMAP_BAD_MEMORY:
+      return "BADMEM";
+    case LIMINE_MEMMAP_BOOTLOADER_RECLAIMABLE:
+      return "LIMINE";
+    case LIMINE_MEMMAP_KERNEL_AND_MODULES:
+      return "KERNEL";
+    case LIMINE_MEMMAP_FRAMEBUFFER:
+      return "FRMBFR";
+    default:
+      return "UNKNWN";
+  }
+}
+
+void DumpRegions() {
+  const limine_memmap_response& memmap = boot::GetMemoryMap();
+  for (uint64_t i = 0; i < memmap.entry_count; i++) {
+    const limine_memmap_entry& entry = *memmap.entries[i];
+    dbgln("Region({}) at {x}:{x} ({x})", MemoryRegionStr(entry.type),
+          entry.base, entry.base + entry.length, entry.length);
+  }
+}
+
 uint64_t AllocatePage() {
   if (gPmm != nullptr) {
     return gPmm->AllocatePage();
@@ -164,7 +193,7 @@ uint64_t AllocatePage() {
   }
 
 #if K_PHYS_DEBUG
-  dbgln("[PMM] Boostrap Alloc!");
+  early_dbgln("[PMM] Boostrap Alloc!");
 #endif
 
   uint64_t page = gBootstrap.next_page;

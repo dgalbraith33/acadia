@@ -26,6 +26,7 @@ extern "C" void zion() {
   KernelHeap heap(0xFFFFFFFF'40000000, 0xFFFFFFFF'80000000);
   phys_mem::InitPhysicalMemoryManager();
   heap.InitializeSlabAllocators();
+  phys_mem::DumpRegions();
 
   dbgln("[boot] Memory allocations available now.");
 
