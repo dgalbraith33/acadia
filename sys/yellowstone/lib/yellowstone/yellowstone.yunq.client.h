@@ -21,6 +21,8 @@ class YellowstoneClient {
 
   [[nodiscard]] glcr::ErrorCode GetAhciInfo(const Empty& request, AhciInfo& response);
 
+  [[nodiscard]] glcr::ErrorCode GetFramebufferInfo(const Empty& request, FramebufferInfo& response);
+
   [[nodiscard]] glcr::ErrorCode GetDenali(const Empty& request, DenaliInfo& response);
 
  private:

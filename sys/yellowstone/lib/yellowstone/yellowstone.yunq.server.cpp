@@ -110,6 +110,17 @@ glcr::ErrorCode YellowstoneServerBase::HandleRequest(const glcr::ByteBuffer& req
     }
     case 2: {
       Empty yunq_request;
+      FramebufferInfo yunq_response;
+
+      yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+
+      RET_ERR(HandleGetFramebufferInfo(yunq_request, yunq_response));
+
+      resp_length = yunq_response.SerializeToBytes(response, kHeaderSize, resp_caps);
+      break;
+    }
+    case 3: {
+      Empty yunq_request;
       DenaliInfo yunq_response;
 
       yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);

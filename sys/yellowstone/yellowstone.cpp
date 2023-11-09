@@ -49,13 +49,6 @@ uint64_t main(uint64_t port_cap) {
 
   dbgln("Test: '{}'", file.cstr());
 
-  MappedMemoryRegion region =
-      MappedMemoryRegion::FromCapability(gBootFramebufferVmmoCap);
-
-  ZFramebufferInfo* fb = reinterpret_cast<ZFramebufferInfo*>(region.vaddr());
-
-  dbgln("FB Addr: {x}", fb->address_phys);
-
   check(server_thread.Join());
   dbgln("Yellowstone Finished Successfully.");
   return 0;

@@ -4,6 +4,7 @@
 #include <glacier/string/string.h>
 #include <mammoth/debug.h>
 #include <mammoth/init.h>
+#include <mammoth/memory_region.h>
 #include <mammoth/process.h>
 #include <stdlib.h>
 
@@ -54,6 +55,29 @@ glcr::ErrorCode YellowstoneServer::HandleGetAhciInfo(const Empty&,
   info.set_ahci_region(pci_reader_.GetAhciVmmo());
   info.set_region_length(kPcieConfigurationSize);
   dbgln("Resp ahci");
+  return glcr::OK;
+}
+
+glcr::ErrorCode YellowstoneServer::HandleGetFramebufferInfo(
+    const Empty&, FramebufferInfo& info) {
+  // FIXME: Don't do this for each request.
+  MappedMemoryRegion region =
+      MappedMemoryRegion::FromCapability(gBootFramebufferVmmoCap);
+  ZFramebufferInfo* fb = reinterpret_cast<ZFramebufferInfo*>(region.vaddr());
+
+  info.set_address_phys(fb->address_phys);
+  info.set_width(fb->width);
+  info.set_height(fb->height);
+  info.set_pitch(fb->pitch);
+  info.set_bpp(fb->bpp);
+  info.set_memory_model(fb->memory_model);
+  info.set_red_mask_size(fb->red_mask_size);
+  info.set_red_mask_shift(fb->red_mask_shift);
+  info.set_green_mask_size(fb->green_mask_size);
+  info.set_green_mask_shift(fb->green_mask_shift);
+  info.set_blue_mask_size(fb->blue_mask_size);
+  info.set_blue_mask_shift(fb->blue_mask_shift);
+
   return glcr::OK;
 }
 

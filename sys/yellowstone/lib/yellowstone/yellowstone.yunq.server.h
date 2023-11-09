@@ -25,6 +25,8 @@ class YellowstoneServerBase {
 
   [[nodiscard]] virtual glcr::ErrorCode HandleGetAhciInfo(const Empty&, AhciInfo&) = 0;
 
+  [[nodiscard]] virtual glcr::ErrorCode HandleGetFramebufferInfo(const Empty&, FramebufferInfo&) = 0;
+
   [[nodiscard]] virtual glcr::ErrorCode HandleGetDenali(const Empty&, DenaliInfo&) = 0;
 
 

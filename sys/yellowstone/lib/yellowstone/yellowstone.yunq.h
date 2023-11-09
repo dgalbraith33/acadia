@@ -62,6 +62,57 @@ class AhciInfo {
   uint64_t region_length_;
 
 };
+class FramebufferInfo {
+ public:
+  FramebufferInfo() {}
+  // Delete copy and move until implemented.
+  FramebufferInfo(const FramebufferInfo&) = delete;
+  FramebufferInfo(FramebufferInfo&&) = delete;
+
+  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
+  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
+  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const;
+  uint64_t address_phys() const { return address_phys_; }
+  void set_address_phys(const uint64_t& value) { address_phys_ = value; }
+  uint64_t width() const { return width_; }
+  void set_width(const uint64_t& value) { width_ = value; }
+  uint64_t height() const { return height_; }
+  void set_height(const uint64_t& value) { height_ = value; }
+  uint64_t pitch() const { return pitch_; }
+  void set_pitch(const uint64_t& value) { pitch_ = value; }
+  uint64_t bpp() const { return bpp_; }
+  void set_bpp(const uint64_t& value) { bpp_ = value; }
+  uint64_t memory_model() const { return memory_model_; }
+  void set_memory_model(const uint64_t& value) { memory_model_ = value; }
+  uint64_t red_mask_size() const { return red_mask_size_; }
+  void set_red_mask_size(const uint64_t& value) { red_mask_size_ = value; }
+  uint64_t red_mask_shift() const { return red_mask_shift_; }
+  void set_red_mask_shift(const uint64_t& value) { red_mask_shift_ = value; }
+  uint64_t green_mask_size() const { return green_mask_size_; }
+  void set_green_mask_size(const uint64_t& value) { green_mask_size_ = value; }
+  uint64_t green_mask_shift() const { return green_mask_shift_; }
+  void set_green_mask_shift(const uint64_t& value) { green_mask_shift_ = value; }
+  uint64_t blue_mask_size() const { return blue_mask_size_; }
+  void set_blue_mask_size(const uint64_t& value) { blue_mask_size_ = value; }
+  uint64_t blue_mask_shift() const { return blue_mask_shift_; }
+  void set_blue_mask_shift(const uint64_t& value) { blue_mask_shift_ = value; }
+
+ private:
+  uint64_t address_phys_;
+  uint64_t width_;
+  uint64_t height_;
+  uint64_t pitch_;
+  uint64_t bpp_;
+  uint64_t memory_model_;
+  uint64_t red_mask_size_;
+  uint64_t red_mask_shift_;
+  uint64_t green_mask_size_;
+  uint64_t green_mask_shift_;
+  uint64_t blue_mask_size_;
+  uint64_t blue_mask_shift_;
+
+};
 class DenaliInfo {
  public:
   DenaliInfo() {}

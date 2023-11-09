@@ -1,6 +1,7 @@
 interface Yellowstone {
   method RegisterEndpoint(RegisterEndpointRequest) -> (Empty);
   method GetAhciInfo(Empty) -> (AhciInfo);
+  method GetFramebufferInfo(Empty) -> (FramebufferInfo);
   method GetDenali(Empty) -> (DenaliInfo);
 }
 
@@ -16,6 +17,23 @@ message Empty {
 message AhciInfo {
   capability ahci_region;
   u64 region_length;
+}
+
+message FramebufferInfo {
+  u64 address_phys;
+  u64 width;
+  u64 height;
+  u64 pitch;
+  // TODO: Add u16 & u8 to the yunq language so
+  // the following can be appropriate widths.
+  u64 bpp;
+  u64 memory_model;
+  u64 red_mask_size;
+  u64 red_mask_shift;
+  u64 green_mask_size;
+  u64 green_mask_shift;
+  u64 blue_mask_size;
+  u64 blue_mask_shift;
 }
 
 message DenaliInfo {
