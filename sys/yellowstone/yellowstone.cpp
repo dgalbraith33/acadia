@@ -1,4 +1,5 @@
 #include <glacier/string/str_format.h>
+#include <glacier/string/str_split.h>
 #include <mammoth/debug.h>
 #include <mammoth/endpoint_client.h>
 #include <mammoth/init.h>
@@ -46,6 +47,21 @@ uint64_t main(uint64_t port_cap) {
       MappedMemoryRegion::FromCapability(response.memory());
   glcr::String file(reinterpret_cast<const char*>(filemem.vaddr()),
                     response.size());
+
+  glcr::Vector<glcr::StringView> files = glcr::StrSplit(file, '\n');
+
+  for (uint64_t i = 0; i < files.size(); i++) {
+    if (!files[i].empty()) {
+      dbgln("Starting {}", files[i]);
+      OpenFileRequest req;
+      req.set_path(glcr::StrFormat("/bin/{}", files[i]));
+      OpenFileResponse resp;
+      check(vfs_client->OpenFile(req, resp));
+
+      ASSIGN_OR_RETURN(YellowstoneClient client3, server->CreateClient());
+      check(SpawnProcess(resp.memory(), client3.Capability()));
+    }
+  }
 
   dbgln("Test: '{}'", file.cstr());
 
