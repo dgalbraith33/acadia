@@ -2,23 +2,29 @@
 
 namespace glcr {
 
-void StringBuilder::PushBack(const StringView& str) {
-  if (capacity() < size() + str.size()) {
-    uint64_t new_capacity = capacity() == 0 ? 1 : capacity() * 2;
+uint64_t VariableStringBuilder::size() const { return data_.size(); }
+
+void VariableStringBuilder::PushBack(const StringView& str) {
+  if (data_.capacity() < size() + str.size()) {
+    uint64_t new_capacity = data_.capacity() == 0 ? 1 : data_.capacity() * 2;
     while (new_capacity < size() + str.size()) {
       new_capacity *= 2;
     }
-    Resize(new_capacity);
+    data_.Resize(new_capacity);
   }
   for (uint64_t i = 0; i < str.size(); i++) {
-    Vector<char>::PushBack(str[i]);
+    data_.PushBack(str[i]);
   }
 }
 
-String StringBuilder::ToString() const { return String(RawPtr(), size()); }
+void VariableStringBuilder::PushBack(const char str) { data_.PushBack(str); }
 
-StringBuilder::operator StringView() const {
-  return StringView(RawPtr(), size());
+String VariableStringBuilder::ToString() const {
+  return String(data_.RawPtr(), size());
+}
+
+VariableStringBuilder::operator StringView() const {
+  return StringView(data_.RawPtr(), size());
 }
 
 }  // namespace glcr

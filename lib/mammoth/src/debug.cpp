@@ -3,10 +3,7 @@
 #include <glacier/status/error.h>
 #include <zcall.h>
 
-void dbgln(const glcr::StringBuilder& builder) {
-  glcr::String str = builder.ToString();
-  (void)ZDebug(str.cstr());
-}
+void dbgln(const glcr::String& string) { (void)ZDebug(string.cstr()); }
 
 void check(uint64_t code) {
   switch (code) {

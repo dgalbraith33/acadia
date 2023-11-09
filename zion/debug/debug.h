@@ -11,6 +11,14 @@ void early_dbgln(const char* str);
 
 void dbgln(const glcr::StringView& str);
 
+// TODO: Write a version of StrFormat that
+// accepts a fix-sized buffer for output
+// to use in the kernel. That way we make
+// dbgln and panic calls without allocation.
+// Optionally, add a dbgln_unbounded method for
+// things like the Debug syscall where the formatted
+// string may be fairly large.
+
 template <typename... Args>
 void dbgln(const char* str, Args... args) {
   dbgln(glcr::StrFormat(str, args...));

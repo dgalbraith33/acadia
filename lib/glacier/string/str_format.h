@@ -59,10 +59,15 @@ void StrFormatInternal(StringBuilder& builder, StringView format, T value,
 }
 
 template <typename... Args>
-StringBuilder StrFormat(StringView format, Args... args) {
-  StringBuilder builder;
+String StrFormat(StringView format, Args... args) {
+  VariableStringBuilder builder;
   StrFormatInternal(builder, format, args...);
-  return glcr::Move(builder);
+  return builder.ToString();
+}
+
+template <typename... Args>
+void StrFormat(StringBuilder& builder, StringView format, Args... args) {
+  StrFormatInternal(builder, format, args...);
 }
 
 }  // namespace glcr

@@ -6,21 +6,39 @@
 
 namespace glcr {
 
-class StringBuilder : public Vector<char> {
+class StringBuilder {
  public:
-  StringBuilder() : Vector<char>() {}
-  StringBuilder(const StringBuilder&) = delete;
-  StringBuilder(StringBuilder&& str) : Vector<char>(Move(str)) {}
+  virtual uint64_t size() const = 0;
+  virtual void PushBack(const StringView& str) = 0;
+  virtual void PushBack(const char str) = 0;
 
-  void PushBack(const StringView& str);
-  using Vector<char>::PushBack;
+  virtual String ToString() const = 0;
 
-  String ToString() const;
+  virtual operator StringView() const = 0;
+};
+
+class VariableStringBuilder : public StringBuilder {
+ public:
+  VariableStringBuilder() = default;
+  VariableStringBuilder(const VariableStringBuilder&) = delete;
+  VariableStringBuilder(VariableStringBuilder&&) = default;
+
+  ~VariableStringBuilder() = default;
+
+  virtual uint64_t size() const override;
+
+  virtual void PushBack(const StringView& str) override;
+  virtual void PushBack(const char str) override;
+
+  virtual String ToString() const override;
 
   // Note that this could become invalidated
   // at any time if more characters are pushed
   // onto the builder.
-  operator StringView() const;
+  virtual operator StringView() const override;
+
+ private:
+  Vector<char> data_;
 };
 
 }  // namespace glcr
