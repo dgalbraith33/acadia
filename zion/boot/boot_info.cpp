@@ -47,4 +47,19 @@ void* GetRsdpAddr() {
   return gRsdpRequest.response->address;
 }
 
+static volatile struct limine_framebuffer_request gFramebufferRequest {
+  .id = LIMINE_FRAMEBUFFER_REQUEST, .revision = 0, .response = 0,
+};
+
+const limine_framebuffer& GetFramebuffer() {
+  if (!gFramebufferRequest.response) {
+    panic("No framebuffer response from limine");
+  }
+  if (gFramebufferRequest.response->framebuffer_count < 1) {
+    panic("No framebuffers in response from limine.");
+  }
+
+  return *gFramebufferRequest.response->framebuffers[0];
+}
+
 }  // namespace boot

@@ -137,6 +137,30 @@ glcr::ErrorCode WritePciVmmo(glcr::RefPtr<Port> port, uint64_t id) {
   return glcr::OK;
 }
 
+void WriteFramebufferVmmo(glcr::RefPtr<Port> port) {
+  const limine_framebuffer& buf = boot::GetFramebuffer();
+  ZFramebufferInfo ubuf{
+      .address_phys = reinterpret_cast<uint64_t>(buf.address) -
+                      boot::GetHigherHalfDirectMap(),
+      .width = buf.width,
+      .height = buf.height,
+      .pitch = buf.pitch,
+      .bpp = buf.bpp,
+      .memory_model = buf.memory_model,
+      .red_mask_size = buf.red_mask_size,
+      .red_mask_shift = buf.red_mask_shift,
+      .green_mask_size = buf.green_mask_size,
+      .green_mask_shift = buf.green_mask_shift,
+      .blue_mask_size = buf.blue_mask_size,
+      .blue_mask_shift = buf.blue_mask_shift,
+  };
+  glcr::RefPtr<MemoryObject> ubuf_vmmo =
+      glcr::MakeRefCounted<MemoryObject>(sizeof(ubuf));
+  ubuf_vmmo->CopyBytesToObject(reinterpret_cast<uint64_t>(&ubuf), sizeof(ubuf));
+  port->WriteKernel(Z_BOOT_FRAMEBUFFER_INFO_VMMO,
+                    MakeRefCounted<Capability>(ubuf_vmmo));
+}
+
 }  // namespace
 
 void LoadInitProgram() {
@@ -153,6 +177,8 @@ void LoadInitProgram() {
   port->WriteKernel(Z_INIT_SELF_VMAS, MakeRefCounted<Capability>(proc->vmas()));
   WriteInitProgram(port, "/sys/denali", Z_BOOT_DENALI_VMMO);
   WriteInitProgram(port, "/sys/victoriafalls", Z_BOOT_VICTORIA_FALLS_VMMO);
+
+  WriteFramebufferVmmo(port);
 
   if (WritePciVmmo(port, Z_BOOT_PCI_VMMO) != glcr::OK) {
     panic("Failed to provide PCI info to init.");

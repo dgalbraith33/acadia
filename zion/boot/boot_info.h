@@ -11,4 +11,6 @@ const limine_module_response& GetModules();
 
 void* GetRsdpAddr();
 
+const limine_framebuffer& GetFramebuffer();
+
 }  // namespace boot

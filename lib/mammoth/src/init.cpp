@@ -14,6 +14,7 @@ uint64_t gInitEndpointCap = 0;
 uint64_t gBootDenaliVmmoCap = 0;
 uint64_t gBootVictoriaFallsVmmoCap = 0;
 uint64_t gBootPciVmmoCap = 0;
+uint64_t gBootFramebufferVmmoCap = 0;
 
 z_err_t ParseInitPort(uint64_t init_port_cap) {
   PortServer port = PortServer::AdoptCap(init_port_cap);
@@ -40,6 +41,8 @@ z_err_t ParseInitPort(uint64_t init_port_cap) {
       case Z_BOOT_PCI_VMMO:
         gBootPciVmmoCap = init_cap;
         break;
+      case Z_BOOT_FRAMEBUFFER_INFO_VMMO:
+        gBootFramebufferVmmoCap = init_cap;
       default:
         dbgln("Unexpected init type {}, continuing.", init_sig);
     }

@@ -109,3 +109,19 @@ const z_perm_t kZionPerm_All = -1;
 #define Z_BOOT_DENALI_VMMO 0x4200'0000
 #define Z_BOOT_VICTORIA_FALLS_VMMO 0x4200'0001
 #define Z_BOOT_PCI_VMMO 0x4200'0002
+#define Z_BOOT_FRAMEBUFFER_INFO_VMMO 0x4200'0003
+
+struct ZFramebufferInfo {
+  uint64_t address_phys;
+  uint64_t width;
+  uint64_t height;
+  uint64_t pitch;
+  uint16_t bpp;
+  uint8_t memory_model;
+  uint8_t red_mask_size;
+  uint8_t red_mask_shift;
+  uint8_t green_mask_size;
+  uint8_t green_mask_shift;
+  uint8_t blue_mask_size;
+  uint8_t blue_mask_shift;
+};
