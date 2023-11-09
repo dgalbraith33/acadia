@@ -65,6 +65,9 @@ def lexer(program: str):
             while program[current + 1].isalnum() or program[current + 1] == '_':
                 current += 1
             tokens.append(Lexeme(LexemeType.NAME, program[start:current + 1]))
+        elif curr == '/' and program[current + 1] == '/':
+            while program[current] != '\n':
+                current += 1
         else:
             sys.exit("Got unexpected token %s on line %s." % (curr, line))
 
