@@ -41,4 +41,29 @@ class VariableStringBuilder : public StringBuilder {
   Vector<char> data_;
 };
 
+class FixedStringBuilder : public StringBuilder {
+ public:
+  FixedStringBuilder() = delete;
+  FixedStringBuilder(const FixedStringBuilder&) = delete;
+  FixedStringBuilder(FixedStringBuilder&&) = delete;
+  ~FixedStringBuilder() = default;
+
+  FixedStringBuilder(char* buffer, uint64_t size)
+      : buffer_(buffer), capacity_(size), size_(0) {}
+
+  virtual uint64_t size() const override { return size_; }
+
+  virtual void PushBack(const StringView& str) override;
+  virtual void PushBack(const char str) override;
+
+  virtual String ToString() const override;
+
+  virtual operator StringView() const override;
+
+ private:
+  char* buffer_;
+  uint64_t capacity_;
+  uint64_t size_;
+};
+
 }  // namespace glcr

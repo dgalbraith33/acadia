@@ -66,7 +66,8 @@ String StrFormat(StringView format, Args... args) {
 }
 
 template <typename... Args>
-void StrFormat(StringBuilder& builder, StringView format, Args... args) {
+void StrFormatIntoBuffer(StringBuilder& builder, StringView format,
+                         Args... args) {
   StrFormatInternal(builder, format, args...);
 }
 

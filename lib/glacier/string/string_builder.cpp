@@ -27,4 +27,27 @@ VariableStringBuilder::operator StringView() const {
   return StringView(data_.RawPtr(), size());
 }
 
+void FixedStringBuilder::PushBack(const StringView& str) {
+  for (uint64_t i = 0; i < str.size(); i++) {
+    PushBack(str[i]);
+  }
+}
+
+void FixedStringBuilder::PushBack(const char str) {
+  if (size_ >= capacity_) {
+    // Somewhat random sequence of characters to show that we've overrun the
+    // buffer.
+    buffer_[capacity_ - 1] = '>';
+    buffer_[capacity_ - 2] = '!';
+  } else {
+    buffer_[size_++] = str;
+  }
+}
+
+String FixedStringBuilder::ToString() const { return String(buffer_, size_); }
+
+FixedStringBuilder::operator StringView() const {
+  return StringView(buffer_, size_);
+}
+
 }  // namespace glcr
