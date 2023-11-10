@@ -26,6 +26,8 @@ class OpenFileRequest {
   glcr::String path_;
   glcr::Vector<uint64_t> options_;
 
+  // Parses everything except for caps.
+  void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
 };
 class File {
  public:
@@ -50,4 +52,6 @@ class File {
   uint64_t attrs_;
   z_cap_t mem_cap_;
 
+  // Parses everything except for caps.
+  void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
 };

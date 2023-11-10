@@ -40,5 +40,7 @@ class {{message.name}} {
   {%- endif %}
 {%- endfor %}
 
+  // Parses everything except for caps.
+  void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
 };
 {%- endfor %}

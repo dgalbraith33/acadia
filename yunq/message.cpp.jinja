@@ -30,39 +30,31 @@ void WriteHeader(glcr::ByteBuffer& bytes, uint64_t offset, uint32_t core_size, u
 
 {%- for message in messages %}
 void {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  CheckHeader(bytes);
+  ParseFromBytesInternal(bytes, offset);
 
 {%- for field in message.fields %}
+{%- if field.type == Type.CAPABILITY %}
   // Parse {{field.name}}.
-{%- if not field.repeated %}
-{%- if field.type == Type.U64 %}
-  set_{{field.name}}(bytes.At<uint64_t>(offset + header_size + (8 * {{loop.index0}})));
-{%- elif field.type == Type.I64 %}
-  set_{{field.name}}(bytes.At<int64_t>(offset + header_size + (8 * {{loop.index0}})));
-{%- elif field.type == Type.STRING %}
-  auto {{field.name}}_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * {{loop.index0}}));
-
-  set_{{field.name}}(bytes.StringAt(offset + {{field.name}}_pointer.offset, {{field.name}}_pointer.length));
-{%- elif field.type == Type.CAPABILITY %}
   // FIXME: Implement in-buffer capabilities for inprocess serialization.
   set_{{field.name}}(0);
-{%- else %}
-  // TODO: Unimplemented parsing {{field.type}}
 {%- endif %}
-{%- else %}
-  auto {{field.name}}_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * {{loop.index0}}));
-
-  {{field.name}}_.Resize({{field.name}}_pointer.length);
-  for (uint64_t i = offset + {{field.name}}_pointer.offset;
-       i < offset + {{field.name}}_pointer.offset + (sizeof({{field.cpp_type()}}) * {{field.name}}_pointer.length);
-       i += sizeof({{field.cpp_type()}})) {
-    {{field.name}}_.PushBack(bytes.At<{{field.cpp_type()}}>(i));
-  }
-{% endif %}
 {%- endfor %}
 }
 
 void {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
+  ParseFromBytesInternal(bytes, offset);
+
+{%- for field in message.fields %}
+{%- if field.type == Type.CAPABILITY %}
+  // Parse {{field.name}}.
+  uint64_t {{field.name}}_ptr = bytes.At<uint64_t>(offset + header_size + (8 * {{loop.index0}}));
+
+  set_{{field.name}}(caps.At({{field.name}}_ptr));
+{%- endif %}
+{%- endfor %}
+}
+
+void {{message.name}}::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
   CheckHeader(bytes);
 
 {%- for field in message.fields %}
@@ -77,9 +69,7 @@ void {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t of
 
   set_{{field.name}}(bytes.StringAt(offset + {{field.name}}_pointer.offset, {{field.name}}_pointer.length));
 {%- elif field.type == Type.CAPABILITY %}
-  uint64_t {{field.name}}_ptr = bytes.At<uint64_t>(offset + header_size + (8 * {{loop.index0}}));
-
-  set_{{field.name}}(caps.At({{field.name}}_ptr));
+  // Skip Cap.
 {%- else %}
   // TODO: Unimplemented parsing {{field.type}}
 {%- endif %}
@@ -94,6 +84,7 @@ void {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t of
   }
 {% endif %}
 {%- endfor %}
+
 }
 
 uint64_t {{message.name}}::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
