@@ -34,6 +34,7 @@ void {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t of
 
 {%- for field in message.fields %}
   // Parse {{field.name}}.
+{%- if not field.repeated %}
 {%- if field.type == Type.U64 %}
   set_{{field.name}}(bytes.At<uint64_t>(offset + header_size + (8 * {{loop.index0}})));
 {%- elif field.type == Type.I64 %}
@@ -48,6 +49,16 @@ void {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t of
 {%- else %}
   // TODO: Unimplemented parsing {{field.type}}
 {%- endif %}
+{%- else %}
+  auto {{field.name}}_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * {{loop.index0}}));
+
+  {{field.name}}_.Resize({{field.name}}_pointer.length);
+  for (uint64_t i = offset + {{field.name}}_pointer.offset;
+       i < offset + {{field.name}}_pointer.offset + (sizeof({{field.cpp_type()}}) * {{field.name}}_pointer.length);
+       i += sizeof({{field.cpp_type()}})) {
+    {{field.name}}_.PushBack(bytes.At<{{field.cpp_type()}}>(i));
+  }
+{% endif %}
 {%- endfor %}
 }
 
@@ -56,6 +67,7 @@ void {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t of
 
 {%- for field in message.fields %}
   // Parse {{field.name}}.
+{%- if not field.repeated %}
 {%- if field.type == Type.U64 %}
   set_{{field.name}}(bytes.At<uint64_t>(offset + header_size + (8 * {{loop.index0}})));
 {%- elif field.type == Type.I64 %}
@@ -71,6 +83,16 @@ void {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t of
 {%- else %}
   // TODO: Unimplemented parsing {{field.type}}
 {%- endif %}
+{%- else %}
+  auto {{field.name}}_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * {{loop.index0}}));
+
+  {{field.name}}_.Resize({{field.name}}_pointer.length);
+  for (uint64_t i = offset + {{field.name}}_pointer.offset;
+       i < offset + {{field.name}}_pointer.offset + (sizeof({{field.cpp_type()}}) * {{field.name}}_pointer.length);
+       i += sizeof({{field.cpp_type()}})) {
+    {{field.name}}_.PushBack(bytes.At<{{field.cpp_type()}}>(i));
+  }
+{% endif %}
 {%- endfor %}
 }
 
@@ -80,6 +102,7 @@ uint64_t {{message.name}}::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t of
 
 {%- for field in message.fields %}
   // Write {{field.name}}.
+{%- if not field.repeated %}
 {%- if field.type == Type.U64 %}
   bytes.WriteAt<uint64_t>(offset + header_size + (8 * {{loop.index0}}), {{field.name}}());
 {%- elif field.type == Type.I64 %}
@@ -101,6 +124,20 @@ uint64_t {{message.name}}::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t of
 {%- else %}
   // TODO: Unimplemented serialization {{field.type}}
 {%- endif %}
+{%- else %}
+  ExtPointer {{field.name}}_ptr{
+    .offset = next_extension,
+    .length = (uint32_t)({{field.name}}().size() * sizeof({{field.cpp_type()}})),
+  };
+
+  next_extension += {{field.name}}_ptr.length;
+  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * {{loop.index0}}), {{field.name}}_ptr);
+
+  for (uint64_t i = 0; i < {{field.name}}().size(); i++) {
+    uint32_t ext_offset = offset + {{field.name}}_ptr.offset + (i * sizeof({{field.cpp_type()}}));
+    bytes.WriteAt<{{field.cpp_type()}}>(ext_offset, {{field.name}}().at(i));
+  }
+{%- endif %}
 {%- endfor %}
 
   // The next extension pointer is the length of the message. 
@@ -116,6 +153,7 @@ uint64_t {{message.name}}::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t of
 
 {%- for field in message.fields %}
   // Write {{field.name}}.
+{%- if not field.repeated %}
 {%- if field.type == Type.U64 %}
   bytes.WriteAt<uint64_t>(offset + header_size + (8 * {{loop.index0}}), {{field.name}}());
 {%- elif field.type == Type.I64 %}
@@ -136,6 +174,20 @@ uint64_t {{message.name}}::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t of
   bytes.WriteAt<uint64_t>(offset + header_size + (8 * {{loop.index0}}), next_cap++);
 {%- else %}
   // TODO: Unimplemented serialization {{field.type}}
+{%- endif %}
+{%- else %}
+  ExtPointer {{field.name}}_ptr{
+    .offset = next_extension,
+    .length = (uint32_t)({{field.name}}().size() * sizeof({{field.cpp_type()}})),
+  };
+
+  next_extension += {{field.name}}_ptr.length;
+  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * {{loop.index0}}), {{field.name}}_ptr);
+
+  for (uint64_t i = 0; i < {{field.name}}().size(); i++) {
+    uint32_t ext_offset = offset + {{field.name}}_ptr.offset + (i * sizeof({{field.cpp_type()}}));
+    bytes.WriteAt<{{field.cpp_type()}}>(ext_offset, {{field.name}}().at(i));
+  }
 {%- endif %}
 {%- endfor %}
 

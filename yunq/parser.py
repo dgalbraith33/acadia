@@ -114,9 +114,10 @@ type_to_cppstr = {
         }
 
 class Field():
-    def __init__(self, fieldtype: Type, name: str):
+    def __init__(self, fieldtype: Type, name: str, repeated = False):
         self.type = fieldtype
         self.name = name
+        self.repeated = repeated
 
     def cpp_type(self):
         return type_to_cppstr[self.type]
@@ -250,14 +251,19 @@ class Parser():
 
     def field(self):
 
+        repeated = False
         field_type_str = self.consume_identifier()
+        if field_type_str == "repeated":
+            repeated = True
+            field_type_str = self.consume_identifier()
+            
         if field_type_str not in type_str_dict.keys():
             sys.exit("Expected type got '%s'" % field_type_str)
         field_type = type_str_dict[field_type_str]
 
         name = self.consume_identifier()
         self.consume_check(LexemeType.SEMICOLON)
-        return Field(field_type, name)
+        return Field(field_type, name, repeated)
 
 def type_check(decls: list[Decl]):
     for decl in decls:

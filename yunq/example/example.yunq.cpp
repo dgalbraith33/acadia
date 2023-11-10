@@ -34,7 +34,15 @@ void OpenFileRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t off
 
   set_path(bytes.StringAt(offset + path_pointer.offset, path_pointer.length));
   // Parse options.
-  set_options(bytes.At<uint64_t>(offset + header_size + (8 * 1)));
+  auto options_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 1))
+
+  options_.Resize(options_pointer.length);
+  for (uint64_t i = offset + options_pointer.offset;
+       i < offset + options_pointer.offset + (sizeof(uint64_t) * options_pointer.length);
+       i += sizeof(uint64_t)) {
+    options_.PushBack(bytes.At<uint64_t>(i));
+  }
+
 }
 
 void OpenFileRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
@@ -44,7 +52,15 @@ void OpenFileRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t off
 
   set_path(bytes.StringAt(offset + path_pointer.offset, path_pointer.length));
   // Parse options.
-  set_options(bytes.At<uint64_t>(offset + header_size + (8 * 1)));
+  auto options_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 1))
+
+  options_.Resize(options_pointer.length);
+  for (uint64_t i = offset + options_pointer.offset;
+       i < offset + options_pointer.offset + (sizeof(uint64_t) * options_pointer.length);
+       i += sizeof(uint64_t)) {
+    options_.PushBack(bytes.At<uint64_t>(i));
+  }
+
 }
 
 uint64_t OpenFileRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
@@ -62,7 +78,18 @@ uint64_t OpenFileRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t off
 
   bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 0), path_ptr);
   // Write options.
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 1), options());
+  ExtPointer options_ptr{
+    .offset = next_extension,
+    .length = (uint32_t)(options().size() * sizeof(uint64_t)),
+  };
+
+  next_extension += options_ptr.length;
+  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 1), options_ptr);
+
+  for (uint64_t i = 0; i < options().size(); i++) {
+    uint32_t ext_offset = offset + options_ptr.offset + (i * sizeof(uint64_t));
+    bytes.WriteAt<uint64_t>(ext_offset, options().at(i));
+  }
 
   // The next extension pointer is the length of the message. 
   WriteHeader(bytes, offset, core_size, next_extension);
@@ -86,7 +113,18 @@ uint64_t OpenFileRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t off
 
   bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 0), path_ptr);
   // Write options.
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 1), options());
+  ExtPointer options_ptr{
+    .offset = next_extension,
+    .length = (uint32_t)(options().size() * sizeof(uint64_t)),
+  };
+
+  next_extension += options_ptr.length;
+  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 1), options_ptr);
+
+  for (uint64_t i = 0; i < options().size(); i++) {
+    uint32_t ext_offset = offset + options_ptr.offset + (i * sizeof(uint64_t));
+    bytes.WriteAt<uint64_t>(ext_offset, options().at(i));
+  }
 
   // The next extension pointer is the length of the message. 
   WriteHeader(bytes, offset, core_size, next_extension);

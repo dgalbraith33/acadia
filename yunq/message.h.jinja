@@ -3,6 +3,7 @@
 
 #include <glacier/buffer/byte_buffer.h>
 #include <glacier/buffer/cap_buffer.h>
+#include <glacier/container/vector.h>
 #include <glacier/string/string.h>
 #include <ztypes.h>
 
@@ -21,13 +22,22 @@ class {{message.name}} {
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const;
 
 {%- for field in message.fields %}
+  {%- if not field.repeated %} 
   {{field.cpp_type()}} {{field.name}}() const { return {{field.name}}_; }
   void set_{{field.name}}(const {{field.cpp_type()}}& value) { {{field.name}}_ = value; }
+  {%- else %}
+  const glcr::Vector<{{field.cpp_type()}}>& {{field.name}}() const { return {{field.name}}_; }
+  void add_{{field.name}}(const {{field.cpp_type()}}& value) { {{field.name}}_.PushBack(value); }
+  {%- endif %}
 {%- endfor %}
 
  private:
 {%- for field in message.fields %}
+  {%- if not field.repeated %}
   {{field.cpp_type()}} {{field.name}}_;
+  {%- else %}
+  glcr::Vector<{{field.cpp_type()}}> {{field.name}}_;
+  {%- endif %}
 {%- endfor %}
 
 };

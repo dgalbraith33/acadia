@@ -4,7 +4,7 @@ interface VFS {
 
 message OpenFileRequest {
   string path;
-  u64 options;
+  repeated u64 options;
 }
 
 message File {
