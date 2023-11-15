@@ -34,15 +34,9 @@ bool IsSlab(void* addr) {
 
 KernelHeap::KernelHeap() { gKernelHeap = this; }
 
-void KernelHeap::InitializeSlabAllocators() {
-  slab_8_ = glcr::MakeUnique<SlabAllocator>(8);
-  slab_16_ = glcr::MakeUnique<SlabAllocator>(16);
-  slab_32_ = glcr::MakeUnique<SlabAllocator>(32);
-}
-
 void* KernelHeap::Allocate(uint64_t size) {
-  if ((size <= 8) && slab_8_) {
-    auto ptr_or = slab_8_->Allocate();
+  if (size <= 8) {
+    auto ptr_or = slab_8_.Allocate();
     if (ptr_or.ok()) {
       return ptr_or.value();
     }
@@ -50,8 +44,8 @@ void* KernelHeap::Allocate(uint64_t size) {
     dbgln("Skipped allocation (slab 8): {x}", ptr_or.error());
 #endif
   }
-  if ((size <= 16) && slab_16_) {
-    auto ptr_or = slab_16_->Allocate();
+  if (size <= 16) {
+    auto ptr_or = slab_16_.Allocate();
     if (ptr_or.ok()) {
       return ptr_or.value();
     }
@@ -59,8 +53,8 @@ void* KernelHeap::Allocate(uint64_t size) {
     dbgln("Skipped allocation (slab 16): {x}", ptr_or.error());
 #endif
   }
-  if ((size <= 32) && slab_32_) {
-    auto ptr_or = slab_32_->Allocate();
+  if (size <= 32) {
+    auto ptr_or = slab_32_.Allocate();
     if (ptr_or.ok()) {
       return ptr_or.value();
     }
@@ -98,18 +92,12 @@ void KernelHeap::DumpDebugDataInternal() {
   dbgln("Active Allocations: {}", alloc_count_);
 
   dbgln("Slab Statistics:");
-  if (slab_8_) {
-    dbgln("Slab 8: {} slabs, {} allocs", slab_8_->SlabCount(),
-          slab_8_->Allocations());
-  }
-  if (slab_16_) {
-    dbgln("Slab 16: {} slabs, {} allocs", slab_16_->SlabCount(),
-          slab_16_->Allocations());
-  }
-  if (slab_32_) {
-    dbgln("Slab 32: {} slabs, {} allocs", slab_32_->SlabCount(),
-          slab_32_->Allocations());
-  }
+  dbgln("Slab 8: {} slabs, {} allocs", slab_8_.SlabCount(),
+        slab_8_.Allocations());
+  dbgln("Slab 16: {} slabs, {} allocs", slab_16_.SlabCount(),
+        slab_16_.Allocations());
+  dbgln("Slab 32: {} slabs, {} allocs", slab_32_.SlabCount(),
+        slab_32_.Allocations());
 
   dbgln("");
   dbgln("Size Distributions of non slab-allocated.");

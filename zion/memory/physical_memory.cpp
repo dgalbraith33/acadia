@@ -140,10 +140,10 @@ void InitBootstrapPageAllocation() {
     // if we limit the number of pages this should be fine.
     // Currently set to the minimum of 3 for one kernel heap allocation:
     // PageDirectory + PageTable + Page
-    if (entry.type == 0 && entry.length >= 0x3000) {
+    if (entry.type == 0 && entry.length >= 0x5000) {
       gBootstrap.init_page = entry.base;
       gBootstrap.next_page = entry.base;
-      gBootstrap.max_page = entry.base + 0x3000;
+      gBootstrap.max_page = entry.base + 0x4000;
       gBootstrapEnabled = true;
       return;
     }

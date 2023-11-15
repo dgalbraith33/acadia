@@ -23,9 +23,9 @@ class KernelHeap {
 
   uint64_t alloc_count_ = 0;
 
-  glcr::UniquePtr<SlabAllocator> slab_8_;
-  glcr::UniquePtr<SlabAllocator> slab_16_;
-  glcr::UniquePtr<SlabAllocator> slab_32_;
+  SlabAllocator slab_8_{8};
+  SlabAllocator slab_16_{16};
+  SlabAllocator slab_32_{32};
 
   // Distribution collection for the purpose of investigating a slab allocator.
   // 0: 0-8B
