@@ -30,7 +30,11 @@ void dbg(const glcr::StringView& str) {
 void AddProcPrefix() {
   if (gScheduler != nullptr) {
     auto t = gScheduler->CurrentThread();
-    dbg(glcr::StrFormat("[{}.{}] ", t->pid(), t->tid()));
+
+    char buffer[16];
+    glcr::FixedStringBuilder builder(buffer, 16);
+    glcr::StrFormatIntoBuffer(builder, "[{}.{}] ", t->pid(), t->tid());
+    dbg(builder);
   }
 }
 
