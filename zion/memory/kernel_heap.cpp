@@ -43,21 +43,27 @@ void* KernelHeap::Allocate(uint64_t size) {
     if (ptr_or.ok()) {
       return ptr_or.value();
     }
-    dbgln("Failed allocation (slab 8): {x}", ptr_or.error());
+#if K_HEAP_DEBUG
+    dbgln("Skipped allocation (slab 8): {x}", ptr_or.error());
+#endif
   }
   if ((size <= 16) && slab_16_) {
     auto ptr_or = slab_16_->Allocate();
     if (ptr_or.ok()) {
       return ptr_or.value();
     }
-    dbgln("Failed allocation (slab 16): {x}", ptr_or.error());
+#if K_HEAP_DEBUG
+    dbgln("Skipped allocation (slab 16): {x}", ptr_or.error());
+#endif
   }
   if ((size <= 32) && slab_32_) {
     auto ptr_or = slab_32_->Allocate();
     if (ptr_or.ok()) {
       return ptr_or.value();
     }
-    dbgln("Failed allocation (slab 32): {x}", ptr_or.error());
+#if K_HEAP_DEBUG
+    dbgln("Skipped allocation (slab 32): {x}", ptr_or.error());
+#endif
   }
   if (next_addr_ + size >= upper_bound_) {
     panic("Kernel Heap Overrun (next, size, max): {x}, {x}, {x}", next_addr_,
