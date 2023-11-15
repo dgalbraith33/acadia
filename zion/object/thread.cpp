@@ -30,7 +30,8 @@ glcr::RefPtr<Thread> Thread::Create(Process& proc, uint64_t tid) {
 }
 
 Thread::Thread(Process& proc, uint64_t tid) : process_(proc), id_(tid) {
-  uint64_t* stack_ptr = proc.vmas()->AllocateKernelStack();
+  uint64_t* stack_ptr =
+      reinterpret_cast<uint64_t*>(proc.vmas()->AllocateKernelStack());
   // 0: rip
   *(stack_ptr) = reinterpret_cast<uint64_t>(thread_init);
   // 1-4: rax, rcx, rdx, rbx

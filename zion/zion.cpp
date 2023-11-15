@@ -24,10 +24,16 @@ extern "C" void zion() {
 
   dbgln("[boot] Init Physical Memory Manager.");
   phys_mem::InitBootstrapPageAllocation();
+
+  // - Must happen after BootstrapPageAllocation
+  // due to the heap using page allocations.
+  // - Must happen after InitIdt() as the kernel
+  // stack manager will update ist1.
   KernelVmm kvmm;
-  KernelHeap heap;
+
+  // Must happen after KernelVmm init as it
+  // will do allocations to build the free list.
   phys_mem::InitPhysicalMemoryManager();
-  phys_mem::DumpRegions();
 
   dbgln("[boot] Memory allocations available now.");
 
@@ -38,13 +44,6 @@ extern "C" void zion() {
   Apic::Init();
   ApicTimer::Init();
 
-  dbgln("[boot] Init Kernel Stack Manager.");
-  KernelStackManager::Init();
-
-  // The KernelStackManager sets Ist1 as a part of initialization so we can use
-  // it now.
-  UpdateFaultHandlersToIst1();
-
   dbgln("[boot] Init syscalls.");
   InitSyscall();
 
@@ -54,9 +53,6 @@ extern "C" void zion() {
 
   dbgln("[boot] Loading sys init program.");
   LoadInitProgram();
-
-  dbgln("[boot] Allocs during boot:");
-  heap.DumpDebugData();
 
   dbgln("[boot] Init finished, yielding.");
   gScheduler->Enable();

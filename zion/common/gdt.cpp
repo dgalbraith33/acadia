@@ -93,8 +93,6 @@ void InitGdt() {
           : "rax");
 }
 
-void SetIst1(uint64_t* ist1) {
-  gTaskStateSegment.ist1 = reinterpret_cast<uint64_t>(ist1);
-}
+void SetIst1(uint64_t ist1) { gTaskStateSegment.ist1 = ist1; }
 
 void SetRsp0(uint64_t rsp0) { gTaskStateSegment.rsp0 = rsp0; }

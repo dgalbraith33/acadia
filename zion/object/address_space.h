@@ -75,7 +75,7 @@ class AddressSpace : public KernelObject {
   uint64_t MapInMemoryObject(const glcr::RefPtr<MemoryObject>& mem_obj);
 
   // Kernel Mappings.
-  uint64_t* AllocateKernelStack();
+  uint64_t AllocateKernelStack();
 
   // Returns true if the page fault has been resolved.
   bool HandlePageFault(uint64_t vaddr);

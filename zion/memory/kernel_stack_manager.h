@@ -14,14 +14,15 @@
 // class.
 class KernelStackManager {
  public:
-  static void Init();
+  KernelStackManager();
 
-  uint64_t* AllocateKernelStack();
+  void SetupInterruptStack();
+
+  uint64_t AllocateKernelStack();
 
   void FreeKernelStack(uint64_t stack_base);
 
  private:
-  KernelStackManager();
   uint64_t next_stack_addr_;
   uint64_t freed_stack_cnt_ = 0;
 };

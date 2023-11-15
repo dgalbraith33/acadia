@@ -13,10 +13,16 @@ KernelVmm::KernelVmm() {
     panic("KernelVmm double init.");
   }
   gKernelVmm = this;
+  stack_manager_ = glcr::MakeUnique<KernelStackManager>();
+  stack_manager_->SetupInterruptStack();
 }
 
 uint64_t KernelVmm::AcquireSlabHeapRegion(uint64_t slab_size_bytes) {
   return gKernelVmm->AcquireSlabHeapRegionInternal(slab_size_bytes);
+}
+
+uint64_t KernelVmm::AcquireKernelStack() {
+  return gKernelVmm->stack_manager_->AllocateKernelStack();
 }
 
 uint64_t KernelVmm::AcquireSlabHeapRegionInternal(uint64_t slab_size_bytes) {

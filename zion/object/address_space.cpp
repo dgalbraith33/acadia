@@ -1,13 +1,11 @@
 #include "object/address_space.h"
 
 #include "debug/debug.h"
-#include "memory/kernel_stack_manager.h"
+#include "memory/kernel_vmm.h"
 #include "memory/paging_util.h"
 #include "memory/physical_memory.h"
 
 #define K_VMAS_DEBUG 0
-
-extern KernelStackManager* gKernelStackManager;
 
 glcr::RefPtr<AddressSpace> AddressSpace::ForRoot() {
   uint64_t cr3 = 0;
@@ -49,8 +47,8 @@ uint64_t AddressSpace::MapInMemoryObject(
   return vaddr;
 }
 
-uint64_t* AddressSpace::AllocateKernelStack() {
-  return gKernelStackManager->AllocateKernelStack();
+uint64_t AddressSpace::AllocateKernelStack() {
+  return KernelVmm::AcquireKernelStack();
 }
 
 bool AddressSpace::HandlePageFault(uint64_t vaddr) {
