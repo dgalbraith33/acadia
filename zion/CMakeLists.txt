@@ -15,6 +15,7 @@ add_executable(zion
   loader/init_loader.cpp
   memory/kernel_heap.cpp
   memory/kernel_stack_manager.cpp
+  memory/kernel_vmm.cpp
   memory/paging_util.cpp
   memory/physical_memory.cpp
   memory/slab_allocator.cpp

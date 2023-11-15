@@ -10,6 +10,7 @@
 #include "loader/init_loader.h"
 #include "memory/kernel_heap.h"
 #include "memory/kernel_stack_manager.h"
+#include "memory/kernel_vmm.h"
 #include "memory/paging_util.h"
 #include "memory/physical_memory.h"
 #include "scheduler/process_manager.h"
@@ -23,6 +24,7 @@ extern "C" void zion() {
 
   early_dbgln("[boot] Init Physical Memory Manager.");
   phys_mem::InitBootstrapPageAllocation();
+  KernelVmm kvmm;
   KernelHeap heap;
   phys_mem::InitPhysicalMemoryManager();
   phys_mem::DumpRegions();

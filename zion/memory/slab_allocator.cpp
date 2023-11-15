@@ -2,25 +2,13 @@
 
 #include "debug/debug.h"
 #include "memory/constants.h"
+#include "memory/kernel_vmm.h"
 #include "memory/paging_util.h"
 
 namespace {
 
-// TODO: Store these in a kernel VMM.
 const uint64_t kSlabSize = 4 * KiB;
 const uint64_t kSlabMask = ~(kSlabSize - 1);
-uint64_t gNextSlab = kKernelSlabHeapStart;
-
-uint64_t NextSlab() {
-  // FIXME: Synchronization.
-  uint64_t next_slab = gNextSlab;
-  if (next_slab >= kKernelBuddyHeapEnd) {
-    panic("Slab heap overrun");
-  }
-  gNextSlab += kSlabSize;
-  EnsureResident(next_slab, 1);
-  return next_slab;
-}
 
 }  // namespace
 
@@ -91,8 +79,8 @@ glcr::ErrorOr<void*> SlabAllocator::Allocate() {
     return slab->Allocate();
   }
 
-  dbgln("Allocating new kernel slab size {}", elem_size_);
-  void* next_slab = (uint64_t*)NextSlab();
+  void* next_slab =
+      reinterpret_cast<void*>(KernelVmm::AcquireSlabHeapRegion(kSlabSize));
   slabs_.PushFront(glcr::AdoptPtr(new (next_slab) Slab(elem_size_)));
   return slabs_.PeekFront()->Allocate();
 }
