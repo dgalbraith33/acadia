@@ -76,9 +76,9 @@ void {{message.name}}::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uin
 {%- else %}
   auto {{field.name}}_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * {{loop.index0}}));
 
-  {{field.name}}_.Resize({{field.name}}_pointer.length);
+  {{field.name}}_.Resize({{field.name}}_pointer.length / sizeof({{field.cpp_type()}}));
   for (uint64_t i = offset + {{field.name}}_pointer.offset;
-       i < offset + {{field.name}}_pointer.offset + (sizeof({{field.cpp_type()}}) * {{field.name}}_pointer.length);
+       i < offset + {{field.name}}_pointer.offset + {{field.name}}_pointer.length;
        i += sizeof({{field.cpp_type()}})) {
     {{field.name}}_.PushBack(bytes.At<{{field.cpp_type()}}>(i));
   }
