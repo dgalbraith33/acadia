@@ -3,7 +3,7 @@
 #include "debug/debug.h"
 #include "memory/paging_util.h"
 
-#define K_HEAP_DEBUG 1
+#define K_HEAP_DEBUG 0
 
 namespace {
 
@@ -104,11 +104,6 @@ void KernelHeap::DumpDebugDataInternal() {
   dbgln("");
   dbgln("Heap Debug Statistics!");
 
-  dbgln("Pages used: {}",
-        (next_addr_ - kKernelBuddyHeapStart - 1) / 0x1000 + 1);
-  // Active Allocs.
-  dbgln("Active Allocations: {}", alloc_count_);
-
   dbgln("Slab Statistics:");
   dbgln("Slab 8: {} slabs, {} allocs", slab_8_.SlabCount(),
         slab_8_.Allocations());
@@ -123,25 +118,25 @@ void KernelHeap::DumpDebugDataInternal() {
 
   dbgln("");
   dbgln("Size Distributions of non slab-allocated.");
-  dbgln("<=8B:   {}", distributions[0]);
-  dbgln("<=16B:  {}", distributions[1]);
-  dbgln("<=32B:  {}", distributions[2]);
-  dbgln("<=64B:  {}", distributions[3]);
-  dbgln("<=128B: {}", distributions[4]);
-  dbgln("<=256B: {}", distributions[5]);
-  dbgln("<=512B: {}", distributions[6]);
-  dbgln("<=1KiB: {}", distributions[7]);
-  dbgln("<=2KiB: {}", distributions[8]);
-  dbgln("<=4KiB: {}", distributions[9]);
-  dbgln("> 4KiB: {}", distributions[10]);
+  dbgln("Pages used: {}",
+        (next_addr_ - kKernelBuddyHeapStart - 1) / 0x1000 + 1);
+  // Active Allocs.
+  dbgln("Active Allocations: {}", alloc_count_);
+
+  dbgln("<=256B: {}", distributions[0]);
+  dbgln("<=512B: {}", distributions[1]);
+  dbgln("<=1KiB: {}", distributions[2]);
+  dbgln("<=2KiB: {}", distributions[3]);
+  dbgln("<=4KiB: {}", distributions[4]);
+  dbgln("> 4KiB: {}", distributions[5]);
   dbgln("");
 }
 
 void KernelHeap::RecordSize(uint64_t size) {
   size -= 1;
-  size >>= 3;
+  size >>= 8;
   uint64_t index = 0;
-  while (size && index < 11) {
+  while (size && index < 5) {
     size >>= 1;
     index++;
   }
