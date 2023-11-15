@@ -73,6 +73,7 @@ class PhysicalMemoryManager {
 #if K_PHYS_DEBUG
     dbgln("Single {x}", page);
 #endif
+    allocated_pages_ += 1;
     return page;
   }
   uint64_t AllocateContinuous(uint64_t num_pages) {
@@ -101,11 +102,35 @@ class PhysicalMemoryManager {
 #if K_PHYS_DEBUG
     dbgln("Continuous {x}:{}", page, num_pages);
 #endif
+    allocated_pages_ += num_pages;
     return page;
   }
-  void FreePage(uint64_t page) { AddMemoryRegion(page, 0x1000); }
+  void FreePage(uint64_t page) {
+    AddMemoryRegion(page, 0x1000);
+    allocated_pages_--;
+  }
+
+  uint64_t AllocatedPages() { return allocated_pages_; }
+
+  uint64_t AvailablePages() {
+    uint64_t available = 0;
+    for (auto iter = memory_blocks.begin(); iter != memory_blocks.end();
+         iter = iter.next()) {
+      available += iter->num_pages;
+    }
+    return available;
+  }
 
  private:
+  struct MemBlock {
+    uint64_t base = 0;
+    uint64_t num_pages = 0;
+  };
+
+  glcr::LinkedList<MemBlock> memory_blocks;
+
+  uint64_t allocated_pages_ = 0;
+
   void AddMemoryRegion(uint64_t base, uint64_t size) {
     MemBlock block{
         .base = base,
@@ -113,12 +138,6 @@ class PhysicalMemoryManager {
     };
     memory_blocks.PushFront(block);
   }
-  struct MemBlock {
-    uint64_t base = 0;
-    uint64_t num_pages = 0;
-  };
-
-  glcr::LinkedList<MemBlock> memory_blocks;
 };
 
 static PhysicalMemoryManager* gPmm = nullptr;
@@ -212,6 +231,11 @@ uint64_t AllocateContinuous(uint64_t num_continuous) {
   }
 
   return gPmm->AllocateContinuous(num_continuous);
+}
+
+void DumpPhysicalMemoryUsage() {
+  dbgln("Pages used: {} MiB, avail: {} MiB", gPmm->AllocatedPages() / 256,
+        gPmm->AvailablePages() / 256);
 }
 
 }  // namespace phys_mem

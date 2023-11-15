@@ -7,6 +7,7 @@
 #include "interrupt/apic.h"
 #include "interrupt/apic_timer.h"
 #include "memory/kernel_heap.h"
+#include "memory/physical_memory.h"
 #include "scheduler/scheduler.h"
 
 #define IDT_INTERRUPT_GATE 0x8E
@@ -142,6 +143,7 @@ extern "C" void interrupt_apic_timer(InterruptFrame*) {
   if (cnt % 20 == 0) {
     if (cnt == 20) {
       KernelHeap::DumpDebugData();
+      phys_mem::DumpPhysicalMemoryUsage();
     }
     dbgln("timer: {}s", cnt * 50 / 1000);
   }

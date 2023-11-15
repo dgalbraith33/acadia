@@ -21,4 +21,6 @@ uint64_t AllocateAndZeroPage();
 uint64_t AllocateContinuous(uint64_t num_pages);
 void FreePage(uint64_t page);
 
+void DumpPhysicalMemoryUsage();
+
 }  // namespace phys_mem
