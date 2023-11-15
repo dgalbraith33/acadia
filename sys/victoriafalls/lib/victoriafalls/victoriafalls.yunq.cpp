@@ -28,19 +28,20 @@ void WriteHeader(glcr::ByteBuffer& bytes, uint64_t offset, uint32_t core_size, u
 
 }  // namespace
 void OpenFileRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  CheckHeader(bytes);
-  // Parse path.
-  auto path_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
-
-  set_path(bytes.StringAt(offset + path_pointer.offset, path_pointer.length));
+  ParseFromBytesInternal(bytes, offset);
 }
 
 void OpenFileRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
+  ParseFromBytesInternal(bytes, offset);
+}
+
+void OpenFileRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
   CheckHeader(bytes);
   // Parse path.
   auto path_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
 
   set_path(bytes.StringAt(offset + path_pointer.offset, path_pointer.length));
+
 }
 
 uint64_t OpenFileRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
@@ -86,19 +87,21 @@ uint64_t OpenFileRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t off
   return next_extension;
 }
 void OpenFileResponse::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  CheckHeader(bytes);
-  // Parse path.
-  auto path_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
-
-  set_path(bytes.StringAt(offset + path_pointer.offset, path_pointer.length));
-  // Parse size.
-  set_size(bytes.At<uint64_t>(offset + header_size + (8 * 1)));
+  ParseFromBytesInternal(bytes, offset);
   // Parse memory.
   // FIXME: Implement in-buffer capabilities for inprocess serialization.
   set_memory(0);
 }
 
 void OpenFileResponse::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
+  ParseFromBytesInternal(bytes, offset);
+  // Parse memory.
+  uint64_t memory_ptr = bytes.At<uint64_t>(offset + header_size + (8 * 2));
+
+  set_memory(caps.At(memory_ptr));
+}
+
+void OpenFileResponse::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
   CheckHeader(bytes);
   // Parse path.
   auto path_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
@@ -107,9 +110,8 @@ void OpenFileResponse::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t of
   // Parse size.
   set_size(bytes.At<uint64_t>(offset + header_size + (8 * 1)));
   // Parse memory.
-  uint64_t memory_ptr = bytes.At<uint64_t>(offset + header_size + (8 * 2));
+  // Skip Cap.
 
-  set_memory(caps.At(memory_ptr));
 }
 
 uint64_t OpenFileResponse::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {

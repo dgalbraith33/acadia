@@ -3,9 +3,9 @@
 #include <glacier/string/string.h>
 #include <mammoth/debug.h>
 
-glcr::ErrorOr<Ext2Driver> Ext2Driver::Init(ScopedDenaliClient&& denali) {
+glcr::ErrorOr<Ext2Driver> Ext2Driver::Init(const DenaliInfo& denali_info) {
   ASSIGN_OR_RETURN(glcr::SharedPtr<Ext2BlockReader> reader,
-                   Ext2BlockReader::Init(glcr::Move(denali)));
+                   Ext2BlockReader::Init(glcr::Move(denali_info)));
 
   ASSIGN_OR_RETURN(
       MappedMemoryRegion bgdt,
@@ -99,10 +99,31 @@ glcr::ErrorOr<MappedMemoryRegion> Ext2Driver::ReadFile(uint64_t inode_number) {
   uint64_t real_block_cnt =
       (inode->blocks - 1) / (ext2_reader_->BlockSize() / 512) + 1;
 
-  if (real_block_cnt > 1) {
-    dbgln("Can't handle scatter-gather yet.");
+  if (inode->block[14]) {
+    dbgln("Can't handle triply-indirect blocks yet.");
     return glcr::UNIMPLEMENTED;
   }
 
-  return ext2_reader_->ReadBlock(inode->block[0]);
+  if (inode->block[13]) {
+    dbgln("Can't handle doubly-indirect blocks yet.");
+    return glcr::UNIMPLEMENTED;
+  }
+
+  MappedMemoryRegion indirect_block;
+  if (inode->block[12]) {
+    ASSIGN_OR_RETURN(indirect_block, ext2_reader_->ReadBlock(inode->block[12]));
+  }
+
+  glcr::Vector<uint64_t> blocks_to_read;
+  for (uint64_t i = 0; i < 12 && i < real_block_cnt; i++) {
+    blocks_to_read.PushBack(inode->block[i]);
+  }
+
+  for (uint64_t i = 12; i < 268 && i < real_block_cnt; i++) {
+    uint32_t* block_array = reinterpret_cast<uint32_t*>(indirect_block.vaddr());
+    uint64_t offset = i - 12;
+    blocks_to_read.PushBack(block_array[offset]);
+  }
+
+  return ext2_reader_->ReadBlocks(blocks_to_read);
 }

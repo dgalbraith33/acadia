@@ -13,6 +13,8 @@ class DenaliServer : public DenaliServerBase {
 
   glcr::ErrorCode HandleRead(const ReadRequest& req,
                              ReadResponse& resp) override;
+  glcr::ErrorCode HandleReadMany(const ReadManyRequest& req,
+                                 ReadResponse& resp) override;
 
  private:
   static const uint64_t kBuffSize = 1024;

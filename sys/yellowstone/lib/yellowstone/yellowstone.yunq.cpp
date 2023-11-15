@@ -28,26 +28,29 @@ void WriteHeader(glcr::ByteBuffer& bytes, uint64_t offset, uint32_t core_size, u
 
 }  // namespace
 void RegisterEndpointRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  CheckHeader(bytes);
-  // Parse endpoint_name.
-  auto endpoint_name_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
-
-  set_endpoint_name(bytes.StringAt(offset + endpoint_name_pointer.offset, endpoint_name_pointer.length));
+  ParseFromBytesInternal(bytes, offset);
   // Parse endpoint_capability.
   // FIXME: Implement in-buffer capabilities for inprocess serialization.
   set_endpoint_capability(0);
 }
 
 void RegisterEndpointRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
+  ParseFromBytesInternal(bytes, offset);
+  // Parse endpoint_capability.
+  uint64_t endpoint_capability_ptr = bytes.At<uint64_t>(offset + header_size + (8 * 1));
+
+  set_endpoint_capability(caps.At(endpoint_capability_ptr));
+}
+
+void RegisterEndpointRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
   CheckHeader(bytes);
   // Parse endpoint_name.
   auto endpoint_name_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
 
   set_endpoint_name(bytes.StringAt(offset + endpoint_name_pointer.offset, endpoint_name_pointer.length));
   // Parse endpoint_capability.
-  uint64_t endpoint_capability_ptr = bytes.At<uint64_t>(offset + header_size + (8 * 1));
+  // Skip Cap.
 
-  set_endpoint_capability(caps.At(endpoint_capability_ptr));
 }
 
 uint64_t RegisterEndpointRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
@@ -99,11 +102,16 @@ uint64_t RegisterEndpointRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint
   return next_extension;
 }
 void Empty::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  CheckHeader(bytes);
+  ParseFromBytesInternal(bytes, offset);
 }
 
 void Empty::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
+  ParseFromBytesInternal(bytes, offset);
+}
+
+void Empty::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
   CheckHeader(bytes);
+
 }
 
 uint64_t Empty::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
@@ -127,22 +135,27 @@ uint64_t Empty::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr:
   return next_extension;
 }
 void AhciInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  CheckHeader(bytes);
+  ParseFromBytesInternal(bytes, offset);
   // Parse ahci_region.
   // FIXME: Implement in-buffer capabilities for inprocess serialization.
   set_ahci_region(0);
-  // Parse region_length.
-  set_region_length(bytes.At<uint64_t>(offset + header_size + (8 * 1)));
 }
 
 void AhciInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  CheckHeader(bytes);
+  ParseFromBytesInternal(bytes, offset);
   // Parse ahci_region.
   uint64_t ahci_region_ptr = bytes.At<uint64_t>(offset + header_size + (8 * 0));
 
   set_ahci_region(caps.At(ahci_region_ptr));
+}
+
+void AhciInfo::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  CheckHeader(bytes);
+  // Parse ahci_region.
+  // Skip Cap.
   // Parse region_length.
   set_region_length(bytes.At<uint64_t>(offset + header_size + (8 * 1)));
+
 }
 
 uint64_t AhciInfo::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
@@ -176,34 +189,14 @@ uint64_t AhciInfo::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, gl
   return next_extension;
 }
 void FramebufferInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  CheckHeader(bytes);
-  // Parse address_phys.
-  set_address_phys(bytes.At<uint64_t>(offset + header_size + (8 * 0)));
-  // Parse width.
-  set_width(bytes.At<uint64_t>(offset + header_size + (8 * 1)));
-  // Parse height.
-  set_height(bytes.At<uint64_t>(offset + header_size + (8 * 2)));
-  // Parse pitch.
-  set_pitch(bytes.At<uint64_t>(offset + header_size + (8 * 3)));
-  // Parse bpp.
-  set_bpp(bytes.At<uint64_t>(offset + header_size + (8 * 4)));
-  // Parse memory_model.
-  set_memory_model(bytes.At<uint64_t>(offset + header_size + (8 * 5)));
-  // Parse red_mask_size.
-  set_red_mask_size(bytes.At<uint64_t>(offset + header_size + (8 * 6)));
-  // Parse red_mask_shift.
-  set_red_mask_shift(bytes.At<uint64_t>(offset + header_size + (8 * 7)));
-  // Parse green_mask_size.
-  set_green_mask_size(bytes.At<uint64_t>(offset + header_size + (8 * 8)));
-  // Parse green_mask_shift.
-  set_green_mask_shift(bytes.At<uint64_t>(offset + header_size + (8 * 9)));
-  // Parse blue_mask_size.
-  set_blue_mask_size(bytes.At<uint64_t>(offset + header_size + (8 * 10)));
-  // Parse blue_mask_shift.
-  set_blue_mask_shift(bytes.At<uint64_t>(offset + header_size + (8 * 11)));
+  ParseFromBytesInternal(bytes, offset);
 }
 
 void FramebufferInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
+  ParseFromBytesInternal(bytes, offset);
+}
+
+void FramebufferInfo::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
   CheckHeader(bytes);
   // Parse address_phys.
   set_address_phys(bytes.At<uint64_t>(offset + header_size + (8 * 0)));
@@ -229,6 +222,7 @@ void FramebufferInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t off
   set_blue_mask_size(bytes.At<uint64_t>(offset + header_size + (8 * 10)));
   // Parse blue_mask_shift.
   set_blue_mask_shift(bytes.At<uint64_t>(offset + header_size + (8 * 11)));
+
 }
 
 uint64_t FramebufferInfo::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
@@ -300,26 +294,29 @@ uint64_t FramebufferInfo::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t off
   return next_extension;
 }
 void DenaliInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  CheckHeader(bytes);
+  ParseFromBytesInternal(bytes, offset);
   // Parse denali_endpoint.
   // FIXME: Implement in-buffer capabilities for inprocess serialization.
   set_denali_endpoint(0);
-  // Parse device_id.
-  set_device_id(bytes.At<uint64_t>(offset + header_size + (8 * 1)));
-  // Parse lba_offset.
-  set_lba_offset(bytes.At<uint64_t>(offset + header_size + (8 * 2)));
 }
 
 void DenaliInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  CheckHeader(bytes);
+  ParseFromBytesInternal(bytes, offset);
   // Parse denali_endpoint.
   uint64_t denali_endpoint_ptr = bytes.At<uint64_t>(offset + header_size + (8 * 0));
 
   set_denali_endpoint(caps.At(denali_endpoint_ptr));
+}
+
+void DenaliInfo::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  CheckHeader(bytes);
+  // Parse denali_endpoint.
+  // Skip Cap.
   // Parse device_id.
   set_device_id(bytes.At<uint64_t>(offset + header_size + (8 * 1)));
   // Parse lba_offset.
   set_lba_offset(bytes.At<uint64_t>(offset + header_size + (8 * 2)));
+
 }
 
 uint64_t DenaliInfo::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {

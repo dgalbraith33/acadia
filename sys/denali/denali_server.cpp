@@ -18,7 +18,10 @@ glcr::ErrorCode DenaliServer::HandleRead(const ReadRequest& req,
   ASSIGN_OR_RETURN(Mutex mutex, Mutex::Create());
   RET_ERR(mutex.Lock());
 
-  DmaReadCommand command(req.lba(), req.size(), mutex);
+  MappedMemoryRegion region =
+      MappedMemoryRegion::ContiguousPhysical(req.size() * 512);
+
+  DmaReadCommand command(req.lba(), req.size(), region.paddr(), mutex);
   device->IssueCommand(&command);
 
   // Wait for read operation to complete.
@@ -26,8 +29,40 @@ glcr::ErrorCode DenaliServer::HandleRead(const ReadRequest& req,
   RET_ERR(mutex.Release());
 
   resp.set_device_id(req.device_id());
-  resp.set_lba(req.lba());
   resp.set_size(req.size());
-  resp.set_memory(command.GetMemoryRegion());
+  resp.set_memory(region.cap());
+  return glcr::OK;
+}
+
+glcr::ErrorCode DenaliServer::HandleReadMany(const ReadManyRequest& req,
+                                             ReadResponse& resp) {
+  ASSIGN_OR_RETURN(AhciDevice * device, driver_.GetDevice(req.device_id()));
+  ASSIGN_OR_RETURN(Mutex mutex, Mutex::Create());
+  RET_ERR(mutex.Lock());
+
+  MappedMemoryRegion region =
+      MappedMemoryRegion::ContiguousPhysical(req.lba().size() * 512);
+
+  auto& vec = req.lba();
+  uint64_t curr_run_start = 0;
+  for (uint64_t i = 0; i < vec.size(); i++) {
+    if (i + 1 < vec.size() && vec.at(i) + 1 == vec.at(i + 1)) {
+      continue;
+    }
+    uint64_t lba = vec.at(curr_run_start);
+    uint64_t size = (i - curr_run_start) + 1;
+    uint64_t paddr = region.paddr() + curr_run_start * 512;
+    DmaReadCommand command(lba, size, paddr, mutex);
+    device->IssueCommand(&command);
+
+    // Wait for read operation to complete.
+    RET_ERR(mutex.Lock());
+
+    curr_run_start = i + 1;
+  }
+
+  resp.set_device_id(req.device_id());
+  resp.set_size(req.lba().size());
+  resp.set_memory(region.cap());
   return glcr::OK;
 }

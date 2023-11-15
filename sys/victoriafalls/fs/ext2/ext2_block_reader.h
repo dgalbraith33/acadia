@@ -1,9 +1,10 @@
 #pragma once
 
-#include <denali/scoped_denali_client.h>
+#include <denali/denali.yunq.client.h>
 #include <glacier/memory/shared_ptr.h>
 #include <glacier/status/error_or.h>
 #include <mammoth/memory_region.h>
+#include <yellowstone/yellowstone.yunq.h>
 
 #include "fs/ext2/ext2.h"
 
@@ -15,7 +16,7 @@
 class Ext2BlockReader {
  public:
   static glcr::ErrorOr<glcr::SharedPtr<Ext2BlockReader>> Init(
-      ScopedDenaliClient&& denali);
+      const DenaliInfo& denali_info);
 
   // TODO: Consider creating a new class wrapper with these computations.
   Superblock* GetSuperblock();
@@ -32,11 +33,17 @@ class Ext2BlockReader {
   glcr::ErrorOr<MappedMemoryRegion> ReadBlocks(uint64_t block_number,
                                                uint64_t num_blocks);
 
+  glcr::ErrorOr<MappedMemoryRegion> ReadBlocks(
+      const glcr::Vector<uint64_t>& block_list);
+
  private:
-  ScopedDenaliClient denali_;
+  DenaliClient denali_;
+  uint64_t device_id_;
+  uint64_t lba_offset_;
   MappedMemoryRegion super_block_region_;
 
-  Ext2BlockReader(ScopedDenaliClient&& denali, MappedMemoryRegion super_block);
+  Ext2BlockReader(DenaliClient&& denali, uint64_t device_id,
+                  uint64_t lba_offset, MappedMemoryRegion super_block);
 
   uint64_t SectorsPerBlock();
 };

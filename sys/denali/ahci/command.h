@@ -17,7 +17,8 @@ class Command {
 
 class DmaReadCommand : public Command {
  public:
-  DmaReadCommand(uint64_t lba, uint64_t sector_cnt, Mutex& callback_mutex);
+  DmaReadCommand(uint64_t lba, uint64_t sector_cnt, uint64_t dest_paddr,
+                 Mutex& callback_mutex);
 
   virtual ~DmaReadCommand() override;
 
@@ -26,11 +27,9 @@ class DmaReadCommand : public Command {
 
   void Callback() override;
 
-  z_cap_t GetMemoryRegion() { return region_.cap(); }
-
  private:
   uint64_t lba_;
   uint64_t sector_cnt_;
+  uint64_t paddr_;
   Mutex& callback_mutex_;
-  MappedMemoryRegion region_;
 };

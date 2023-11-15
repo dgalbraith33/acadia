@@ -23,6 +23,8 @@ class DenaliServerBase {
 
   [[nodiscard]] virtual glcr::ErrorCode HandleRead(const ReadRequest&, ReadResponse&) = 0;
 
+  [[nodiscard]] virtual glcr::ErrorCode HandleReadMany(const ReadManyRequest&, ReadResponse&) = 0;
+
 
  private:
   z_cap_t endpoint_;

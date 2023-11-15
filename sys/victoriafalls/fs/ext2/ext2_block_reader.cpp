@@ -3,12 +3,22 @@
 #include "mammoth/debug.h"
 
 glcr::ErrorOr<glcr::SharedPtr<Ext2BlockReader>> Ext2BlockReader::Init(
-    ScopedDenaliClient&& denali) {
+    const DenaliInfo& denali_info) {
   // Read 1024 bytes from 1024 offset.
   // FIXME: Don't assume 512 byte sectors somehow.
-  ASSIGN_OR_RETURN(MappedMemoryRegion superblock, denali.ReadSectors(2, 2));
+  DenaliClient client(denali_info.denali_endpoint());
+  ReadRequest req;
+  req.set_device_id(denali_info.device_id());
+  req.set_lba(denali_info.lba_offset() + 2);
+  req.set_size(2);
+  ReadResponse resp;
+  RET_ERR(client.Read(req, resp));
+  MappedMemoryRegion superblock =
+      MappedMemoryRegion::FromCapability(resp.memory());
+
   return glcr::SharedPtr<Ext2BlockReader>(
-      new Ext2BlockReader(glcr::Move(denali), superblock));
+      new Ext2BlockReader(glcr::Move(client), denali_info.device_id(),
+                          denali_info.lba_offset(), superblock));
 }
 
 Superblock* Ext2BlockReader::GetSuperblock() {
@@ -51,15 +61,40 @@ uint64_t Ext2BlockReader::InodeTableBlockSize() {
 
 glcr::ErrorOr<MappedMemoryRegion> Ext2BlockReader::ReadBlock(
     uint64_t block_number) {
-  return denali_.ReadSectors(block_number * SectorsPerBlock(),
-                             SectorsPerBlock());
+  return ReadBlocks(block_number, 1);
 }
 glcr::ErrorOr<MappedMemoryRegion> Ext2BlockReader::ReadBlocks(
     uint64_t block_number, uint64_t num_blocks) {
-  return denali_.ReadSectors(block_number * SectorsPerBlock(),
-                             num_blocks * SectorsPerBlock());
+  ReadRequest req;
+  req.set_device_id(device_id_);
+  req.set_lba(lba_offset_ + block_number * SectorsPerBlock());
+  req.set_size(num_blocks * SectorsPerBlock());
+  ReadResponse resp;
+  RET_ERR(denali_.Read(req, resp));
+  return MappedMemoryRegion::FromCapability(resp.memory());
 }
 
-Ext2BlockReader::Ext2BlockReader(ScopedDenaliClient&& denali,
+glcr::ErrorOr<MappedMemoryRegion> Ext2BlockReader::ReadBlocks(
+    const glcr::Vector<uint64_t>& block_list) {
+  ReadManyRequest req;
+  req.set_device_id(device_id_);
+  // FIXME: We should have better ergonomics for setting a repeated field in
+  // Yunq.
+  for (uint64_t i = 0; i < block_list.size(); i++) {
+    uint64_t sector = lba_offset_ + block_list.at(i) * SectorsPerBlock();
+    for (uint64_t j = 0; j < SectorsPerBlock(); j++) {
+      req.add_lba(sector + j);
+    }
+  }
+  ReadResponse resp;
+  RET_ERR(denali_.ReadMany(req, resp));
+  return MappedMemoryRegion::FromCapability(resp.memory());
+}
+
+Ext2BlockReader::Ext2BlockReader(DenaliClient&& denali, uint64_t device_id,
+                                 uint64_t lba_offset,
                                  MappedMemoryRegion super_block)
-    : denali_(glcr::Move(denali)), super_block_region_(super_block) {}
+    : denali_(glcr::Move(denali)),
+      device_id_(device_id),
+      lba_offset_(lba_offset),
+      super_block_region_(super_block) {}

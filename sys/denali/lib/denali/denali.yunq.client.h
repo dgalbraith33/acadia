@@ -19,6 +19,8 @@ class DenaliClient {
 
   [[nodiscard]] glcr::ErrorCode Read(const ReadRequest& request, ReadResponse& response);
 
+  [[nodiscard]] glcr::ErrorCode ReadMany(const ReadManyRequest& request, ReadResponse& response);
+
  private:
   z_cap_t endpoint_;
   uint64_t kBufferSize = 0x1000;

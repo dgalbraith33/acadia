@@ -1,5 +1,6 @@
 interface Denali {
   method Read(ReadRequest) -> (ReadResponse); 
+  method ReadMany(ReadManyRequest) -> (ReadResponse);
 }
 
 message ReadRequest {
@@ -8,9 +9,14 @@ message ReadRequest {
   u64 size;
 }
 
+message ReadManyRequest {
+  u64 device_id;
+  repeated u64 lba;
+}
+
 message ReadResponse {
   u64 device_id;
-  u64 lba;
   u64 size;
   capability memory;
 }
+

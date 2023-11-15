@@ -63,8 +63,6 @@ uint64_t main(uint64_t port_cap) {
     }
   }
 
-  dbgln("Test: '{}'", file.cstr());
-
   check(server_thread.Join());
   dbgln("Yellowstone Finished Successfully.");
   return 0;

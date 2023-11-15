@@ -97,6 +97,17 @@ glcr::ErrorCode DenaliServerBase::HandleRequest(const glcr::ByteBuffer& request,
       resp_length = yunq_response.SerializeToBytes(response, kHeaderSize, resp_caps);
       break;
     }
+    case 1: {
+      ReadManyRequest yunq_request;
+      ReadResponse yunq_response;
+
+      yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+
+      RET_ERR(HandleReadMany(yunq_request, yunq_response));
+
+      resp_length = yunq_response.SerializeToBytes(response, kHeaderSize, resp_caps);
+      break;
+    }
     default: {
       return glcr::UNIMPLEMENTED;
     }

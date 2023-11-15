@@ -1,8 +1,8 @@
 #pragma once
 
-#include <denali/scoped_denali_client.h>
 #include <glacier/memory/move.h>
 #include <glacier/memory/unique_ptr.h>
+#include <yellowstone/yellowstone.yunq.h>
 
 #include "fs/ext2/ext2.h"
 #include "fs/ext2/ext2_block_reader.h"
@@ -10,7 +10,7 @@
 
 class Ext2Driver {
  public:
-  static glcr::ErrorOr<Ext2Driver> Init(ScopedDenaliClient&& denali);
+  static glcr::ErrorOr<Ext2Driver> Init(const DenaliInfo& denali_info);
 
   glcr::ErrorCode ProbePartition();
 
