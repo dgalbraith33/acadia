@@ -93,3 +93,23 @@ glcr::ErrorOr<void*> SlabAllocator::Allocate() {
   slabs_.PushFront(glcr::AdoptPtr(new (next_slab) Slab(elem_size_)));
   return slabs_.PeekFront()->Allocate();
 }
+
+uint64_t SlabAllocator::SlabCount() {
+  auto slab = slabs_.PeekFront();
+  uint64_t count = 0;
+  while (slab) {
+    count++;
+    slab = slab->next_;
+  }
+  return count;
+}
+
+uint64_t SlabAllocator::Allocations() {
+  auto slab = slabs_.PeekFront();
+  uint64_t count = 0;
+  while (slab) {
+    count += slab->Allocations();
+    slab = slab->next_;
+  }
+  return count;
+}

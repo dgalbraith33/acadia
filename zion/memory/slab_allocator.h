@@ -19,6 +19,7 @@ class Slab : public glcr::RefCounted<Slab>,
   void Free(void* addr);
 
   bool IsFull();
+  uint64_t Allocations() { return num_allocated_; }
 
  private:
   struct FreeListEntry {
@@ -38,6 +39,10 @@ class SlabAllocator {
   SlabAllocator(SlabAllocator&) = delete;
 
   glcr::ErrorOr<void*> Allocate();
+
+  // Stats:
+  uint64_t SlabCount();
+  uint64_t Allocations();
 
  private:
   uint64_t elem_size_;

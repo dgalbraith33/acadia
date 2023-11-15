@@ -141,7 +141,7 @@ extern "C" void interrupt_apic_timer(InterruptFrame*) {
   cnt++;
   if (cnt % 20 == 0) {
     if (cnt == 20) {
-      KernelHeap::DumpDistribution();
+      KernelHeap::DumpDebugData();
     }
     dbgln("timer: {}s", cnt * 50 / 1000);
   }

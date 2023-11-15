@@ -3,7 +3,7 @@
 #include "debug/debug.h"
 #include "memory/paging_util.h"
 
-#define K_HEAP_DEBUG 0
+#define K_HEAP_DEBUG 1
 
 namespace {
 
@@ -38,9 +38,6 @@ void KernelHeap::InitializeSlabAllocators() {
 }
 
 void* KernelHeap::Allocate(uint64_t size) {
-#if K_HEAP_DEBUG
-  dbgln("Alloc ({x})", size);
-#endif
   if ((size <= 8) && slab_8_) {
     auto ptr_or = slab_8_->Allocate();
     if (ptr_or.ok()) {
@@ -77,31 +74,58 @@ void* KernelHeap::Allocate(uint64_t size) {
 #endif
   EnsureResident(next_addr_, size);
   uint64_t address = next_addr_;
+  alloc_count_ += 1;
   next_addr_ += size;
   return reinterpret_cast<void*>(address);
 }
 
-void KernelHeap::DumpDistribution() {
+void KernelHeap::DumpDebugData() {
 #if K_HEAP_DEBUG
-  uint64_t* distributions = gKernelHeap->distributions;
-  dbgln("<=4B:   {}", distributions[0]);
-  dbgln("<=8B:   {}", distributions[1]);
-  dbgln("<=16B:  {}", distributions[2]);
-  dbgln("<=32B:  {}", distributions[3]);
-  dbgln("<=64B:  {}", distributions[4]);
-  dbgln("<=128B: {}", distributions[5]);
-  dbgln("<=256B: {}", distributions[6]);
-  dbgln("<=512B: {}", distributions[7]);
-  dbgln("<=1KiB: {}", distributions[8]);
-  dbgln("<=2KiB: {}", distributions[9]);
-  dbgln("<=4KiB: {}", distributions[10]);
-  dbgln("> 4KiB: {}", distributions[11]);
+  gKernelHeap->DumpDebugDataInternal();
 #endif
+}
+
+void KernelHeap::DumpDebugDataInternal() {
+  dbgln("");
+  dbgln("Heap Debug Statistics!");
+
+  dbgln("Pages used: {}", (next_addr_ - 0xFFFFFFFF60000000 - 1) / 0x1000 + 1);
+  // Active Allocs.
+  dbgln("Active Allocations: {}", alloc_count_);
+
+  dbgln("Slab Statistics:");
+  if (slab_8_) {
+    dbgln("Slab 8: {} slabs, {} allocs", slab_8_->SlabCount(),
+          slab_8_->Allocations());
+  }
+  if (slab_16_) {
+    dbgln("Slab 16: {} slabs, {} allocs", slab_16_->SlabCount(),
+          slab_16_->Allocations());
+  }
+  if (slab_32_) {
+    dbgln("Slab 32: {} slabs, {} allocs", slab_32_->SlabCount(),
+          slab_32_->Allocations());
+  }
+
+  dbgln("");
+  dbgln("Size Distributions of non slab-allocated.");
+  dbgln("<=8B:   {}", distributions[0]);
+  dbgln("<=16B:  {}", distributions[1]);
+  dbgln("<=32B:  {}", distributions[2]);
+  dbgln("<=64B:  {}", distributions[3]);
+  dbgln("<=128B: {}", distributions[4]);
+  dbgln("<=256B: {}", distributions[5]);
+  dbgln("<=512B: {}", distributions[6]);
+  dbgln("<=1KiB: {}", distributions[7]);
+  dbgln("<=2KiB: {}", distributions[8]);
+  dbgln("<=4KiB: {}", distributions[9]);
+  dbgln("> 4KiB: {}", distributions[10]);
+  dbgln("");
 }
 
 void KernelHeap::RecordSize(uint64_t size) {
   size -= 1;
-  size >>= 2;
+  size >>= 3;
   uint64_t index = 0;
   while (size && index < 11) {
     size >>= 1;

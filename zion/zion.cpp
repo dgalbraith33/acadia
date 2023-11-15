@@ -55,7 +55,7 @@ extern "C" void zion() {
   LoadInitProgram();
 
   dbgln("[boot] Allocs during boot:");
-  heap.DumpDistribution();
+  heap.DumpDebugData();
 
   dbgln("[boot] Init finished, yielding.");
   gScheduler->Enable();
