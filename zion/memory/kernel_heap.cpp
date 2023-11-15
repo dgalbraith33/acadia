@@ -100,7 +100,8 @@ void KernelHeap::DumpDistribution() {
 }
 
 void KernelHeap::RecordSize(uint64_t size) {
-  size >>= 3;
+  size -= 1;
+  size >>= 2;
   uint64_t index = 0;
   while (size && index < 11) {
     size >>= 1;
