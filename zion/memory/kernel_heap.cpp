@@ -24,12 +24,15 @@ void InitMemory(uint8_t* addr, uint64_t size) {
   }
 }
 
+bool IsSlab(void* addr) {
+  uint64_t uaddr = reinterpret_cast<uint64_t>(addr);
+
+  return uaddr >= kKernelSlabHeapStart && uaddr < kKernelSlabHeapEnd;
+}
+
 }  // namespace
 
-KernelHeap::KernelHeap(uint64_t lower_bound, uint64_t upper_bound)
-    : next_addr_(lower_bound), upper_bound_(upper_bound) {
-  gKernelHeap = this;
-}
+KernelHeap::KernelHeap() { gKernelHeap = this; }
 
 void KernelHeap::InitializeSlabAllocators() {
   slab_8_ = glcr::MakeUnique<SlabAllocator>(8);
@@ -89,7 +92,8 @@ void KernelHeap::DumpDebugDataInternal() {
   dbgln("");
   dbgln("Heap Debug Statistics!");
 
-  dbgln("Pages used: {}", (next_addr_ - 0xFFFFFFFF60000000 - 1) / 0x1000 + 1);
+  dbgln("Pages used: {}",
+        (next_addr_ - kKernelBuddyHeapStart - 1) / 0x1000 + 1);
   // Active Allocs.
   dbgln("Active Allocations: {}", alloc_count_);
 
@@ -145,5 +149,13 @@ void* operator new[](uint64_t size) {
   return addr;
 }
 
-void operator delete(void*, uint64_t size) {}
-void operator delete[](void*) {}
+void operator delete(void* addr, uint64_t size) {
+  if (IsSlab(addr)) {
+    SlabFree(addr);
+  }
+}
+void operator delete[](void* addr) {
+  if (IsSlab(addr)) {
+    SlabFree(addr);
+  }
+}

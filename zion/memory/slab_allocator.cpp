@@ -1,21 +1,24 @@
 #include "slab_allocator.h"
 
 #include "debug/debug.h"
+#include "memory/constants.h"
 #include "memory/paging_util.h"
 
 namespace {
 
 // TODO: Store these in a kernel VMM.
-const uint64_t kSlabSize = 0x1000;
-uint64_t gNextSlab = 0xFFFFFFFF'40000000;
-const uint64_t gMaxSlab = 0xFFFF'FFFF'6000'0000;
+const uint64_t kSlabSize = 4 * KiB;
+const uint64_t kSlabMask = ~(kSlabSize - 1);
+uint64_t gNextSlab = kKernelSlabHeapStart;
 
 uint64_t NextSlab() {
   // FIXME: Synchronization.
   uint64_t next_slab = gNextSlab;
+  if (next_slab >= kKernelBuddyHeapEnd) {
+    panic("Slab heap overrun");
+  }
   gNextSlab += kSlabSize;
   EnsureResident(next_slab, 1);
-
   return next_slab;
 }
 
@@ -112,4 +115,10 @@ uint64_t SlabAllocator::Allocations() {
     slab = slab->next_;
   }
   return count;
+}
+
+void SlabFree(void* addr) {
+  Slab* slab =
+      reinterpret_cast<Slab*>(reinterpret_cast<uint64_t>(addr) & kSlabMask);
+  slab->Free(addr);
 }

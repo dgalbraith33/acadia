@@ -3,11 +3,12 @@
 #include <glacier/memory/unique_ptr.h>
 #include <stdint.h>
 
+#include "memory/constants.h"
 #include "memory/slab_allocator.h"
 
 class KernelHeap {
  public:
-  KernelHeap(uint64_t lower_bound, uint64_t upper_bound);
+  KernelHeap();
   void InitializeSlabAllocators();
 
   void* Allocate(uint64_t size);
@@ -17,8 +18,8 @@ class KernelHeap {
   static void DumpDebugData();
 
  private:
-  uint64_t next_addr_;
-  uint64_t upper_bound_;
+  uint64_t next_addr_ = kKernelBuddyHeapStart;
+  uint64_t upper_bound_ = kKernelBuddyHeapEnd;
 
   uint64_t alloc_count_ = 0;
 

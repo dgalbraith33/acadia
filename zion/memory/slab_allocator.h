@@ -48,3 +48,5 @@ class SlabAllocator {
   uint64_t elem_size_;
   glcr::IntrusiveList<Slab> slabs_;
 };
+
+void SlabFree(void* addr);
