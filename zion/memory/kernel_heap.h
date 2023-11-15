@@ -17,14 +17,12 @@ class KernelHeap {
   static void DumpDistribution();
 
  private:
-  uint64_t next_slab_addr_;
-  uint64_t first_unsized_addr_;
   uint64_t next_addr_;
   uint64_t upper_bound_;
 
-  glcr::UniquePtr<SlabAllocator<8>> slab_8_;
-  glcr::UniquePtr<SlabAllocator<16>> slab_16_;
-  glcr::UniquePtr<SlabAllocator<32>> slab_32_;
+  glcr::UniquePtr<SlabAllocator> slab_8_;
+  glcr::UniquePtr<SlabAllocator> slab_16_;
+  glcr::UniquePtr<SlabAllocator> slab_32_;
 
   // Distribution collection for the purpose of investigating a slab allocator.
   // 0: 0-4B

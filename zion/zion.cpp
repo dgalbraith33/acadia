@@ -23,7 +23,7 @@ extern "C" void zion() {
 
   early_dbgln("[boot] Init Physical Memory Manager.");
   phys_mem::InitBootstrapPageAllocation();
-  KernelHeap heap(0xFFFFFFFF'40000000, 0xFFFFFFFF'80000000);
+  KernelHeap heap(0xFFFFFFFF'60000000, 0xFFFFFFFF'80000000);
   phys_mem::InitPhysicalMemoryManager();
   heap.InitializeSlabAllocators();
   phys_mem::DumpRegions();

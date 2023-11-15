@@ -15,23 +15,26 @@ KernelHeap& GetKernelHeap() {
   }
   return *gKernelHeap;
 }
+
+static uint8_t kNewByte = 0xAB;
+
+void InitMemory(uint8_t* addr, uint64_t size) {
+  for (uint64_t i = 0; i < size; i++) {
+    addr[i] = kNewByte;
+  }
+}
+
 }  // namespace
 
 KernelHeap::KernelHeap(uint64_t lower_bound, uint64_t upper_bound)
-    : next_slab_addr_(lower_bound),
-      first_unsized_addr_(lower_bound + (upper_bound - lower_bound) / 2),
-      next_addr_(first_unsized_addr_),
-      upper_bound_(upper_bound) {
+    : next_addr_(lower_bound), upper_bound_(upper_bound) {
   gKernelHeap = this;
 }
 
 void KernelHeap::InitializeSlabAllocators() {
-  slab_8_ = glcr::MakeUnique<SlabAllocator<8>>(next_slab_addr_, 4);
-  next_slab_addr_ += 0x4000;
-  slab_16_ = glcr::MakeUnique<SlabAllocator<16>>(next_slab_addr_, 6);
-  next_slab_addr_ += 0x6000;
-  slab_32_ = glcr::MakeUnique<SlabAllocator<32>>(next_slab_addr_, 6);
-  next_slab_addr_ += 0x6000;
+  slab_8_ = glcr::MakeUnique<SlabAllocator>(8);
+  slab_16_ = glcr::MakeUnique<SlabAllocator>(16);
+  slab_32_ = glcr::MakeUnique<SlabAllocator>(32);
 }
 
 void* KernelHeap::Allocate(uint64_t size) {
@@ -106,8 +109,16 @@ void KernelHeap::RecordSize(uint64_t size) {
   distributions[index]++;
 }
 
-void* operator new(uint64_t size) { return GetKernelHeap().Allocate(size); }
-void* operator new[](uint64_t size) { return GetKernelHeap().Allocate(size); }
+void* operator new(uint64_t size) {
+  void* addr = GetKernelHeap().Allocate(size);
+  InitMemory(static_cast<uint8_t*>(addr), size);
+  return addr;
+}
+void* operator new[](uint64_t size) {
+  void* addr = GetKernelHeap().Allocate(size);
+  InitMemory(static_cast<uint8_t*>(addr), size);
+  return addr;
+}
 
 void operator delete(void*, uint64_t size) {}
 void operator delete[](void*) {}

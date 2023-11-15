@@ -17,6 +17,7 @@ add_executable(zion
   memory/kernel_stack_manager.cpp
   memory/paging_util.cpp
   memory/physical_memory.cpp
+  memory/slab_allocator.cpp
   memory/user_stack_manager.cpp
   object/address_space.cpp
   object/channel.cpp
