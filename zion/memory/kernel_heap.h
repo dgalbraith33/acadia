@@ -26,6 +26,8 @@ class KernelHeap {
   SlabAllocator slab_8_{8};
   SlabAllocator slab_16_{16};
   SlabAllocator slab_32_{32};
+  SlabAllocator slab_64_{64};
+  SlabAllocator slab_128_{128};
 
   // Distribution collection for the purpose of investigating a slab allocator.
   // 0: 0-8B

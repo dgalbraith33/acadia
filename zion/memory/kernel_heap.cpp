@@ -62,6 +62,24 @@ void* KernelHeap::Allocate(uint64_t size) {
     dbgln("Skipped allocation (slab 32): {x}", ptr_or.error());
 #endif
   }
+  if (size <= 64) {
+    auto ptr_or = slab_64_.Allocate();
+    if (ptr_or.ok()) {
+      return ptr_or.value();
+    }
+#if K_HEAP_DEBUG
+    dbgln("Skipped allocation (slab 64): {x}", ptr_or.error());
+#endif
+  }
+  if (size <= 128) {
+    auto ptr_or = slab_128_.Allocate();
+    if (ptr_or.ok()) {
+      return ptr_or.value();
+    }
+#if K_HEAP_DEBUG
+    dbgln("Skipped allocation (slab 128): {x}", ptr_or.error());
+#endif
+  }
   if (next_addr_ + size >= upper_bound_) {
     panic("Kernel Heap Overrun (next, size, max): {x}, {x}, {x}", next_addr_,
           size, upper_bound_);
@@ -98,6 +116,10 @@ void KernelHeap::DumpDebugDataInternal() {
         slab_16_.Allocations());
   dbgln("Slab 32: {} slabs, {} allocs", slab_32_.SlabCount(),
         slab_32_.Allocations());
+  dbgln("Slab 64: {} slabs, {} allocs", slab_64_.SlabCount(),
+        slab_64_.Allocations());
+  dbgln("Slab 128: {} slabs, {} allocs", slab_128_.SlabCount(),
+        slab_128_.Allocations());
 
   dbgln("");
   dbgln("Size Distributions of non slab-allocated.");
