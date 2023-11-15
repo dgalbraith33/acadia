@@ -69,11 +69,13 @@ class Vector {
 
 template <typename T>
 void Vector<T>::Resize(uint64_t capacity) {
-  T* new_data = reinterpret_cast<T*>(new uint8_t[capacity * sizeof(T)]);
-  for (uint64_t i = 0; i < size_; i++) {
-    new_data[i] = glcr::Move(data_[i]);
+  T* new_data = new T[capacity];
+  if (data_) {
+    for (uint64_t i = 0; i < size_; i++) {
+      new_data[i] = glcr::Move(data_[i]);
+    }
+    delete[] data_;
   }
-  delete[] data_;
   data_ = new_data;
   capacity_ = capacity;
 }
