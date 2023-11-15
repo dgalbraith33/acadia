@@ -1,3 +1,5 @@
 builddbg/
 __pycache__/
 compile_commands.json
+
+sysroot/bin
