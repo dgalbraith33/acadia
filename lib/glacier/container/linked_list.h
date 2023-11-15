@@ -16,6 +16,23 @@ class LinkedList {
   bool empty() const { return size_ == 0; }
   uint64_t size() const { return size_; }
 
+  void PushFront(const T& item) {
+    ListItem* new_item = new ListItem{
+        .item = item,
+        .next = front_,
+    };
+    front_ = new_item;
+    size_++;
+  }
+  void PushFront(T&& item) {
+    ListItem* new_item = new ListItem{
+        .item = glcr::Move(item),
+        .next = front_,
+    };
+    front_ = new_item;
+    size_++;
+  }
+
   void PushBack(const T& item) {
     ListItem* new_item = new ListItem{
         .item = item,
@@ -42,7 +59,8 @@ class LinkedList {
     return ret;
   }
 
-  T& PeekFront() const { return front_->item; }
+  T& PeekFront() { return front_->item; }
+  const T& PeekFront() const { return front_->item; }
 
   struct ListItem {
     T item;

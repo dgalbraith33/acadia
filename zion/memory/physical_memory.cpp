@@ -1,5 +1,7 @@
 #include "memory/physical_memory.h"
 
+#include <glacier/container/linked_list.h>
+
 #include "boot/boot_info.h"
 #include "debug/debug.h"
 
@@ -53,21 +55,20 @@ class PhysicalMemoryManager {
   }
 
   uint64_t AllocatePage() {
-    if (front_ == nullptr) {
+    if (memory_blocks.size() == 0) {
       panic("No available memory regions.");
     }
 
-    if (front_->num_pages == 0) {
-      panic("Bad state, empty memory block.");
+    while (memory_blocks.PeekFront().num_pages == 0) {
+      memory_blocks.PopFront();
     }
 
-    uint64_t page = front_->base;
-    front_->base += 0x1000;
-    front_->num_pages--;
-    if (front_->num_pages == 0) {
-      MemBlock* temp = front_;
-      front_ = front_->next;
-      delete temp;
+    MemBlock& block = memory_blocks.PeekFront();
+    uint64_t page = block.base;
+    block.base += 0x1000;
+    block.num_pages--;
+    if (block.num_pages == 0) {
+      memory_blocks.PopFront();
     }
 #if K_PHYS_DEBUG
     dbgln("Single {x}", page);
@@ -75,33 +76,28 @@ class PhysicalMemoryManager {
     return page;
   }
   uint64_t AllocateContinuous(uint64_t num_pages) {
-    if (front_ == nullptr) {
+    if (memory_blocks.size() == 0) {
       panic("No available memory regions.");
     }
 
-    if (front_->num_pages == 0) {
+    MemBlock& block = memory_blocks.PeekFront();
+    if (block.num_pages == 0) {
       panic("Bad state, empty memory block.");
     }
 
-    MemBlock* block = front_;
-    while (block != nullptr && block->num_pages < num_pages) {
-      dbgln("Skipping block of size {} seeking {}", block->num_pages,
-            num_pages);
-      block = block->next;
+    auto iter = memory_blocks.begin();
+    while (iter != memory_blocks.end() && iter->num_pages < num_pages) {
+      dbgln("Skipping block of size {} seeking {}", iter->num_pages, num_pages);
+      iter = iter.next();
     }
 
-    if (block == nullptr) {
+    if (iter == memory_blocks.end()) {
       panic("No memory regions to allocate");
     }
 
-    uint64_t page = front_->base;
-    front_->base += num_pages * 0x1000;
-    front_->num_pages -= num_pages;
-    if (front_->num_pages == 0) {
-      MemBlock* temp = front_;
-      front_ = front_->next;
-      delete temp;
-    }
+    uint64_t page = iter->base;
+    iter->base += num_pages * 0x1000;
+    iter->num_pages -= num_pages;
 #if K_PHYS_DEBUG
     dbgln("Continuous {x}:{}", page, num_pages);
 #endif
@@ -111,20 +107,18 @@ class PhysicalMemoryManager {
 
  private:
   void AddMemoryRegion(uint64_t base, uint64_t size) {
-    MemBlock* block = new MemBlock{
-        .next = front_,
+    MemBlock block{
         .base = base,
         .num_pages = size >> 12,
     };
-    front_ = block;
+    memory_blocks.PushFront(block);
   }
   struct MemBlock {
-    MemBlock* next = nullptr;
     uint64_t base = 0;
     uint64_t num_pages = 0;
   };
 
-  MemBlock* front_ = nullptr;
+  glcr::LinkedList<MemBlock> memory_blocks;
 };
 
 static PhysicalMemoryManager* gPmm = nullptr;
