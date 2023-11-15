@@ -18,11 +18,11 @@
 #include "syscall/syscall.h"
 
 extern "C" void zion() {
-  early_dbgln("[boot] Init GDT & IDT.");
+  dbgln("[boot] Init GDT & IDT.");
   InitGdt();
   InitIdt();
 
-  early_dbgln("[boot] Init Physical Memory Manager.");
+  dbgln("[boot] Init Physical Memory Manager.");
   phys_mem::InitBootstrapPageAllocation();
   KernelVmm kvmm;
   KernelHeap heap;

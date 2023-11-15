@@ -40,11 +40,6 @@ void AddProcPrefix() {
 
 }  // namespace
 
-void early_dbgln(const char* str) {
-  dbgcstr(str);
-  dbgcstr("\n");
-}
-
 void dbgln(const glcr::StringView& str) {
   AddProcPrefix();
   dbg(str);

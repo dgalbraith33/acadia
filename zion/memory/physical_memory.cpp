@@ -206,7 +206,7 @@ uint64_t AllocatePage() {
   }
 
 #if K_PHYS_DEBUG
-  early_dbgln("[PMM] Boostrap Alloc!");
+  dbgln("[PMM] Boostrap Alloc!");
 #endif
 
   uint64_t page = gBootstrap.next_page;
