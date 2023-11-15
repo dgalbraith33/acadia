@@ -3,14 +3,11 @@
 #include "common/gdt.h"
 #include "debug/debug.h"
 #include "interrupt/interrupt.h"
+#include "memory/constants.h"
 #include "memory/paging_util.h"
 
-#define KERNEL_STACK_START 0xFFFFFFFF'90000000
-#define KERNEL_STACK_LIMIT 0xFFFFFFFF'9FFFFFFF
-#define KERNEL_STACK_OFFSET 0x4000
-
 KernelStackManager::KernelStackManager()
-    : next_stack_addr_(KERNEL_STACK_START) {}
+    : next_stack_addr_(kKernelStackStart) {}
 
 void KernelStackManager::SetupInterruptStack() {
   SetIst1(AllocateKernelStack());
@@ -18,11 +15,11 @@ void KernelStackManager::SetupInterruptStack() {
 }
 
 uint64_t KernelStackManager::AllocateKernelStack() {
-  next_stack_addr_ += KERNEL_STACK_OFFSET;
-  if (next_stack_addr_ >= KERNEL_STACK_LIMIT) {
-    panic("No more kernelstack space");
+  next_stack_addr_ += kKernelStackOffset;
+  if (next_stack_addr_ >= kKernelStackEnd) {
+    panic("No more kernel stack space");
   }
-  EnsureResident(next_stack_addr_ - 0x3000, 0x3000);
+  EnsureResident(next_stack_addr_ - kKernelStackSize, kKernelStackSize);
   return next_stack_addr_ - 8;
 }
 
