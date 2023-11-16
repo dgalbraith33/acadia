@@ -143,7 +143,6 @@ void AhciDriver::InterruptLoop() {
     for (uint64_t i = 0; i < 32; i++) {
       if (devices_[i] != nullptr && devices_[i]->IsInit() &&
           (ahci_hba_->interrupt_status & (1 << i))) {
-        dbgln("Interrupt for {}", i);
         devices_[i]->HandleIrq();
         ahci_hba_->interrupt_status &= ~(1 << i);
       }
