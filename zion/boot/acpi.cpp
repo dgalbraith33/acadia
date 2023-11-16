@@ -139,13 +139,18 @@ void ParseMcfg(SdtHeader* rsdt) {
 }
 
 void ParseMadt(SdtHeader* rsdt) {
+#if K_ACPI_DEBUG
   dbgsz(rsdt->signature, 4);
+#endif
   uint64_t max_addr = reinterpret_cast<uint64_t>(rsdt) + rsdt->length;
   MadtHeader* header = reinterpret_cast<MadtHeader*>(rsdt);
 
+#if K_ACPI_DEBUG
   dbgln("Local APIC {x}", header->local_apic_address);
-  gLApicBase = header->local_apic_address;
   dbgln("Flags: {x}", header->flags);
+#endif
+
+  gLApicBase = header->local_apic_address;
 
   MadtEntry* entry = &header->first_entry;
 
@@ -153,14 +158,18 @@ void ParseMadt(SdtHeader* rsdt) {
     switch (entry->type) {
       case 0: {
         MadtLocalApic* local = reinterpret_cast<MadtLocalApic*>(entry);
+#if K_ACPI_DEBUG
         dbgln("Local APIC (Proc id, id, flags): {x}, {x}, {x}",
               local->processor_id, local->apic_id, local->flags);
+#endif
         break;
       }
       case 1: {
         MadtIoApic* io = reinterpret_cast<MadtIoApic*>(entry);
+#if K_ACPI_DEBUG
         dbgln("IO Apic (id, addr, gsi base): {x}, {x}, {x}", io->io_apic_id,
               io->io_apic_address, io->global_system_interrupt_base);
+#endif
         if (gIOApicBase != 0) {
           dbgln("More than one IOApic, unhandled");
         }
@@ -170,16 +179,20 @@ void ParseMadt(SdtHeader* rsdt) {
       case 2: {
         MadtIoApicInterruptSource* src =
             reinterpret_cast<MadtIoApicInterruptSource*>(entry);
+#if K_ACPI_DEBUG
         dbgln("IO Source (Bus, IRQ, GSI, flags): {x}, {x}, {x}, {x}",
               src->bus_source, src->irq_source, src->global_system_interrupt,
               src->flags);
+#endif
         break;
       }
       case 4: {
         MadtLocalApicNonMaskable* lnmi =
             reinterpret_cast<MadtLocalApicNonMaskable*>(entry);
+#if K_ACPI_DEBUG
         dbgln("Local NMI (proc id, flags, lint#): {x}, {x}, {x}",
               lnmi->apic_processor_id, lnmi->flags, lnmi->lint_num);
+#endif
         break;
       }
       default:
