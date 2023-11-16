@@ -9,7 +9,8 @@ echo $DIR
 BUILD_DIR="${DIR}/../builddbg"
 
 pushd $BUILD_DIR 
-ninja && ninja install
+ninja 
+ninja install
 
 sudo sh ${DIR}/build_image.sh disk.img
 
