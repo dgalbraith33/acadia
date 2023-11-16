@@ -114,9 +114,8 @@ class PhysicalMemoryManager {
 
   uint64_t AvailablePages() {
     uint64_t available = 0;
-    for (auto iter = memory_blocks.begin(); iter != memory_blocks.end();
-         iter = iter.next()) {
-      available += iter->num_pages;
+    for (const auto& mem_block : memory_blocks) {
+      available += mem_block.num_pages;
     }
     return available;
   }
