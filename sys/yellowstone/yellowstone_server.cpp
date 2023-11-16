@@ -54,7 +54,6 @@ glcr::ErrorCode YellowstoneServer::HandleGetAhciInfo(const Empty&,
                                                      AhciInfo& info) {
   info.set_ahci_region(pci_reader_.GetAhciVmmo());
   info.set_region_length(kPcieConfigurationSize);
-  dbgln("Resp ahci");
   return glcr::OK;
 }
 
@@ -88,13 +87,12 @@ glcr::ErrorCode YellowstoneServer::HandleGetDenali(const Empty&,
   info.set_denali_endpoint(new_denali);
   info.set_device_id(device_id_);
   info.set_lba_offset(lba_offset_);
-  dbgln("Resp denali");
   return glcr::OK;
 }
 
 glcr::ErrorCode YellowstoneServer::HandleRegisterEndpoint(
     const RegisterEndpointRequest& req, Empty&) {
-  dbgln("Registering.");
+  dbgln("Registering {}.", req.endpoint_name());
   if (req.endpoint_name() == "denali") {
     // FIXME: Rather than blocking and calling the denali service
     // immediately we should signal the main thread that it can continue init.

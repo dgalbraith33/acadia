@@ -7,6 +7,8 @@
 #include <zcall.h>
 #include <zglobal.h>
 
+#define GPT_DEBUG 0
+
 const uint64_t kSectorSize = 512;
 
 const uint64_t kGptPartitionSignature = 0x54524150'20494645;
@@ -79,23 +81,26 @@ glcr::ErrorCode GptReader::ParsePartitionTables() {
     dbgln("Incorrect OS type: {x}", first_partition->os_type);
     return glcr::FAILED_PRECONDITION;
   }
+#if GPT_DEBUG
   dbgln("LBAs: ({x}, {x})", first_partition->starting_lba,
         first_partition->ending_lba);
+#endif
 
   // FIXME: Don't hardcode sector size.
   ParititionHeader* header =
       reinterpret_cast<ParititionHeader*>(lba_1_and_2.vaddr() + 512);
 
-  dbgln("signature {}", header->signature);
-
   uint64_t num_partitions = header->num_partitions;
   uint64_t entry_size = header->parition_entry_size;
   uint64_t num_blocks = (num_partitions * entry_size) / 512;
 
+#if GPT_DEBUG
+  dbgln("signature {}", header->signature);
   dbgln("lba_partition_entries {x}", header->lba_partition_entries);
   dbgln("num_partitions: {x}", num_partitions);
   dbgln("partition_entry_size: {x}", entry_size);
   dbgln("Num blocks: {x}", num_blocks);
+#endif
 
   req.set_device_id(0);
   req.set_lba(header->lba_partition_entries);
@@ -103,16 +108,17 @@ glcr::ErrorCode GptReader::ParsePartitionTables() {
   RET_ERR(denali_->Read(req, resp));
   MappedMemoryRegion part_table =
       MappedMemoryRegion::FromCapability(resp.memory());
-  dbgln("Entries");
   for (uint64_t i = 0; i < num_partitions; i++) {
     PartitionEntry* entry = reinterpret_cast<PartitionEntry*>(
         part_table.vaddr() + (i * entry_size));
     if (entry->type_guid_low != 0 || entry->type_guid_high != 0) {
+#if GPT_DEBUG
       dbgln("Entry {}", i);
       dbgln("T Guid: {x}-{x}", entry->type_guid_high, entry->type_guid_low);
       dbgln("P Guid: {x}-{x}", entry->part_guid_high, entry->part_guid_low);
       dbgln("LBA: {x}, {x}", entry->lba_start, entry->lba_end);
       dbgln("Attrs: {x}", entry->attributes);
+#endif
       // For now we hardcode these values to the type that is
       // created in our setup script.
       // FIXME: Set up our own root partition type guid at some
