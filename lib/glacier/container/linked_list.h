@@ -12,55 +12,22 @@ class LinkedList {
   LinkedList() {}
 
   LinkedList(const LinkedList&) = delete;
+  LinkedList(LinkedList&&) = delete;
 
+  // Accessors.
   bool empty() const { return size_ == 0; }
   uint64_t size() const { return size_; }
 
-  void PushFront(const T& item) {
-    ListItem* new_item = new ListItem{
-        .item = item,
-        .next = front_,
-    };
-    front_ = new_item;
-    size_++;
-  }
-  void PushFront(T&& item) {
-    ListItem* new_item = new ListItem{
-        .item = glcr::Move(item),
-        .next = front_,
-    };
-    front_ = new_item;
-    size_++;
-  }
-
-  void PushBack(const T& item) {
-    ListItem* new_item = new ListItem{
-        .item = item,
-        .next = nullptr,
-    };
-    PushBackInternal(new_item);
-  }
-
-  void PushBack(T&& item) {
-    ListItem* new_item = new ListItem{
-        .item = glcr::Move(item),
-        .next = nullptr,
-    };
-    PushBackInternal(new_item);
-  }
-
-  T PopFront() {
-    size_--;
-
-    ListItem* old_front = front_;
-    front_ = front_->next;
-    T ret = glcr::Move(old_front->item);
-    delete old_front;
-    return ret;
-  }
-
   T& PeekFront() { return front_->item; }
   const T& PeekFront() const { return front_->item; }
+
+  T PopFront();
+
+  void PushFront(const T& item);
+  void PushFront(T&& item);
+
+  void PushBack(const T& item);
+  void PushBack(T&& item);
 
   struct ListItem {
     T item;
@@ -106,5 +73,54 @@ class LinkedList {
     litem->next = new_item;
   }
 };
+
+template <typename T>
+void LinkedList<T>::PushFront(const T& item) {
+  ListItem* new_item = new ListItem{
+      .item = item,
+      .next = front_,
+  };
+  front_ = new_item;
+  size_++;
+}
+
+template <typename T>
+void LinkedList<T>::PushFront(T&& item) {
+  ListItem* new_item = new ListItem{
+      .item = glcr::Move(item),
+      .next = front_,
+  };
+  front_ = new_item;
+  size_++;
+}
+
+template <typename T>
+void LinkedList<T>::PushBack(const T& item) {
+  ListItem* new_item = new ListItem{
+      .item = item,
+      .next = nullptr,
+  };
+  PushBackInternal(new_item);
+}
+
+template <typename T>
+void LinkedList<T>::PushBack(T&& item) {
+  ListItem* new_item = new ListItem{
+      .item = glcr::Move(item),
+      .next = nullptr,
+  };
+  PushBackInternal(new_item);
+}
+
+template <typename T>
+T LinkedList<T>::PopFront() {
+  size_--;
+
+  ListItem* old_front = front_;
+  front_ = front_->next;
+  T ret = Move(old_front->item);
+  delete old_front;
+  return Move(ret);
+}
 
 }  // namespace glcr
