@@ -44,7 +44,7 @@ z_err_t ParseInitPort(uint64_t init_port_cap) {
       case Z_BOOT_FRAMEBUFFER_INFO_VMMO:
         gBootFramebufferVmmoCap = init_cap;
       default:
-        dbgln("Unexpected init type {}, continuing.", init_sig);
+        dbgln("Unexpected init type {x}, continuing.", init_sig);
     }
   }
 
