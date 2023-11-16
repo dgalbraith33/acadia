@@ -58,7 +58,6 @@ extern "C" void zion() {
   gScheduler->Enable();
   gScheduler->Yield();
 
-  dbgln("Sleeping!");
   while (1)
     ;
 }

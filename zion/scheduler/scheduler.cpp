@@ -83,7 +83,6 @@ void Scheduler::Yield() {
   } else {
     if (runnable_threads_.size() == 0) {
       current_thread_ = sleep_thread_;
-      dbgln("Sleeping");
     } else {
       current_thread_ = runnable_threads_.PopFront();
     }
