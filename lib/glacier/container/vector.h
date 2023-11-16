@@ -8,30 +8,14 @@ namespace glcr {
 template <typename T>
 class Vector {
  public:
+  // Constructors.
   Vector() : data_(nullptr), size_(0), capacity_(0) {}
 
   Vector(const Vector&) = delete;
-  Vector(Vector&& other)
-      : data_(other.data_), size_(other.size_), capacity_(other.capacity_) {
-    other.data_ = nullptr;
-    other.size_ = 0;
-    other.capacity_ = 0;
-  }
-  Vector& operator=(Vector&& other) {
-    if (data_) {
-      delete[] data_;
-    }
+  Vector& operator=(const Vector&) = delete;
 
-    data_ = other.data_;
-    size_ = other.size_;
-    capacity_ = other.capacity_;
-
-    other.data_ = nullptr;
-    other.size_ = 0;
-    other.capacity_ = 0;
-
-    return *this;
-  }
+  Vector(Vector&& other);
+  Vector& operator=(Vector&& other);
 
   ~Vector() {
     if (data_) {
@@ -39,25 +23,27 @@ class Vector {
     }
   }
 
-  // FIXME: Handle downsizing.
-  void Resize(uint64_t capacity);
-
-  // Setters.
-  void PushBack(const T& item);
-  void PushBack(T&& item);
-  template <typename... Args>
-  void EmplaceBack(Args... args);
-
   // Accessors.
-  T& operator[](uint64_t index);
-  const T& operator[](uint64_t index) const;
-  T& at(uint64_t index);
-  const T& at(uint64_t index) const;
+  T& operator[](uint64_t index) { return data_[index]; }
+  const T& operator[](uint64_t index) const { return data_[index]; }
+  T& at(uint64_t index) { return data_[index]; }
+  const T& at(uint64_t index) const { return data_[index]; }
 
   uint64_t size() const { return size_; }
+  bool empty() const { return size_ == 0; }
   uint64_t capacity() const { return capacity_; }
 
   const T* RawPtr() const { return data_; }
+
+  // Setters.
+  // FIXME: Handle downsizing.
+  void Resize(uint64_t capacity);
+
+  void PushBack(const T& item);
+  void PushBack(T&& item);
+
+  template <typename... Args>
+  void EmplaceBack(Args&&... args);
 
  private:
   T* data_;
@@ -65,7 +51,32 @@ class Vector {
   uint64_t capacity_;
 
   void Expand();
-};
+};  // namespace glcr
+
+template <typename T>
+Vector<T>::Vector(Vector&& other)
+    : data_(other.data_), size_(other.size_), capacity_(other.capacity_) {
+  other.data_ = nullptr;
+  other.size_ = 0;
+  other.capacity_ = 0;
+}
+
+template <typename T>
+Vector<T>& Vector<T>::operator=(Vector&& other) {
+  if (data_) {
+    delete[] data_;
+  }
+
+  data_ = other.data_;
+  size_ = other.size_;
+  capacity_ = other.capacity_;
+
+  other.data_ = nullptr;
+  other.size_ = 0;
+  other.capacity_ = 0;
+
+  return *this;
+}
 
 template <typename T>
 void Vector<T>::Resize(uint64_t capacity) {
@@ -100,32 +111,12 @@ void Vector<T>::PushBack(T&& item) {
 
 template <typename T>
 template <typename... Args>
-void Vector<T>::EmplaceBack(Args... args) {
+void Vector<T>::EmplaceBack(Args&&... args) {
   if (size_ >= capacity_) {
     Expand();
   }
 
   data_[size_++] = T(args...);
-}
-
-template <typename T>
-T& Vector<T>::operator[](uint64_t index) {
-  return data_[index];
-}
-
-template <typename T>
-const T& Vector<T>::operator[](uint64_t index) const {
-  return data_[index];
-}
-
-template <typename T>
-T& Vector<T>::at(uint64_t index) {
-  return data_[index];
-}
-
-template <typename T>
-const T& Vector<T>::at(uint64_t index) const {
-  return data_[index];
 }
 
 template <typename T>
