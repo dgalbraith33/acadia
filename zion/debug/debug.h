@@ -25,7 +25,7 @@ template <typename... Args>
 void panic(const char* str, Args... args) {
   dbgln(str, args...);
   dbgln("PANIC");
-  asm volatile("hlt;");
+  asm volatile("cli; hlt;");
 }
 
 #define UNREACHABLE                                \
