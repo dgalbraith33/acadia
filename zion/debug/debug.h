@@ -28,6 +28,12 @@ void panic(const char* str, Args... args) {
   asm volatile("cli; hlt;");
 }
 
+#define PANIC_ON_ERR(expr, str) \
+  {                             \
+    if (expr != glcr::OK) {     \
+      panic(str);               \
+    }                           \
+  }
 #define UNREACHABLE                                \
   panic("Unreachable {}, {}", __FILE__, __LINE__); \
   __builtin_unreachable();

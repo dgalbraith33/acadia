@@ -10,19 +10,12 @@ void ProcessManager::Init() {
 }
 
 void ProcessManager::InsertProcess(const glcr::RefPtr<Process>& proc) {
-  proc_list_.PushBack(proc);
+  PANIC_ON_ERR(proc_map_.Insert(proc->id(), proc), "Reinserting process");
 }
 
 Process& ProcessManager::FromId(uint64_t pid) {
-  if (pid >= proc_list_.size()) {
-    panic("Bad proc access {}, have {} processes", pid, proc_list_.size());
+  if (!proc_map_.Contains(pid)) {
+    panic("Bad proc access {}, have {} processes", pid, proc_map_.size());
   }
-  return *proc_list_[pid];
-}
-
-void ProcessManager::DumpProcessStates() {
-  dbgln("Process States: {}", proc_list_.size());
-  for (uint64_t i = 0; i < proc_list_.size(); i++) {
-    dbgln("{}: {}", proc_list_[i]->id(), (uint64_t)proc_list_[i]->GetState());
-  }
+  return *proc_map_.at(pid);
 }

@@ -14,11 +14,8 @@ class ProcessManager {
   void InsertProcess(const glcr::RefPtr<Process>& proc);
   Process& FromId(uint64_t id);
 
-  void DumpProcessStates();
-
  private:
-  // TODO: This should be a hashmap.
-  glcr::Vector<glcr::RefPtr<Process>> proc_list_;
+  glcr::HashMap<uint64_t, glcr::RefPtr<Process>> proc_map_;
 };
 
 extern ProcessManager* gProcMan;
