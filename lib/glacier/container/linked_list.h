@@ -23,6 +23,8 @@ class LinkedList {
 
   T PopFront();
 
+  void Remove(const T& item);
+
   void PushFront(const T& item);
   void PushFront(T&& item);
 
@@ -53,7 +55,9 @@ class LinkedList {
   };
 
   Iterator begin() { return {front_}; }
+  const Iterator begin() const { return {front_}; }
   Iterator end() { return {nullptr}; }
+  const Iterator end() const { return {nullptr}; }
 
  private:
   uint64_t size_ = 0;
@@ -121,6 +125,23 @@ T LinkedList<T>::PopFront() {
   T ret = Move(old_front->item);
   delete old_front;
   return Move(ret);
+}
+
+template <typename T>
+void LinkedList<T>::Remove(const T& item) {
+  if (front_->item == item) {
+    PopFront();
+    return;
+  }
+  ListItem* iter = front_;
+  while (iter != nullptr) {
+    if (iter->next != nullptr && iter->next->item == item) {
+      iter->next = iter->next->next;
+      size_--;
+      return;
+    }
+    iter = iter->next;
+  }
 }
 
 }  // namespace glcr

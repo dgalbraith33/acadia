@@ -8,37 +8,26 @@ uint64_t CapabilityTable::AddExistingCapability(
     const glcr::RefPtr<Capability>& cap) {
   MutexHolder h(lock_);
   uint64_t id = next_cap_id_++;
-  capabilities_.PushBack({.id = id, .cap = cap});
+  if (capabilities_.Insert(id, cap) != glcr::OK) {
+    panic("Reusing capability id.");
+  }
   return id;
 }
 
 glcr::RefPtr<Capability> CapabilityTable::GetCapability(uint64_t id) {
   MutexHolder h(lock_);
-  auto iter = capabilities_.begin();
-  while (iter != capabilities_.end()) {
-    if (iter->cap && iter->id == id) {
-      return iter->cap;
-    }
-    ++iter;
+  if (!capabilities_.Contains(id)) {
+    panic("Bad cap access {}", id);
   }
-  dbgln("Bad cap access {}", id);
-  dbgln("Num caps: {}", capabilities_.size());
-  return {};
+  return capabilities_.at(id);
 }
 
 glcr::RefPtr<Capability> CapabilityTable::ReleaseCapability(uint64_t id) {
   MutexHolder h(lock_);
-  auto iter = capabilities_.begin();
-  while (iter != capabilities_.end()) {
-    if (iter->cap && iter->id == id) {
-      // FIXME: Do an actual release here.
-      auto cap = iter->cap;
-      iter->cap = {nullptr};
-      return cap;
-    }
-    ++iter;
+  if (!capabilities_.Contains(id)) {
+    panic("Bad cap release {}", id);
   }
-  dbgln("Bad cap release: {}", id);
-  dbgln("Num caps: {}", capabilities_.size());
-  return {};
+  auto cap = capabilities_.at(id);
+  (void)capabilities_.Delete(id);
+  return cap;
 }

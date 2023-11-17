@@ -1,9 +1,10 @@
 #pragma once
 
-#include <glacier/container/linked_list.h>
+#include <glacier/container/hash_map.h>
 #include <glacier/memory/ref_ptr.h>
 
 #include "capability/capability.h"
+#include "debug/debug.h"
 #include "object/mutex.h"
 
 class CapabilityTable {
@@ -28,12 +29,8 @@ class CapabilityTable {
   glcr::RefPtr<Mutex> lock_ = Mutex::Create();
   // TODO: Do some randomization.
   uint64_t next_cap_id_ = 0x100;
-  // FIXME: use a map data structure.
-  struct CapEntry {
-    uint64_t id;
-    glcr::RefPtr<Capability> cap;
-  };
-  glcr::LinkedList<CapEntry> capabilities_;
+  // TODO: Consider not holding a uniqueptr here instead of a refptr?
+  glcr::HashMap<uint64_t, glcr::RefPtr<Capability>> capabilities_;
 };
 
 template <typename T>
@@ -41,7 +38,9 @@ uint64_t CapabilityTable::AddNewCapability(const glcr::RefPtr<T>& object,
                                            uint64_t permissions) {
   MutexHolder h(lock_);
   uint64_t id = next_cap_id_++;
-  capabilities_.PushBack(
-      {.id = id, .cap = MakeRefCounted<Capability>(object, permissions)});
+  if (capabilities_.Insert(
+          id, MakeRefCounted<Capability>(object, permissions)) != glcr::OK) {
+    panic("Reusing capability id {}", id);
+  }
   return id;
 }
