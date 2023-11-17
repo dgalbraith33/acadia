@@ -33,6 +33,8 @@ class Scheduler {
 
   Scheduler();
   void SwapToCurrent(Thread& prev);
+
+  void ClearDeadThreadsFromFront();
 };
 
 extern Scheduler* gScheduler;

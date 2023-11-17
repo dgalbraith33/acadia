@@ -16,6 +16,7 @@ class KernelVmm {
 
   static uint64_t AcquireKernelStack();
 
+  // Takes the base address to the stack. I.e. the highest value in it.
   static void FreeKernelStack(uint64_t);
 
  private:

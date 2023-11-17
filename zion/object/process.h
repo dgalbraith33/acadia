@@ -61,6 +61,8 @@ class Process : public KernelObject {
 
   State GetState() { return state_; }
 
+  void Exit();
+
  private:
   friend class glcr::MakeRefCountedFriend<Process>;
   Process();

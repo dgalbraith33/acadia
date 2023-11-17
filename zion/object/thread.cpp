@@ -2,6 +2,7 @@
 
 #include "common/gdt.h"
 #include "debug/debug.h"
+#include "memory/kernel_vmm.h"
 #include "memory/paging_util.h"
 #include "object/process.h"
 #include "scheduler/scheduler.h"
@@ -68,14 +69,27 @@ void Thread::Exit() {
 #if K_THREAD_DEBUG
   dbgln("Exiting");
 #endif
-  state_ = FINISHED;
+  auto curr_thread = gScheduler->CurrentThread();
+  if (curr_thread->tid() != id_) {
+    panic("Thread::Exit called from [{}.{}] on [{}.{}]", curr_thread->pid(),
+          curr_thread->tid(), pid(), tid());
+  }
+  Cleanup();
+  gScheduler->Yield();
+}
+
+void Thread::Cleanup() {
+  state_ = CLEANUP;
   process_.CheckState();
   while (blocked_threads_.size() != 0) {
     auto thread = blocked_threads_.PopFront();
     thread->SetState(Thread::RUNNABLE);
     gScheduler->Enqueue(thread);
   }
-  gScheduler->Yield();
+  state_ = FINISHED;
+  // TODO: Race condition when called from exit, once kernel stack manager
+  // actually reuses stacks this will cause an issue
+  KernelVmm::FreeKernelStack(rsp0_start_);
 }
 
 void Thread::Wait() {
@@ -86,7 +100,7 @@ void Thread::Wait() {
   // 3. B finishes.
   // 4. Context Switch B -> A
   // 5. A forever blocks on B.
-  if (state_ == Thread::FINISHED) {
+  if (IsDying()) {
     return;
   }
   auto thread = gScheduler->CurrentThread();

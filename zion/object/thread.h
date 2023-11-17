@@ -29,6 +29,7 @@ class Thread : public KernelObject, public glcr::IntrusiveListNode<Thread> {
     RUNNING,
     RUNNABLE,
     BLOCKED,
+    CLEANUP,
     FINISHED,
   };
   static glcr::RefPtr<Thread> RootThread(Process& root_proc);
@@ -51,7 +52,16 @@ class Thread : public KernelObject, public glcr::IntrusiveListNode<Thread> {
   // State Management.
   State GetState() { return state_; };
   void SetState(State state) { state_ = state; }
+  bool IsDying() { return state_ == CLEANUP || state_ == FINISHED; }
+
+  // Exits this thread.
+  // Allows all blocked threads to run and releases the kernel stack.
+  // This function should only be called by the running thread on itself
+  // as it will yield.
   void Exit();
+
+  // Like Exit except it does not yield.
+  void Cleanup();
 
   void Wait();
 

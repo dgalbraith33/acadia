@@ -12,6 +12,8 @@ class ProcessManager {
   static void Init();
 
   void InsertProcess(const glcr::RefPtr<Process>& proc);
+  void RemoveProcess(uint64_t id);
+
   Process& FromId(uint64_t id);
 
  private:

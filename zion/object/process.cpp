@@ -5,6 +5,7 @@
 #include "memory/paging_util.h"
 #include "memory/physical_memory.h"
 #include "object/thread.h"
+#include "scheduler/process_manager.h"
 #include "scheduler/scheduler.h"
 
 namespace {
@@ -49,11 +50,11 @@ glcr::RefPtr<Thread> Process::GetThread(uint64_t tid) {
 void Process::CheckState() {
   MutexHolder lock(mutex_);
   for (uint64_t i = 0; i < threads_.size(); i++) {
-    if (threads_[i]->GetState() != Thread::FINISHED) {
+    if (!threads_[i]->IsDying()) {
       return;
     }
   }
-  state_ = FINISHED;
+  Exit();
 }
 
 glcr::RefPtr<Capability> Process::ReleaseCapability(uint64_t cid) {
@@ -66,4 +67,29 @@ glcr::RefPtr<Capability> Process::GetCapability(uint64_t cid) {
 
 uint64_t Process::AddExistingCapability(const glcr::RefPtr<Capability>& cap) {
   return caps_.AddExistingCapability(cap);
+}
+
+void Process::Exit() {
+  // TODO: Check this state elsewhere to ensure that we don't for instance
+  // create a running thread on a finished process.
+  state_ = FINISHED;
+
+  for (uint64_t i = 0; i < threads_.size(); i++) {
+    if (!threads_[i]->IsDying()) {
+      threads_[i]->Cleanup();
+    }
+  }
+
+  // From this point onward no threads should be able to reach userspace.
+
+  // TODO: Unmap all userspace mappings.
+  // TODO: Clear capabilities.
+
+  // TODO: In the future consider removing this from the process manager.
+  // I need to think through the implications because the process object
+  // will be kept alive by the process that created it most likely.
+
+  if (gScheduler->CurrentProcess().id_ == id_) {
+    gScheduler->Yield();
+  }
 }

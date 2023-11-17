@@ -43,6 +43,8 @@ void Scheduler::Preempt() {
     return;
   }
 
+  ClearDeadThreadsFromFront();
+
   asm volatile("cli");
   if (current_thread_ == sleep_thread_) {
     // Sleep should never be preempted. (We should yield it if another thread
@@ -66,9 +68,14 @@ void Scheduler::Preempt() {
 
 void Scheduler::Yield() {
   if (!enabled_) {
+    // This is expected to fire once at the start when we enqueue the first
+    // thread before the scheduler is enabled. Maybe we should get rid of it?
     dbgln("WARN Scheduler skipped yield.");
     return;
   }
+
+  ClearDeadThreadsFromFront();
+
   asm volatile("cli");
 
   glcr::RefPtr<Thread> prev = current_thread_;
@@ -78,7 +85,9 @@ void Scheduler::Yield() {
       return;
     } else {
       current_thread_ = runnable_threads_.PopFront();
-      prev->SetState(Thread::RUNNABLE);
+      if (!prev->IsDying()) {
+        prev->SetState(Thread::RUNNABLE);
+      }
     }
   } else {
     if (runnable_threads_.size() == 0) {
@@ -89,4 +98,11 @@ void Scheduler::Yield() {
   }
 
   SwapToCurrent(*prev);
+}
+
+void Scheduler::ClearDeadThreadsFromFront() {
+  while (runnable_threads_.size() > 0 &&
+         runnable_threads_.PeekFront()->IsDying()) {
+    runnable_threads_.PopFront();
+  }
 }
