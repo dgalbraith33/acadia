@@ -55,9 +55,6 @@ glcr::ErrorCode MemoryMappingTree::FreeMemoryRange(uint64_t vaddr_base,
 
   auto find_or = mapping_tree_.Find(vaddr_base);
   if (find_or) {
-    dbgln("Mem addr {x} refcnt {}",
-          (uint64_t)find_or.value().get().mem_object.get(),
-          find_or.value().get().mem_object->ref_count());
     mapping_tree_.Delete(vaddr_base);
   }
   while (true) {

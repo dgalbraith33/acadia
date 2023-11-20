@@ -31,7 +31,7 @@ class MemoryObject : public KernelObject {
   ~MemoryObject();
 
   uint64_t size() { return size_; }
-  uint64_t num_pages() { return size_ / 0x1000; }
+  uint64_t num_pages() { return ((size_ - 1) / 0x1000) + 1; }
 
   uint64_t PhysicalPageAtOffset(uint64_t offset);
 
@@ -58,14 +58,20 @@ class MemoryObject : public KernelObject {
 class FixedMemoryObject : public MemoryObject {
  public:
   // FIXME: Validate that this is 4k aligned.
-  FixedMemoryObject(uint64_t physical_addr, uint64_t size)
-      : MemoryObject(size, true), physical_addr_(physical_addr) {}
+  // Create a new class object for should free.
+  FixedMemoryObject(uint64_t physical_addr, uint64_t size, bool should_free)
+      : MemoryObject(size, true),
+        physical_addr_(physical_addr),
+        should_free_(should_free) {}
+
+  ~FixedMemoryObject();
 
   virtual glcr::ErrorOr<glcr::RefPtr<MemoryObject>> Duplicate(
       uint64_t offset, uint64_t length) override;
 
  private:
   uint64_t physical_addr_;
+  bool should_free_;
 
   uint64_t PageNumberToPhysAddr(uint64_t page_num) override {
     return physical_addr_ + (0x1000 * page_num);

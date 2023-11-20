@@ -14,7 +14,8 @@ z_err_t MemoryObjectCreate(ZMemoryObjectCreateReq* req) {
 z_err_t MemoryObjectCreatePhysical(ZMemoryObjectCreatePhysicalReq* req) {
   auto& curr_proc = gScheduler->CurrentProcess();
   uint64_t paddr = req->paddr;
-  auto vmmo_ref = glcr::MakeRefCounted<FixedMemoryObject>(paddr, req->size);
+  auto vmmo_ref =
+      glcr::MakeRefCounted<FixedMemoryObject>(paddr, req->size, false);
   *req->vmmo_cap =
       curr_proc.AddNewCapability(StaticCastRefPtr<MemoryObject>(vmmo_ref));
   return glcr::OK;
@@ -22,8 +23,10 @@ z_err_t MemoryObjectCreatePhysical(ZMemoryObjectCreatePhysicalReq* req) {
 
 z_err_t MemoryObjectCreateContiguous(ZMemoryObjectCreateContiguousReq* req) {
   auto& curr_proc = gScheduler->CurrentProcess();
-  uint64_t paddr = phys_mem::AllocateContinuous(((req->size - 1) / 0x1000) + 1);
-  auto vmmo_ref = glcr::MakeRefCounted<FixedMemoryObject>(paddr, req->size);
+  uint64_t num_pages = ((req->size - 1) / 0x1000) + 1;
+  uint64_t paddr = phys_mem::AllocateContinuous(num_pages);
+  auto vmmo_ref =
+      glcr::MakeRefCounted<FixedMemoryObject>(paddr, req->size, true);
   *req->vmmo_cap =
       curr_proc.AddNewCapability(StaticCastRefPtr<MemoryObject>(vmmo_ref));
   *req->paddr = paddr;

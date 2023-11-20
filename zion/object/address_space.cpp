@@ -14,7 +14,7 @@ glcr::RefPtr<AddressSpace> AddressSpace::ForRoot() {
 }
 
 AddressSpace::AddressSpace() {
-  cr3_ = phys_mem::AllocatePage();
+  cr3_ = phys_mem::AllocateAndZeroPage();
   InitializePml4(cr3_);
 }
 

@@ -19,7 +19,9 @@ uint64_t AllocatePage();
 uint64_t AllocateAndZeroPage();
 
 uint64_t AllocateContinuous(uint64_t num_pages);
+
 void FreePage(uint64_t page);
+void FreePages(uint64_t page, uint64_t num_pages);
 
 void DumpPhysicalMemoryUsage();
 

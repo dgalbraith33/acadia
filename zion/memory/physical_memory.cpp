@@ -4,6 +4,7 @@
 
 #include "boot/boot_info.h"
 #include "debug/debug.h"
+#include "memory/constants.h"
 
 #define K_PHYS_DEBUG 0
 
@@ -49,7 +50,7 @@ class PhysicalMemoryManager {
 #endif
           size -= bootstrap_used;
         }
-        AddMemoryRegion(base, size);
+        AddMemoryRegion(base, size / kPageSize);
       }
     }
   }
@@ -65,7 +66,7 @@ class PhysicalMemoryManager {
 
     MemBlock& block = memory_blocks.PeekFront();
     uint64_t page = block.base;
-    block.base += 0x1000;
+    block.base += kPageSize;
     block.num_pages--;
     if (block.num_pages == 0) {
       memory_blocks.PopFront();
@@ -97,7 +98,7 @@ class PhysicalMemoryManager {
     }
 
     uint64_t page = iter->base;
-    iter->base += num_pages * 0x1000;
+    iter->base += num_pages * kPageSize;
     iter->num_pages -= num_pages;
 #if K_PHYS_DEBUG
     dbgln("Continuous {x}:{}", page, num_pages);
@@ -105,9 +106,15 @@ class PhysicalMemoryManager {
     allocated_pages_ += num_pages;
     return page;
   }
+
   void FreePage(uint64_t page) {
-    AddMemoryRegion(page, 0x1000);
+    AddMemoryRegion(page, 1);
     allocated_pages_--;
+  }
+
+  void FreePages(uint64_t page, uint64_t num_pages) {
+    AddMemoryRegion(page, num_pages);
+    allocated_pages_ -= num_pages;
   }
 
   uint64_t AllocatedPages() { return allocated_pages_; }
@@ -130,10 +137,10 @@ class PhysicalMemoryManager {
 
   uint64_t allocated_pages_ = 0;
 
-  void AddMemoryRegion(uint64_t base, uint64_t size) {
+  void AddMemoryRegion(uint64_t base, uint64_t num_pages) {
     MemBlock block{
         .base = base,
-        .num_pages = size >> 12,
+        .num_pages = num_pages,
     };
     memory_blocks.PushFront(block);
   }
@@ -232,8 +239,22 @@ uint64_t AllocateContinuous(uint64_t num_continuous) {
   return gPmm->AllocateContinuous(num_continuous);
 }
 
+void FreePage(uint64_t page) {
+  if (gPmm == nullptr) {
+    panic("No physical memory manager!");
+  }
+  gPmm->FreePage(page);
+}
+
+void FreePages(uint64_t page, uint64_t num_pages) {
+  if (gPmm == nullptr) {
+    panic("No physical memory manager!");
+  }
+  gPmm->FreePages(page, num_pages);
+}
+
 void DumpPhysicalMemoryUsage() {
-  dbgln("Pages used: {} MiB, avail: {} MiB", gPmm->AllocatedPages() / 256,
+  dbgln("Pages used: {} KiB, avail: {} MiB", gPmm->AllocatedPages() * 4,
         gPmm->AvailablePages() / 256);
 }
 

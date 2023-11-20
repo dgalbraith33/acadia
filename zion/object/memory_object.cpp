@@ -20,7 +20,13 @@ MemoryObject::MemoryObject(uint64_t size) : size_(size) {
   }
 }
 
-MemoryObject::~MemoryObject() { dbgln("Memory Object Freed"); }
+MemoryObject::~MemoryObject() {
+  for (uint64_t page : phys_page_list_) {
+    if (page != 0) {
+      phys_mem::FreePage(page);
+    }
+  }
+}
 
 uint64_t MemoryObject::PhysicalPageAtOffset(uint64_t offset) {
   if (offset > size_) {
@@ -70,6 +76,12 @@ uint64_t MemoryObject::PageNumberToPhysAddr(uint64_t page_num) {
   return *iter;
 }
 
+FixedMemoryObject::~FixedMemoryObject() {
+  if (should_free_) {
+    phys_mem::FreePages(physical_addr_, num_pages());
+  }
+}
+
 glcr::ErrorOr<glcr::RefPtr<MemoryObject>> FixedMemoryObject::Duplicate(
     uint64_t offset, uint64_t length) {
   if (offset + length > size()) {
@@ -77,5 +89,6 @@ glcr::ErrorOr<glcr::RefPtr<MemoryObject>> FixedMemoryObject::Duplicate(
   }
 
   return glcr::StaticCastRefPtr<MemoryObject>(
-      glcr::MakeRefCounted<FixedMemoryObject>(physical_addr_ + offset, length));
+      glcr::MakeRefCounted<FixedMemoryObject>(physical_addr_ + offset, length,
+                                              false));
 }
