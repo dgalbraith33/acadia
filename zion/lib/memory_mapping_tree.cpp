@@ -28,9 +28,32 @@ glcr::ErrorCode MemoryMappingTree::AddInMemoryObject(
   return glcr::OK;
 }
 
-glcr::ErrorCode FreeMemoryRange(uint64_t vaddr_base, uint64_t vaddr_limit) {
-  dbgln("Unhandled free memory range!");
-  return glcr::OK;
+glcr::ErrorCode MemoryMappingTree::FreeMemoryRange(uint64_t vaddr_base,
+                                                   uint64_t vaddr_limit) {
+  if (vaddr_limit <= vaddr_base) {
+    return glcr::INVALID_ARGUMENT;
+  }
+  auto predecessor_or = mapping_tree_.Predecessor(vaddr_base);
+  if (predecessor_or && predecessor_or.value().get().vaddr_limit > vaddr_base) {
+    return glcr::FAILED_PRECONDITION;
+  }
+  auto last_predecessor_or = mapping_tree_.Predecessor(vaddr_limit);
+  if (last_predecessor_or &&
+      last_predecessor_or.value().get().vaddr_limit > vaddr_limit) {
+    return glcr::FAILED_PRECONDITION;
+  }
+
+  auto find_or = mapping_tree_.Find(vaddr_base);
+  if (find_or) {
+    mapping_tree_.Delete(vaddr_base);
+  }
+  while (true) {
+    auto successor_or = mapping_tree_.Successor(vaddr_base);
+    if (!successor_or || successor_or.value().get().vaddr_base >= vaddr_limit) {
+      return glcr::OK;
+    }
+    mapping_tree_.Delete(successor_or.value().get().vaddr_base);
+  }
 }
 
 glcr::ErrorOr<uint64_t> MemoryMappingTree::GetPhysicalPageAtVaddr(

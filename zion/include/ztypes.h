@@ -21,7 +21,7 @@ const uint64_t kZionThreadWait = 0x13;
 
 // Memory Calls
 const uint64_t kZionAddressSpaceMap = 0x21;
-const uint64_t kZionAddressSpaceUnMap = 0x21;
+const uint64_t kZionAddressSpaceUnmap = 0x22;
 
 const uint64_t kZionMemoryObjectCreate = 0x30;
 const uint64_t kZionMemoryObjectCreatePhysical = 0x31;

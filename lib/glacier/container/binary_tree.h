@@ -74,32 +74,32 @@ void BinaryTree<K, V>::Delete(K key) {
   }
 
   RefPtr<BinaryNode> new_child = nullptr;
-  if (!node.left) {
+  if (!node->left) {
     // No children.
     // Right child only.
-    new_child = node.right;
-  } else if (!node.right) {
+    new_child = node->right;
+  } else if (!node->right) {
     // Left child only.
-    new_child = node.left;
+    new_child = node->left;
   } else {
     // Find Successor.
-    auto successor = node.right;
-    while (successor.left) {
-      successor = successor.left;
+    auto successor = node->right;
+    while (successor->left) {
+      successor = successor->left;
     }
     new_child = successor;
-    if (successor != node.right) {
-      successor.parent.left = successor.right;
+    if (successor != node->right) {
+      successor->parent->left = successor->right;
     }
   }
 
   if (node == root_) {
     root_ = new_child;
   } else {
-    if (node.parent.right == node) {
-      node.parent.right = new_child;
+    if (node->parent->right == node) {
+      node->parent->right = new_child;
     } else {
-      node.parent.left = new_child;
+      node->parent->left = new_child;
     }
   }
 }

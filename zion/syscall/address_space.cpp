@@ -15,10 +15,19 @@ z_err_t AddressSpaceMap(ZAddressSpaceMapReq* req) {
 
   // FIXME: Validation necessary.
   if (req->vmas_offset != 0) {
-    vmas->MapInMemoryObject(req->vmas_offset, vmmo);
+    RET_ERR(vmas->MapInMemoryObject(req->vmas_offset, vmmo));
     *req->vaddr = req->vmas_offset;
   } else {
-    *req->vaddr = vmas->MapInMemoryObject(vmmo);
+    ASSIGN_OR_RETURN(*req->vaddr, vmas->MapInMemoryObject(vmmo));
   }
   return glcr::OK;
+}
+
+z_err_t AddressSpaceUnmap(ZAddressSpaceUnmapReq* req) {
+  auto& curr_proc = gScheduler->CurrentProcess();
+  auto vmas_cap = curr_proc.GetCapability(req->vmas_cap);
+  RET_ERR(ValidateCapability<AddressSpace>(vmas_cap, kZionPerm_Write));
+
+  auto vmas = vmas_cap->obj<AddressSpace>();
+  return vmas->FreeAddressRange(req->lower_addr, req->upper_addr);
 }

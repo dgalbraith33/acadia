@@ -60,6 +60,7 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req) {
     CASE(ThreadWait);
     // syscall/address_space.h
     CASE(AddressSpaceMap);
+    CASE(AddressSpaceUnmap);
     // syscall/memory_object.h
     CASE(MemoryObjectCreate);
     CASE(MemoryObjectCreatePhysical);
