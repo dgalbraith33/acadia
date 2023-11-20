@@ -25,6 +25,10 @@ uint64_t KernelVmm::AcquireKernelStack() {
   return gKernelVmm->stack_manager_->AllocateKernelStack();
 }
 
+void KernelVmm::FreeKernelStack(uint64_t stack_addr) {
+  return gKernelVmm->stack_manager_->FreeKernelStack(stack_addr);
+}
+
 uint64_t KernelVmm::AcquireSlabHeapRegionInternal(uint64_t slab_size_bytes) {
   uint64_t next_slab = next_slab_heap_page_;
   if (next_slab >= kKernelBuddyHeapEnd) {
