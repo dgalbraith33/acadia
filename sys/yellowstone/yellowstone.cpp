@@ -14,8 +14,15 @@
 
 glcr::ErrorCode SpawnProcess(z_cap_t vmmo_cap, z_cap_t yellowstone_cap) {
   uint64_t vaddr;
+  // FIXME: Probably unmap this and remove the cap ownership.
   RET_ERR(ZAddressSpaceMap(gSelfVmasCap, 0, vmmo_cap, &vaddr));
   return SpawnProcessFromElfRegion(vaddr, yellowstone_cap);
+}
+
+glcr::ErrorCode SpawnProcessDeleteCap(z_cap_t vmmo_cap,
+                                      z_cap_t yellowstone_cap) {
+  OwnedMemoryRegion region = OwnedMemoryRegion::FromCapability(vmmo_cap);
+  return SpawnProcessFromElfRegion(region.vaddr(), yellowstone_cap);
 }
 
 uint64_t main(uint64_t port_cap) {
@@ -59,7 +66,7 @@ uint64_t main(uint64_t port_cap) {
       check(vfs_client->OpenFile(req, resp));
 
       ASSIGN_OR_RETURN(YellowstoneClient client3, server->CreateClient());
-      check(SpawnProcess(resp.memory(), client3.Capability()));
+      check(SpawnProcessDeleteCap(resp.memory(), client3.Capability()));
     }
   }
 
