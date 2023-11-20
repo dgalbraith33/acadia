@@ -23,7 +23,7 @@ class {{message.name}} {
 
 {%- for field in message.fields %}
   {%- if not field.repeated %} 
-  {{field.cpp_type()}} {{field.name}}() const { return {{field.name}}_; }
+  const {{field.cpp_type()}}& {{field.name}}() const { return {{field.name}}_; }
   void set_{{field.name}}(const {{field.cpp_type()}}& value) { {{field.name}}_ = value; }
   {%- else %}
   const glcr::Vector<{{field.cpp_type()}}>& {{field.name}}() const { return {{field.name}}_; }

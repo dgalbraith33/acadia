@@ -46,5 +46,6 @@ char String::operator[](uint64_t offset) const {
 }
 
 String::operator StringView() const { return StringView(cstr_, length_); }
+StringView String::view() const { return this->operator StringView(); }
 
 }  // namespace glcr

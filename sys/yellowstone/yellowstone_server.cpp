@@ -92,7 +92,7 @@ glcr::ErrorCode YellowstoneServer::HandleGetDenali(const Empty&,
 
 glcr::ErrorCode YellowstoneServer::HandleRegisterEndpoint(
     const RegisterEndpointRequest& req, Empty&) {
-  dbgln("Registering {}.", req.endpoint_name());
+  dbgln("Registering {}.", req.endpoint_name().view());
   if (req.endpoint_name() == "denali") {
     // FIXME: Rather than blocking and calling the denali service
     // immediately we should signal the main thread that it can continue init.

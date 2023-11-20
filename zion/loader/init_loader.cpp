@@ -107,7 +107,7 @@ void DumpModules() {
 #endif
 }
 
-const limine_file& GetInitProgram(glcr::String path) {
+const limine_file& GetInitProgram(const glcr::String& path) {
   const limine_module_response& resp = boot::GetModules();
   for (uint64_t i = 0; i < resp.module_count; i++) {
     const limine_file& file = *resp.modules[i];
@@ -115,7 +115,7 @@ const limine_file& GetInitProgram(glcr::String path) {
       return file;
     }
   }
-  panic("Program not found: {}", path);
+  panic("Program not found: {}", path.view());
   UNREACHABLE
 }
 

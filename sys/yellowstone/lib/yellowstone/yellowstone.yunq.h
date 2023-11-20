@@ -17,9 +17,9 @@ class RegisterEndpointRequest {
   void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
-  glcr::String endpoint_name() const { return endpoint_name_; }
+  const glcr::String& endpoint_name() const { return endpoint_name_; }
   void set_endpoint_name(const glcr::String& value) { endpoint_name_ = value; } 
-  z_cap_t endpoint_capability() const { return endpoint_capability_; }
+  const z_cap_t& endpoint_capability() const { return endpoint_capability_; }
   void set_endpoint_capability(const z_cap_t& value) { endpoint_capability_ = value; }
 
  private:
@@ -57,9 +57,9 @@ class AhciInfo {
   void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
-  z_cap_t ahci_region() const { return ahci_region_; }
+  const z_cap_t& ahci_region() const { return ahci_region_; }
   void set_ahci_region(const z_cap_t& value) { ahci_region_ = value; } 
-  uint64_t region_length() const { return region_length_; }
+  const uint64_t& region_length() const { return region_length_; }
   void set_region_length(const uint64_t& value) { region_length_ = value; }
 
  private:
@@ -80,29 +80,29 @@ class FramebufferInfo {
   void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
-  uint64_t address_phys() const { return address_phys_; }
+  const uint64_t& address_phys() const { return address_phys_; }
   void set_address_phys(const uint64_t& value) { address_phys_ = value; } 
-  uint64_t width() const { return width_; }
+  const uint64_t& width() const { return width_; }
   void set_width(const uint64_t& value) { width_ = value; } 
-  uint64_t height() const { return height_; }
+  const uint64_t& height() const { return height_; }
   void set_height(const uint64_t& value) { height_ = value; } 
-  uint64_t pitch() const { return pitch_; }
+  const uint64_t& pitch() const { return pitch_; }
   void set_pitch(const uint64_t& value) { pitch_ = value; } 
-  uint64_t bpp() const { return bpp_; }
+  const uint64_t& bpp() const { return bpp_; }
   void set_bpp(const uint64_t& value) { bpp_ = value; } 
-  uint64_t memory_model() const { return memory_model_; }
+  const uint64_t& memory_model() const { return memory_model_; }
   void set_memory_model(const uint64_t& value) { memory_model_ = value; } 
-  uint64_t red_mask_size() const { return red_mask_size_; }
+  const uint64_t& red_mask_size() const { return red_mask_size_; }
   void set_red_mask_size(const uint64_t& value) { red_mask_size_ = value; } 
-  uint64_t red_mask_shift() const { return red_mask_shift_; }
+  const uint64_t& red_mask_shift() const { return red_mask_shift_; }
   void set_red_mask_shift(const uint64_t& value) { red_mask_shift_ = value; } 
-  uint64_t green_mask_size() const { return green_mask_size_; }
+  const uint64_t& green_mask_size() const { return green_mask_size_; }
   void set_green_mask_size(const uint64_t& value) { green_mask_size_ = value; } 
-  uint64_t green_mask_shift() const { return green_mask_shift_; }
+  const uint64_t& green_mask_shift() const { return green_mask_shift_; }
   void set_green_mask_shift(const uint64_t& value) { green_mask_shift_ = value; } 
-  uint64_t blue_mask_size() const { return blue_mask_size_; }
+  const uint64_t& blue_mask_size() const { return blue_mask_size_; }
   void set_blue_mask_size(const uint64_t& value) { blue_mask_size_ = value; } 
-  uint64_t blue_mask_shift() const { return blue_mask_shift_; }
+  const uint64_t& blue_mask_shift() const { return blue_mask_shift_; }
   void set_blue_mask_shift(const uint64_t& value) { blue_mask_shift_ = value; }
 
  private:
@@ -133,11 +133,11 @@ class DenaliInfo {
   void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
-  z_cap_t denali_endpoint() const { return denali_endpoint_; }
+  const z_cap_t& denali_endpoint() const { return denali_endpoint_; }
   void set_denali_endpoint(const z_cap_t& value) { denali_endpoint_ = value; } 
-  uint64_t device_id() const { return device_id_; }
+  const uint64_t& device_id() const { return device_id_; }
   void set_device_id(const uint64_t& value) { device_id_ = value; } 
-  uint64_t lba_offset() const { return lba_offset_; }
+  const uint64_t& lba_offset() const { return lba_offset_; }
   void set_lba_offset(const uint64_t& value) { lba_offset_ = value; }
 
  private:

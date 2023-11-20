@@ -70,11 +70,6 @@ void StrFormatValue(StringBuilder& builder, StringView value, StringView opts) {
   StrFormatInternal(builder, value);
 }
 
-template <>
-void StrFormatValue(StringBuilder& builder, String value, StringView opts) {
-  StrFormatInternal(builder, value);
-}
-
 void StrFormatInternal(StringBuilder& builder, StringView format) {
   // TODO: Consider throwing an error if there are unhandled format
   builder.PushBack(format);

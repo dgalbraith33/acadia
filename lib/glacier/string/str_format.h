@@ -37,9 +37,6 @@ void StrFormatValue(StringBuilder& builder, const char* value, StringView opts);
 template <>
 void StrFormatValue(StringBuilder& builder, StringView value, StringView opts);
 
-template <>
-void StrFormatValue(StringBuilder& builder, String value, StringView opts);
-
 void StrFormatInternal(StringBuilder& builder, StringView format);
 
 template <typename T, typename... Args>
