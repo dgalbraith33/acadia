@@ -203,6 +203,7 @@ glcr::ErrorCode AhciDriver::LoadHbaRegisters() {
 glcr::ErrorCode AhciDriver::LoadDevices() {
   for (uint8_t i = 0; i < 32; i++) {
     if (!(ahci_hba_->port_implemented & (1 << i))) {
+      devices_[i] = nullptr;
       continue;
     }
     uint64_t port_addr =
