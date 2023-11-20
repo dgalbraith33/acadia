@@ -56,20 +56,24 @@ class PhysicalMemoryManager {
   }
 
   uint64_t AllocatePage() {
-    if (memory_blocks.size() == 0) {
+    if (single_memory_pages_.size() > 0) {
+      return single_memory_pages_.PopFront();
+    }
+
+    if (memory_blocks_.size() == 0) {
       panic("No available memory regions.");
     }
 
-    while (memory_blocks.PeekFront().num_pages == 0) {
-      memory_blocks.PopFront();
+    while (memory_blocks_.PeekFront().num_pages == 0) {
+      memory_blocks_.PopFront();
     }
 
-    MemBlock& block = memory_blocks.PeekFront();
+    MemBlock& block = memory_blocks_.PeekFront();
     uint64_t page = block.base;
     block.base += kPageSize;
     block.num_pages--;
     if (block.num_pages == 0) {
-      memory_blocks.PopFront();
+      memory_blocks_.PopFront();
     }
 #if K_PHYS_DEBUG
     dbgln("Single {x}", page);
@@ -78,37 +82,37 @@ class PhysicalMemoryManager {
     return page;
   }
   uint64_t AllocateContinuous(uint64_t num_pages) {
-    if (memory_blocks.size() == 0) {
+    if (memory_blocks_.size() == 0) {
       panic("No available memory regions.");
     }
 
-    MemBlock& block = memory_blocks.PeekFront();
-    if (block.num_pages == 0) {
-      panic("Bad state, empty memory block.");
+    // TODO: Add an easy way to delete an iterator from a LinkedList
+    // so we can keep the blocklist free from 0 sized pages.
+    // These occur when we allocate a continuous block the same size as
+    // an available MemoryBlock.
+    while (memory_blocks_.PeekFront().num_pages == 0) {
+      memory_blocks_.PopFront();
     }
 
-    auto iter = memory_blocks.begin();
-    while (iter != memory_blocks.end() && iter->num_pages < num_pages) {
-      dbgln("Skipping block of size {} seeking {}", iter->num_pages, num_pages);
-      iter = iter.next();
-    }
-
-    if (iter == memory_blocks.end()) {
-      panic("No memory regions to allocate");
-    }
-
-    uint64_t page = iter->base;
-    iter->base += num_pages * kPageSize;
-    iter->num_pages -= num_pages;
+    for (MemBlock& block : memory_blocks_) {
+      if (block.num_pages < num_pages) {
+        continue;
+      }
+      uint64_t page = block.base;
+      block.base += num_pages * kPageSize;
+      block.num_pages -= num_pages;
 #if K_PHYS_DEBUG
-    dbgln("Continuous {x}:{}", page, num_pages);
+      dbgln("Continuous {x}:{}", page, num_pages);
 #endif
-    allocated_pages_ += num_pages;
-    return page;
+      return page;
+    }
+
+    panic("No memory regions to allocate");
+    UNREACHABLE
   }
 
   void FreePage(uint64_t page) {
-    AddMemoryRegion(page, 1);
+    single_memory_pages_.PushFront(page);
     allocated_pages_--;
   }
 
@@ -121,7 +125,7 @@ class PhysicalMemoryManager {
 
   uint64_t AvailablePages() {
     uint64_t available = 0;
-    for (const auto& mem_block : memory_blocks) {
+    for (const auto& mem_block : memory_blocks_) {
       available += mem_block.num_pages;
     }
     return available;
@@ -133,7 +137,12 @@ class PhysicalMemoryManager {
     uint64_t num_pages = 0;
   };
 
-  glcr::LinkedList<MemBlock> memory_blocks;
+  // Memory blocks contains the initial memory blocks
+  // as well as freed chucks. We relegate single freed
+  // pages to a separate list to avoid having to traverse far
+  // to find large ones.
+  glcr::LinkedList<MemBlock> memory_blocks_;
+  glcr::LinkedList<uint64_t> single_memory_pages_;
 
   uint64_t allocated_pages_ = 0;
 
@@ -142,7 +151,7 @@ class PhysicalMemoryManager {
         .base = base,
         .num_pages = num_pages,
     };
-    memory_blocks.PushFront(block);
+    memory_blocks_.PushFront(block);
   }
 };
 
