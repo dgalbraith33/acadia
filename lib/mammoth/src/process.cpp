@@ -71,8 +71,9 @@ uint64_t LoadElfProgram(uint64_t base, uint64_t as_cap) {
 #if MAM_PROC_DEBUG
     dbgln("Create mem object");
 #endif
+    uint64_t page_offset = program.vaddr & 0xFFF;
     uint64_t mem_cap;
-    uint64_t size = program.memsz;
+    uint64_t size = page_offset + program.memsz;
     check(ZMemoryObjectCreate(size, &mem_cap));
 
 #if MAM_PROC_DEBUG
@@ -80,16 +81,21 @@ uint64_t LoadElfProgram(uint64_t base, uint64_t as_cap) {
 #endif
     uint64_t vaddr;
     check(ZAddressSpaceMap(gSelfVmasCap, 0, mem_cap, &vaddr));
+    uint8_t* offset = reinterpret_cast<uint8_t*>(vaddr);
+    for (uint64_t j = 0; j < size; j++) {
+      offset[j] = 0;
+    }
 
 #if MAM_PROC_DEBUG
     dbgln("Copy");
 #endif
-    memcpy(base + program.offset, program.filesz, vaddr);
+    memcpy(base + program.offset, program.filesz, vaddr + page_offset);
 
 #if MAM_PROC_DEBUG
     dbgln("Map Foreign");
 #endif
-    check(ZAddressSpaceMap(as_cap, program.vaddr, mem_cap, &vaddr));
+    check(
+        ZAddressSpaceMap(as_cap, program.vaddr - page_offset, mem_cap, &vaddr));
   }
   return header->entry;
 }
