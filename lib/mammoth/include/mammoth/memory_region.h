@@ -32,3 +32,40 @@ class MappedMemoryRegion {
   uint64_t vaddr_ = 0;
   uint64_t size_ = 0;
 };
+
+/*
+ * Memory Region class that unmaps its memory and releases its
+ * capability when it goes out of scope.
+ */
+class OwnedMemoryRegion {
+ public:
+  OwnedMemoryRegion() = default;
+
+  OwnedMemoryRegion(const OwnedMemoryRegion&) = delete;
+  OwnedMemoryRegion& operator=(const OwnedMemoryRegion&) = delete;
+
+  OwnedMemoryRegion(OwnedMemoryRegion&&);
+  OwnedMemoryRegion& operator=(OwnedMemoryRegion&&);
+
+  ~OwnedMemoryRegion();
+
+  static OwnedMemoryRegion FromCapability(z_cap_t vmmo_cap);
+
+  uint64_t paddr() { return paddr_; }
+  uint64_t vaddr() { return vaddr_; }
+  uint64_t size() { return size_; }
+
+  uint64_t cap() { return vmmo_cap_; }
+
+  bool empty() { return vmmo_cap_ != 0; }
+  explicit operator bool() { return vmmo_cap_ != 0; }
+
+ private:
+  OwnedMemoryRegion(uint64_t vmmo_cap, uint64_t paddr, uint64_t vaddr,
+                    uint64_t size)
+      : vmmo_cap_(vmmo_cap), paddr_(paddr), vaddr_(vaddr), size_(size) {}
+  uint64_t vmmo_cap_ = 0;
+  uint64_t paddr_ = 0;
+  uint64_t vaddr_ = 0;
+  uint64_t size_ = 0;
+};

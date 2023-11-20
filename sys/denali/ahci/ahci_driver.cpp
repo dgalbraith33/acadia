@@ -21,8 +21,8 @@ void interrupt_thread(void* void_driver) {
 }  // namespace
 
 glcr::ErrorOr<glcr::UniquePtr<AhciDriver>> AhciDriver::Init(
-    MappedMemoryRegion pci_region) {
-  glcr::UniquePtr<AhciDriver> driver(new AhciDriver(pci_region));
+    OwnedMemoryRegion&& pci_region) {
+  glcr::UniquePtr<AhciDriver> driver(new AhciDriver(glcr::Move(pci_region)));
   // RET_ERR(driver->LoadCapabilities());
   RET_ERR(driver->LoadHbaRegisters());
   RET_ERR(driver->LoadDevices());
