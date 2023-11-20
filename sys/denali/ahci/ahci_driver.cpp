@@ -192,7 +192,7 @@ glcr::ErrorCode AhciDriver::RegisterIrq() {
 
 glcr::ErrorCode AhciDriver::LoadHbaRegisters() {
   ahci_region_ =
-      MappedMemoryRegion::DirectPhysical(pci_device_header_->abar, 0x1100);
+      OwnedMemoryRegion ::DirectPhysical(pci_device_header_->abar, 0x1100);
   ahci_hba_ = reinterpret_cast<AhciHba*>(ahci_region_.vaddr());
   num_ports_ = (ahci_hba_->capabilities & 0x1F) + 1;
   num_commands_ = ((ahci_hba_->capabilities & 0x1F00) >> 8) + 1;

@@ -5,27 +5,6 @@
 #include "mammoth/debug.h"
 #include "mammoth/init.h"
 
-MappedMemoryRegion MappedMemoryRegion::DirectPhysical(uint64_t paddr,
-                                                      uint64_t size) {
-  uint64_t vmmo_cap;
-  check(ZMemoryObjectCreatePhysical(paddr, size, &vmmo_cap));
-
-  uint64_t vaddr;
-  check(ZAddressSpaceMap(gSelfVmasCap, 0, vmmo_cap, &vaddr));
-
-  return MappedMemoryRegion(vmmo_cap, paddr, vaddr, size);
-}
-
-MappedMemoryRegion MappedMemoryRegion::Default(uint64_t size) {
-  uint64_t vmmo_cap;
-  check(ZMemoryObjectCreate(size, &vmmo_cap));
-
-  uint64_t vaddr;
-  check(ZAddressSpaceMap(gSelfVmasCap, 0, vmmo_cap, &vaddr));
-
-  return MappedMemoryRegion(vmmo_cap, 0, vaddr, size);
-}
-
 OwnedMemoryRegion::OwnedMemoryRegion(OwnedMemoryRegion&& other)
     : OwnedMemoryRegion(other.vmmo_cap_, other.vaddr_, other.size_) {
   other.vmmo_cap_ = 0;
@@ -71,6 +50,16 @@ OwnedMemoryRegion OwnedMemoryRegion::ContiguousPhysical(uint64_t size,
   uint64_t vaddr;
   check(ZAddressSpaceMap(gSelfVmasCap, 0, vmmo_cap, &vaddr));
 
+  return OwnedMemoryRegion(vmmo_cap, vaddr, size);
+}
+
+OwnedMemoryRegion OwnedMemoryRegion::DirectPhysical(uint64_t paddr,
+                                                    uint64_t size) {
+  uint64_t vmmo_cap;
+  check(ZMemoryObjectCreatePhysical(paddr, size, &vmmo_cap));
+
+  uint64_t vaddr;
+  check(ZAddressSpaceMap(gSelfVmasCap, 0, vmmo_cap, &vaddr));
   return OwnedMemoryRegion(vmmo_cap, vaddr, size);
 }
 

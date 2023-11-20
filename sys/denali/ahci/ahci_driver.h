@@ -24,7 +24,7 @@ class AhciDriver {
  private:
   OwnedMemoryRegion pci_region_;
   PciDeviceHeader* pci_device_header_ = nullptr;
-  MappedMemoryRegion ahci_region_;
+  OwnedMemoryRegion ahci_region_;
   AhciHba* ahci_hba_ = nullptr;
 
   // TODO: Allocate these dynamically.
