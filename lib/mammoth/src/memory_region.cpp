@@ -16,16 +16,6 @@ MappedMemoryRegion MappedMemoryRegion::DirectPhysical(uint64_t paddr,
   return MappedMemoryRegion(vmmo_cap, paddr, vaddr, size);
 }
 
-MappedMemoryRegion MappedMemoryRegion::ContiguousPhysical(uint64_t size) {
-  uint64_t vmmo_cap, paddr;
-  check(ZMemoryObjectCreateContiguous(size, &vmmo_cap, &paddr));
-
-  uint64_t vaddr;
-  check(ZAddressSpaceMap(gSelfVmasCap, 0, vmmo_cap, &vaddr));
-
-  return MappedMemoryRegion(vmmo_cap, paddr, vaddr, size);
-}
-
 MappedMemoryRegion MappedMemoryRegion::Default(uint64_t size) {
   uint64_t vmmo_cap;
   check(ZMemoryObjectCreate(size, &vmmo_cap));
@@ -70,6 +60,17 @@ OwnedMemoryRegion OwnedMemoryRegion::FromCapability(z_cap_t vmmo_cap) {
   uint64_t size;
   check(ZMemoryObjectInspect(vmmo_cap, &size));
   // FIXME: get the size here.
+  return OwnedMemoryRegion(vmmo_cap, vaddr, size);
+}
+
+OwnedMemoryRegion OwnedMemoryRegion::ContiguousPhysical(uint64_t size,
+                                                        uint64_t* paddr) {
+  uint64_t vmmo_cap;
+  check(ZMemoryObjectCreateContiguous(size, &vmmo_cap, paddr));
+
+  uint64_t vaddr;
+  check(ZAddressSpaceMap(gSelfVmasCap, 0, vmmo_cap, &vaddr));
+
   return OwnedMemoryRegion(vmmo_cap, vaddr, size);
 }
 

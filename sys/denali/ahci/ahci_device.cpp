@@ -13,8 +13,8 @@ AhciDevice::AhciDevice(AhciPort* port) : port_struct_(port) {
   // 0x0-0x400 -> Command List
   // 0x400-0x500 -> Received FIS
   // 0x500-0x2500 -> Command Tables (0x100 each) (Max PRDT Length is 8 for now)
-  command_structures_ = MappedMemoryRegion::ContiguousPhysical(0x2500);
-  uint64_t paddr = command_structures_.paddr();
+  uint64_t paddr;
+  command_structures_ = OwnedMemoryRegion::ContiguousPhysical(0x2500, &paddr);
 
   command_list_ = reinterpret_cast<CommandList*>(command_structures_.vaddr());
   port_struct_->command_list_base = paddr;

@@ -18,10 +18,11 @@ glcr::ErrorCode DenaliServer::HandleRead(const ReadRequest& req,
   ASSIGN_OR_RETURN(Mutex mutex, Mutex::Create());
   RET_ERR(mutex.Lock());
 
-  MappedMemoryRegion region =
-      MappedMemoryRegion::ContiguousPhysical(req.size() * 512);
+  uint64_t paddr;
+  OwnedMemoryRegion region =
+      OwnedMemoryRegion::ContiguousPhysical(req.size() * 512, &paddr);
 
-  DmaReadCommand command(req.lba(), req.size(), region.paddr(), mutex);
+  DmaReadCommand command(req.lba(), req.size(), paddr, mutex);
   device->IssueCommand(&command);
 
   // Wait for read operation to complete.
@@ -30,7 +31,7 @@ glcr::ErrorCode DenaliServer::HandleRead(const ReadRequest& req,
 
   resp.set_device_id(req.device_id());
   resp.set_size(req.size());
-  resp.set_memory(region.cap());
+  resp.set_memory(region.DuplicateCap());
   return glcr::OK;
 }
 
@@ -40,8 +41,9 @@ glcr::ErrorCode DenaliServer::HandleReadMany(const ReadManyRequest& req,
   ASSIGN_OR_RETURN(Mutex mutex, Mutex::Create());
   RET_ERR(mutex.Lock());
 
-  MappedMemoryRegion region =
-      MappedMemoryRegion::ContiguousPhysical(req.lba().size() * 512);
+  uint64_t region_paddr;
+  OwnedMemoryRegion region = OwnedMemoryRegion::ContiguousPhysical(
+      req.lba().size() * 512, &region_paddr);
 
   auto& vec = req.lba();
   uint64_t curr_run_start = 0;
@@ -51,7 +53,7 @@ glcr::ErrorCode DenaliServer::HandleReadMany(const ReadManyRequest& req,
     }
     uint64_t lba = vec.at(curr_run_start);
     uint64_t size = (i - curr_run_start) + 1;
-    uint64_t paddr = region.paddr() + curr_run_start * 512;
+    uint64_t paddr = region_paddr + curr_run_start * 512;
     DmaReadCommand command(lba, size, paddr, mutex);
     device->IssueCommand(&command);
 
@@ -63,6 +65,6 @@ glcr::ErrorCode DenaliServer::HandleReadMany(const ReadManyRequest& req,
 
   resp.set_device_id(req.device_id());
   resp.set_size(req.lba().size());
-  resp.set_memory(region.cap());
+  resp.set_memory(region.DuplicateCap());
   return glcr::OK;
 }

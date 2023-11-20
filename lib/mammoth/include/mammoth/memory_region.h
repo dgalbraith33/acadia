@@ -7,7 +7,6 @@ class MappedMemoryRegion {
  public:
   // FIXME: Introduce optional type to contain error or.
   static MappedMemoryRegion DirectPhysical(uint64_t phys_addr, uint64_t size);
-  static MappedMemoryRegion ContiguousPhysical(uint64_t size);
   static MappedMemoryRegion Default(uint64_t size);
 
   MappedMemoryRegion() {}
@@ -49,6 +48,8 @@ class OwnedMemoryRegion {
   ~OwnedMemoryRegion();
 
   static OwnedMemoryRegion FromCapability(z_cap_t vmmo_cap);
+  // TODO: Consider making this its own class.
+  static OwnedMemoryRegion ContiguousPhysical(uint64_t size, uint64_t* paddr);
 
   uint64_t vaddr() { return vaddr_; }
   uint64_t size() { return size_; }
