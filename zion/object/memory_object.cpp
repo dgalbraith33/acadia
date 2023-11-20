@@ -72,18 +72,15 @@ uint64_t VariableMemoryObject::PageNumberToPhysAddr(uint64_t page_num) {
 }
 
 FixedMemoryObject::~FixedMemoryObject() {
-  if (should_free_) {
-    phys_mem::FreePages(physical_addr_, num_pages());
-  }
+  phys_mem::FreePages(physical_addr_, num_pages());
 }
 
-glcr::ErrorOr<glcr::RefPtr<MemoryObject>> FixedMemoryObject::Duplicate(
+glcr::ErrorOr<glcr::RefPtr<MemoryObject>> ViewMemoryObject::Duplicate(
     uint64_t offset, uint64_t length) {
   if (offset + length > size()) {
     return glcr::INVALID_ARGUMENT;
   }
 
   return glcr::StaticCastRefPtr<MemoryObject>(
-      glcr::MakeRefCounted<FixedMemoryObject>(physical_addr_ + offset, length,
-                                              false));
+      glcr::MakeRefCounted<ViewMemoryObject>(physical_addr_ + offset, length));
 }

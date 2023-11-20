@@ -68,11 +68,36 @@ class VariableMemoryObject : public MemoryObject {
 class FixedMemoryObject : public MemoryObject {
  public:
   // FIXME: Validate that this is 4k aligned.
-  // Create a new class object for should free.
-  FixedMemoryObject(uint64_t physical_addr, uint64_t size, bool should_free)
-      : size_(size), physical_addr_(physical_addr), should_free_(should_free) {}
+  FixedMemoryObject(uint64_t physical_addr, uint64_t size)
+      : size_(size), physical_addr_(physical_addr) {}
 
   ~FixedMemoryObject() override;
+
+  virtual uint64_t size() override { return size_; }
+  virtual glcr::ErrorOr<glcr::RefPtr<MemoryObject>> Duplicate(
+      uint64_t offset, uint64_t length) override {
+    return glcr::UNIMPLEMENTED;
+  }
+
+ protected:
+  uint64_t PageNumberToPhysAddr(uint64_t page_num) override {
+    return physical_addr_ + (kPageSize * page_num);
+  }
+
+ private:
+  uint64_t size_;
+  uint64_t physical_addr_;
+};
+
+// Like a FixedMemoryObject except it doesn't release
+// it's pages when it is done. Should be used for things
+// like HBAs and the PCI config space.
+class ViewMemoryObject : public MemoryObject {
+ public:
+  ViewMemoryObject(uint64_t physical_addr, uint64_t size)
+      : size_(size), physical_addr_(physical_addr) {}
+
+  ~ViewMemoryObject(){};
 
   virtual uint64_t size() override { return size_; }
   virtual glcr::ErrorOr<glcr::RefPtr<MemoryObject>> Duplicate(
@@ -86,5 +111,4 @@ class FixedMemoryObject : public MemoryObject {
  private:
   uint64_t size_;
   uint64_t physical_addr_;
-  bool should_free_;
 };

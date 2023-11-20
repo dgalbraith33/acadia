@@ -132,8 +132,8 @@ void WriteInitProgram(glcr::RefPtr<Port> port, glcr::String name, uint64_t id) {
 
 glcr::ErrorCode WritePciVmmo(glcr::RefPtr<Port> port, uint64_t id) {
   ASSIGN_OR_RETURN(PcieConfiguration config, GetPciExtendedConfiguration());
-  auto vmmo = glcr::MakeRefCounted<FixedMemoryObject>(config.base,
-                                                      config.offset, false);
+  auto vmmo =
+      glcr::MakeRefCounted<ViewMemoryObject>(config.base, config.offset);
 
   port->WriteKernel(id, MakeRefCounted<Capability>(vmmo));
 
