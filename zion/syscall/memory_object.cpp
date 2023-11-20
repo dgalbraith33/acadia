@@ -33,7 +33,6 @@ z_err_t MemoryObjectCreateContiguous(ZMemoryObjectCreateContiguousReq* req) {
 z_err_t MemoryObjectDuplicate(ZMemoryObjectDuplicateReq* req) {
   auto& curr_proc = gScheduler->CurrentProcess();
   auto vmmo_cap = curr_proc.GetCapability(req->vmmo_cap);
-  // FIXME: Check a duplication permission here.
   RET_ERR(ValidateCapability<MemoryObject>(vmmo_cap, kZionPerm_Duplicate));
 
   ASSIGN_OR_RETURN(
@@ -41,5 +40,16 @@ z_err_t MemoryObjectDuplicate(ZMemoryObjectDuplicateReq* req) {
       vmmo_cap->obj<MemoryObject>()->Duplicate(req->base_offset, req->length));
   *req->new_vmmo_cap =
       curr_proc.AddNewCapability(new_vmmo, vmmo_cap->permissions());
+  return glcr::OK;
+}
+
+z_err_t MemoryObjectInspect(ZMemoryObjectInspectReq* req) {
+  auto& curr_proc = gScheduler->CurrentProcess();
+  auto vmmo_cap = curr_proc.GetCapability(req->vmmo_cap);
+  RET_ERR(ValidateCapability<MemoryObject>(vmmo_cap, kZionPerm_Read));
+
+  auto vmmo = vmmo_cap->obj<MemoryObject>();
+  *req->size = vmmo->size();
+
   return glcr::OK;
 }

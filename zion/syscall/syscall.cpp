@@ -66,6 +66,7 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req) {
     CASE(MemoryObjectCreatePhysical);
     CASE(MemoryObjectCreateContiguous);
     CASE(MemoryObjectDuplicate);
+    CASE(MemoryObjectInspect);
     // syscall/ipc.h
     CASE(ChannelCreate);
     CASE(ChannelSend);
