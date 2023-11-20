@@ -60,8 +60,8 @@ glcr::ErrorCode YellowstoneServer::HandleGetAhciInfo(const Empty&,
 glcr::ErrorCode YellowstoneServer::HandleGetFramebufferInfo(
     const Empty&, FramebufferInfo& info) {
   // FIXME: Don't do this for each request.
-  MappedMemoryRegion region =
-      MappedMemoryRegion::FromCapability(gBootFramebufferVmmoCap);
+  OwnedMemoryRegion region =
+      OwnedMemoryRegion::FromCapability(gBootFramebufferVmmoCap);
   ZFramebufferInfo* fb = reinterpret_cast<ZFramebufferInfo*>(region.vaddr());
 
   info.set_address_phys(fb->address_phys);

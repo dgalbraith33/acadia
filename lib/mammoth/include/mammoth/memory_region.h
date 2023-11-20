@@ -9,7 +9,6 @@ class MappedMemoryRegion {
   static MappedMemoryRegion DirectPhysical(uint64_t phys_addr, uint64_t size);
   static MappedMemoryRegion ContiguousPhysical(uint64_t size);
   static MappedMemoryRegion Default(uint64_t size);
-  static MappedMemoryRegion FromCapability(z_cap_t vmmo_cap);
 
   MappedMemoryRegion() {}
   // TODO: Disallow copy before doing any cleanup here.

@@ -21,13 +21,13 @@ class MemoryMappingTree {
 
   glcr::ErrorOr<uint64_t> GetPhysicalPageAtVaddr(uint64_t vaddr);
 
- private:
   struct MemoryMapping {
     uint64_t vaddr_base;
     uint64_t vaddr_limit;
     glcr::RefPtr<MemoryObject> mem_object;
   };
 
+ private:
   // TODO: Consider adding a red-black tree implementation here.
   // As is this tree functions about as well as a linked list
   // because mappings are likely to be added in near-perfect ascedning order.

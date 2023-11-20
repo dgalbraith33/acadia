@@ -18,16 +18,16 @@ class RefPtr {
   RefPtr(decltype(nullptr)) : ptr_(nullptr) {}
   RefPtr(const RefPtr& other) : ptr_(other.ptr_) {
     if (ptr_) {
-      ptr_->Acquire();
+      ptr_->AcquirePtr();
     }
   }
   RefPtr& operator=(const RefPtr& other) {
     T* old = ptr_;
     ptr_ = other.ptr_;
     if (ptr_) {
-      ptr_->Acquire();
+      ptr_->AcquirePtr();
     }
-    if (old && old->Release()) {
+    if (old && old->ReleasePtr()) {
       delete old;
     }
 
@@ -46,7 +46,15 @@ class RefPtr {
   enum DontAdoptTag {
     DontAdopt,
   };
-  RefPtr(T* ptr, DontAdoptTag) : ptr_(ptr) { ptr->Acquire(); }
+  RefPtr(T* ptr, DontAdoptTag) : ptr_(ptr) { ptr->AcquirePtr(); }
+
+  ~RefPtr() {
+    if (ptr_) {
+      if (ptr_->ReleasePtr()) {
+        delete ptr_;
+      }
+    }
+  }
 
   T* get() const { return ptr_; };
   T& operator*() const { return *ptr_; }
@@ -65,7 +73,7 @@ class RefPtr {
   T* ptr_;
 
   friend RefPtr<T> AdoptPtr<T>(T* ptr);
-  RefPtr(T* ptr) : ptr_(ptr) { ptr->Adopt(); }
+  RefPtr(T* ptr) : ptr_(ptr) { ptr->AdoptPtr(); }
 };
 
 template <typename T>

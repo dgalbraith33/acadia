@@ -64,7 +64,7 @@ target_link_libraries(zion
 # -mno-red-zone -- Don't put data below the stack pointer (clobbered by interrupts).
 # -mcmodel=kernel -- Assume the kernel code is running in the higher half.
 # -mgeneral-regs-only -- Prevent GCC from using a whole host of nonsense registers (that we have to enable).
-set(_Z_COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -c -ffreestanding -fno-rtti -fno-exceptions -nostdlib -mabi=sysv -mno-red-zone -mcmodel=kernel -mgeneral-regs-only")
+set(_Z_COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -c -ffreestanding -fno-rtti -fno-exceptions -fno-use-cxa-atexit -nostdlib -mabi=sysv -mno-red-zone -mcmodel=kernel -mgeneral-regs-only")
 
 set(_Z_LINK_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/linker.ld")
 

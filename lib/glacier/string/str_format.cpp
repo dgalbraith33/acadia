@@ -20,27 +20,32 @@ void StrFormatNumber(StringBuilder& builder, uint64_t value, uint64_t base) {
 }  // namespace
 
 template <>
-void StrFormatValue(StringBuilder& builder, uint8_t value, StringView opts) {
+void StrFormatValue(StringBuilder& builder, const uint8_t& value,
+                    StringView opts) {
   StrFormatValue(builder, static_cast<uint64_t>(value), opts);
 }
 
 template <>
-void StrFormatValue(StringBuilder& builder, uint16_t value, StringView opts) {
+void StrFormatValue(StringBuilder& builder, const uint16_t& value,
+                    StringView opts) {
   StrFormatValue(builder, static_cast<uint64_t>(value), opts);
 }
 
 template <>
-void StrFormatValue(StringBuilder& builder, int32_t value, StringView opts) {
+void StrFormatValue(StringBuilder& builder, const int32_t& value,
+                    StringView opts) {
   StrFormatValue(builder, static_cast<uint64_t>(value), opts);
 }
 
 template <>
-void StrFormatValue(StringBuilder& builder, uint32_t value, StringView opts) {
+void StrFormatValue(StringBuilder& builder, const uint32_t& value,
+                    StringView opts) {
   StrFormatValue(builder, static_cast<uint64_t>(value), opts);
 }
 
 template <>
-void StrFormatValue(StringBuilder& builder, uint64_t value, StringView opts) {
+void StrFormatValue(StringBuilder& builder, const uint64_t& value,
+                    StringView opts) {
   if (opts.find('x') != opts.npos) {
     builder.PushBack("0x");
     StrFormatNumber(builder, value, 16);
@@ -50,23 +55,26 @@ void StrFormatValue(StringBuilder& builder, uint64_t value, StringView opts) {
 }
 
 template <>
-void StrFormatValue(StringBuilder& builder, ErrorCode value, StringView opts) {
+void StrFormatValue(StringBuilder& builder, const ErrorCode& value,
+                    StringView opts) {
   StrFormatValue(builder, static_cast<uint64_t>(value), opts);
 }
 
 template <>
-void StrFormatValue(StringBuilder& builder, char value, StringView opts) {
+void StrFormatValue(StringBuilder& builder, const char& value,
+                    StringView opts) {
   builder.PushBack(value);
 }
 
 template <>
-void StrFormatValue(StringBuilder& builder, const char* value,
+void StrFormatValue(StringBuilder& builder, char const* const& value,
                     StringView opts) {
-  StrFormatValue(builder, StringView(value), opts);
+  StrFormatInternal(builder, StringView(value));
 }
 
 template <>
-void StrFormatValue(StringBuilder& builder, StringView value, StringView opts) {
+void StrFormatValue(StringBuilder& builder, const StringView& value,
+                    StringView opts) {
   StrFormatInternal(builder, value);
 }
 

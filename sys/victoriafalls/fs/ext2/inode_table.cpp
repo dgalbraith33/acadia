@@ -3,8 +3,10 @@
 #include <mammoth/debug.h>
 
 InodeTable::InodeTable(const glcr::SharedPtr<Ext2BlockReader>& reader,
-                       BlockGroupDescriptor* bgdt)
-    : ext2_reader_(reader), bgdt_(bgdt) {
+                       OwnedMemoryRegion&& bgdt_region)
+    : ext2_reader_(reader),
+      bgdt_region_(glcr::Move(bgdt_region)),
+      bgdt_(reinterpret_cast<BlockGroupDescriptor*>(bgdt_region_.vaddr())) {
   inode_tables_.Resize(ext2_reader_->NumberOfBlockGroups());
 }
 

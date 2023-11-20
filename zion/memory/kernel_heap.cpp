@@ -164,3 +164,8 @@ void operator delete[](void* addr) {
     SlabFree(addr);
   }
 }
+void operator delete[](void* addr, uint64_t size) {
+  if (IsSlab(addr)) {
+    SlabFree(addr);
+  }
+}

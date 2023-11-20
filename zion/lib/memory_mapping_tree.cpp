@@ -1,6 +1,16 @@
 #include "lib/memory_mapping_tree.h"
 
+#include <glacier/string/str_format.h>
+
 #include "debug/debug.h"
+
+template <>
+void glcr::StrFormatValue(glcr::StringBuilder& builder,
+                          const MemoryMappingTree::MemoryMapping& value,
+                          glcr::StringView opts) {
+  builder.PushBack(
+      glcr::StrFormat("Range {x}-{x}", value.vaddr_base, value.vaddr_limit));
+}
 
 glcr::ErrorCode MemoryMappingTree::AddInMemoryObject(
     uint64_t vaddr, const glcr::RefPtr<MemoryObject>& object) {
@@ -45,6 +55,9 @@ glcr::ErrorCode MemoryMappingTree::FreeMemoryRange(uint64_t vaddr_base,
 
   auto find_or = mapping_tree_.Find(vaddr_base);
   if (find_or) {
+    dbgln("Mem addr {x} refcnt {}",
+          (uint64_t)find_or.value().get().mem_object.get(),
+          find_or.value().get().mem_object->ref_count());
     mapping_tree_.Delete(vaddr_base);
   }
   while (true) {

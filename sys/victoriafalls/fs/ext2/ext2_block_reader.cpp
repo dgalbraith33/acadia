@@ -13,12 +13,12 @@ glcr::ErrorOr<glcr::SharedPtr<Ext2BlockReader>> Ext2BlockReader::Init(
   req.set_size(2);
   ReadResponse resp;
   RET_ERR(client.Read(req, resp));
-  MappedMemoryRegion superblock =
-      MappedMemoryRegion::FromCapability(resp.memory());
+  OwnedMemoryRegion superblock =
+      OwnedMemoryRegion::FromCapability(resp.memory());
 
   return glcr::SharedPtr<Ext2BlockReader>(
       new Ext2BlockReader(glcr::Move(client), denali_info.device_id(),
-                          denali_info.lba_offset(), superblock));
+                          denali_info.lba_offset(), glcr::Move(superblock)));
 }
 
 Superblock* Ext2BlockReader::GetSuperblock() {
@@ -59,11 +59,11 @@ uint64_t Ext2BlockReader::InodeTableBlockSize() {
   return (InodeSize() * GetSuperblock()->inodes_per_group) / BlockSize();
 }
 
-glcr::ErrorOr<MappedMemoryRegion> Ext2BlockReader::ReadBlock(
+glcr::ErrorOr<OwnedMemoryRegion> Ext2BlockReader::ReadBlock(
     uint64_t block_number) {
   return ReadBlocks(block_number, 1);
 }
-glcr::ErrorOr<MappedMemoryRegion> Ext2BlockReader::ReadBlocks(
+glcr::ErrorOr<OwnedMemoryRegion> Ext2BlockReader::ReadBlocks(
     uint64_t block_number, uint64_t num_blocks) {
   ReadRequest req;
   req.set_device_id(device_id_);
@@ -71,10 +71,10 @@ glcr::ErrorOr<MappedMemoryRegion> Ext2BlockReader::ReadBlocks(
   req.set_size(num_blocks * SectorsPerBlock());
   ReadResponse resp;
   RET_ERR(denali_.Read(req, resp));
-  return MappedMemoryRegion::FromCapability(resp.memory());
+  return OwnedMemoryRegion::FromCapability(resp.memory());
 }
 
-glcr::ErrorOr<MappedMemoryRegion> Ext2BlockReader::ReadBlocks(
+glcr::ErrorOr<OwnedMemoryRegion> Ext2BlockReader::ReadBlocks(
     const glcr::Vector<uint64_t>& block_list) {
   ReadManyRequest req;
   req.set_device_id(device_id_);
@@ -88,13 +88,13 @@ glcr::ErrorOr<MappedMemoryRegion> Ext2BlockReader::ReadBlocks(
   }
   ReadResponse resp;
   RET_ERR(denali_.ReadMany(req, resp));
-  return MappedMemoryRegion::FromCapability(resp.memory());
+  return OwnedMemoryRegion::FromCapability(resp.memory());
 }
 
 Ext2BlockReader::Ext2BlockReader(DenaliClient&& denali, uint64_t device_id,
                                  uint64_t lba_offset,
-                                 MappedMemoryRegion super_block)
+                                 OwnedMemoryRegion&& super_block)
     : denali_(glcr::Move(denali)),
       device_id_(device_id),
       lba_offset_(lba_offset),
-      super_block_region_(super_block) {}
+      super_block_region_(glcr::Move(super_block)) {}

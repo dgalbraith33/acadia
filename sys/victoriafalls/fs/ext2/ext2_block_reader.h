@@ -29,21 +29,21 @@ class Ext2BlockReader {
   // because the last table will likely be smaller.
   uint64_t InodeTableBlockSize();
 
-  glcr::ErrorOr<MappedMemoryRegion> ReadBlock(uint64_t block_number);
-  glcr::ErrorOr<MappedMemoryRegion> ReadBlocks(uint64_t block_number,
-                                               uint64_t num_blocks);
+  glcr::ErrorOr<OwnedMemoryRegion> ReadBlock(uint64_t block_number);
+  glcr::ErrorOr<OwnedMemoryRegion> ReadBlocks(uint64_t block_number,
+                                              uint64_t num_blocks);
 
-  glcr::ErrorOr<MappedMemoryRegion> ReadBlocks(
+  glcr::ErrorOr<OwnedMemoryRegion> ReadBlocks(
       const glcr::Vector<uint64_t>& block_list);
 
  private:
   DenaliClient denali_;
   uint64_t device_id_;
   uint64_t lba_offset_;
-  MappedMemoryRegion super_block_region_;
+  OwnedMemoryRegion super_block_region_;
 
   Ext2BlockReader(DenaliClient&& denali, uint64_t device_id,
-                  uint64_t lba_offset, MappedMemoryRegion super_block);
+                  uint64_t lba_offset, OwnedMemoryRegion&& super_block);
 
   uint64_t SectorsPerBlock();
 };

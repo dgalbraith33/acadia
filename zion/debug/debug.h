@@ -9,7 +9,7 @@
 void dbgln(const glcr::StringView& str);
 
 template <typename... Args>
-void dbgln(const char* str, Args... args) {
+void dbgln(const char* str, Args&&... args) {
   char buffer[256];
   glcr::FixedStringBuilder builder(buffer, 256);
   glcr::StrFormatIntoBuffer(builder, str, args...);
@@ -17,12 +17,12 @@ void dbgln(const char* str, Args... args) {
 }
 
 template <typename... Args>
-void dbgln_large(const char* str, Args... args) {
+void dbgln_large(const char* str, Args&&... args) {
   dbgln(glcr::StrFormat(str, args...));
 }
 
 template <typename... Args>
-void panic(const char* str, Args... args) {
+void panic(const char* str, Args&&... args) {
   dbgln(str, args...);
   dbgln("PANIC");
   asm volatile("cli; hlt;");
@@ -34,6 +34,6 @@ void panic(const char* str, Args... args) {
       panic(str);               \
     }                           \
   }
-#define UNREACHABLE                                \
-  panic("Unreachable {}, {}", __FILE__, __LINE__); \
+#define UNREACHABLE                                                  \
+  panic("Unreachable {}, {}", glcr::StringView(__FILE__), __LINE__); \
   __builtin_unreachable();

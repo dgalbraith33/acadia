@@ -7,6 +7,7 @@
 #include "glacier/memory/ref_ptr.h"
 #include "glacier/memory/reference.h"
 #include "glacier/memory/unique_ptr.h"
+#include "glacier/string/str_format.h"
 
 namespace glcr {
 
@@ -25,6 +26,8 @@ class BinaryTree {
   Optional<Ref<V>> Successor(K key);
 
   Optional<Ref<V>> Find(K key);
+
+  void DebugTreeIntoStr(StringBuilder& builder) const;
 
  private:
   // TODO: Consider adding a sharedptr type to
@@ -45,6 +48,9 @@ class BinaryTree {
   // If this node exists, return it. Otherwise, this
   // will be the parent of where this node would be inserted.
   RefPtr<BinaryNode> FindOrInsertionParent(K key);
+
+  static void DebugNodeIntoString(StringBuilder& builder, uint64_t indent_level,
+                                  const RefPtr<BinaryNode>& node);
 };
 
 template <typename K, typename V>
@@ -101,6 +107,9 @@ void BinaryTree<K, V>::Delete(K key) {
     } else {
       node->parent->left = new_child;
     }
+  }
+  if (new_child) {
+    new_child->parent = node->parent;
   }
 }
 
@@ -211,4 +220,36 @@ BinaryTree<K, V>::FindOrInsertionParent(K key) {
   }
 }
 
+template <typename K, typename V>
+void StrFormatValue(StringBuilder& builder, const BinaryTree<K, V>& value,
+                    StringView opts) {
+  value.DebugTreeIntoStr(builder);
+}
+
+template <typename K, typename V>
+void BinaryTree<K, V>::DebugTreeIntoStr(StringBuilder& builder) const {
+  DebugNodeIntoString(builder, 0, root_);
+}
+
+template <typename K, typename V>
+void BinaryTree<K, V>::DebugNodeIntoString(StringBuilder& builder,
+                                           uint64_t indent_level,
+                                           const RefPtr<BinaryNode>& node) {
+  if (node.empty()) {
+    return;
+  }
+  for (uint64_t i = 0; i < indent_level; i++) {
+    builder.PushBack('\t');
+  }
+  StrFormatValue(builder, node->value, "");
+  builder.PushBack('\n');
+  if (node->left) {
+    builder.PushBack('L');
+    DebugNodeIntoString(builder, indent_level + 1, node->left);
+  }
+  if (node->right) {
+    builder.PushBack('R');
+    DebugNodeIntoString(builder, indent_level + 1, node->right);
+  }
+}
 }  // namespace glcr

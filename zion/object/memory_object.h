@@ -27,7 +27,8 @@ class MemoryObject : public KernelObject {
            kZionPerm_Transmit;
   }
 
-  MemoryObject(uint64_t size);
+  explicit MemoryObject(uint64_t size);
+  ~MemoryObject();
 
   uint64_t size() { return size_; }
   uint64_t num_pages() { return size_ / 0x1000; }

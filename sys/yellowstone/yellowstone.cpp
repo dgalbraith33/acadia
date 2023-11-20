@@ -43,8 +43,8 @@ uint64_t main(uint64_t port_cap) {
   OpenFileResponse response;
   check(vfs_client->OpenFile(request, response));
 
-  MappedMemoryRegion filemem =
-      MappedMemoryRegion::FromCapability(response.memory());
+  OwnedMemoryRegion filemem =
+      OwnedMemoryRegion::FromCapability(response.memory());
   glcr::String file(reinterpret_cast<const char*>(filemem.vaddr()),
                     response.size());
 

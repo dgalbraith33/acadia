@@ -11,10 +11,12 @@ class RefCounted {
   virtual ~RefCounted() {}
   // FIXME: Rethink error handling in these cases now that we can't panic the
   // kernel.
-  void Adopt() { ref_count_ = 1; }
+  void AdoptPtr() { ref_count_ = 1; }
 
-  void Acquire() { ref_count_++; }
-  bool Release() { return (--ref_count_) == 0; }
+  void AcquirePtr() { ref_count_++; }
+  bool ReleasePtr() { return (--ref_count_) == 0; }
+
+  uint64_t ref_count() { return ref_count_; }
 
  private:
   // FIXME: This should be an atomic type.

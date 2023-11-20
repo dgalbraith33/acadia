@@ -20,6 +20,8 @@ MemoryObject::MemoryObject(uint64_t size) : size_(size) {
   }
 }
 
+MemoryObject::~MemoryObject() { dbgln("Memory Object Freed"); }
+
 uint64_t MemoryObject::PhysicalPageAtOffset(uint64_t offset) {
   if (offset > size_) {
     panic("Invalid offset");

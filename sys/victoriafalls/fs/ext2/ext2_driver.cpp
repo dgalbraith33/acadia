@@ -8,11 +8,10 @@ glcr::ErrorOr<Ext2Driver> Ext2Driver::Init(const DenaliInfo& denali_info) {
                    Ext2BlockReader::Init(glcr::Move(denali_info)));
 
   ASSIGN_OR_RETURN(
-      MappedMemoryRegion bgdt,
+      OwnedMemoryRegion bgdt,
       reader->ReadBlocks(reader->BgdtBlockNum(), reader->BgdtBlockSize()));
-  BlockGroupDescriptor* bgds =
-      reinterpret_cast<BlockGroupDescriptor*>(bgdt.vaddr());
-  glcr::UniquePtr<InodeTable> inode_table(new InodeTable(reader, bgds));
+  glcr::UniquePtr<InodeTable> inode_table(
+      new InodeTable(reader, glcr::Move(bgdt)));
 
   return Ext2Driver(reader, glcr::Move(inode_table));
 }
@@ -64,7 +63,7 @@ glcr::ErrorOr<glcr::Vector<DirEntry>> Ext2Driver::ReadDirectory(
   glcr::Vector<DirEntry> directory;
   for (uint64_t i = 0; i < real_block_cnt; i++) {
     dbgln("Getting block {x}", inode->block[i]);
-    ASSIGN_OR_RETURN(MappedMemoryRegion block,
+    ASSIGN_OR_RETURN(OwnedMemoryRegion block,
                      ext2_reader_->ReadBlock(inode->block[i]));
     uint64_t addr = block.vaddr();
     while (addr < block.vaddr() + ext2_reader_->BlockSize()) {
@@ -87,7 +86,7 @@ glcr::ErrorOr<glcr::Vector<DirEntry>> Ext2Driver::ReadDirectory(
   return directory;
 }
 
-glcr::ErrorOr<MappedMemoryRegion> Ext2Driver::ReadFile(uint64_t inode_number) {
+glcr::ErrorOr<OwnedMemoryRegion> Ext2Driver::ReadFile(uint64_t inode_number) {
   ASSIGN_OR_RETURN(Inode * inode, inode_table_->GetInode(inode_number));
 
   if (!(inode->mode & 0x8000)) {
@@ -109,7 +108,7 @@ glcr::ErrorOr<MappedMemoryRegion> Ext2Driver::ReadFile(uint64_t inode_number) {
     return glcr::UNIMPLEMENTED;
   }
 
-  MappedMemoryRegion indirect_block;
+  OwnedMemoryRegion indirect_block;
   if (inode->block[12]) {
     ASSIGN_OR_RETURN(indirect_block, ext2_reader_->ReadBlock(inode->block[12]));
   }

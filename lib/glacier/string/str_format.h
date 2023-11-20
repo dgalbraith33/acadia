@@ -7,41 +7,51 @@
 
 namespace glcr {
 
+// FIXME: We need some meta-programming here to allow pass-by-value for pointers
+// and primitives.
 template <typename T>
-void StrFormatValue(StringBuilder& builder, T value, StringView opts);
+void StrFormatValue(StringBuilder& builder, const T& value, StringView opts);
 
 template <>
-void StrFormatValue(StringBuilder& builder, uint8_t value, StringView opts);
+void StrFormatValue(StringBuilder& builder, const uint8_t& value,
+                    StringView opts);
 
 template <>
-void StrFormatValue(StringBuilder& builder, uint16_t value, StringView opts);
+void StrFormatValue(StringBuilder& builder, const uint16_t& value,
+                    StringView opts);
 
 template <>
-void StrFormatValue(StringBuilder& builder, int32_t value, StringView opts);
+void StrFormatValue(StringBuilder& builder, const int32_t& value,
+                    StringView opts);
 
 template <>
-void StrFormatValue(StringBuilder& builder, uint32_t value, StringView opts);
+void StrFormatValue(StringBuilder& builder, const uint32_t& value,
+                    StringView opts);
 
 template <>
-void StrFormatValue(StringBuilder& builder, uint64_t value, StringView opts);
+void StrFormatValue(StringBuilder& builder, const uint64_t& value,
+                    StringView opts);
 
 template <>
-void StrFormatValue(StringBuilder& builder, ErrorCode value, StringView opts);
+void StrFormatValue(StringBuilder& builder, const ErrorCode& value,
+                    StringView opts);
 
 template <>
-void StrFormatValue(StringBuilder& builder, char value, StringView opts);
+void StrFormatValue(StringBuilder& builder, const char& value, StringView opts);
 
 template <>
-void StrFormatValue(StringBuilder& builder, const char* value, StringView opts);
+void StrFormatValue(StringBuilder& builder, char const* const& value,
+                    StringView opts);
 
 template <>
-void StrFormatValue(StringBuilder& builder, StringView value, StringView opts);
+void StrFormatValue(StringBuilder& builder, const StringView& value,
+                    StringView opts);
 
 void StrFormatInternal(StringBuilder& builder, StringView format);
 
 template <typename T, typename... Args>
-void StrFormatInternal(StringBuilder& builder, StringView format, T value,
-                       Args... args) {
+void StrFormatInternal(StringBuilder& builder, StringView format,
+                       const T& value, Args&&... args) {
   uint64_t posl = format.find('{');
   uint64_t posr = format.find('}', posl);
   if (posl == format.npos || posr == format.npos) {
@@ -56,7 +66,7 @@ void StrFormatInternal(StringBuilder& builder, StringView format, T value,
 }
 
 template <typename... Args>
-String StrFormat(StringView format, Args... args) {
+String StrFormat(StringView format, Args&&... args) {
   VariableStringBuilder builder;
   StrFormatInternal(builder, format, args...);
   return builder.ToString();
@@ -64,7 +74,7 @@ String StrFormat(StringView format, Args... args) {
 
 template <typename... Args>
 void StrFormatIntoBuffer(StringBuilder& builder, StringView format,
-                         Args... args) {
+                         Args&&... args) {
   StrFormatInternal(builder, format, args...);
 }
 
