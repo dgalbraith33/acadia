@@ -72,3 +72,9 @@ OwnedMemoryRegion OwnedMemoryRegion::FromCapability(z_cap_t vmmo_cap) {
   // FIXME: get the size here.
   return OwnedMemoryRegion(vmmo_cap, vaddr, size);
 }
+
+z_cap_t OwnedMemoryRegion::DuplicateCap() {
+  z_cap_t cap;
+  check(ZCapDuplicate(vmmo_cap_, kZionPerm_All, &cap));
+  return cap;
+}

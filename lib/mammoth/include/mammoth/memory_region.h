@@ -53,7 +53,8 @@ class OwnedMemoryRegion {
   uint64_t vaddr() { return vaddr_; }
   uint64_t size() { return size_; }
 
-  uint64_t cap() { return vmmo_cap_; }
+  z_cap_t cap() { return vmmo_cap_; }
+  z_cap_t DuplicateCap();
 
   bool empty() { return vmmo_cap_ != 0; }
   explicit operator bool() { return vmmo_cap_ != 0; }

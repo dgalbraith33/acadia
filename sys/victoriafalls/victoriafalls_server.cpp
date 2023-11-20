@@ -56,9 +56,7 @@ glcr::ErrorCode VFSServer::HandleOpenFile(const OpenFileRequest& request,
   // FIXME: There isn't really a reason we need to map the file into memory then
   // duplicate the cap. In the future just get the cap from the read then pass
   // it to the caller directly.
-  uint64_t mem_cap;
-  uint64_t cap = ZCapDuplicate(region.cap(), kZionPerm_All, &mem_cap);
-  response.set_memory(mem_cap);
+  response.set_memory(region.DuplicateCap());
   // TODO: Consider folding this up into the actual read call.
   ASSIGN_OR_RETURN(Inode * inode, driver_.GetInode(inode_num));
   // FIXME: This technically only sets the lower 32 bits.
