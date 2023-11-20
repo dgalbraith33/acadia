@@ -6,30 +6,8 @@
 
 #define K_MEM_DEBUG 0
 
-MemoryObject::MemoryObject(uint64_t size) : size_(size) {
-  if ((size & 0xFFF) != 0) {
-    size_ = (size & ~0xFFF) + 0x1000;
-#if K_MEM_DEBUG
-    dbgln("MemoryObject: aligned {x} to {x}", size, size_);
-#endif
-  }
-  // FIXME: Do this lazily.
-  uint64_t num_pages = size_ / 0x1000;
-  for (uint64_t i = 0; i < num_pages; i++) {
-    phys_page_list_.PushBack(0);
-  }
-}
-
-MemoryObject::~MemoryObject() {
-  for (uint64_t page : phys_page_list_) {
-    if (page != 0) {
-      phys_mem::FreePage(page);
-    }
-  }
-}
-
 uint64_t MemoryObject::PhysicalPageAtOffset(uint64_t offset) {
-  if (offset > size_) {
+  if (offset > size()) {
     panic("Invalid offset");
   }
   uint64_t page_num = offset / 0x1000;
@@ -37,8 +15,8 @@ uint64_t MemoryObject::PhysicalPageAtOffset(uint64_t offset) {
 }
 
 void MemoryObject::CopyBytesToObject(uint64_t source, uint64_t length) {
-  if (length > size_) {
-    panic("Copy overruns memory object: {x} too large for {x}", length, size_);
+  if (length > size()) {
+    panic("Copy overruns memory object: {x} too large for {x}", length, size());
   }
   uint64_t hhdm = boot::GetHigherHalfDirectMap();
   uint64_t page_number = 0;
@@ -59,21 +37,38 @@ void MemoryObject::CopyBytesToObject(uint64_t source, uint64_t length) {
   }
 }
 
-uint64_t MemoryObject::PageNumberToPhysAddr(uint64_t page_num) {
-  auto iter = phys_page_list_.begin();
-  uint64_t index = 0;
-  while (index < page_num) {
-    ++iter;
-    index++;
+VariableMemoryObject::VariableMemoryObject(uint64_t size) : size_(size) {
+  if ((size & 0xFFF) != 0) {
+    size_ = (size & ~0xFFF) + 0x1000;
+#if K_MEM_DEBUG
+    dbgln("MemoryObject: aligned {x} to {x}", size, size_);
+#endif
   }
+  // FIXME: Do this lazily.
+  uint64_t num_pages = size_ / 0x1000;
+  phys_page_list_ = glcr::Array<uint64_t>(num_pages);
+  for (uint64_t i = 0; i < phys_page_list_.size(); i++) {
+    phys_page_list_[i] = 0;
+  }
+}
 
-  if (*iter == 0) {
+VariableMemoryObject::~VariableMemoryObject() {
+  for (uint64_t p = 0; p < phys_page_list_.size(); p++) {
+    if (phys_page_list_[p] != 0) {
+      // TODO: We may be able to do some sort of coalescing here.
+      phys_mem::FreePage(phys_page_list_[p]);
+    }
+  }
+}
+
+uint64_t VariableMemoryObject::PageNumberToPhysAddr(uint64_t page_num) {
+  if (phys_page_list_[page_num] == 0) {
 #if K_MEM_DEBUG
     dbgln("Allocating page num {} for mem object", page_num);
 #endif
-    *iter = phys_mem::AllocatePage();
+    phys_page_list_[page_num] = phys_mem::AllocatePage();
   }
-  return *iter;
+  return phys_page_list_[page_num];
 }
 
 FixedMemoryObject::~FixedMemoryObject() {

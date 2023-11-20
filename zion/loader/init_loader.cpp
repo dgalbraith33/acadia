@@ -74,10 +74,12 @@ uint64_t LoadElfProgram(Process& dest_proc, uint64_t base, uint64_t offset) {
         program.type, program.flags, program.offset, program.vaddr,
         program.paddr, program.filesz, program.memsz, program.align);
 #endif
-    auto mem_obj = glcr::MakeRefCounted<MemoryObject>(program.memsz);
+    auto mem_obj = glcr::MakeRefCounted<VariableMemoryObject>(program.memsz);
     mem_obj->CopyBytesToObject(base + program.offset, program.filesz);
-    PANIC_ON_ERR(dest_proc.vmas()->MapInMemoryObject(program.vaddr, mem_obj),
-                 "Couldn't map in init program.");
+    PANIC_ON_ERR(
+        dest_proc.vmas()->MapInMemoryObject(
+            program.vaddr, glcr::StaticCastRefPtr<MemoryObject>(mem_obj)),
+        "Couldn't map in init program.");
   }
   return header->entry;
 }
@@ -121,8 +123,8 @@ const limine_file& GetInitProgram(const glcr::String& path) {
 
 void WriteInitProgram(glcr::RefPtr<Port> port, glcr::String name, uint64_t id) {
   const limine_file& prog = GetInitProgram(name);
-  glcr::RefPtr<MemoryObject> prog_vmmo =
-      glcr::MakeRefCounted<MemoryObject>(prog.size);
+  glcr::RefPtr<VariableMemoryObject> prog_vmmo =
+      glcr::MakeRefCounted<VariableMemoryObject>(prog.size);
   prog_vmmo->CopyBytesToObject(reinterpret_cast<uint64_t>(prog.address),
                                prog.size);
   port->WriteKernel(id, MakeRefCounted<Capability>(prog_vmmo));
@@ -155,8 +157,8 @@ void WriteFramebufferVmmo(glcr::RefPtr<Port> port) {
       .blue_mask_size = buf.blue_mask_size,
       .blue_mask_shift = buf.blue_mask_shift,
   };
-  glcr::RefPtr<MemoryObject> ubuf_vmmo =
-      glcr::MakeRefCounted<MemoryObject>(sizeof(ubuf));
+  glcr::RefPtr<VariableMemoryObject> ubuf_vmmo =
+      glcr::MakeRefCounted<VariableMemoryObject>(sizeof(ubuf));
   ubuf_vmmo->CopyBytesToObject(reinterpret_cast<uint64_t>(&ubuf), sizeof(ubuf));
   port->WriteKernel(Z_BOOT_FRAMEBUFFER_INFO_VMMO,
                     MakeRefCounted<Capability>(ubuf_vmmo));

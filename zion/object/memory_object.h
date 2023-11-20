@@ -1,10 +1,11 @@
 #pragma once
 
-#include <glacier/container/linked_list.h>
+#include <glacier/container/array.h>
 #include <glacier/memory/ref_ptr.h>
 #include <glacier/status/error_or.h>
 
 #include "include/ztypes.h"
+#include "memory/constants.h"
 #include "object/kernel_object.h"
 
 class MemoryObject;
@@ -27,32 +28,41 @@ class MemoryObject : public KernelObject {
            kZionPerm_Transmit;
   }
 
-  explicit MemoryObject(uint64_t size);
-  ~MemoryObject();
+  MemoryObject() = default;
+  virtual ~MemoryObject() = default;
 
-  uint64_t size() { return size_; }
-  uint64_t num_pages() { return ((size_ - 1) / 0x1000) + 1; }
+  virtual uint64_t size() = 0;
+  uint64_t num_pages() { return ((size() - 1) / kPageSize) + 1; }
+  virtual glcr::ErrorOr<glcr::RefPtr<MemoryObject>> Duplicate(
+      uint64_t offset, uint64_t length) = 0;
 
   uint64_t PhysicalPageAtOffset(uint64_t offset);
-
   void CopyBytesToObject(uint64_t source, uint64_t length);
 
-  virtual glcr::ErrorOr<glcr::RefPtr<MemoryObject>> Duplicate(uint64_t offset,
-                                                              uint64_t length) {
+ protected:
+  virtual uint64_t PageNumberToPhysAddr(uint64_t page_num) = 0;
+};
+
+class VariableMemoryObject : public MemoryObject {
+ public:
+  explicit VariableMemoryObject(uint64_t size);
+  ~VariableMemoryObject() override;
+
+  uint64_t size() override { return size_; }
+
+  virtual glcr::ErrorOr<glcr::RefPtr<MemoryObject>> Duplicate(
+      uint64_t offset, uint64_t length) override {
     return glcr::UNIMPLEMENTED;
   }
 
  protected:
-  // Hacky to avoid linked_list creation.
-  MemoryObject(uint64_t size, bool) : size_(size) {}
+  virtual uint64_t PageNumberToPhysAddr(uint64_t page_num) override;
 
  private:
   // Always stores the full page-aligned size.
   uint64_t size_;
 
-  virtual uint64_t PageNumberToPhysAddr(uint64_t page_num);
-
-  glcr::LinkedList<uint64_t> phys_page_list_;
+  glcr::Array<uint64_t> phys_page_list_;
 };
 
 class FixedMemoryObject : public MemoryObject {
@@ -60,20 +70,21 @@ class FixedMemoryObject : public MemoryObject {
   // FIXME: Validate that this is 4k aligned.
   // Create a new class object for should free.
   FixedMemoryObject(uint64_t physical_addr, uint64_t size, bool should_free)
-      : MemoryObject(size, true),
-        physical_addr_(physical_addr),
-        should_free_(should_free) {}
+      : size_(size), physical_addr_(physical_addr), should_free_(should_free) {}
 
-  ~FixedMemoryObject();
+  ~FixedMemoryObject() override;
 
+  virtual uint64_t size() override { return size_; }
   virtual glcr::ErrorOr<glcr::RefPtr<MemoryObject>> Duplicate(
       uint64_t offset, uint64_t length) override;
 
+ protected:
+  uint64_t PageNumberToPhysAddr(uint64_t page_num) override {
+    return physical_addr_ + (kPageSize * page_num);
+  }
+
  private:
+  uint64_t size_;
   uint64_t physical_addr_;
   bool should_free_;
-
-  uint64_t PageNumberToPhysAddr(uint64_t page_num) override {
-    return physical_addr_ + (0x1000 * page_num);
-  }
 };

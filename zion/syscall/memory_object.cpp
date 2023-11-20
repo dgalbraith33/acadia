@@ -6,8 +6,8 @@
 
 z_err_t MemoryObjectCreate(ZMemoryObjectCreateReq* req) {
   auto& curr_proc = gScheduler->CurrentProcess();
-  *req->vmmo_cap =
-      curr_proc.AddNewCapability(glcr::MakeRefCounted<MemoryObject>(req->size));
+  *req->vmmo_cap = curr_proc.AddNewCapability(
+      glcr::MakeRefCounted<VariableMemoryObject>(req->size));
   return glcr::OK;
 }
 
