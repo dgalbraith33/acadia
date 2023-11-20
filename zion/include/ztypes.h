@@ -53,6 +53,7 @@ const uint64_t kZionEndpointCall = 0x65;
 
 // Capability Calls
 const uint64_t kZionCapDuplicate = 0x70;
+const uint64_t kZionCapRelease = 0x71;
 
 // Syncronization Calls
 const uint64_t kZionMutexCreate = 0x80;

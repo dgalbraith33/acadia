@@ -17,7 +17,8 @@ uint64_t CapabilityTable::AddExistingCapability(
 glcr::RefPtr<Capability> CapabilityTable::GetCapability(uint64_t id) {
   MutexHolder h(lock_);
   if (!capabilities_.Contains(id)) {
-    panic("Bad cap access {}", id);
+    dbgln("Bad cap access {}", id);
+    return {};
   }
   return capabilities_.at(id);
 }
@@ -25,7 +26,8 @@ glcr::RefPtr<Capability> CapabilityTable::GetCapability(uint64_t id) {
 glcr::RefPtr<Capability> CapabilityTable::ReleaseCapability(uint64_t id) {
   MutexHolder h(lock_);
   if (!capabilities_.Contains(id)) {
-    panic("Bad cap release {}", id);
+    dbgln("Bad cap release {}", id);
+    return {};
   }
   auto cap = capabilities_.at(id);
   (void)capabilities_.Delete(id);

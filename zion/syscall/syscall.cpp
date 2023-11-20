@@ -81,6 +81,7 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req) {
     CASE(ReplyPortRecv);
     // syscall/capability.h
     CASE(CapDuplicate);
+    CASE(CapRelease);
     // syscall/syncronization.h
     CASE(MutexCreate);
     CASE(MutexLock);

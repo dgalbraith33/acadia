@@ -18,3 +18,11 @@ z_err_t CapDuplicate(ZCapDuplicateReq* req) {
                                         cap->permissions() & req->perm_mask);
   return glcr::OK;
 }
+
+z_err_t CapRelease(ZCapReleaseReq* req) {
+  auto& proc = gScheduler->CurrentProcess();
+  if (proc.ReleaseCapability(req->cap).empty()) {
+    return glcr::CAP_NOT_FOUND;
+  }
+  return glcr::OK;
+}
