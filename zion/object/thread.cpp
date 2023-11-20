@@ -75,12 +75,12 @@ void Thread::Exit() {
           curr_thread->tid(), pid(), tid());
   }
   Cleanup();
+  process_.CheckState();
   gScheduler->Yield();
 }
 
 void Thread::Cleanup() {
   state_ = CLEANUP;
-  process_.CheckState();
   while (blocked_threads_.size() != 0) {
     auto thread = blocked_threads_.PopFront();
     thread->SetState(Thread::RUNNABLE);
