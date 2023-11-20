@@ -35,15 +35,15 @@ uint64_t AddressSpace::GetNextMemMapAddr(uint64_t size) {
   return addr;
 }
 
-void AddressSpace::MapInMemoryObject(
+glcr::ErrorCode AddressSpace::MapInMemoryObject(
     uint64_t vaddr, const glcr::RefPtr<MemoryObject>& mem_obj) {
-  memory_mappings_.Insert(vaddr, {.vaddr = vaddr, .mem_obj = mem_obj});
+  return mapping_tree_.AddInMemoryObject(vaddr, mem_obj);
 }
 
-uint64_t AddressSpace::MapInMemoryObject(
+glcr::ErrorOr<uint64_t> AddressSpace::MapInMemoryObject(
     const glcr::RefPtr<MemoryObject>& mem_obj) {
   uint64_t vaddr = GetNextMemMapAddr(mem_obj->size());
-  memory_mappings_.Insert(vaddr, {.vaddr = vaddr, .mem_obj = mem_obj});
+  RET_ERR(mapping_tree_.AddInMemoryObject(vaddr, mem_obj));
   return vaddr;
 }
 
@@ -55,38 +55,23 @@ bool AddressSpace::HandlePageFault(uint64_t vaddr) {
 #if K_VMAS_DEBUG
   dbgln("[VMAS] Page Fault!");
 #endif
+  if (vaddr < kPageSize) {
+    // Invalid page access.
+    return false;
+  }
+
   if (user_stacks_.IsValidStack(vaddr)) {
     MapPage(cr3_, vaddr, phys_mem::AllocatePage());
     return true;
   }
 
-  auto mapping_or = GetMemoryMappingForAddr(vaddr);
-  if (!mapping_or) {
-    return false;
-  }
-  MemoryMapping& mapping = mapping_or.value();
-  uint64_t offset = vaddr - mapping.vaddr;
-  uint64_t physical_addr = mapping.mem_obj->PhysicalPageAtOffset(offset);
-  if (physical_addr == 0) {
-    dbgln("WARN: Memory object returned invalid physical addr.");
+  auto offset_or = mapping_tree_.GetPhysicalPageAtVaddr(vaddr);
+  if (!offset_or.ok()) {
     return false;
   }
 #if K_VMAS_DEBUG
   dbgln("[VMAS] Mapping P({x}) at V({x})", physical_addr, vaddr);
 #endif
-  MapPage(cr3_, vaddr, physical_addr);
+  MapPage(cr3_, vaddr, offset_or.value());
   return true;
-}
-
-glcr::Optional<glcr::Ref<AddressSpace::MemoryMapping>>
-AddressSpace::GetMemoryMappingForAddr(uint64_t vaddr) {
-  auto mapping_or = memory_mappings_.Predecessor(vaddr + 1);
-  if (!mapping_or) {
-    return mapping_or;
-  }
-  MemoryMapping& mapping = mapping_or.value();
-  if (mapping.vaddr + mapping.mem_obj->size() <= vaddr) {
-    return {};
-  }
-  return mapping_or;
 }

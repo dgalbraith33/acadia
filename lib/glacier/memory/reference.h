@@ -10,6 +10,7 @@ class Ref {
   Ref(Ref&& other) = default;
 
   operator T&() const { return ref_; }
+  T& get() const { return ref_; }
 
  private:
   T& ref_;

@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #include "include/ztypes.h"
+#include "lib/memory_mapping_tree.h"
 #include "memory/user_stack_manager.h"
 #include "object/memory_object.h"
 
@@ -69,16 +70,17 @@ class AddressSpace : public KernelObject {
 
   // Maps in a memory object at a specific address.
   // Note this is unsafe for now as it may clobber other mappings.
-  void MapInMemoryObject(uint64_t vaddr,
-                         const glcr::RefPtr<MemoryObject>& mem_obj);
+  [[nodiscard]] glcr::ErrorCode MapInMemoryObject(
+      uint64_t vaddr, const glcr::RefPtr<MemoryObject>& mem_obj);
 
-  uint64_t MapInMemoryObject(const glcr::RefPtr<MemoryObject>& mem_obj);
+  [[nodiscard]] glcr::ErrorOr<uint64_t> MapInMemoryObject(
+      const glcr::RefPtr<MemoryObject>& mem_obj);
 
   // Kernel Mappings.
   uint64_t AllocateKernelStack();
 
   // Returns true if the page fault has been resolved.
-  bool HandlePageFault(uint64_t vaddr);
+  [[nodiscard]] bool HandlePageFault(uint64_t vaddr);
 
  private:
   friend class glcr::MakeRefCountedFriend<AddressSpace>;
@@ -88,19 +90,5 @@ class AddressSpace : public KernelObject {
   UserStackManager user_stacks_;
   uint64_t next_memmap_addr_ = 0x20'00000000;
 
-  struct MemoryMapping {
-    uint64_t vaddr;
-    glcr::RefPtr<MemoryObject> mem_obj;
-  };
-
-  // TODO: Consider adding a red-black tree implementation here.
-  // As is this tree functions about as well as a linked list
-  // because mappings are likely to be added in near-perfect ascedning order.
-  // Also worth considering creating a special tree implementation for
-  // just this purpose, or maybe a BinaryTree implementation that accepts
-  // ranges rather than a single key.
-  glcr::BinaryTree<uint64_t, MemoryMapping> memory_mappings_;
-
-  glcr::Optional<glcr::Ref<MemoryMapping>> GetMemoryMappingForAddr(
-      uint64_t vaddr);
+  MemoryMappingTree mapping_tree_;
 };

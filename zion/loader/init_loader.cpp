@@ -76,7 +76,8 @@ uint64_t LoadElfProgram(Process& dest_proc, uint64_t base, uint64_t offset) {
 #endif
     auto mem_obj = glcr::MakeRefCounted<MemoryObject>(program.memsz);
     mem_obj->CopyBytesToObject(base + program.offset, program.filesz);
-    dest_proc.vmas()->MapInMemoryObject(program.vaddr, mem_obj);
+    PANIC_ON_ERR(dest_proc.vmas()->MapInMemoryObject(program.vaddr, mem_obj),
+                 "Couldn't map in init program.");
   }
   return header->entry;
 }

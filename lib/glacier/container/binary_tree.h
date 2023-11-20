@@ -107,6 +107,9 @@ void BinaryTree<K, V>::Delete(K key) {
 template <typename K, typename V>
 Optional<Ref<V>> BinaryTree<K, V>::Predecessor(K key) {
   auto current = FindOrInsertionParent(key);
+  if (current.empty()) {
+    return {};
+  }
 
   // The case where the current is the insertion parent and
   // the predecessor is unique. If the key was going to be
@@ -139,6 +142,9 @@ Optional<Ref<V>> BinaryTree<K, V>::Predecessor(K key) {
 template <typename K, typename V>
 Optional<Ref<V>> BinaryTree<K, V>::Successor(K key) {
   auto current = FindOrInsertionParent(key);
+  if (current.empty()) {
+    return {};
+  }
 
   // The case where the current is the insertion parent and
   // the predecessor is unique. If the key was going to be
@@ -171,6 +177,9 @@ Optional<Ref<V>> BinaryTree<K, V>::Successor(K key) {
 template <typename K, typename V>
 Optional<Ref<V>> BinaryTree<K, V>::Find(K key) {
   auto current = FindOrInsertionParent(key);
+  if (current.empty()) {
+    return {};
+  }
   if (current->key == key) {
     return Optional<Ref<V>>(current->value);
   }
