@@ -51,7 +51,6 @@ class OwnedMemoryRegion {
 
   static OwnedMemoryRegion FromCapability(z_cap_t vmmo_cap);
 
-  uint64_t paddr() { return paddr_; }
   uint64_t vaddr() { return vaddr_; }
   uint64_t size() { return size_; }
 
@@ -61,11 +60,9 @@ class OwnedMemoryRegion {
   explicit operator bool() { return vmmo_cap_ != 0; }
 
  private:
-  OwnedMemoryRegion(uint64_t vmmo_cap, uint64_t paddr, uint64_t vaddr,
-                    uint64_t size)
-      : vmmo_cap_(vmmo_cap), paddr_(paddr), vaddr_(vaddr), size_(size) {}
+  OwnedMemoryRegion(uint64_t vmmo_cap, uint64_t vaddr, uint64_t size)
+      : vmmo_cap_(vmmo_cap), vaddr_(vaddr), size_(size) {}
   uint64_t vmmo_cap_ = 0;
-  uint64_t paddr_ = 0;
   uint64_t vaddr_ = 0;
   uint64_t size_ = 0;
 };
