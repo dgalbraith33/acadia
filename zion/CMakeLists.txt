@@ -2,6 +2,7 @@ add_executable(zion
   boot/acpi.cpp
   boot/boot_info.cpp
   capability/capability_table.cpp
+  common/cpu.cpp
   common/gdt.cpp
   common/load_gdt.s
   common/msr.cpp

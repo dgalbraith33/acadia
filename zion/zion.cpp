@@ -1,6 +1,7 @@
 #include <stdint.h>
 
 #include "boot/acpi.h"
+#include "common/cpu.h"
 #include "common/gdt.h"
 #include "debug/debug.h"
 #include "interrupt/apic.h"
@@ -21,6 +22,8 @@ extern "C" void zion() {
   dbgln("[boot] Init GDT & IDT.");
   InitGdt();
   InitIdt();
+
+  ProbeCpuAndEnableFeatures();
 
   dbgln("[boot] Init Physical Memory Manager.");
   phys_mem::InitBootstrapPageAllocation();
