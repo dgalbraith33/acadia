@@ -61,6 +61,10 @@ void Thread::Init() {
   dbgln("Thread start.", pid(), id_);
 #endif
   uint64_t rsp = process_.vmas()->AllocateUserStack();
+  // TODO: Investigate this further but without this GCC
+  // will emit movaps calls to non-16-bit-aligned stack
+  // addresses.
+  rsp -= 0x8;
   SetRsp0(rsp0_start_);
   jump_user_space(rip_, rsp, arg1_, arg2_);
 }
