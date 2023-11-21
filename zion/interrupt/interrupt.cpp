@@ -130,6 +130,11 @@ extern "C" void interrupt_page_fault(InterruptFrame* frame) {
   panic("PF");
 }
 
+extern "C" void isr_fpe_fault();
+extern "C" void interrupt_fpe_fault(InterruptFrame* frame) {
+  panic("Floating point exception");
+}
+
 extern "C" void isr_timer();
 extern "C" void interrupt_timer(InterruptFrame*) {
   gApicTimer->Calibrate();
@@ -178,8 +183,9 @@ extern "C" void interrupt_pci4(InterruptFrame*) {
 
 void InitIdt() {
   gIdt[0] = CreateDescriptor(isr_divide_by_zero);
-  gIdt[13] = CreateDescriptor(isr_protection_fault);
-  gIdt[14] = CreateDescriptor(isr_page_fault);
+  gIdt[0xD] = CreateDescriptor(isr_protection_fault);
+  gIdt[0xE] = CreateDescriptor(isr_page_fault);
+  gIdt[0x13] = CreateDescriptor(isr_fpe_fault);
 
   gIdt[0x20] = CreateDescriptor(isr_timer);
   gIdt[0x21] = CreateDescriptor(isr_apic_timer);
