@@ -43,6 +43,8 @@ class Thread : public KernelObject, public glcr::IntrusiveListNode<Thread> {
   uint64_t* Rsp0Ptr() { return &rsp0_; }
   uint64_t Rsp0Start() { return rsp0_start_; }
 
+  uint8_t* FxData() { return fx_data_; }
+
   // Switches the thread's state to runnable and enqueues it.
   void Start(uint64_t entry, uint64_t arg1, uint64_t arg2);
 
@@ -85,6 +87,9 @@ class Thread : public KernelObject, public glcr::IntrusiveListNode<Thread> {
   // Stack pointer to take when returning from userspace.
   // I don't think me mind clobbering the stack here.
   uint64_t rsp0_start_;
+
+  // Pointer to a 512 byte region for FXSAVE and FXRSTOR
+  uint8_t* fx_data_ = nullptr;
 
   glcr::IntrusiveList<Thread> blocked_threads_;
 };

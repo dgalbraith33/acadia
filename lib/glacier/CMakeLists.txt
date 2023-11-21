@@ -26,4 +26,4 @@ target_include_directories(glacier_kernel
   PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/..")
 
 set_target_properties(glacier_kernel PROPERTIES
-  COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${BASE_COMPILE_FLAGS} -mcmodel=kernel")
+  COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${BASE_COMPILE_FLAGS} -mcmodel=kernel -mgeneral-regs-only")

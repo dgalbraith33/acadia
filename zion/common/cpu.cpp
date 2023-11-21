@@ -17,6 +17,10 @@ void ProbeCpuAndEnableFeatures() {
     panic("SSE3, SSSE3 not available.");
   }
 
+  if (!(ecx & (0x3 << 19))) {
+    dbgln("SSE4 not available.");
+  }
+
   dbgln("Setting SSE");
   asm volatile(
       "mov %%cr0, %%rax;"

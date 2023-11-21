@@ -6,7 +6,8 @@
 
 namespace {
 
-extern "C" void context_switch(uint64_t* current_esp, uint64_t* next_esp);
+extern "C" void context_switch(uint64_t* current_esp, uint64_t* next_esp,
+                               uint8_t* current_fx_data, uint8_t* next_fx_data);
 
 }  // namespace
 
@@ -26,7 +27,8 @@ void Scheduler::SwapToCurrent(Thread& prev) {
   current_thread_->SetState(Thread::RUNNING);
 
   SetRsp0(current_thread_->Rsp0Start());
-  context_switch(prev.Rsp0Ptr(), current_thread_->Rsp0Ptr());
+  context_switch(prev.Rsp0Ptr(), current_thread_->Rsp0Ptr(), prev.FxData(),
+                 current_thread_->FxData());
 
   asm volatile("sti");
 }

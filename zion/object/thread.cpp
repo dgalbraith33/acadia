@@ -30,7 +30,8 @@ glcr::RefPtr<Thread> Thread::Create(Process& proc, uint64_t tid) {
   return glcr::MakeRefCounted<Thread>(proc, tid);
 }
 
-Thread::Thread(Process& proc, uint64_t tid) : process_(proc), id_(tid) {
+Thread::Thread(Process& proc, uint64_t tid)
+    : process_(proc), id_(tid), fx_data_(new uint8_t[520]) {
   uint64_t* stack_ptr =
       reinterpret_cast<uint64_t*>(proc.vmas()->AllocateKernelStack());
   // 0: rip
@@ -43,6 +44,11 @@ Thread::Thread(Process& proc, uint64_t tid) : process_(proc), id_(tid) {
   *(stack_ptr - 16) = proc.vmas()->cr3();
   rsp0_ = reinterpret_cast<uint64_t>(stack_ptr - 16);
   rsp0_start_ = reinterpret_cast<uint64_t>(stack_ptr);
+
+  // Super hacky way to align to 16 bits.
+  if (reinterpret_cast<uint64_t>(fx_data_) & 0x8) {
+    fx_data_ += 8;
+  }
 }
 
 uint64_t Thread::pid() const { return process_.id(); }
