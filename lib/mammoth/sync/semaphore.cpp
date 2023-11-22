@@ -1,4 +1,4 @@
-#include "mammoth/semaphore.h"
+#include "sync/semaphore.h"
 
 #include <zcall.h>
 

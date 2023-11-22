@@ -7,11 +7,11 @@ add_library(mammoth STATIC
   src/debug.cpp
   src/init.cpp
   src/memory_region.cpp
-  src/mutex.cpp
   src/new.cpp
   src/process.cpp
-  src/semaphore.cpp
   src/thread.cpp
+  sync/mutex.cpp
+  sync/semaphore.cpp
   )
 
 target_include_directories(mammoth

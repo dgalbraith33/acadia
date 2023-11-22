@@ -2,7 +2,7 @@
 
 #include <mammoth/memory_region.h>
 #include <mammoth/response_context.h>
-#include <mammoth/semaphore.h>
+#include <mammoth/sync/semaphore.h>
 #include <stdint.h>
 
 #include "ahci/ahci.h"

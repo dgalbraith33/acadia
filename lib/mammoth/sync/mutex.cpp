@@ -1,4 +1,4 @@
-#include "mammoth/mutex.h"
+#include "sync/mutex.h"
 
 #include <zcall.h>
 
