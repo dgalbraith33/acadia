@@ -7,11 +7,11 @@
 Command::~Command() {}
 
 DmaReadCommand::DmaReadCommand(uint64_t lba, uint64_t sector_cnt,
-                               uint64_t paddr, Mutex& callback_mutex)
+                               uint64_t paddr)
     : lba_(lba),
       sector_cnt_(sector_cnt),
       paddr_(paddr),
-      callback_mutex_(callback_mutex) {}
+      callback_semaphore_() {}
 
 DmaReadCommand::~DmaReadCommand() {}
 
@@ -47,4 +47,6 @@ void DmaReadCommand::PopulatePrdt(PhysicalRegionDescriptor* prdt) {
   prdt[0].region_address = paddr_;
   prdt[0].byte_count = sector_cnt_ * 512;
 }
-void DmaReadCommand::Callback() { callback_mutex_.Release(); }
+
+void DmaReadCommand::SignalComplete() { callback_semaphore_.Signal(); }
+void DmaReadCommand::WaitComplete() { callback_semaphore_.Wait(); }

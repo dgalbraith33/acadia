@@ -85,7 +85,7 @@ void AhciDevice::HandleIrq() {
   for (uint64_t i = 0; i < 32; i++) {
     if (commands_finished & (1 << i)) {
       commands_issued_ &= ~(1 << i);
-      commands_[i]->Callback();
+      commands_[i]->SignalComplete();
     }
   }
 
