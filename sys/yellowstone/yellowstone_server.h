@@ -5,8 +5,8 @@
 #include <glacier/memory/unique_ptr.h>
 #include <glacier/status/error_or.h>
 #include <mammoth/endpoint_server.h>
-#include <mammoth/mutex.h>
 #include <mammoth/port_server.h>
+#include <mammoth/semaphore.h>
 #include <mammoth/thread.h>
 #include <victoriafalls/victoriafalls.yunq.client.h>
 
@@ -26,8 +26,8 @@ class YellowstoneServer : public YellowstoneServerBase {
   glcr::ErrorCode HandleGetEndpoint(const GetEndpointRequest&,
                                     Endpoint&) override;
 
-  glcr::ErrorCode WaitDenaliRegistered();
-  glcr::ErrorCode WaitVictoriaFallsRegistered();
+  void WaitDenaliRegistered();
+  void WaitVictoriaFallsRegistered();
 
   glcr::SharedPtr<VFSClient> GetVFSClient();
 
@@ -40,9 +40,8 @@ class YellowstoneServer : public YellowstoneServerBase {
 
   PciReader pci_reader_;
 
-  Mutex has_denali_mutex_;
-  Mutex has_victoriafalls_mutex_;
+  Semaphore has_denali_semaphore_;
+  Semaphore has_victoriafalls_semaphore_;
 
-  YellowstoneServer(z_cap_t endpoint_cap, Mutex&& denali_mutex,
-                    Mutex&& victoriafalls_mutex);
+  YellowstoneServer(z_cap_t endpoint_cap);
 };

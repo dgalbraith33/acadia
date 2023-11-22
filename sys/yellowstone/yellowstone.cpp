@@ -27,12 +27,12 @@ uint64_t main(uint64_t port_cap) {
   ASSIGN_OR_RETURN(YellowstoneClient client1, server->CreateClient());
   check(SpawnProcess(gBootDenaliVmmoCap, client1.Capability()));
 
-  check(server->WaitDenaliRegistered());
+  server->WaitDenaliRegistered();
 
   ASSIGN_OR_RETURN(YellowstoneClient client2, server->CreateClient());
   check(SpawnProcess(gBootVictoriaFallsVmmoCap, client2.Capability()));
 
-  check(server->WaitVictoriaFallsRegistered());
+  server->WaitVictoriaFallsRegistered();
 
   dbgln("VFS Available.");
 

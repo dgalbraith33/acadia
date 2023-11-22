@@ -34,21 +34,12 @@ glcr::ErrorOr<glcr::UniquePtr<YellowstoneServer>> YellowstoneServer::Create() {
   z_cap_t endpoint_cap;
   RET_ERR(ZEndpointCreate(&endpoint_cap));
 
-  ASSIGN_OR_RETURN(Mutex denali_mut, Mutex::Create());
-  RET_ERR(denali_mut.Lock());
-
-  ASSIGN_OR_RETURN(Mutex victoriafalls_mut, Mutex::Create());
-  RET_ERR(victoriafalls_mut.Lock());
-
-  return glcr::UniquePtr<YellowstoneServer>(new YellowstoneServer(
-      endpoint_cap, glcr::Move(denali_mut), glcr::Move(victoriafalls_mut)));
+  return glcr::UniquePtr<YellowstoneServer>(
+      new YellowstoneServer(endpoint_cap));
 }
 
-YellowstoneServer::YellowstoneServer(z_cap_t endpoint_cap, Mutex&& denali_mutex,
-                                     Mutex&& victoriafalls_mutex)
-    : YellowstoneServerBase(endpoint_cap),
-      has_denali_mutex_(glcr::Move(denali_mutex)),
-      has_victoriafalls_mutex_(glcr::Move(victoriafalls_mutex)) {}
+YellowstoneServer::YellowstoneServer(z_cap_t endpoint_cap)
+    : YellowstoneServerBase(endpoint_cap) {}
 
 glcr::ErrorCode YellowstoneServer::HandleGetAhciInfo(const Empty&,
                                                      AhciInfo& info) {
@@ -105,12 +96,12 @@ glcr::ErrorCode YellowstoneServer::HandleRegisterEndpoint(
     device_id_ = part_info_or.value().device_id;
     lba_offset_ = part_info_or.value().partition_lba;
 
-    check(has_denali_mutex_.Release());
+    has_denali_semaphore_.Signal();
   } else if (req.endpoint_name() == "victoriafalls") {
     // FIXME: Probably make a separate copy for use within yellowstone vs
     // transmit to other processes.
     vfs_client_ = glcr::MakeShared<VFSClient>(req.endpoint_capability());
-    check(has_victoriafalls_mutex_.Release());
+    has_victoriafalls_semaphore_.Signal();
   } else {
     dbgln("[WARN] Got endpoint cap type: {}", req.endpoint_name().cstr());
   }
@@ -129,14 +120,10 @@ glcr::ErrorCode YellowstoneServer::HandleGetEndpoint(
   return glcr::OK;
 }
 
-glcr::ErrorCode YellowstoneServer::WaitDenaliRegistered() {
-  RET_ERR(has_denali_mutex_.Lock());
-  return has_denali_mutex_.Release();
-}
+void YellowstoneServer::WaitDenaliRegistered() { has_denali_semaphore_.Wait(); }
 
-glcr::ErrorCode YellowstoneServer::WaitVictoriaFallsRegistered() {
-  RET_ERR(has_victoriafalls_mutex_.Lock());
-  return has_victoriafalls_mutex_.Release();
+void YellowstoneServer::WaitVictoriaFallsRegistered() {
+  has_victoriafalls_semaphore_.Wait();
 }
 
 glcr::SharedPtr<VFSClient> YellowstoneServer::GetVFSClient() {
