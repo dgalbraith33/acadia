@@ -6,6 +6,7 @@
 #include "glacier/container/linked_list.h"
 #include "glacier/container/pair.h"
 #include "glacier/status/error.h"
+#include "glacier/string/string.h"
 
 namespace glcr {
 
@@ -19,6 +20,18 @@ struct HashFunc<uint64_t> {
   uint64_t operator()(const uint64_t& value) {
     // FIXME: Write a real hash function.
     return 0xABBAABBAABBAABBA ^ value;
+  }
+};
+
+template <>
+struct HashFunc<String> {
+  uint64_t operator()(const String& value) {
+    // FIXME: Write a real hash function.
+    uint64_t acc = 0;
+    for (uint64_t i = 0; i < value.length(); i++) {
+      acc += value[i];
+    }
+    return 0xABBAABBAABBAABBA ^ acc;
   }
 };
 

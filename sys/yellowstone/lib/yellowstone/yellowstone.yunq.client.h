@@ -19,6 +19,8 @@ class YellowstoneClient {
 
   [[nodiscard]] glcr::ErrorCode RegisterEndpoint(const RegisterEndpointRequest& request, Empty& response);
 
+  [[nodiscard]] glcr::ErrorCode GetEndpoint(const GetEndpointRequest& request, Endpoint& response);
+
   [[nodiscard]] glcr::ErrorCode GetAhciInfo(const Empty& request, AhciInfo& response);
 
   [[nodiscard]] glcr::ErrorCode GetFramebufferInfo(const Empty& request, FramebufferInfo& response);

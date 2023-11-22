@@ -23,6 +23,8 @@ class YellowstoneServerBase {
 
   [[nodiscard]] virtual glcr::ErrorCode HandleRegisterEndpoint(const RegisterEndpointRequest&, Empty&) = 0;
 
+  [[nodiscard]] virtual glcr::ErrorCode HandleGetEndpoint(const GetEndpointRequest&, Endpoint&) = 0;
+
   [[nodiscard]] virtual glcr::ErrorCode HandleGetAhciInfo(const Empty&, AhciInfo&) = 0;
 
   [[nodiscard]] virtual glcr::ErrorCode HandleGetFramebufferInfo(const Empty&, FramebufferInfo&) = 0;

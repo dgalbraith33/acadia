@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glacier/container/hash_map.h>
 #include <glacier/memory/shared_ptr.h>
 #include <glacier/memory/unique_ptr.h>
 #include <glacier/status/error_or.h>
@@ -22,6 +23,8 @@ class YellowstoneServer : public YellowstoneServerBase {
   glcr::ErrorCode HandleGetDenali(const Empty&, DenaliInfo&) override;
   glcr::ErrorCode HandleRegisterEndpoint(const RegisterEndpointRequest&,
                                          Empty&) override;
+  glcr::ErrorCode HandleGetEndpoint(const GetEndpointRequest&,
+                                    Endpoint&) override;
 
   glcr::ErrorCode WaitDenaliRegistered();
   glcr::ErrorCode WaitVictoriaFallsRegistered();
@@ -29,11 +32,10 @@ class YellowstoneServer : public YellowstoneServerBase {
   glcr::SharedPtr<VFSClient> GetVFSClient();
 
  private:
-  // TODO: Store these in a data structure.
-  z_cap_t denali_cap_ = 0;
+  glcr::HashMap<glcr::String, z_cap_t> endpoint_map_;
+
   uint64_t device_id_ = 0;
   uint64_t lba_offset_ = 0;
-  z_cap_t victoria_falls_cap_ = 0;
   glcr::SharedPtr<VFSClient> vfs_client_;
 
   PciReader pci_reader_;

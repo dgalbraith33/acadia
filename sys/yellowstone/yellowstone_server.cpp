@@ -82,8 +82,11 @@ glcr::ErrorCode YellowstoneServer::HandleGetFramebufferInfo(
 
 glcr::ErrorCode YellowstoneServer::HandleGetDenali(const Empty&,
                                                    DenaliInfo& info) {
+  if (!endpoint_map_.Contains("denali")) {
+    return glcr::NOT_FOUND;
+  }
   z_cap_t new_denali;
-  check(ZCapDuplicate(denali_cap_, kZionPerm_All, &new_denali));
+  check(ZCapDuplicate(endpoint_map_.at("denali"), kZionPerm_All, &new_denali));
   info.set_denali_endpoint(new_denali);
   info.set_device_id(device_id_);
   info.set_lba_offset(lba_offset_);
@@ -93,11 +96,9 @@ glcr::ErrorCode YellowstoneServer::HandleGetDenali(const Empty&,
 glcr::ErrorCode YellowstoneServer::HandleRegisterEndpoint(
     const RegisterEndpointRequest& req, Empty&) {
   dbgln("Registering {}.", req.endpoint_name().view());
+  check(endpoint_map_.Insert(req.endpoint_name(), req.endpoint_capability()));
   if (req.endpoint_name() == "denali") {
-    // FIXME: Rather than blocking and calling the denali service
-    // immediately we should signal the main thread that it can continue init.
-    denali_cap_ = req.endpoint_capability();
-    auto part_info_or = HandleDenaliRegistration(denali_cap_);
+    auto part_info_or = HandleDenaliRegistration(req.endpoint_capability());
     if (!part_info_or.ok()) {
       check(part_info_or.error());
     }
@@ -106,14 +107,25 @@ glcr::ErrorCode YellowstoneServer::HandleRegisterEndpoint(
 
     check(has_denali_mutex_.Release());
   } else if (req.endpoint_name() == "victoriafalls") {
-    victoria_falls_cap_ = req.endpoint_capability();
     // FIXME: Probably make a separate copy for use within yellowstone vs
     // transmit to other processes.
-    vfs_client_ = glcr::MakeShared<VFSClient>(victoria_falls_cap_);
+    vfs_client_ = glcr::MakeShared<VFSClient>(req.endpoint_capability());
     check(has_victoriafalls_mutex_.Release());
   } else {
     dbgln("[WARN] Got endpoint cap type: {}", req.endpoint_name().cstr());
   }
+  return glcr::OK;
+}
+
+glcr::ErrorCode YellowstoneServer::HandleGetEndpoint(
+    const GetEndpointRequest& req, Endpoint& resp) {
+  if (!endpoint_map_.Contains(req.endpoint_name())) {
+    return glcr::NOT_FOUND;
+  }
+  z_cap_t cap = endpoint_map_.at(req.endpoint_name());
+  z_cap_t new_cap;
+  check(ZCapDuplicate(cap, kZionPerm_All, &new_cap));
+  resp.set_endpoint(new_cap);
   return glcr::OK;
 }
 

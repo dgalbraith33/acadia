@@ -9,6 +9,8 @@ class Framebuffer {
 
   void DrawPixel(uint32_t row, uint32_t col, uint32_t pixel);
 
+  void DrawGlyph(uint8_t* glyph);
+
  private:
   // FIXME: Implement Yunq copy or move so we
   // don't have to store a reference here.
@@ -16,4 +18,5 @@ class Framebuffer {
 
   OwnedMemoryRegion fb_memory_;
   uint32_t* fb_;
+  uint32_t cursor_pos_;
 };

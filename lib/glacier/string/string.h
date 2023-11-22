@@ -13,7 +13,12 @@ class String {
   String(const char* cstr, uint64_t str_len);
   String(StringView str);
 
-  String(const String&) = delete;
+  String(const String&);
+  String& operator=(const String&);
+  String(String&&);
+  String& operator=(String&&);
+
+  ~String();
 
   const char* cstr() const { return cstr_; }
   uint64_t length() const { return length_; }

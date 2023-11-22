@@ -98,6 +98,17 @@ glcr::ErrorCode YellowstoneServerBase::HandleRequest(const glcr::ByteBuffer& req
       break;
     }
     case 1: {
+      GetEndpointRequest yunq_request;
+      Endpoint yunq_response;
+
+      yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+
+      RET_ERR(HandleGetEndpoint(yunq_request, yunq_response));
+
+      resp_length = yunq_response.SerializeToBytes(response, kHeaderSize, resp_caps);
+      break;
+    }
+    case 2: {
       Empty yunq_request;
       AhciInfo yunq_response;
 
@@ -108,7 +119,7 @@ glcr::ErrorCode YellowstoneServerBase::HandleRequest(const glcr::ByteBuffer& req
       resp_length = yunq_response.SerializeToBytes(response, kHeaderSize, resp_caps);
       break;
     }
-    case 2: {
+    case 3: {
       Empty yunq_request;
       FramebufferInfo yunq_response;
 
@@ -119,7 +130,7 @@ glcr::ErrorCode YellowstoneServerBase::HandleRequest(const glcr::ByteBuffer& req
       resp_length = yunq_response.SerializeToBytes(response, kHeaderSize, resp_caps);
       break;
     }
-    case 3: {
+    case 4: {
       Empty yunq_request;
       DenaliInfo yunq_response;
 

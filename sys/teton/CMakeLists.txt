@@ -1,5 +1,6 @@
 add_executable(teton
   framebuffer/framebuffer.cpp
+  framebuffer/psf.cpp
   teton.cpp
   )
 
@@ -10,6 +11,7 @@ target_include_directories(teton
 target_link_libraries(teton
   glacier
   mammoth
+  victoriafalls_yunq
   yellowstone_yunq
   )
 

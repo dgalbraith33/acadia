@@ -28,6 +28,46 @@ String::String(const char* cstr, uint64_t str_len) : length_(str_len) {
 
 String::String(StringView str) : String(str.data(), str.size()) {}
 
+String::String(const String& other) : String(other.cstr_, other.length_) {}
+
+String& String::operator=(const String& other) {
+  if (cstr_) {
+    delete cstr_;
+  }
+  length_ = other.length_;
+  cstr_ = new char[length_ + 1];
+  for (uint64_t i = 0; i < length_; i++) {
+    cstr_[i] = other.cstr_[i];
+  }
+  cstr_[length_] = '\0';
+
+  return *this;
+}
+
+String::String(String&& other) : cstr_(other.cstr_), length_(other.length_) {
+  other.cstr_ = nullptr;
+  other.length_ = 0;
+}
+
+String& String::operator=(String&& other) {
+  if (cstr_) {
+    delete cstr_;
+  }
+  cstr_ = other.cstr_;
+  length_ = other.length_;
+
+  other.cstr_ = nullptr;
+  other.length_ = 0;
+
+  return *this;
+}
+
+String::~String() {
+  if (cstr_) {
+    delete cstr_;
+  }
+}
+
 bool String::operator==(const String& other) {
   if (other.length_ != length_) {
     return false;

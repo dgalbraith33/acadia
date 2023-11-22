@@ -46,6 +46,46 @@ class Empty {
   // Parses everything except for caps.
   void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
 };
+class GetEndpointRequest {
+ public:
+  GetEndpointRequest() {}
+  // Delete copy and move until implemented.
+  GetEndpointRequest(const GetEndpointRequest&) = delete;
+  GetEndpointRequest(GetEndpointRequest&&) = delete;
+
+  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
+  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
+  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
+  const glcr::String& endpoint_name() const { return endpoint_name_; }
+  void set_endpoint_name(const glcr::String& value) { endpoint_name_ = value; }
+
+ private:
+  glcr::String endpoint_name_;
+
+  // Parses everything except for caps.
+  void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+};
+class Endpoint {
+ public:
+  Endpoint() {}
+  // Delete copy and move until implemented.
+  Endpoint(const Endpoint&) = delete;
+  Endpoint(Endpoint&&) = delete;
+
+  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
+  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
+  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
+  const z_cap_t& endpoint() const { return endpoint_; }
+  void set_endpoint(const z_cap_t& value) { endpoint_ = value; }
+
+ private:
+  z_cap_t endpoint_;
+
+  // Parses everything except for caps.
+  void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+};
 class AhciInfo {
  public:
   AhciInfo() {}

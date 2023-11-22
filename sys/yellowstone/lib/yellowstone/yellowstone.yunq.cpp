@@ -134,6 +134,113 @@ uint64_t Empty::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr:
 
   return next_extension;
 }
+void GetEndpointRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  ParseFromBytesInternal(bytes, offset);
+}
+
+void GetEndpointRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
+  ParseFromBytesInternal(bytes, offset);
+}
+
+void GetEndpointRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  CheckHeader(bytes);
+  // Parse endpoint_name.
+  auto endpoint_name_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
+
+  set_endpoint_name(bytes.StringAt(offset + endpoint_name_pointer.offset, endpoint_name_pointer.length));
+
+}
+
+uint64_t GetEndpointRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
+  uint32_t next_extension = header_size + 8 * 1;
+  const uint32_t core_size = next_extension;
+  // Write endpoint_name.
+  ExtPointer endpoint_name_ptr{
+    .offset = next_extension,
+    // FIXME: Check downcast of str length.
+    .length = (uint32_t)endpoint_name().length(),
+  };
+
+  bytes.WriteStringAt(offset + next_extension, endpoint_name());
+  next_extension += endpoint_name_ptr.length;
+
+  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 0), endpoint_name_ptr);
+
+  // The next extension pointer is the length of the message. 
+  WriteHeader(bytes, offset, core_size, next_extension);
+
+  return next_extension;
+}
+
+uint64_t GetEndpointRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
+  uint32_t next_extension = header_size + 8 * 1;
+  const uint32_t core_size = next_extension;
+  uint64_t next_cap = 0;
+  // Write endpoint_name.
+  ExtPointer endpoint_name_ptr{
+    .offset = next_extension,
+    // FIXME: Check downcast of str length.
+    .length = (uint32_t)endpoint_name().length(),
+  };
+
+  bytes.WriteStringAt(offset + next_extension, endpoint_name());
+  next_extension += endpoint_name_ptr.length;
+
+  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 0), endpoint_name_ptr);
+
+  // The next extension pointer is the length of the message. 
+  WriteHeader(bytes, offset, core_size, next_extension);
+
+  return next_extension;
+}
+void Endpoint::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  ParseFromBytesInternal(bytes, offset);
+  // Parse endpoint.
+  // FIXME: Implement in-buffer capabilities for inprocess serialization.
+  set_endpoint(0);
+}
+
+void Endpoint::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
+  ParseFromBytesInternal(bytes, offset);
+  // Parse endpoint.
+  uint64_t endpoint_ptr = bytes.At<uint64_t>(offset + header_size + (8 * 0));
+
+  set_endpoint(caps.At(endpoint_ptr));
+}
+
+void Endpoint::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  CheckHeader(bytes);
+  // Parse endpoint.
+  // Skip Cap.
+
+}
+
+uint64_t Endpoint::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
+  uint32_t next_extension = header_size + 8 * 1;
+  const uint32_t core_size = next_extension;
+  // Write endpoint.
+  // FIXME: Implement inbuffer capabilities.
+  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 0), 0);
+
+  // The next extension pointer is the length of the message. 
+  WriteHeader(bytes, offset, core_size, next_extension);
+
+  return next_extension;
+}
+
+uint64_t Endpoint::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
+  uint32_t next_extension = header_size + 8 * 1;
+  const uint32_t core_size = next_extension;
+  uint64_t next_cap = 0;
+  // Write endpoint.
+  caps.WriteAt(next_cap, endpoint());
+  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 0), next_cap++);
+
+  // The next extension pointer is the length of the message. 
+  WriteHeader(bytes, offset, core_size, next_extension);
+
+  return next_extension;
+}
 void AhciInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
   ParseFromBytesInternal(bytes, offset);
   // Parse ahci_region.
