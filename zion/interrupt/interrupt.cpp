@@ -75,6 +75,12 @@ extern "C" void interrupt_divide_by_zero(InterruptFrame* frame) {
   panic("DIV0");
 }
 
+extern "C" void isr_invalid_opcode();
+extern "C" void interrupt_invalid_opcode(InterruptFrame* frame) {
+  dbgln("RIP: {x}", frame->rip);
+  panic("INVALID OPCODE");
+}
+
 extern "C" void isr_protection_fault();
 extern "C" void interrupt_protection_fault(InterruptFrame* frame) {
   dbgln("General Protection Fault");
@@ -183,6 +189,7 @@ extern "C" void interrupt_pci4(InterruptFrame*) {
 
 void InitIdt() {
   gIdt[0] = CreateDescriptor(isr_divide_by_zero);
+  gIdt[0x6] = CreateDescriptor(isr_invalid_opcode);
   gIdt[0xD] = CreateDescriptor(isr_protection_fault);
   gIdt[0xE] = CreateDescriptor(isr_page_fault);
   gIdt[0x13] = CreateDescriptor(isr_fpe_fault);
