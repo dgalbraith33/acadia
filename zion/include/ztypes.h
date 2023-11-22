@@ -60,6 +60,9 @@ const uint64_t kZionCapRelease = 0x71;
 const uint64_t kZionMutexCreate = 0x80;
 const uint64_t kZionMutexLock = 0x81;
 const uint64_t kZionMutexRelease = 0x82;
+const uint64_t kZionSemaphoreCreate = 0x83;
+const uint64_t kZionSemaphoreWait = 0x84;
+const uint64_t kZionSemaphoreSignal = 0x85;
 
 // Debugging Calls.
 const uint64_t kZionDebug = 0x1'0000;
@@ -89,6 +92,9 @@ const uint64_t kZionPerm_SpawnThread = 0x200;
 // Permissions on mutexes.
 const uint64_t kZionPerm_Lock = 0x100;
 const uint64_t kZionPerm_Release = 0x200;
+// Permissions on semaphores.
+const uint64_t kZionPerm_Wait = 0x100;
+const uint64_t kZionPerm_Signal = 0x200;
 
 const z_perm_t kZionPerm_None = 0;
 const z_perm_t kZionPerm_All = -1;

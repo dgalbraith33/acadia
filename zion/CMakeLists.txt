@@ -31,6 +31,7 @@ add_executable(zion
   object/port.cpp
   object/process.cpp
   object/reply_port.cpp
+  object/semaphore.cpp
   object/thread.cpp
   scheduler/context_switch.s
   scheduler/jump_user_space.s

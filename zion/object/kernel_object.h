@@ -15,6 +15,7 @@ class KernelObject : public glcr::RefCounted<KernelObject> {
     ENDPOINT = 0x7,
     REPLY_PORT = 0x8,
     MUTEX = 0x9,
+    SEMAPHORE = 0x10,
   };
 
   virtual uint64_t TypeTag() = 0;

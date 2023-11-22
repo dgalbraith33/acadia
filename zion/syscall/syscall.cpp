@@ -88,6 +88,9 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req) {
     CASE(MutexCreate);
     CASE(MutexLock);
     CASE(MutexRelease);
+    CASE(SemaphoreCreate);
+    CASE(SemaphoreWait);
+    CASE(SemaphoreSignal);
     // syscall/debug.h
     CASE(Debug);
     default:

@@ -64,5 +64,8 @@ SYS1(CapRelease, z_cap_t, cap);
 SYS1(MutexCreate, z_cap_t*, mutex_cap);
 SYS1(MutexLock, z_cap_t, mutex_cap);
 SYS1(MutexRelease, z_cap_t, mutex_cap);
+SYS1(SemaphoreCreate, z_cap_t*, semaphore_cap);
+SYS1(SemaphoreWait, z_cap_t, semaphore_cap);
+SYS1(SemaphoreSignal, z_cap_t, semaphore_cap);
 
 SYS1(Debug, const char*, message);
