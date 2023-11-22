@@ -10,6 +10,7 @@ add_library(mammoth STATIC
   src/process.cpp
   src/port_client.cpp
   src/port_server.cpp
+  src/semaphore.cpp
   src/thread.cpp
   )
 
