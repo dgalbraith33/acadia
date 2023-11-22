@@ -20,6 +20,8 @@ class Psf {
   void DumpHeader();
 
   uint32_t size() { return header_->numglyph; }
+  uint32_t width() { return header_->width; }
+  uint32_t height() { return header_->height; }
 
   uint8_t* glyph(uint32_t index) {
     return reinterpret_cast<uint8_t*>(psf_file_.vaddr() + header_->headersize +

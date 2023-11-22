@@ -3,6 +3,7 @@
 #include <victoriafalls/victoriafalls.yunq.client.h>
 #include <yellowstone/yellowstone.yunq.client.h>
 
+#include "framebuffer/console.h"
 #include "framebuffer/framebuffer.h"
 #include "framebuffer/psf.h"
 
@@ -22,12 +23,6 @@ uint64_t main(uint64_t init_port) {
 
   Framebuffer fbuf(framebuffer);
 
-  for (uint64_t r = 0; r < 20; r++) {
-    for (uint64_t c = 0; c < 20; c++) {
-      fbuf.DrawPixel(r, c, 0x0000FF00);
-    }
-  }
-
   // 2. Parse a font file.
 
   GetEndpointRequest req;
@@ -45,7 +40,8 @@ uint64_t main(uint64_t init_port) {
   Psf psf(OwnedMemoryRegion::FromCapability(fresp.memory()));
   psf.DumpHeader();
 
-  fbuf.DrawGlyph(psf.glyph('C'));
+  Console console(fbuf, psf);
+  console.WriteString("Hello World!");
 
   // 3. Write a line to the screen.
 

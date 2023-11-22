@@ -11,6 +11,9 @@ class Framebuffer {
 
   void DrawGlyph(uint8_t* glyph);
 
+  uint64_t width() { return fb_info_.width(); }
+  uint64_t height() { return fb_info_.height(); }
+
  private:
   // FIXME: Implement Yunq copy or move so we
   // don't have to store a reference here.

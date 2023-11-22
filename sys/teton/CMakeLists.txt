@@ -1,4 +1,5 @@
 add_executable(teton
+  framebuffer/console.cpp
   framebuffer/framebuffer.cpp
   framebuffer/psf.cpp
   teton.cpp
