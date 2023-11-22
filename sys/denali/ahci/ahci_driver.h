@@ -2,7 +2,7 @@
 
 #include <glacier/memory/unique_ptr.h>
 #include <glacier/status/error_or.h>
-#include <mammoth/thread.h>
+#include <mammoth/proc/thread.h>
 #include <ztypes.h>
 
 #include "ahci/ahci.h"

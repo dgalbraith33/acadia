@@ -4,12 +4,12 @@ add_library(mammoth STATIC
   ipc/endpoint_server.cpp
   ipc/port_client.cpp
   ipc/port_server.cpp
+  proc/process.cpp
+  proc/thread.cpp
   src/debug.cpp
   src/init.cpp
   src/memory_region.cpp
   src/new.cpp
-  src/process.cpp
-  src/thread.cpp
   sync/mutex.cpp
   sync/semaphore.cpp
   )

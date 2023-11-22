@@ -1,4 +1,4 @@
-#include "mammoth/process.h"
+#include "proc/process.h"
 
 #include <glacier/status/error.h>
 #include <zcall.h>

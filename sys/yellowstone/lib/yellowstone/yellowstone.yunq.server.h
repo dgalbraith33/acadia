@@ -2,7 +2,7 @@
 #pragma once
 
 #include <glacier/status/error_or.h>
-#include <mammoth/thread.h>
+#include <mammoth/proc/thread.h>
 #include <ztypes.h>
 
 #include "yellowstone.yunq.h"

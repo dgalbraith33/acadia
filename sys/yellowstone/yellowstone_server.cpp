@@ -5,7 +5,6 @@
 #include <mammoth/debug.h>
 #include <mammoth/init.h>
 #include <mammoth/memory_region.h>
-#include <mammoth/process.h>
 #include <stdlib.h>
 #include <zcall.h>
 

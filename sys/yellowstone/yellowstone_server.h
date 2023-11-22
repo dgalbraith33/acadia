@@ -5,7 +5,6 @@
 #include <glacier/memory/unique_ptr.h>
 #include <glacier/status/error_or.h>
 #include <mammoth/sync/semaphore.h>
-#include <mammoth/thread.h>
 #include <victoriafalls/victoriafalls.yunq.client.h>
 
 #include "hw/pcie.h"

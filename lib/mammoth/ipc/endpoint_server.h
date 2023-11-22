@@ -7,7 +7,7 @@
 #include "mammoth/ipc/endpoint_client.h"
 #include "mammoth/ipc/request_context.h"
 #include "mammoth/ipc/response_context.h"
-#include "mammoth/thread.h"
+#include "mammoth/proc/thread.h"
 
 class EndpointServer {
  public:

@@ -1,4 +1,4 @@
-#include "mammoth/thread.h"
+#include "proc/thread.h"
 
 #include <zcall.h>
 
