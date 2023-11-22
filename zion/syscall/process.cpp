@@ -7,7 +7,7 @@
 
 z_err_t ProcessExit(ZProcessExitReq* req) {
   auto curr_thread = gScheduler->CurrentThread();
-  dbgln("Exit code: {x}", req->code);
+  dbgln("Exit code: {}", static_cast<glcr::ErrorCode>(req->code));
   curr_thread->process().Exit();
   panic("Returned from thread exit");
   return glcr::UNIMPLEMENTED;

@@ -1,4 +1,5 @@
 set(glacier_files
+  status/error.cpp
   string/string.cpp
   string/string_builder.cpp
   string/string_view.cpp

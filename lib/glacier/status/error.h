@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+#include "glacier/string/string_view.h"
+
 namespace glcr {
 
 enum ErrorCode : uint64_t {
@@ -28,6 +30,8 @@ enum ErrorCode : uint64_t {
   CAP_PERMISSION_DENIED = 0x1002,
 
 };
+
+StringView ErrorCodeToStr(ErrorCode code);
 
 #define RET_ERR(expr)                                              \
   {                                                                \

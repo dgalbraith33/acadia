@@ -57,7 +57,7 @@ void StrFormatValue(StringBuilder& builder, const uint64_t& value,
 template <>
 void StrFormatValue(StringBuilder& builder, const ErrorCode& value,
                     StringView opts) {
-  StrFormatValue(builder, static_cast<uint64_t>(value), opts);
+  StrFormatValue(builder, ErrorCodeToStr(value), opts);
 }
 
 template <>
