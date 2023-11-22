@@ -6,8 +6,6 @@
 
 - Reserve lower physical memory for hardware accesses as necessary.
 - Return errors rather than panicking on allocation failure
-- Return memory pages to the pool when a MemoryObject goes out of scope.
-- Add diagnostics to inspect physical memory usage.
 
 ### Virtual Memory
 
@@ -46,7 +44,6 @@
 
 - Add different scheduling priorities.
 - Add thread sleep capability.
-- Add synchronization syscalls for userspace.
 
 ## Large Projects
 
