@@ -1,7 +1,7 @@
 #include "ahci/ahci_device.h"
 
 #include <glacier/status/error.h>
-#include <mammoth/debug.h>
+#include <mammoth/util/debug.h>
 #include <string.h>
 #include <zcall.h>
 

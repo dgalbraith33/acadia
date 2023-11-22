@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glacier/container/vector.h>
+#include <mammoth/util/memory_region.h>
 #include <stdint.h>
 
 #include "fs/ext2/ext2_block_reader.h"

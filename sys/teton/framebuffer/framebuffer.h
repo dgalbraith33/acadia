@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mammoth/memory_region.h>
+#include <mammoth/util/memory_region.h>
 #include <yellowstone/yellowstone.yunq.h>
 
 class Framebuffer {

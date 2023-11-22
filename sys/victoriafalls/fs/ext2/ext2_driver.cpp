@@ -1,7 +1,7 @@
 #include "fs/ext2/ext2_driver.h"
 
 #include <glacier/string/string.h>
-#include <mammoth/debug.h>
+#include <mammoth/util/debug.h>
 
 glcr::ErrorOr<Ext2Driver> Ext2Driver::Init(const DenaliInfo& denali_info) {
   ASSIGN_OR_RETURN(glcr::SharedPtr<Ext2BlockReader> reader,

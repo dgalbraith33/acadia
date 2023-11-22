@@ -2,9 +2,9 @@
 
 #include <denali/denali.yunq.client.h>
 #include <glacier/string/string.h>
-#include <mammoth/debug.h>
-#include <mammoth/init.h>
-#include <mammoth/memory_region.h>
+#include <mammoth/util/debug.h>
+#include <mammoth/util/init.h>
+#include <mammoth/util/memory_region.h>
 #include <stdlib.h>
 #include <zcall.h>
 

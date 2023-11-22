@@ -1,5 +1,5 @@
-#include <mammoth/debug.h>
-#include <mammoth/init.h>
+#include <mammoth/util/debug.h>
+#include <mammoth/util/init.h>
 #include <yellowstone/yellowstone.yunq.client.h>
 
 #include "fs/ext2/ext2_driver.h"

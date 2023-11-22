@@ -2,8 +2,8 @@
 
 #include <zcall.h>
 
-#include "mammoth/debug.h"
-#include "mammoth/init.h"
+#include "util/debug.h"
+#include "util/init.h"
 
 namespace {
 

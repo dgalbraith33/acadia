@@ -3,7 +3,7 @@
 #include <glacier/status/error.h>
 #include <zcall.h>
 
-#include "mammoth/debug.h"
+#include "util/debug.h"
 
 PortClient PortClient::AdoptPort(z_cap_t cap) { return PortClient(cap); }
 PortClient::PortClient(z_cap_t port_cap) : port_cap_(port_cap) {}

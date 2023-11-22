@@ -1,6 +1,6 @@
 #include "ipc/endpoint_server.h"
 
-#include "mammoth/debug.h"
+#include "util/debug.h"
 
 // Declared as friend in EndpointServer.
 void EndpointServerThreadBootstrap(void* endpoint_server) {

@@ -3,7 +3,7 @@
 #include <denali/denali.yunq.client.h>
 #include <glacier/memory/shared_ptr.h>
 #include <glacier/status/error_or.h>
-#include <mammoth/memory_region.h>
+#include <mammoth/util/memory_region.h>
 #include <yellowstone/yellowstone.yunq.h>
 
 #include "fs/ext2/ext2.h"

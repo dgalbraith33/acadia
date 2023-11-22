@@ -1,7 +1,7 @@
 #include "framebuffer/psf.h"
 
 #include <glacier/memory/move.h>
-#include <mammoth/debug.h>
+#include <mammoth/util/debug.h>
 
 namespace {
 

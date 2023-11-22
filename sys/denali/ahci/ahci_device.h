@@ -1,7 +1,7 @@
 #pragma once
 
 #include <glacier/status/error.h>
-#include <mammoth/memory_region.h>
+#include <mammoth/util/memory_region.h>
 #include <ztypes.h>
 
 #include "ahci/ahci.h"

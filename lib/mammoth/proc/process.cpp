@@ -3,11 +3,11 @@
 #include <glacier/status/error.h>
 #include <zcall.h>
 
-#include "mammoth/debug.h"
-#include "mammoth/init.h"
-#include "mammoth/ipc/endpoint_server.h"
-#include "mammoth/ipc/port_client.h"
-#include "mammoth/ipc/port_server.h"
+#include "ipc/endpoint_server.h"
+#include "ipc/port_client.h"
+#include "ipc/port_server.h"
+#include "util/debug.h"
+#include "util/init.h"
 
 #define MAM_PROC_DEBUG 0
 

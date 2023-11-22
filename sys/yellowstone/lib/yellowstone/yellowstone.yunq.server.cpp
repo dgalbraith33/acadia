@@ -1,7 +1,7 @@
 // Generated file -- DO NOT MODIFY.
 #include "yellowstone.yunq.server.h"
 
-#include <mammoth/debug.h>
+#include <mammoth/util/debug.h>
 #include <zcall.h>
 
 namespace {

@@ -1,9 +1,9 @@
-#include "mammoth/memory_region.h"
+#include "util/memory_region.h"
 
 #include <zcall.h>
 
-#include "mammoth/debug.h"
-#include "mammoth/init.h"
+#include "util/debug.h"
+#include "util/init.h"
 
 OwnedMemoryRegion::OwnedMemoryRegion(OwnedMemoryRegion&& other)
     : OwnedMemoryRegion(other.vmmo_cap_, other.vaddr_, other.size_) {

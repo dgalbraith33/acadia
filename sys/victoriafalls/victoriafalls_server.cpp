@@ -1,7 +1,7 @@
 #include "victoriafalls_server.h"
 
 #include <glacier/string/str_split.h>
-#include <mammoth/debug.h>
+#include <mammoth/util/debug.h>
 #include <zcall.h>
 
 glcr::ErrorOr<glcr::UniquePtr<VFSServer>> VFSServer::Create(

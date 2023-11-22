@@ -1,7 +1,7 @@
 // Generated file -- DO NOT MODIFY.
 #include "denali.yunq.server.h"
 
-#include <mammoth/debug.h>
+#include <mammoth/util/debug.h>
 #include <zcall.h>
 
 namespace {

@@ -1,4 +1,4 @@
-#include "include/mammoth/debug.h"
+#include "util/debug.h"
 
 #include <glacier/status/error.h>
 #include <zcall.h>

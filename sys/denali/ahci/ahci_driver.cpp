@@ -2,7 +2,7 @@
 
 #include <glacier/status/error.h>
 #include <glacier/status/error_or.h>
-#include <mammoth/debug.h>
+#include <mammoth/util/debug.h>
 #include <stdint.h>
 #include <zcall.h>
 

@@ -6,12 +6,12 @@ add_library(mammoth STATIC
   ipc/port_server.cpp
   proc/process.cpp
   proc/thread.cpp
-  src/debug.cpp
-  src/init.cpp
-  src/memory_region.cpp
-  src/new.cpp
   sync/mutex.cpp
   sync/semaphore.cpp
+  util/debug.cpp
+  util/init.cpp
+  util/memory_region.cpp
+  util/new.cpp
   )
 
 target_include_directories(mammoth

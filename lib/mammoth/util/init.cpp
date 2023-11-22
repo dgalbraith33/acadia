@@ -1,10 +1,10 @@
-#include "mammoth/init.h"
+#include "util/init.h"
 
 #include <glacier/status/error.h>
 #include <ztypes.h>
 
-#include "mammoth/debug.h"
-#include "mammoth/ipc/port_server.h"
+#include "ipc/port_server.h"
+#include "util/debug.h"
 
 uint64_t gSelfProcCap = 0;
 uint64_t gSelfVmasCap = 0;

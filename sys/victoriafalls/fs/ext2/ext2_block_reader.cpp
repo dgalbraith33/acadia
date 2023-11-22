@@ -1,6 +1,6 @@
 #include "fs/ext2/ext2_block_reader.h"
 
-#include "mammoth/debug.h"
+#include <mammoth/util/debug.h>
 
 glcr::ErrorOr<glcr::SharedPtr<Ext2BlockReader>> Ext2BlockReader::Init(
     const DenaliInfo& denali_info) {

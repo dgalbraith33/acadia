@@ -1,9 +1,9 @@
 #include <glacier/string/str_format.h>
 #include <glacier/string/str_split.h>
-#include <mammoth/debug.h>
-#include <mammoth/init.h>
-#include <mammoth/memory_region.h>
 #include <mammoth/proc/process.h>
+#include <mammoth/util/debug.h>
+#include <mammoth/util/init.h>
+#include <mammoth/util/memory_region.h>
 #include <zcall.h>
 #include <ztypes.h>
 

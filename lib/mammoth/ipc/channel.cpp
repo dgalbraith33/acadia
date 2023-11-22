@@ -2,7 +2,7 @@
 
 #include <zcall.h>
 
-#include "mammoth/debug.h"
+#include "util/debug.h"
 
 namespace {
 

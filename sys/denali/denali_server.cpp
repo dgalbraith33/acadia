@@ -2,7 +2,7 @@
 
 #include <glacier/memory/move.h>
 #include <glacier/status/error.h>
-#include <mammoth/debug.h>
+#include <mammoth/util/debug.h>
 #include <zcall.h>
 
 glcr::ErrorOr<glcr::UniquePtr<DenaliServer>> DenaliServer::Create(

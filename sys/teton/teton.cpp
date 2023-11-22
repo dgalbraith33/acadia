@@ -1,5 +1,5 @@
-#include <mammoth/debug.h>
-#include <mammoth/init.h>
+#include <mammoth/util/debug.h>
+#include <mammoth/util/init.h>
 #include <victoriafalls/victoriafalls.yunq.client.h>
 #include <yellowstone/yellowstone.yunq.client.h>
 

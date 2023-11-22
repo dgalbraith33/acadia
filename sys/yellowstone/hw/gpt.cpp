@@ -2,8 +2,8 @@
 
 #include <glacier/memory/move.h>
 #include <glacier/status/error.h>
-#include <mammoth/debug.h>
-#include <mammoth/memory_region.h>
+#include <mammoth/util/debug.h>
+#include <mammoth/util/memory_region.h>
 #include <zcall.h>
 #include <zglobal.h>
 

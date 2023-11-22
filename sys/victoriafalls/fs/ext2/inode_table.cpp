@@ -1,7 +1,5 @@
 #include "fs/ext2/inode_table.h"
 
-#include <mammoth/debug.h>
-
 InodeTable::InodeTable(const glcr::SharedPtr<Ext2BlockReader>& reader,
                        OwnedMemoryRegion&& bgdt_region)
     : ext2_reader_(reader),

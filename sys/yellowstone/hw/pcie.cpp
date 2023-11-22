@@ -1,7 +1,7 @@
 #include "hw/pcie.h"
 
-#include <mammoth/debug.h>
-#include <mammoth/init.h>
+#include <mammoth/util/debug.h>
+#include <mammoth/util/init.h>
 #include <zcall.h>
 
 #define PCI_DEBUG 0

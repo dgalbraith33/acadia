@@ -1,6 +1,6 @@
 
-#include <mammoth/debug.h>
-#include <mammoth/init.h>
+#include <mammoth/util/debug.h>
+#include <mammoth/util/init.h>
 #include <stdint.h>
 #include <yellowstone/yellowstone.yunq.client.h>
 

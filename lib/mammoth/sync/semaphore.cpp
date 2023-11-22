@@ -2,7 +2,7 @@
 
 #include <zcall.h>
 
-#include "mammoth/debug.h"
+#include "util/debug.h"
 
 Semaphore::Semaphore() { check(ZSemaphoreCreate(&semaphore_cap_)); }
 Semaphore::~Semaphore() { check(ZCapRelease(semaphore_cap_)); }

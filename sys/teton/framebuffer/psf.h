@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mammoth/memory_region.h>
+#include <mammoth/util/memory_region.h>
 
 struct PsfHeader {
   uint32_t magic;         /* magic bytes to identify PSF */

@@ -1,6 +1,6 @@
 #include "framebuffer/console.h"
 
-#include <mammoth/debug.h>
+#include <mammoth/util/debug.h>
 
 void Console::WriteChar(char c) {
   if (c == '\n') {
