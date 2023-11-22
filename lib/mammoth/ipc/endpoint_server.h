@@ -5,8 +5,8 @@
 #include <ztypes.h>
 
 #include "mammoth/ipc/endpoint_client.h"
-#include "mammoth/request_context.h"
-#include "mammoth/response_context.h"
+#include "mammoth/ipc/request_context.h"
+#include "mammoth/ipc/response_context.h"
 #include "mammoth/thread.h"
 
 class EndpointServer {

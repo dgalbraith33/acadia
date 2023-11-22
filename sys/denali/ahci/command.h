@@ -1,7 +1,5 @@
 #pragma once
 
-#include <mammoth/memory_region.h>
-#include <mammoth/response_context.h>
 #include <mammoth/sync/semaphore.h>
 #include <stdint.h>
 
