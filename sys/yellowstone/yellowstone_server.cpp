@@ -7,6 +7,7 @@
 #include <mammoth/memory_region.h>
 #include <mammoth/process.h>
 #include <stdlib.h>
+#include <zcall.h>
 
 #include "hw/gpt.h"
 #include "hw/pcie.h"

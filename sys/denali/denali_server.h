@@ -1,7 +1,6 @@
 #pragma once
 
 #include <glacier/status/error.h>
-#include <mammoth/endpoint_server.h>
 
 #include "ahci/ahci_driver.h"
 #include "lib/denali/denali.yunq.server.h"

@@ -4,7 +4,7 @@
 #include <ztypes.h>
 
 #include "mammoth/debug.h"
-#include "mammoth/port_server.h"
+#include "mammoth/ipc/port_server.h"
 
 uint64_t gSelfProcCap = 0;
 uint64_t gSelfVmasCap = 0;

@@ -1,22 +1,24 @@
 add_library(mammoth STATIC
-  src/channel.cpp
+  ipc/channel.cpp
+  ipc/endpoint_client.cpp
+  ipc/endpoint_server.cpp
+  ipc/port_client.cpp
+  ipc/port_server.cpp
   src/debug.cpp
-  src/endpoint_client.cpp
-  src/endpoint_server.cpp
   src/init.cpp
   src/memory_region.cpp
   src/mutex.cpp
   src/new.cpp
   src/process.cpp
-  src/port_client.cpp
-  src/port_server.cpp
   src/semaphore.cpp
   src/thread.cpp
   )
 
 target_include_directories(mammoth
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+  "${CMAKE_CURRENT_SOURCE_DIR}/.."
+  )
 
 target_link_libraries(mammoth
   glacier

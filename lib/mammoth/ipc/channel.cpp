@@ -1,4 +1,4 @@
-#include "mammoth/channel.h"
+#include "ipc/channel.h"
 
 #include <zcall.h>
 

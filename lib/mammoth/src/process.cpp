@@ -4,10 +4,10 @@
 #include <zcall.h>
 
 #include "mammoth/debug.h"
-#include "mammoth/endpoint_server.h"
 #include "mammoth/init.h"
-#include "mammoth/port_client.h"
-#include "mammoth/port_server.h"
+#include "mammoth/ipc/endpoint_server.h"
+#include "mammoth/ipc/port_client.h"
+#include "mammoth/ipc/port_server.h"
 
 #define MAM_PROC_DEBUG 0
 

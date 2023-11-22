@@ -1,4 +1,4 @@
-#include "mammoth/endpoint_server.h"
+#include "ipc/endpoint_server.h"
 
 #include "mammoth/debug.h"
 

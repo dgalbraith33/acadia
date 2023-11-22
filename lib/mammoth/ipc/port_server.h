@@ -3,7 +3,7 @@
 #include <glacier/status/error_or.h>
 #include <ztypes.h>
 
-#include "mammoth/port_client.h"
+#include "mammoth/ipc/port_client.h"
 
 class PortServer {
  public:

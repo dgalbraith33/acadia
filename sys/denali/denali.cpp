@@ -1,8 +1,6 @@
 
 #include <mammoth/debug.h>
-#include <mammoth/endpoint_server.h>
 #include <mammoth/init.h>
-#include <mammoth/port_client.h>
 #include <stdint.h>
 #include <yellowstone/yellowstone.yunq.client.h>
 
@@ -11,8 +9,6 @@
 
 uint64_t main(uint64_t init_port_cap) {
   check(ParseInitPort(init_port_cap));
-  glcr::UniquePtr<EndpointClient> yellowstone =
-      EndpointClient::AdoptEndpoint(gInitEndpointCap);
 
   YellowstoneClient stub(gInitEndpointCap);
   Empty empty;

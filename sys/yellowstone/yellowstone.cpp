@@ -1,7 +1,6 @@
 #include <glacier/string/str_format.h>
 #include <glacier/string/str_split.h>
 #include <mammoth/debug.h>
-#include <mammoth/endpoint_client.h>
 #include <mammoth/init.h>
 #include <mammoth/memory_region.h>
 #include <mammoth/process.h>
