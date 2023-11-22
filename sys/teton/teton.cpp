@@ -41,7 +41,10 @@ uint64_t main(uint64_t init_port) {
   psf.DumpHeader();
 
   Console console(fbuf, psf);
-  console.WriteString("Hello World!");
+  console.WriteString("Hello World!\n");
+  for (uint8_t i = 0x20; i < 0x7E; i++) {
+    console.WriteChar(i);
+  }
 
   // 3. Write a line to the screen.
 

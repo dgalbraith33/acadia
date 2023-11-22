@@ -20,4 +20,7 @@ class Console {
   Framebuffer& framebuf_;
   Psf& psf_;
   uint64_t cursor_pos_ = 0;
+
+  void CursorIncr();
+  void CursorReturn();
 };
