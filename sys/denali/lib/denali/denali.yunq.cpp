@@ -100,11 +100,21 @@ void ReadManyRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint
     lba_.PushBack(bytes.At<uint64_t>(i));
   }
 
+  // Parse sector_cnt.
+  auto sector_cnt_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 2));
+
+  sector_cnt_.Resize(sector_cnt_pointer.length / sizeof(uint64_t));
+  for (uint64_t i = offset + sector_cnt_pointer.offset;
+       i < offset + sector_cnt_pointer.offset + sector_cnt_pointer.length;
+       i += sizeof(uint64_t)) {
+    sector_cnt_.PushBack(bytes.At<uint64_t>(i));
+  }
+
 
 }
 
 uint64_t ReadManyRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
-  uint32_t next_extension = header_size + 8 * 2;
+  uint32_t next_extension = header_size + 8 * 3;
   const uint32_t core_size = next_extension;
   // Write device_id.
   bytes.WriteAt<uint64_t>(offset + header_size + (8 * 0), device_id());
@@ -121,6 +131,19 @@ uint64_t ReadManyRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t off
     uint32_t ext_offset = offset + lba_ptr.offset + (i * sizeof(uint64_t));
     bytes.WriteAt<uint64_t>(ext_offset, lba().at(i));
   }
+  // Write sector_cnt.
+  ExtPointer sector_cnt_ptr{
+    .offset = next_extension,
+    .length = (uint32_t)(sector_cnt().size() * sizeof(uint64_t)),
+  };
+
+  next_extension += sector_cnt_ptr.length;
+  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 2), sector_cnt_ptr);
+
+  for (uint64_t i = 0; i < sector_cnt().size(); i++) {
+    uint32_t ext_offset = offset + sector_cnt_ptr.offset + (i * sizeof(uint64_t));
+    bytes.WriteAt<uint64_t>(ext_offset, sector_cnt().at(i));
+  }
 
   // The next extension pointer is the length of the message. 
   WriteHeader(bytes, offset, core_size, next_extension);
@@ -129,7 +152,7 @@ uint64_t ReadManyRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t off
 }
 
 uint64_t ReadManyRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
-  uint32_t next_extension = header_size + 8 * 2;
+  uint32_t next_extension = header_size + 8 * 3;
   const uint32_t core_size = next_extension;
   uint64_t next_cap = 0;
   // Write device_id.
@@ -146,6 +169,19 @@ uint64_t ReadManyRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t off
   for (uint64_t i = 0; i < lba().size(); i++) {
     uint32_t ext_offset = offset + lba_ptr.offset + (i * sizeof(uint64_t));
     bytes.WriteAt<uint64_t>(ext_offset, lba().at(i));
+  }
+  // Write sector_cnt.
+  ExtPointer sector_cnt_ptr{
+    .offset = next_extension,
+    .length = (uint32_t)(sector_cnt().size() * sizeof(uint64_t)),
+  };
+
+  next_extension += sector_cnt_ptr.length;
+  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 2), sector_cnt_ptr);
+
+  for (uint64_t i = 0; i < sector_cnt().size(); i++) {
+    uint32_t ext_offset = offset + sector_cnt_ptr.offset + (i * sizeof(uint64_t));
+    bytes.WriteAt<uint64_t>(ext_offset, sector_cnt().at(i));
   }
 
   // The next extension pointer is the length of the message. 

@@ -47,10 +47,13 @@ class ReadManyRequest {
   void set_device_id(const uint64_t& value) { device_id_ = value; }
   const glcr::Vector<uint64_t>& lba() const { return lba_; }
   void add_lba(const uint64_t& value) { lba_.PushBack(value); }
+  const glcr::Vector<uint64_t>& sector_cnt() const { return sector_cnt_; }
+  void add_sector_cnt(const uint64_t& value) { sector_cnt_.PushBack(value); }
 
  private:
   uint64_t device_id_;
   glcr::Vector<uint64_t> lba_;
+  glcr::Vector<uint64_t> sector_cnt_;
 
   // Parses everything except for caps.
   void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);

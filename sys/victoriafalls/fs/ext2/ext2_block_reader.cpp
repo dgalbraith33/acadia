@@ -78,14 +78,19 @@ glcr::ErrorOr<OwnedMemoryRegion> Ext2BlockReader::ReadBlocks(
     const glcr::Vector<uint64_t>& block_list) {
   ReadManyRequest req;
   req.set_device_id(device_id_);
-  // FIXME: We should have better ergonomics for setting a repeated field in
-  // Yunq.
   for (uint64_t i = 0; i < block_list.size(); i++) {
-    uint64_t sector = lba_offset_ + block_list.at(i) * SectorsPerBlock();
-    for (uint64_t j = 0; j < SectorsPerBlock(); j++) {
-      req.add_lba(sector + j);
+    uint64_t curr_start = lba_offset_ + block_list.at(i) * SectorsPerBlock();
+    uint64_t curr_run_len = 1;
+    while ((i + 1) < block_list.size() &&
+           block_list.at(i + 1) == block_list.at(i) + 1) {
+      i++;
+      curr_run_len++;
     }
+    req.add_lba(curr_start);
+    req.add_sector_cnt(curr_run_len * SectorsPerBlock());
+    dbgln("Read {x}, {x}", curr_start, curr_run_len * SectorsPerBlock());
   }
+  dbgln("Read many: {x}", req.lba().size());
   ReadResponse resp;
   RET_ERR(denali_.ReadMany(req, resp));
   return OwnedMemoryRegion::FromCapability(resp.memory());
