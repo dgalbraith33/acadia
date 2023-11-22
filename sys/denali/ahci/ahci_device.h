@@ -26,7 +26,7 @@ class AhciDevice {
 
  private:
   AhciPort* port_struct_ = nullptr;
-  OwnedMemoryRegion command_structures_;
+  mmth::OwnedMemoryRegion command_structures_;
 
   CommandList* command_list_ = nullptr;
   ReceivedFis* received_fis_ = nullptr;

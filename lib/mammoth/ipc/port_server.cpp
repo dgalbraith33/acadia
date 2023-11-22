@@ -2,6 +2,8 @@
 
 #include <zcall.h>
 
+namespace mmth {
+
 glcr::ErrorOr<PortServer> PortServer::Create() {
   z_cap_t port;
   RET_ERR(ZPortCreate(&port));
@@ -44,3 +46,5 @@ glcr::ErrorCode PortServer::PollForIntCap(uint64_t *msg, uint64_t *cap) {
   }
   return glcr::OK;
 }
+
+}  // namespace mmth

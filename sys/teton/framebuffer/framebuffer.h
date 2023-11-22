@@ -19,7 +19,7 @@ class Framebuffer {
   // don't have to store a reference here.
   const FramebufferInfo& fb_info_;
 
-  OwnedMemoryRegion fb_memory_;
+  mmth::OwnedMemoryRegion fb_memory_;
   uint32_t* fb_;
   uint32_t cursor_pos_;
 };

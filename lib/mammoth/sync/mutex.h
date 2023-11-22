@@ -3,6 +3,8 @@
 #include <glacier/status/error_or.h>
 #include <ztypes.h>
 
+namespace mmth {
+
 class Mutex {
  public:
   Mutex(const Mutex&) = delete;
@@ -19,3 +21,5 @@ class Mutex {
 
   Mutex(z_cap_t mutex_cap) : mutex_cap_(mutex_cap) {}
 };
+
+}  // namespace mmth

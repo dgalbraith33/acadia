@@ -13,8 +13,8 @@ glcr::ErrorOr<glcr::SharedPtr<Ext2BlockReader>> Ext2BlockReader::Init(
   req.set_size(2);
   ReadResponse resp;
   RET_ERR(client.Read(req, resp));
-  OwnedMemoryRegion superblock =
-      OwnedMemoryRegion::FromCapability(resp.memory());
+  mmth::OwnedMemoryRegion superblock =
+      mmth::OwnedMemoryRegion::FromCapability(resp.memory());
 
   return glcr::SharedPtr<Ext2BlockReader>(
       new Ext2BlockReader(glcr::Move(client), denali_info.device_id(),
@@ -59,11 +59,11 @@ uint64_t Ext2BlockReader::InodeTableBlockSize() {
   return (InodeSize() * GetSuperblock()->inodes_per_group) / BlockSize();
 }
 
-glcr::ErrorOr<OwnedMemoryRegion> Ext2BlockReader::ReadBlock(
+glcr::ErrorOr<mmth::OwnedMemoryRegion> Ext2BlockReader::ReadBlock(
     uint64_t block_number) {
   return ReadBlocks(block_number, 1);
 }
-glcr::ErrorOr<OwnedMemoryRegion> Ext2BlockReader::ReadBlocks(
+glcr::ErrorOr<mmth::OwnedMemoryRegion> Ext2BlockReader::ReadBlocks(
     uint64_t block_number, uint64_t num_blocks) {
   ReadRequest req;
   req.set_device_id(device_id_);
@@ -71,10 +71,10 @@ glcr::ErrorOr<OwnedMemoryRegion> Ext2BlockReader::ReadBlocks(
   req.set_size(num_blocks * SectorsPerBlock());
   ReadResponse resp;
   RET_ERR(denali_.Read(req, resp));
-  return OwnedMemoryRegion::FromCapability(resp.memory());
+  return mmth::OwnedMemoryRegion::FromCapability(resp.memory());
 }
 
-glcr::ErrorOr<OwnedMemoryRegion> Ext2BlockReader::ReadBlocks(
+glcr::ErrorOr<mmth::OwnedMemoryRegion> Ext2BlockReader::ReadBlocks(
     const glcr::Vector<uint64_t>& block_list) {
   ReadManyRequest req;
   req.set_device_id(device_id_);
@@ -93,12 +93,12 @@ glcr::ErrorOr<OwnedMemoryRegion> Ext2BlockReader::ReadBlocks(
   dbgln("Read many: {x}", req.lba().size());
   ReadResponse resp;
   RET_ERR(denali_.ReadMany(req, resp));
-  return OwnedMemoryRegion::FromCapability(resp.memory());
+  return mmth::OwnedMemoryRegion::FromCapability(resp.memory());
 }
 
 Ext2BlockReader::Ext2BlockReader(DenaliClient&& denali, uint64_t device_id,
                                  uint64_t lba_offset,
-                                 OwnedMemoryRegion&& super_block)
+                                 mmth::OwnedMemoryRegion&& super_block)
     : denali_(glcr::Move(denali)),
       device_id_(device_id),
       lba_offset_(lba_offset),

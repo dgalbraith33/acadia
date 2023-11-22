@@ -5,6 +5,8 @@
 #include "util/debug.h"
 #include "util/init.h"
 
+namespace mmth {
+
 OwnedMemoryRegion::OwnedMemoryRegion(OwnedMemoryRegion&& other)
     : OwnedMemoryRegion(other.vmmo_cap_, other.vaddr_, other.size_) {
   other.vmmo_cap_ = 0;
@@ -68,3 +70,5 @@ z_cap_t OwnedMemoryRegion::DuplicateCap() {
   check(ZCapDuplicate(vmmo_cap_, kZionPerm_All, &cap));
   return cap;
 }
+
+}  // namespace mmth

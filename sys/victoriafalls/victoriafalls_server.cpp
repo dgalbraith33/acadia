@@ -38,7 +38,7 @@ glcr::ErrorCode VFSServer::HandleOpenFile(const OpenFileRequest& request,
   }
 
   uint64_t inode_num;
-  OwnedMemoryRegion region;
+  mmth::OwnedMemoryRegion region;
   for (uint64_t j = 0; j < files.size(); j++) {
     if (path_tokens.at(path_tokens.size() - 1) ==
         glcr::StringView(files.at(j).name, files.at(j).name_len)) {

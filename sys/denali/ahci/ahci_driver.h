@@ -11,7 +11,7 @@
 class AhciDriver {
  public:
   static glcr::ErrorOr<glcr::UniquePtr<AhciDriver>> Init(
-      OwnedMemoryRegion&& ahci_phys);
+      mmth::OwnedMemoryRegion&& ahci_phys);
   glcr::ErrorCode RegisterIrq();
 
   void InterruptLoop();
@@ -22,9 +22,9 @@ class AhciDriver {
   void DumpPorts();
 
  private:
-  OwnedMemoryRegion pci_region_;
+  mmth::OwnedMemoryRegion pci_region_;
   PciDeviceHeader* pci_device_header_ = nullptr;
-  OwnedMemoryRegion ahci_region_;
+  mmth::OwnedMemoryRegion ahci_region_;
   AhciHba* ahci_hba_ = nullptr;
 
   // TODO: Allocate these dynamically.
@@ -40,7 +40,7 @@ class AhciDriver {
   glcr::ErrorCode LoadHbaRegisters();
   glcr::ErrorCode LoadDevices();
 
-  AhciDriver(OwnedMemoryRegion&& pci_region)
+  AhciDriver(mmth::OwnedMemoryRegion&& pci_region)
       : pci_region_(glcr::Move(pci_region)),
         pci_device_header_(
             reinterpret_cast<PciDeviceHeader*>(pci_region_.vaddr())) {}

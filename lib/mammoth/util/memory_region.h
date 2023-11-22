@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <ztypes.h>
 
+namespace mmth {
 /*
  * Memory Region class that unmaps its memory and releases its
  * capability when it goes out of scope.
@@ -41,3 +42,5 @@ class OwnedMemoryRegion {
   // TODO: We may want to differentiate between VMMO size and mapped size?
   uint64_t size_ = 0;
 };
+
+}  // namespace mmth

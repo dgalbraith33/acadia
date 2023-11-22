@@ -5,6 +5,8 @@
 
 #include "mammoth/ipc/port_client.h"
 
+namespace mmth {
+
 class PortServer {
  public:
   static glcr::ErrorOr<PortServer> Create();
@@ -22,3 +24,5 @@ class PortServer {
 
   PortServer(z_cap_t cap);
 };
+
+}  // namespace mmth

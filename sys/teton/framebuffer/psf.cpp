@@ -9,7 +9,7 @@ const uint32_t kMagic = 0x864AB572;
 
 }
 
-Psf::Psf(OwnedMemoryRegion&& psf_file)
+Psf::Psf(mmth::OwnedMemoryRegion&& psf_file)
     : psf_file_(glcr::Move(psf_file)),
       header_(reinterpret_cast<PsfHeader*>(psf_file_.vaddr())) {
   EnsureValid();

@@ -17,8 +17,8 @@ glcr::ErrorCode DenaliServer::HandleRead(const ReadRequest& req,
   ASSIGN_OR_RETURN(AhciDevice * device, driver_.GetDevice(req.device_id()));
 
   uint64_t paddr;
-  OwnedMemoryRegion region =
-      OwnedMemoryRegion::ContiguousPhysical(req.size() * 512, &paddr);
+  mmth::OwnedMemoryRegion region =
+      mmth::OwnedMemoryRegion::ContiguousPhysical(req.size() * 512, &paddr);
 
   DmaReadCommand command(req.lba(), req.size(), paddr);
   device->IssueCommand(&command);
@@ -44,8 +44,8 @@ glcr::ErrorCode DenaliServer::HandleReadMany(const ReadManyRequest& req,
     sector_cnt += req.sector_cnt().at(i);
   }
   uint64_t region_paddr;
-  OwnedMemoryRegion region =
-      OwnedMemoryRegion::ContiguousPhysical(sector_cnt * 512, &region_paddr);
+  mmth::OwnedMemoryRegion region = mmth::OwnedMemoryRegion::ContiguousPhysical(
+      sector_cnt * 512, &region_paddr);
 
   for (uint64_t i = 0; i < req.lba().size(); i++) {
     uint64_t lba = req.lba().at(i);

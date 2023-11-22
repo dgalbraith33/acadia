@@ -64,8 +64,8 @@ glcr::ErrorCode GptReader::ParsePartitionTables() {
   req.set_size(2);
   ReadResponse resp;
   RET_ERR(denali_->Read(req, resp));
-  OwnedMemoryRegion lba_1_and_2 =
-      OwnedMemoryRegion::FromCapability(resp.memory());
+  mmth::OwnedMemoryRegion lba_1_and_2 =
+      mmth::OwnedMemoryRegion::FromCapability(resp.memory());
   uint16_t* mbr_sig = reinterpret_cast<uint16_t*>(lba_1_and_2.vaddr() + 0x1FE);
   if (*mbr_sig != 0xAA55) {
     dbgln("Invalid MBR Sig: {x}", *mbr_sig);
@@ -106,8 +106,8 @@ glcr::ErrorCode GptReader::ParsePartitionTables() {
   req.set_lba(header->lba_partition_entries);
   req.set_size(num_blocks);
   RET_ERR(denali_->Read(req, resp));
-  OwnedMemoryRegion part_table =
-      OwnedMemoryRegion::FromCapability(resp.memory());
+  mmth::OwnedMemoryRegion part_table =
+      mmth::OwnedMemoryRegion::FromCapability(resp.memory());
   for (uint64_t i = 0; i < num_partitions; i++) {
     PartitionEntry* entry = reinterpret_cast<PartitionEntry*>(
         part_table.vaddr() + (i * entry_size));

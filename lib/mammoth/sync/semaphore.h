@@ -2,6 +2,8 @@
 
 #include <ztypes.h>
 
+namespace mmth {
+
 class Semaphore {
  public:
   Semaphore();
@@ -13,3 +15,5 @@ class Semaphore {
  private:
   z_cap_t semaphore_cap_;
 };
+
+}  // namespace mmth

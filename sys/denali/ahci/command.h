@@ -32,5 +32,5 @@ class DmaReadCommand : public Command {
   uint64_t paddr_;
   // TODO: Make this owned by the device so that we don't have to create a new
   // one with the kernel every time a command is issued.
-  Semaphore callback_semaphore_;
+  mmth::Semaphore callback_semaphore_;
 };

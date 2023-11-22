@@ -37,8 +37,8 @@ class YellowstoneServer : public YellowstoneServerBase {
 
   PciReader pci_reader_;
 
-  Semaphore has_denali_semaphore_;
-  Semaphore has_victoriafalls_semaphore_;
+  mmth::Semaphore has_denali_semaphore_;
+  mmth::Semaphore has_victoriafalls_semaphore_;
 
   YellowstoneServer(z_cap_t endpoint_cap);
 };

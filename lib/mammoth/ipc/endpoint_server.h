@@ -9,6 +9,7 @@
 #include "mammoth/ipc/response_context.h"
 #include "mammoth/proc/thread.h"
 
+namespace mmth {
 class EndpointServer {
  public:
   EndpointServer() = delete;
@@ -34,3 +35,5 @@ class EndpointServer {
   friend void EndpointServerThreadBootstrap(void* endpoint_server);
   void ServerThread();
 };
+
+}  // namespace mmth

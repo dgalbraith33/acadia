@@ -15,7 +15,7 @@ struct PsfHeader {
 
 class Psf {
  public:
-  Psf(OwnedMemoryRegion&& psf_file);
+  Psf(mmth::OwnedMemoryRegion&& psf_file);
 
   void DumpHeader();
 
@@ -29,7 +29,7 @@ class Psf {
   }
 
  private:
-  OwnedMemoryRegion psf_file_;
+  mmth::OwnedMemoryRegion psf_file_;
   PsfHeader* header_;
 
   void EnsureValid();

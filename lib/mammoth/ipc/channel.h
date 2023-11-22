@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <zcall.h>
 
+namespace mmth {
+
 class Channel {
  public:
   Channel() {}
@@ -45,3 +47,5 @@ z_err_t Channel::ReadStructAndCap(T* obj, uint64_t* cap) {
   }
   return glcr::OK;
 }
+
+}  // namespace mmth

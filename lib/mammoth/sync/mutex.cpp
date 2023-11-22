@@ -2,6 +2,8 @@
 
 #include <zcall.h>
 
+namespace mmth {
+
 Mutex::Mutex(Mutex&& other) : mutex_cap_(other.mutex_cap_) {
   other.mutex_cap_ = 0;
 }
@@ -25,3 +27,5 @@ glcr::ErrorCode Mutex::Lock() {
 glcr::ErrorCode Mutex::Release() {
   return static_cast<glcr::ErrorCode>(ZMutexRelease(mutex_cap_));
 }
+
+}  // namespace mmth

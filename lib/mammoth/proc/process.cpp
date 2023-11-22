@@ -11,6 +11,7 @@
 
 #define MAM_PROC_DEBUG 0
 
+namespace mmth {
 namespace {
 
 typedef struct {
@@ -140,3 +141,5 @@ glcr::ErrorCode SpawnProcessFromElfRegion(uint64_t program,
 
   return glcr::OK;
 }
+
+}  // namespace mmth

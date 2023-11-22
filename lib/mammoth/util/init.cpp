@@ -17,7 +17,7 @@ uint64_t gBootPciVmmoCap = 0;
 uint64_t gBootFramebufferVmmoCap = 0;
 
 z_err_t ParseInitPort(uint64_t init_port_cap) {
-  PortServer port = PortServer::AdoptCap(init_port_cap);
+  mmth::PortServer port = mmth::PortServer::AdoptCap(init_port_cap);
   z_err_t ret;
   uint64_t init_sig, init_cap;
   while ((ret = port.PollForIntCap(&init_sig, &init_cap)) != glcr::EMPTY) {

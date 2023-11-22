@@ -3,8 +3,8 @@
 Framebuffer::Framebuffer(const FramebufferInfo& info)
     : fb_info_(info), cursor_pos_(0) {
   uint64_t buff_size_bytes = fb_info_.height() * fb_info_.pitch();
-  fb_memory_ = OwnedMemoryRegion::DirectPhysical(fb_info_.address_phys(),
-                                                 buff_size_bytes);
+  fb_memory_ = mmth::OwnedMemoryRegion::DirectPhysical(fb_info_.address_phys(),
+                                                       buff_size_bytes);
   fb_ = reinterpret_cast<uint32_t*>(fb_memory_.vaddr());
 }
 

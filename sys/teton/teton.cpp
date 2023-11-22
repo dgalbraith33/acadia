@@ -37,7 +37,7 @@ uint64_t main(uint64_t init_port) {
   OpenFileResponse fresp;
   check(vfs.OpenFile(freq, fresp));
 
-  Psf psf(OwnedMemoryRegion::FromCapability(fresp.memory()));
+  Psf psf(mmth::OwnedMemoryRegion::FromCapability(fresp.memory()));
   psf.DumpHeader();
 
   Console console(fbuf, psf);

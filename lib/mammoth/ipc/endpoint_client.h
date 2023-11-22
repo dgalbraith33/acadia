@@ -6,6 +6,8 @@
 #include <zcall.h>
 #include <ztypes.h>
 
+namespace mmth {
+
 class EndpointClient {
  public:
   EndpointClient() = delete;
@@ -63,3 +65,5 @@ glcr::ErrorOr<Resp> EndpointClient::CallEndpoint(const Req& req) {
 
   return resp;
 }
+
+}  // namespace mmth

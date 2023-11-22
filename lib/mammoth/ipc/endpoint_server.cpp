@@ -2,6 +2,7 @@
 
 #include "util/debug.h"
 
+namespace mmth {
 // Declared as friend in EndpointServer.
 void EndpointServerThreadBootstrap(void* endpoint_server) {
   reinterpret_cast<EndpointServer*>(endpoint_server)->ServerThread();
@@ -40,3 +41,5 @@ void EndpointServer::ServerThread() {
     }
   }
 }
+
+}  // namespace mmth

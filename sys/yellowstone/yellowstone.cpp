@@ -12,8 +12,9 @@
 #include "yellowstone_server.h"
 
 glcr::ErrorCode SpawnProcess(z_cap_t vmmo_cap, z_cap_t yellowstone_cap) {
-  OwnedMemoryRegion region = OwnedMemoryRegion::FromCapability(vmmo_cap);
-  return SpawnProcessFromElfRegion(region.vaddr(), yellowstone_cap);
+  mmth::OwnedMemoryRegion region =
+      mmth::OwnedMemoryRegion::FromCapability(vmmo_cap);
+  return mmth::SpawnProcessFromElfRegion(region.vaddr(), yellowstone_cap);
 }
 
 uint64_t main(uint64_t port_cap) {
@@ -41,8 +42,8 @@ uint64_t main(uint64_t port_cap) {
   OpenFileResponse response;
   check(vfs_client->OpenFile(request, response));
 
-  OwnedMemoryRegion filemem =
-      OwnedMemoryRegion::FromCapability(response.memory());
+  mmth::OwnedMemoryRegion filemem =
+      mmth::OwnedMemoryRegion::FromCapability(response.memory());
   glcr::String file(reinterpret_cast<const char*>(filemem.vaddr()),
                     response.size());
 

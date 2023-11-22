@@ -4,6 +4,7 @@
 
 #include "util/debug.h"
 
+namespace mmth {
 namespace {
 
 uint64_t strlen(const char* ptr) {
@@ -55,3 +56,5 @@ z_err_t CreateChannels(Channel& c1, Channel& c2) {
   c2.adopt_cap(chan2);
   return glcr::OK;
 }
+
+}  // namespace mmth

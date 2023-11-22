@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <zcall.h>
 
+namespace mmth {
+
 class PortClient {
  public:
   PortClient() {}
@@ -29,3 +31,5 @@ template <typename T>
 z_err_t PortClient::WriteMessage(const T& obj, z_cap_t cap) {
   return ZPortSend(port_cap_, sizeof(obj), &obj, 1, &cap);
 }
+
+}  // namespace mmth

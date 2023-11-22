@@ -21,7 +21,7 @@ void interrupt_thread(void* void_driver) {
 }  // namespace
 
 glcr::ErrorOr<glcr::UniquePtr<AhciDriver>> AhciDriver::Init(
-    OwnedMemoryRegion&& pci_region) {
+    mmth::OwnedMemoryRegion&& pci_region) {
   glcr::UniquePtr<AhciDriver> driver(new AhciDriver(glcr::Move(pci_region)));
   // RET_ERR(driver->LoadCapabilities());
   RET_ERR(driver->LoadHbaRegisters());
@@ -191,8 +191,8 @@ glcr::ErrorCode AhciDriver::RegisterIrq() {
 }
 
 glcr::ErrorCode AhciDriver::LoadHbaRegisters() {
-  ahci_region_ =
-      OwnedMemoryRegion ::DirectPhysical(pci_device_header_->abar, 0x1100);
+  ahci_region_ = mmth::OwnedMemoryRegion ::DirectPhysical(
+      pci_device_header_->abar, 0x1100);
   ahci_hba_ = reinterpret_cast<AhciHba*>(ahci_region_.vaddr());
   num_ports_ = (ahci_hba_->capabilities & 0x1F) + 1;
   num_commands_ = ((ahci_hba_->capabilities & 0x1F00) >> 8) + 1;

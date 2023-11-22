@@ -1,7 +1,7 @@
 #include "fs/ext2/inode_table.h"
 
 InodeTable::InodeTable(const glcr::SharedPtr<Ext2BlockReader>& reader,
-                       OwnedMemoryRegion&& bgdt_region)
+                       mmth::OwnedMemoryRegion&& bgdt_region)
     : ext2_reader_(reader),
       bgdt_region_(glcr::Move(bgdt_region)),
       bgdt_(reinterpret_cast<BlockGroupDescriptor*>(bgdt_region_.vaddr())) {
