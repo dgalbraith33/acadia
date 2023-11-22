@@ -7,35 +7,11 @@
 #include "glacier/container/pair.h"
 #include "glacier/status/error.h"
 #include "glacier/string/string.h"
+#include "glacier/util/hash.h"
 
 namespace glcr {
 
-template <typename T>
-struct HashFunc {
-  uint64_t operator()(const T&);
-};
-
-template <>
-struct HashFunc<uint64_t> {
-  uint64_t operator()(const uint64_t& value) {
-    // FIXME: Write a real hash function.
-    return 0xABBAABBAABBAABBA ^ value;
-  }
-};
-
-template <>
-struct HashFunc<String> {
-  uint64_t operator()(const String& value) {
-    // FIXME: Write a real hash function.
-    uint64_t acc = 0;
-    for (uint64_t i = 0; i < value.length(); i++) {
-      acc += value[i];
-    }
-    return 0xABBAABBAABBAABBA ^ acc;
-  }
-};
-
-template <typename K, typename V, class H = HashFunc<K>>
+template <typename K, typename V, class H = Hash<K>>
 class HashMap {
  public:
   HashMap() = default;

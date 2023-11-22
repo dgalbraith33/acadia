@@ -4,6 +4,7 @@ set(glacier_files
   string/string_view.cpp
   string/str_format.cpp
   string/str_split.cpp
+  util/hash.cpp
   )
 
 add_library(glacier STATIC
