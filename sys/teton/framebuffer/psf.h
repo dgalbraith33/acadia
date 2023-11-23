@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mammoth/util/memory_region.h>
+#include <mammoth/file/file.h>
 
 struct PsfHeader {
   uint32_t magic;         /* magic bytes to identify PSF */
@@ -15,7 +15,7 @@ struct PsfHeader {
 
 class Psf {
  public:
-  Psf(mmth::OwnedMemoryRegion&& psf_file);
+  Psf(glcr::StringView path);
 
   void DumpHeader();
 
@@ -24,12 +24,13 @@ class Psf {
   uint32_t height() { return header_->height; }
 
   uint8_t* glyph(uint32_t index) {
-    return reinterpret_cast<uint8_t*>(psf_file_.vaddr() + header_->headersize +
+    return reinterpret_cast<uint8_t*>(psf_file_.byte_ptr() +
+                                      header_->headersize +
                                       (index * header_->bytesperglyph));
   }
 
  private:
-  mmth::OwnedMemoryRegion psf_file_;
+  mmth::File psf_file_;
   PsfHeader* header_;
 
   void EnsureValid();

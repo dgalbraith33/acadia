@@ -1,4 +1,5 @@
 add_library(mammoth STATIC
+  file/file.cpp
   ipc/channel.cpp
   ipc/endpoint_client.cpp
   ipc/endpoint_server.cpp
@@ -23,7 +24,10 @@ target_include_directories(mammoth
 target_link_libraries(mammoth
   glacier
   c
-  zion_stub)
+  victoriafalls_yunq
+  yellowstone_yunq
+  zion_stub
+  )
 
 set_target_properties(mammoth PROPERTIES
   COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${BASE_COMPILE_FLAGS}"

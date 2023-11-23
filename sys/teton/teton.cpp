@@ -25,19 +25,7 @@ uint64_t main(uint64_t init_port) {
 
   // 2. Parse a font file.
 
-  GetEndpointRequest req;
-  req.set_endpoint_name("victoriafalls");
-  Endpoint resp;
-  check(client.GetEndpoint(req, resp));
-
-  VFSClient vfs(resp.endpoint());
-
-  OpenFileRequest freq;
-  freq.set_path("/default8x16.psfu");
-  OpenFileResponse fresp;
-  check(vfs.OpenFile(freq, fresp));
-
-  Psf psf(mmth::OwnedMemoryRegion::FromCapability(fresp.memory()));
+  Psf psf("/default8x16.psfu");
   psf.DumpHeader();
 
   Console console(fbuf, psf);
