@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include "common/port.h"
+#include "common/stack_unwind.h"
 #include "debug/debug.h"
 #include "interrupt/apic.h"
 #include "interrupt/apic_timer.h"
@@ -69,15 +70,29 @@ struct InterruptFrame {
   uint64_t ss;
 };
 
+bool IsUserSpace(uint64_t addr) { return (addr & (1l << 63)) == 0; }
+
 extern "C" void isr_divide_by_zero();
 extern "C" void interrupt_divide_by_zero(InterruptFrame* frame) {
   dbgln("RIP: {x}", frame->rip);
+  StackUnwind(frame->rbp);
+
+  if (IsUserSpace(frame->rip)) {
+    gScheduler->CurrentProcess().Exit();
+    UNREACHABLE
+  }
   panic("DIV0");
 }
 
 extern "C" void isr_invalid_opcode();
 extern "C" void interrupt_invalid_opcode(InterruptFrame* frame) {
   dbgln("RIP: {x}", frame->rip);
+  StackUnwind(frame->rbp);
+
+  if (IsUserSpace(frame->rip)) {
+    gScheduler->CurrentProcess().Exit();
+    UNREACHABLE
+  }
   panic("INVALID OPCODE");
 }
 
@@ -96,7 +111,12 @@ extern "C" void interrupt_protection_fault(InterruptFrame* frame) {
   dbgln("Index: {}", err >> 3);
   dbgln("RIP: {x}", frame->rip);
   dbgln("RSP: {x}", frame->rsp);
+  StackUnwind(frame->rbp);
 
+  if (IsUserSpace(frame->rip)) {
+    gScheduler->CurrentProcess().Exit();
+    UNREACHABLE
+  }
   panic("GP");
 }
 
@@ -133,11 +153,23 @@ extern "C" void interrupt_page_fault(InterruptFrame* frame) {
 
   dbgln("rip:  {x}", frame->rip);
   dbgln("addr: {x}", frame->cr2);
+  StackUnwind(frame->rbp);
+
+  if (IsUserSpace(frame->rip)) {
+    gScheduler->CurrentProcess().Exit();
+    UNREACHABLE
+  }
+
   panic("PF");
 }
 
 extern "C" void isr_fpe_fault();
 extern "C" void interrupt_fpe_fault(InterruptFrame* frame) {
+  dbgln("Floating point exception.");
+  if (IsUserSpace(frame->rip)) {
+    gScheduler->CurrentProcess().Exit();
+    UNREACHABLE
+  }
   panic("Floating point exception");
 }
 

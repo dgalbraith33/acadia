@@ -1,6 +1,7 @@
 #include "object/thread.h"
 
 #include "common/gdt.h"
+#include "common/stack_unwind.h"
 #include "debug/debug.h"
 #include "memory/kernel_vmm.h"
 #include "memory/paging_util.h"
@@ -71,6 +72,7 @@ void Thread::Init() {
   // will emit movaps calls to non-16-bit-aligned stack
   // addresses.
   rsp -= 0x8;
+  *reinterpret_cast<uint64_t*>(rsp) = kStackBaseSentinel;
   SetRsp0(rsp0_start_);
   jump_user_space(rip_, rsp, arg1_, arg2_);
 }

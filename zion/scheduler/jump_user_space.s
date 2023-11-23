@@ -8,6 +8,7 @@ jump_user_space:
   mov %ax, %fs
   mov %ax, %gs
 
+  mov %rsi, %rbp
   pushq $0x23 # ss
   pushq %rsi
   pushq $0x202  # Bit 9 enables interrupts.

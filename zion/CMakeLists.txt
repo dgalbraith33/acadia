@@ -6,6 +6,7 @@ add_executable(zion
   common/gdt.cpp
   common/load_gdt.s
   common/msr.cpp
+  common/stack_unwind.cpp
   debug/debug.cpp
   interrupt/apic.cpp
   interrupt/apic_timer.cpp
