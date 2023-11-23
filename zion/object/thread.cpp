@@ -67,14 +67,14 @@ void Thread::Init() {
 #if K_THREAD_DEBUG
   dbgln("Thread start.", pid(), id_);
 #endif
-  uint64_t rsp = process_.vmas()->AllocateUserStack();
+  uint64_t rsp_ = process_.vmas()->AllocateUserStack();
   // TODO: Investigate this further but without this GCC
   // will emit movaps calls to non-16-bit-aligned stack
   // addresses.
-  rsp -= 0x8;
-  *reinterpret_cast<uint64_t*>(rsp) = kStackBaseSentinel;
+  rsp_ -= 0x8;
+  *reinterpret_cast<uint64_t*>(rsp_) = kStackBaseSentinel;
   SetRsp0(rsp0_start_);
-  jump_user_space(rip_, rsp, arg1_, arg2_);
+  jump_user_space(rip_, rsp_, arg1_, arg2_);
 }
 
 void Thread::Exit() {
@@ -102,6 +102,7 @@ void Thread::Cleanup() {
   // TODO: Race condition when called from exit, once kernel stack manager
   // actually reuses stacks this will cause an issue
   KernelVmm::FreeKernelStack(rsp0_start_);
+  process_.vmas()->FreeUserStack(rsp_);
 }
 
 void Thread::Wait() {

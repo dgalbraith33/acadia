@@ -22,6 +22,10 @@ uint64_t AddressSpace::AllocateUserStack() {
   return user_stacks_.NewUserStack();
 }
 
+void AddressSpace::FreeUserStack(uint64_t rsp) {
+  return user_stacks_.FreeUserStack(rsp);
+}
+
 uint64_t AddressSpace::GetNextMemMapAddr(uint64_t size) {
   if (size == 0) {
     panic("Zero size memmap");

@@ -77,6 +77,7 @@ class Thread : public KernelObject, public glcr::IntrusiveListNode<Thread> {
   State state_ = CREATED;
 
   // Startup Context for the thread.
+  uint64_t rsp_;
   uint64_t rip_;
   uint64_t arg1_;
   uint64_t arg2_;

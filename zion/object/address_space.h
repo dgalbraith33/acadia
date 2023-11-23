@@ -66,6 +66,7 @@ class AddressSpace : public KernelObject {
 
   // User Mappings.
   uint64_t AllocateUserStack();
+  void FreeUserStack(uint64_t);
   uint64_t GetNextMemMapAddr(uint64_t size);
 
   // Maps in a memory object at a specific address.
