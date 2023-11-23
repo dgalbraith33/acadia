@@ -104,9 +104,10 @@ glcr::ErrorOr<mmth::OwnedMemoryRegion> Ext2Driver::ReadFile(
     return glcr::UNIMPLEMENTED;
   }
 
+  mmth::OwnedMemoryRegion double_indirect_block;
   if (inode->block[13]) {
-    dbgln("Can't handle doubly-indirect blocks yet.");
-    return glcr::UNIMPLEMENTED;
+    ASSIGN_OR_RETURN(double_indirect_block,
+                     ext2_reader_->ReadBlock(inode->block[13]));
   }
 
   mmth::OwnedMemoryRegion indirect_block;
@@ -119,10 +120,31 @@ glcr::ErrorOr<mmth::OwnedMemoryRegion> Ext2Driver::ReadFile(
     blocks_to_read.PushBack(inode->block[i]);
   }
 
+  uint32_t* indr_block_array =
+      reinterpret_cast<uint32_t*>(indirect_block.vaddr());
   for (uint64_t i = 12; i < 268 && i < real_block_cnt; i++) {
-    uint32_t* block_array = reinterpret_cast<uint32_t*>(indirect_block.vaddr());
     uint64_t offset = i - 12;
-    blocks_to_read.PushBack(block_array[offset]);
+    blocks_to_read.PushBack(indr_block_array[offset]);
+  }
+
+  uint32_t* dbl_indr_block_array =
+      reinterpret_cast<uint32_t*>(double_indirect_block.vaddr());
+  for (uint64_t i = 0; i < 256; i++) {
+    uint64_t block = 268 + (256 * i);
+    if (block >= real_block_cnt) {
+      break;
+    }
+    ASSIGN_OR_RETURN(mmth::OwnedMemoryRegion single_indr_block,
+                     ext2_reader_->ReadBlock(dbl_indr_block_array[i]));
+    uint32_t* single_indr_block_array =
+        reinterpret_cast<uint32_t*>(single_indr_block.vaddr());
+    for (uint64_t j = 0; j < 256; j++) {
+      uint64_t block_inner = block + j;
+      if (block_inner >= real_block_cnt) {
+        break;
+      }
+      blocks_to_read.PushBack(single_indr_block_array[j]);
+    }
   }
 
   return ext2_reader_->ReadBlocks(blocks_to_read);
