@@ -7,9 +7,14 @@
 
 namespace mmth {
 
+// Intended for use in yellowstone since it already has the VFS cap.
+void SetVfsCap(z_cap_t vfs_cap);
+
 class File {
  public:
   static File Open(glcr::StringView path);
+
+  uint64_t size() { return size_; }
 
   glcr::StringView as_str();
 
@@ -18,8 +23,10 @@ class File {
 
  private:
   OwnedMemoryRegion file_data_;
+  uint64_t size_;
 
-  File(OwnedMemoryRegion&& file) : file_data_(glcr::Move(file)) {}
+  File(OwnedMemoryRegion&& file, uint64_t size)
+      : file_data_(glcr::Move(file)), size_(size) {}
 };
 
 }  // namespace mmth

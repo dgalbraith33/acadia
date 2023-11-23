@@ -2,6 +2,7 @@
 
 #include <denali/denali.yunq.client.h>
 #include <glacier/string/string.h>
+#include <mammoth/file/file.h>
 #include <mammoth/util/debug.h>
 #include <mammoth/util/init.h>
 #include <mammoth/util/memory_region.h>
@@ -100,7 +101,7 @@ glcr::ErrorCode YellowstoneServer::HandleRegisterEndpoint(
   } else if (req.endpoint_name() == "victoriafalls") {
     // FIXME: Probably make a separate copy for use within yellowstone vs
     // transmit to other processes.
-    vfs_client_ = glcr::MakeShared<VFSClient>(req.endpoint_capability());
+    mmth::SetVfsCap(req.endpoint_capability());
     has_victoriafalls_semaphore_.Signal();
   } else {
     dbgln("[WARN] Got endpoint cap type: {}", req.endpoint_name().cstr());
@@ -124,8 +125,4 @@ void YellowstoneServer::WaitDenaliRegistered() { has_denali_semaphore_.Wait(); }
 
 void YellowstoneServer::WaitVictoriaFallsRegistered() {
   has_victoriafalls_semaphore_.Wait();
-}
-
-glcr::SharedPtr<VFSClient> YellowstoneServer::GetVFSClient() {
-  return vfs_client_;
 }

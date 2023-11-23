@@ -26,8 +26,6 @@ class YellowstoneServer : public YellowstoneServerBase {
   void WaitDenaliRegistered();
   void WaitVictoriaFallsRegistered();
 
-  glcr::SharedPtr<VFSClient> GetVFSClient();
-
  private:
   glcr::HashMap<glcr::String, z_cap_t> endpoint_map_;
 

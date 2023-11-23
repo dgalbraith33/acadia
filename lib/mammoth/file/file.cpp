@@ -13,6 +13,8 @@ VFSClient* gVfsClient = nullptr;
 
 }  // namespace
 
+void SetVfsCap(z_cap_t vfs_cap) { gVfsClient = new VFSClient(vfs_cap); }
+
 File File::Open(glcr::StringView path) {
   if (gVfsClient == 0) {
     YellowstoneClient client(gInitEndpointCap);
@@ -30,11 +32,11 @@ File File::Open(glcr::StringView path) {
   OpenFileResponse resp;
   check(gVfsClient->OpenFile(req, resp));
 
-  return File(OwnedMemoryRegion::FromCapability(resp.memory()));
+  return File(OwnedMemoryRegion::FromCapability(resp.memory()), resp.size());
 }
 
 glcr::StringView File::as_str() {
-  return glcr::StringView((char*)raw_ptr(), file_data_.size());
+  return glcr::StringView((char*)raw_ptr(), size_);
 }
 
 void* File::raw_ptr() { return reinterpret_cast<void*>(file_data_.vaddr()); }
