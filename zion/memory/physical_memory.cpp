@@ -104,6 +104,7 @@ class PhysicalMemoryManager {
 #if K_PHYS_DEBUG
       dbgln("Continuous {x}:{}", page, num_pages);
 #endif
+      allocated_pages_ += num_pages;
       return page;
     }
 
