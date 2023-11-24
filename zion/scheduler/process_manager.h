@@ -4,6 +4,7 @@
 #include <glacier/memory/ref_ptr.h>
 
 #include "object/process.h"
+#include "scheduler/cleanup.h"
 
 class ProcessManager {
  public:
@@ -16,8 +17,14 @@ class ProcessManager {
 
   Process& FromId(uint64_t id);
 
+  void InitCleanup();
+
+  void CleanupProcess(uint64_t pid);
+  void CleanupThread(glcr::RefPtr<Thread> thread);
+
  private:
   glcr::HashMap<uint64_t, glcr::RefPtr<Process>> proc_map_;
+  ProcessCleanup cleanup;
 };
 
 extern ProcessManager* gProcMan;

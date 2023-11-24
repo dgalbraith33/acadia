@@ -45,6 +45,8 @@ class Thread : public KernelObject, public glcr::IntrusiveListNode<Thread> {
 
   uint8_t* FxData() { return fx_data_; }
 
+  void SetKernel() { is_kernel_ = true; }
+
   // Switches the thread's state to runnable and enqueues it.
   void Start(uint64_t entry, uint64_t arg1, uint64_t arg2);
 
@@ -75,6 +77,7 @@ class Thread : public KernelObject, public glcr::IntrusiveListNode<Thread> {
   Process& process_;
   uint64_t id_;
   State state_ = CREATED;
+  bool is_kernel_ = false;
 
   // Startup Context for the thread.
   uint64_t rsp_;

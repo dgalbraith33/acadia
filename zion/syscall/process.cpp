@@ -2,12 +2,14 @@
 
 #include "capability/capability.h"
 #include "debug/debug.h"
+#include "scheduler/cleanup.h"
 #include "scheduler/process_manager.h"
 #include "scheduler/scheduler.h"
 
 z_err_t ProcessExit(ZProcessExitReq* req) {
   auto curr_thread = gScheduler->CurrentThread();
   dbgln("Exit code: {}", static_cast<glcr::ErrorCode>(req->code));
+  gProcMan->CleanupProcess(curr_thread->pid());
   curr_thread->process().Exit();
   panic("Returned from thread exit");
   return glcr::UNIMPLEMENTED;

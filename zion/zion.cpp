@@ -53,6 +53,7 @@ extern "C" void zion() {
   dbgln("[boot] Init scheduler.");
   ProcessManager::Init();
   Scheduler::Init();
+  gProcMan->InitCleanup();
 
   dbgln("[boot] Loading sys init program.");
   LoadInitProgram();

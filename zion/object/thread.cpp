@@ -6,6 +6,7 @@
 #include "memory/kernel_vmm.h"
 #include "memory/paging_util.h"
 #include "object/process.h"
+#include "scheduler/process_manager.h"
 #include "scheduler/scheduler.h"
 
 #define K_THREAD_DEBUG 0
@@ -64,6 +65,10 @@ void Thread::Start(uint64_t entry, uint64_t arg1, uint64_t arg2) {
 }
 
 void Thread::Init() {
+  if (is_kernel_) {
+    ((void (*)(void*))rip_)(reinterpret_cast<void*>(arg1_));
+    panic("Returned from kernel thread.");
+  }
 #if K_THREAD_DEBUG
   dbgln("Thread start.", pid(), id_);
 #endif
@@ -86,6 +91,7 @@ void Thread::Exit() {
     panic("Thread::Exit called from [{}.{}] on [{}.{}]", curr_thread->pid(),
           curr_thread->tid(), pid(), tid());
   }
+  gProcMan->CleanupThread(curr_thread);
   Cleanup();
   process_.CheckState();
   gScheduler->Yield();
