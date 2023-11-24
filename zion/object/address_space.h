@@ -67,7 +67,7 @@ class AddressSpace : public KernelObject {
   // User Mappings.
   uint64_t AllocateUserStack();
   void FreeUserStack(uint64_t);
-  uint64_t GetNextMemMapAddr(uint64_t size);
+  uint64_t GetNextMemMapAddr(uint64_t size, uint64_t align);
 
   // Maps in a memory object at a specific address.
   // Note this is unsafe for now as it may clobber other mappings.
@@ -75,7 +75,7 @@ class AddressSpace : public KernelObject {
       uint64_t vaddr, const glcr::RefPtr<MemoryObject>& mem_obj);
 
   [[nodiscard]] glcr::ErrorOr<uint64_t> MapInMemoryObject(
-      const glcr::RefPtr<MemoryObject>& mem_obj);
+      const glcr::RefPtr<MemoryObject>& mem_obj, uint64_t align);
 
   [[nodiscard]] glcr::ErrorCode FreeAddressRange(uint64_t vaddr_base,
                                                  uint64_t vaddr_limit) {

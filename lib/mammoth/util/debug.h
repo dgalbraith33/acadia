@@ -6,7 +6,7 @@
 #include <ztypes.h>
 
 // TODO: Take StringView here instead.
-void dbgln(const glcr::String& string);
+void dbgln(glcr::StringView string);
 
 template <typename... Args>
 void dbgln(const glcr::StringView& fmt, Args... args) {

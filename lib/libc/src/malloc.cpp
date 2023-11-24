@@ -13,9 +13,9 @@ class NaiveAllocator {
     uint64_t vmmo_cap;
     uint64_t err = ZMemoryObjectCreate(kSize, &vmmo_cap);
     if (err != 0) {
-      ZProcessExit(err);
+      (void)ZProcessExit(err);
     }
-    err = ZAddressSpaceMap(gSelfVmasCap, 0, vmmo_cap, &next_addr_);
+    err = ZAddressSpaceMap(gSelfVmasCap, 0, vmmo_cap, 0, &next_addr_);
     max_addr_ = next_addr_ + kSize;
   }
 
@@ -23,7 +23,7 @@ class NaiveAllocator {
     uint64_t addr = next_addr_;
     next_addr_ += size;
     if (next_addr_ >= max_addr_) {
-      ZProcessExit(0xBEEF);
+      (void)ZProcessExit(0xBEEF);
       return 0;
     }
     return reinterpret_cast<void*>(addr);

@@ -81,7 +81,7 @@ uint64_t LoadElfProgram(uint64_t base, uint64_t as_cap) {
     dbgln("Map Local");
 #endif
     uint64_t vaddr;
-    check(ZAddressSpaceMap(gSelfVmasCap, 0, mem_cap, &vaddr));
+    check(ZAddressSpaceMap(gSelfVmasCap, 0, mem_cap, 0, &vaddr));
     uint8_t* offset = reinterpret_cast<uint8_t*>(vaddr);
     for (uint64_t j = 0; j < size; j++) {
       offset[j] = 0;
@@ -95,8 +95,8 @@ uint64_t LoadElfProgram(uint64_t base, uint64_t as_cap) {
 #if MAM_PROC_DEBUG
     dbgln("Map Foreign");
 #endif
-    check(
-        ZAddressSpaceMap(as_cap, program.vaddr - page_offset, mem_cap, &vaddr));
+    check(ZAddressSpaceMap(as_cap, program.vaddr - page_offset, mem_cap, 0,
+                           &vaddr));
   }
   return header->entry;
 }

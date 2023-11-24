@@ -26,11 +26,17 @@ void AddressSpace::FreeUserStack(uint64_t rsp) {
   return user_stacks_.FreeUserStack(rsp);
 }
 
-uint64_t AddressSpace::GetNextMemMapAddr(uint64_t size) {
+uint64_t AddressSpace::GetNextMemMapAddr(uint64_t size, uint64_t align) {
   if (size == 0) {
     panic("Zero size memmap");
   }
   size = ((size - 1) & ~0xFFF) + 0x1000;
+  // FIXME: We need to validate that align is a power of 2;
+  if (align > 0) {
+    while ((next_memmap_addr_ & (align - 1)) != 0) {
+      next_memmap_addr_ += kPageSize;
+    }
+  }
   uint64_t addr = next_memmap_addr_;
   next_memmap_addr_ += size;
   if (next_memmap_addr_ >= 0x30'00000000) {
@@ -45,8 +51,8 @@ glcr::ErrorCode AddressSpace::MapInMemoryObject(
 }
 
 glcr::ErrorOr<uint64_t> AddressSpace::MapInMemoryObject(
-    const glcr::RefPtr<MemoryObject>& mem_obj) {
-  uint64_t vaddr = GetNextMemMapAddr(mem_obj->size());
+    const glcr::RefPtr<MemoryObject>& mem_obj, uint64_t align) {
+  uint64_t vaddr = GetNextMemMapAddr(mem_obj->size(), align);
   RET_ERR(mapping_tree_.AddInMemoryObject(vaddr, mem_obj));
   return vaddr;
 }

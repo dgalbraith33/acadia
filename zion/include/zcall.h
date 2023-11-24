@@ -17,8 +17,8 @@ SYS4(ThreadStart, z_cap_t, thread_cap, uint64_t, entry, uint64_t, arg1,
 SYS0(ThreadExit);
 SYS1(ThreadWait, z_cap_t, thread_cap);
 
-SYS4(AddressSpaceMap, z_cap_t, vmas_cap, uint64_t, vmas_offset, z_cap_t,
-     vmmo_cap, uint64_t*, vaddr);
+SYS5(AddressSpaceMap, z_cap_t, vmas_cap, uint64_t, vmas_offset, z_cap_t,
+     vmmo_cap, uint64_t, align, uint64_t*, vaddr);
 SYS3(AddressSpaceUnmap, z_cap_t, vmas_cap, uint64_t, lower_addr, uint64_t,
      upper_addr);
 
@@ -68,4 +68,4 @@ SYS1(SemaphoreCreate, z_cap_t*, semaphore_cap);
 SYS1(SemaphoreWait, z_cap_t, semaphore_cap);
 SYS1(SemaphoreSignal, z_cap_t, semaphore_cap);
 
-SYS1(Debug, const char*, message);
+SYS2(Debug, const char*, message, uint64_t, size);

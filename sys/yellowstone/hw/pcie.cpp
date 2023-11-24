@@ -18,7 +18,7 @@ PciDeviceHeader* PciHeader(uint64_t base, uint64_t bus, uint64_t dev,
 
 PciReader::PciReader() {
   uint64_t vaddr;
-  check(ZAddressSpaceMap(gSelfVmasCap, 0, gBootPciVmmoCap, &vaddr));
+  check(ZAddressSpaceMap(gSelfVmasCap, 0, gBootPciVmmoCap, 0, &vaddr));
 
   PciDump(vaddr);
 

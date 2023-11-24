@@ -18,7 +18,7 @@ z_err_t AddressSpaceMap(ZAddressSpaceMapReq* req) {
     RET_ERR(vmas->MapInMemoryObject(req->vmas_offset, vmmo));
     *req->vaddr = req->vmas_offset;
   } else {
-    ASSIGN_OR_RETURN(*req->vaddr, vmas->MapInMemoryObject(vmmo));
+    ASSIGN_OR_RETURN(*req->vaddr, vmas->MapInMemoryObject(vmmo, req->align));
   }
   return glcr::OK;
 }

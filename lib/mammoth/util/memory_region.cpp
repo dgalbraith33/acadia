@@ -36,7 +36,7 @@ OwnedMemoryRegion::~OwnedMemoryRegion() {
 
 OwnedMemoryRegion OwnedMemoryRegion::FromCapability(z_cap_t vmmo_cap) {
   uint64_t vaddr;
-  check(ZAddressSpaceMap(gSelfVmasCap, 0, vmmo_cap, &vaddr));
+  check(ZAddressSpaceMap(gSelfVmasCap, 0, vmmo_cap, 0, &vaddr));
 
   uint64_t size;
   check(ZMemoryObjectInspect(vmmo_cap, &size));
@@ -50,7 +50,7 @@ OwnedMemoryRegion OwnedMemoryRegion::ContiguousPhysical(uint64_t size,
   check(ZMemoryObjectCreateContiguous(size, &vmmo_cap, paddr));
 
   uint64_t vaddr;
-  check(ZAddressSpaceMap(gSelfVmasCap, 0, vmmo_cap, &vaddr));
+  check(ZAddressSpaceMap(gSelfVmasCap, 0, vmmo_cap, 0, &vaddr));
 
   return OwnedMemoryRegion(vmmo_cap, vaddr, size);
 }
@@ -61,7 +61,7 @@ OwnedMemoryRegion OwnedMemoryRegion::DirectPhysical(uint64_t paddr,
   check(ZMemoryObjectCreatePhysical(paddr, size, &vmmo_cap));
 
   uint64_t vaddr;
-  check(ZAddressSpaceMap(gSelfVmasCap, 0, vmmo_cap, &vaddr));
+  check(ZAddressSpaceMap(gSelfVmasCap, 0, vmmo_cap, 0, &vaddr));
   return OwnedMemoryRegion(vmmo_cap, vaddr, size);
 }
 
