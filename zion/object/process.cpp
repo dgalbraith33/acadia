@@ -47,16 +47,6 @@ glcr::RefPtr<Thread> Process::GetThread(uint64_t tid) {
   return threads_[tid];
 }
 
-void Process::CheckState() {
-  MutexHolder lock(mutex_);
-  for (uint64_t i = 0; i < threads_.size(); i++) {
-    if (!threads_[i]->IsDying()) {
-      return;
-    }
-  }
-  Exit();
-}
-
 glcr::RefPtr<Capability> Process::ReleaseCapability(uint64_t cid) {
   return caps_.ReleaseCapability(cid);
 }
@@ -72,24 +62,46 @@ uint64_t Process::AddExistingCapability(const glcr::RefPtr<Capability>& cap) {
 void Process::Exit() {
   // TODO: Check this state elsewhere to ensure that we don't for instance
   // create a running thread on a finished process.
-  state_ = FINISHED;
+  state_ = CLEANUP;
 
   for (uint64_t i = 0; i < threads_.size(); i++) {
     if (!threads_[i]->IsDying()) {
-      threads_[i]->Cleanup();
+      threads_[i]->SetState(Thread::CLEANUP);
     }
   }
 
-  // From this point onward no threads should be able to reach userspace.
+  gProcMan->CleanupProcess(id_);
 
-  // TODO: Unmap all userspace mappings.
-  // TODO: Clear capabilities.
-
-  // TODO: In the future consider removing this from the process manager.
-  // I need to think through the implications because the process object
-  // will be kept alive by the process that created it most likely.
+  // Technically we may get interrupted here the cleanup process may start,
+  // truthfully that is fine. Once each thread is flagged for cleanup then it
+  // will no longer be scheduled again or need to be.
 
   if (gScheduler->CurrentProcess().id_ == id_) {
     gScheduler->Yield();
   }
+}
+
+void Process::Cleanup() {
+  if (gScheduler->CurrentProcess().id_ == id_) {
+    panic("Can't clean up process from itself.");
+  }
+  if (state_ != CLEANUP) {
+    dbgln("WARN: Cleaning up process with non-cleanup state {}",
+          (uint64_t)state_);
+    state_ = CLEANUP;
+  }
+
+  // 1. For each thread, call cleanup.
+  for (uint64_t i = 0; i < threads_.size(); i++) {
+    if (threads_[i]->GetState() == Thread::CLEANUP) {
+      threads_[i]->Cleanup();
+    }
+  }
+
+  // 2. Release all capabailities. TODO
+
+  // 3. Unmap all user memory. TODO
+
+  // 4. Release paging structures. TODO
+  state_ = FINISHED;
 }

@@ -55,7 +55,7 @@ class Thread : public KernelObject, public glcr::IntrusiveListNode<Thread> {
 
   // State Management.
   State GetState() { return state_; };
-  void SetState(State state) { state_ = state; }
+  void SetState(State state);
   bool IsDying() { return state_ == CLEANUP || state_ == FINISHED; }
 
   // Exits this thread.

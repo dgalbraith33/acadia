@@ -31,6 +31,7 @@ class Process : public KernelObject {
     UNSPECIFIED,
     SETUP,
     RUNNING,
+    CLEANUP,
     FINISHED,
   };
   static glcr::RefPtr<Process> RootProcess();
@@ -55,13 +56,15 @@ class Process : public KernelObject {
   }
   uint64_t AddExistingCapability(const glcr::RefPtr<Capability>& cap);
 
-  // Checks the state of all child threads and transitions to
-  // finished if all have finished.
-  void CheckState();
-
   State GetState() { return state_; }
 
+  // This stops all of the processes threads (they will no longer be scheduled)
+  // and flags the process for cleanup.
   void Exit();
+
+  // This *should not* be called from a thread that belongs to this process.
+  // Rather it should be called from the cleanup thread.
+  void Cleanup();
 
  private:
   friend class glcr::MakeRefCountedFriend<Process>;

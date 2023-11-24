@@ -8,11 +8,13 @@ void ProcessCleanup::CleanupLoop() {
     // TODO: I think we need to protect these lists with a mutex as well.
     while (!process_list_.empty()) {
       auto proc = process_list_.PopFront();
-      dbgln("CLEANUP Proc {}", proc->id());
+      dbgln("CLEANUP Process: {}", proc->id());
+      proc->Cleanup();
     }
     while (!thread_list_.empty()) {
       auto thread = thread_list_.PopFront();
-      dbgln("CLEANUP Thread {}.{}", thread->pid(), thread->tid());
+      dbgln("CLEANUP Thread: {}.{}", thread->pid(), thread->tid());
+      thread->Cleanup();
     }
   }
 }

@@ -81,6 +81,12 @@ void Thread::Init() {
   SetRsp0(rsp0_start_);
   jump_user_space(rip_, rsp_, arg1_, arg2_);
 }
+void Thread::SetState(State state) {
+  if (IsDying()) {
+    panic("Cannot set state on dying thread.");
+  }
+  state_ = state;
+}
 
 void Thread::Exit() {
 #if K_THREAD_DEBUG
@@ -92,23 +98,34 @@ void Thread::Exit() {
           curr_thread->tid(), pid(), tid());
   }
   gProcMan->CleanupThread(curr_thread);
-  Cleanup();
-  process_.CheckState();
+  state_ = CLEANUP;
   gScheduler->Yield();
 }
 
 void Thread::Cleanup() {
-  state_ = CLEANUP;
+  if (gScheduler->CurrentThread().get() == this) {
+    panic("Cannot cleanup thread from itself.");
+  }
+  if (state_ != CLEANUP) {
+    dbgln("WARN: Cleaning up thread with non-cleanup state {}",
+          (uint64_t)state_);
+    state_ = CLEANUP;
+  }
+
+  // 1. Release User Stack
+  process_.vmas()->FreeUserStack(rsp_);
+
+  // 2. Unblock waiting threads.
   while (blocked_threads_.size() != 0) {
     auto thread = blocked_threads_.PopFront();
     thread->SetState(Thread::RUNNABLE);
     gScheduler->Enqueue(thread);
   }
-  state_ = FINISHED;
-  // TODO: Race condition when called from exit, once kernel stack manager
-  // actually reuses stacks this will cause an issue
+
+  // 3. Release Kernel Stack
   KernelVmm::FreeKernelStack(rsp0_start_);
-  process_.vmas()->FreeUserStack(rsp_);
+
+  state_ = FINISHED;
 }
 
 void Thread::Wait() {
