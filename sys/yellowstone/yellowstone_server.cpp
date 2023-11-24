@@ -6,7 +6,6 @@
 #include <mammoth/util/debug.h>
 #include <mammoth/util/init.h>
 #include <mammoth/util/memory_region.h>
-#include <stdlib.h>
 #include <zcall.h>
 
 #include "hw/gpt.h"
