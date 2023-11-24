@@ -115,7 +115,7 @@ ErrorCode HashMap<K, V, H>::Insert(const K& key, const V& value) {
       return ALREADY_EXISTS;
     }
   }
-  ll.PushFront({Move(key), Move(value)});
+  ll.PushFront({key, value});
   size_++;
   return OK;
 }
