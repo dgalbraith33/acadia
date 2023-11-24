@@ -31,6 +31,11 @@ struct BuddySlot {
   uint64_t size;
 };
 
+BuddySlot* GetBuddy(BuddySlot* slot) {
+  return reinterpret_cast<BuddySlot*>(reinterpret_cast<uint64_t>(slot) ^
+                                      slot->size);
+}
+
 uint64_t NeededSize(uint64_t size) {
   uint64_t needed = size + sizeof(BuddySlot);
   // Start at 32 because sizeof(BuddySlot) is already 24;
@@ -91,11 +96,29 @@ class BuddyAllocator {
   }
 
   void Free(void* ptr) {
+    check(ZMutexLock(mutex_cap_));
     BuddySlot* slot = ((BuddySlot*)ptr) - 1;
-    // TODO: Merge.
-    free_front_->prev = slot;
+    if (slot->next || slot->prev) {
+      crash("Double free", glcr::INTERNAL);
+    }
+    BuddySlot* buddy = GetBuddy(slot);
+    while ((slot->size < 0x2000) && (buddy->next || buddy->prev) &&
+           (buddy->size == slot->size)) {
+      // Buddy is free! Merge!.
+      Remove(buddy);
+      if (buddy < slot) {
+        slot = buddy;
+      }
+      slot->size *= 2;
+      buddy = GetBuddy(slot);
+    }
+
+    if (free_front_) {
+      free_front_->prev = slot;
+    }
     slot->next = free_front_;
     free_front_ = slot;
+    check(ZMutexRelease(mutex_cap_));
   }
 
  private:
@@ -103,11 +126,13 @@ class BuddyAllocator {
   z_cap_t mutex_cap_ = 0;
 
   void AddPage() {
-    dbgln("PAGE");
     uint64_t vaddr = PageAllocator::AllocatePagePair();
     BuddySlot* slot = reinterpret_cast<BuddySlot*>(vaddr);
     slot->prev = nullptr;
     slot->next = free_front_;
+    if (free_front_) {
+      free_front_->prev = slot;
+    }
     free_front_ = slot;
     slot->size = 0x2000;
   }
@@ -118,8 +143,7 @@ class BuddyAllocator {
     }
 
     slot->size /= 2;
-    BuddySlot* new_slot = reinterpret_cast<BuddySlot*>(
-        reinterpret_cast<uint64_t>(slot) ^ slot->size);
+    BuddySlot* new_slot = GetBuddy(slot);
     new_slot->size = slot->size;
     new_slot->next = slot->next;
     new_slot->prev = slot;
