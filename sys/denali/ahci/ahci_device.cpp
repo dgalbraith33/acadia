@@ -2,7 +2,6 @@
 
 #include <glacier/status/error.h>
 #include <mammoth/util/debug.h>
-#include <string.h>
 #include <zcall.h>
 
 AhciDevice::AhciDevice(AhciPort* port) : port_struct_(port) {

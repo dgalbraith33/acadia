@@ -1,8 +1,19 @@
 #include "ahci/command.h"
 
-#include <string.h>
-
 #include "ahci/ahci.h"
+
+namespace {
+
+void* memcpy(void* dest, const void* src, uint64_t count) {
+  uint8_t* d = (uint8_t*)dest;
+  const uint8_t* s = (uint8_t*)src;
+  for (uint64_t i = 0; i < count; i++) {
+    d[i] = s[i];
+  }
+  return dest;
+}
+
+}  // namespace
 
 Command::~Command() {}
 

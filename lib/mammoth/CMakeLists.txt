@@ -23,7 +23,6 @@ target_include_directories(mammoth
 
 target_link_libraries(mammoth
   glacier
-  c
   victoriafalls_yunq
   yellowstone_yunq
   zion_stub
