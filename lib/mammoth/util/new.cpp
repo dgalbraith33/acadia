@@ -90,11 +90,20 @@ class BuddyAllocator {
     return ptr;
   }
 
+  void Free(void* ptr) {
+    BuddySlot* slot = ((BuddySlot*)ptr) - 1;
+    // TODO: Merge.
+    free_front_->prev = slot;
+    slot->next = free_front_;
+    free_front_ = slot;
+  }
+
  private:
   BuddySlot* free_front_ = nullptr;
   z_cap_t mutex_cap_ = 0;
 
   void AddPage() {
+    dbgln("PAGE");
     uint64_t vaddr = PageAllocator::AllocatePagePair();
     BuddySlot* slot = reinterpret_cast<BuddySlot*>(vaddr);
     slot->prev = nullptr;
@@ -157,11 +166,13 @@ void* Allocate(uint64_t size) {
   return ptr;
 }
 
+void Free(void* ptr) { gAllocator.Free(ptr); }
+
 }  // namespace
 
 [[nodiscard]] void* operator new(uint64_t size) { return Allocate(size); }
 [[nodiscard]] void* operator new[](uint64_t size) { return Allocate(size); }
 
-void operator delete(void*, uint64_t) {}
-void operator delete[](void*) {}
-void operator delete[](void*, uint64_t) {}
+void operator delete(void* ptr, uint64_t) { Free(ptr); }
+void operator delete[](void* ptr) { Free(ptr); }
+void operator delete[](void* ptr, uint64_t) { Free(ptr); }
