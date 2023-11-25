@@ -17,6 +17,8 @@ class PortClient {
 
   glcr::ErrorCode WriteString(glcr::String str, z_cap_t cap);
 
+  glcr::ErrorCode WriteByte(uint8_t byte);
+
   z_cap_t cap() { return port_cap_; }
 
   bool empty() { return port_cap_ == 0; }

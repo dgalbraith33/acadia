@@ -15,4 +15,8 @@ glcr::ErrorCode PortClient::WriteString(glcr::String str, z_cap_t cap) {
       ZPortSend(port_cap_, str.length() + 1, str.cstr(), 1, &cap));
 }
 
+glcr::ErrorCode PortClient::WriteByte(uint8_t byte) {
+  return static_cast<glcr::ErrorCode>(
+      ZPortSend(port_cap_, 1, &byte, 0, nullptr));
+}
 }  // namespace mmth

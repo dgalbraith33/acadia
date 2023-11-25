@@ -9,6 +9,7 @@ namespace mmth {
 
 class PortServer {
  public:
+  PortServer() {}
   static glcr::ErrorOr<PortServer> Create();
   static PortServer AdoptCap(z_cap_t cap);
 
