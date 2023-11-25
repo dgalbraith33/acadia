@@ -8,25 +8,10 @@ void dbgln(glcr::StringView string) {
 }
 
 void check(uint64_t code) {
-  switch (code) {
-    case glcr::OK:
-      return;
-    case glcr::UNIMPLEMENTED:
-      dbgln("crash: UNIMPLEMENTED");
-      break;
-    case glcr::CAP_NOT_FOUND:
-      dbgln("crash: missing capability");
-      break;
-    case glcr::CAP_WRONG_TYPE:
-      dbgln("crash: capability of the wrong type");
-      break;
-    case glcr::CAP_PERMISSION_DENIED:
-      dbgln("crash: capability permissions error");
-      break;
-    default:
-      dbgln("Unhandled code");
-      break;
+  if (code == glcr::OK) {
+    return;
   }
+  dbgln("crash!");
   (void)ZProcessExit(code);
 }
 
