@@ -146,8 +146,8 @@ void ParseMadt(SdtHeader* rsdt) {
   MadtHeader* header = reinterpret_cast<MadtHeader*>(rsdt);
 
 #if K_ACPI_DEBUG
-  dbgln("Local APIC {x}", header->local_apic_address);
-  dbgln("Flags: {x}", header->flags);
+  dbgln("Local APIC {x}", +header->local_apic_address);
+  dbgln("Flags: {x}", +header->flags);
 #endif
 
   gLApicBase = header->local_apic_address;
@@ -160,7 +160,7 @@ void ParseMadt(SdtHeader* rsdt) {
         MadtLocalApic* local = reinterpret_cast<MadtLocalApic*>(entry);
 #if K_ACPI_DEBUG
         dbgln("Local APIC (Proc id, id, flags): {x}, {x}, {x}",
-              local->processor_id, local->apic_id, local->flags);
+              local->processor_id, local->apic_id, +local->flags);
 #endif
         break;
       }
@@ -168,7 +168,7 @@ void ParseMadt(SdtHeader* rsdt) {
         MadtIoApic* io = reinterpret_cast<MadtIoApic*>(entry);
 #if K_ACPI_DEBUG
         dbgln("IO Apic (id, addr, gsi base): {x}, {x}, {x}", io->io_apic_id,
-              io->io_apic_address, io->global_system_interrupt_base);
+              +io->io_apic_address, +io->global_system_interrupt_base);
 #endif
         if (gIOApicBase != 0) {
           dbgln("More than one IOApic, unhandled");
@@ -181,8 +181,8 @@ void ParseMadt(SdtHeader* rsdt) {
             reinterpret_cast<MadtIoApicInterruptSource*>(entry);
 #if K_ACPI_DEBUG
         dbgln("IO Source (Bus, IRQ, GSI, flags): {x}, {x}, {x}, {x}",
-              src->bus_source, src->irq_source, src->global_system_interrupt,
-              src->flags);
+              src->bus_source, src->irq_source, +src->global_system_interrupt,
+              +src->flags);
 #endif
         break;
       }
@@ -191,7 +191,7 @@ void ParseMadt(SdtHeader* rsdt) {
             reinterpret_cast<MadtLocalApicNonMaskable*>(entry);
 #if K_ACPI_DEBUG
         dbgln("Local NMI (proc id, flags, lint#): {x}, {x}, {x}",
-              lnmi->apic_processor_id, lnmi->flags, lnmi->lint_num);
+              lnmi->apic_processor_id, +lnmi->flags, lnmi->lint_num);
 #endif
         break;
       }
@@ -254,7 +254,7 @@ void ProbeRsdp() {
 
 #if K_ACPI_DEBUG
   dbgln("ACPI Ver {}", rsdp->revision);
-  dbgln("RSDT Addr: {x}", rsdp->rsdt_addr);
+  dbgln("RSDT Addr: {x}", +rsdp->rsdt_addr);
 #endif
 
   ProbeRsdt(reinterpret_cast<SdtHeader*>(rsdp->rsdt_addr));
@@ -270,7 +270,7 @@ void ProbeRsdp() {
   }
 
 #if K_ACPI_DEBUG
-  dbgln("XSDT Addr: {x}", rsdp->xsdt_addr);
+  dbgln("XSDT Addr: {x}", +rsdp->xsdt_addr);
 #endif
 }
 

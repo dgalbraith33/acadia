@@ -183,7 +183,22 @@ glcr::ErrorCode AhciDriver::RegisterIrq() {
   if (pci_device_header_->interrupt_pin == 0) {
     crash("Can't register IRQ without a pin num", glcr::INVALID_ARGUMENT);
   }
-  uint64_t irq_num = Z_IRQ_PCI_BASE + pci_device_header_->interrupt_pin - 1;
+  uint64_t irq_num = 0;
+  switch (pci_device_header_->interrupt_pin) {
+    case 1:
+      irq_num = kZIrqPci1;
+      break;
+    case 2:
+      irq_num = kZIrqPci2;
+      break;
+    case 3:
+      irq_num = kZIrqPci3;
+      break;
+    case 4:
+      irq_num = kZIrqPci4;
+      break;
+  }
+
   RET_ERR(ZIrqRegister(irq_num, &irq_port_cap_));
   irq_thread_ = Thread(interrupt_thread, this);
   ahci_hba_->global_host_control |= kGhc_InteruptEnable;

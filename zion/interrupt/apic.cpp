@@ -136,6 +136,9 @@ Apic::Apic(const ApicConfiguration& config)
   // FIXME: Get this offset from ACPI.
   SetIoDoubleReg(0x14, 0x20 | APIC_MASK);
 
+  // Map Keyboard
+  SetIoDoubleReg(0x12, 0x22);
+
   // For now set these based on the presets in the following spec.
   // http://web.archive.org/web/20161130153145/http://download.intel.com/design/chipsets/datashts/29056601.pdf
   // FIXME: However in the future we should likely use the MADT for legacy

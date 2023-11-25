@@ -50,8 +50,6 @@ const uint64_t kZionReplyPortSend = 0x63;
 const uint64_t kZionReplyPortRecv = 0x64;
 const uint64_t kZionEndpointCall = 0x65;
 
-#define Z_IRQ_PCI_BASE 0x30
-
 // Capability Calls
 const uint64_t kZionCapDuplicate = 0x70;
 const uint64_t kZionCapRelease = 0x71;
@@ -66,6 +64,13 @@ const uint64_t kZionSemaphoreSignal = 0x85;
 
 // Debugging Calls.
 const uint64_t kZionDebug = 0x1'0000;
+
+// Irq Types
+const uint64_t kZIrqKbd = 0x22;
+const uint64_t kZIrqPci1 = 0x30;
+const uint64_t kZIrqPci2 = 0x31;
+const uint64_t kZIrqPci3 = 0x32;
+const uint64_t kZIrqPci4 = 0x33;
 
 /* ------------------------------
  * Capability Types

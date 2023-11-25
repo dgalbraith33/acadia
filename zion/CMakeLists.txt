@@ -10,6 +10,7 @@ add_executable(zion
   debug/debug.cpp
   interrupt/apic.cpp
   interrupt/apic_timer.cpp
+  interrupt/driver_manager.cpp
   interrupt/interrupt.cpp
   interrupt/interrupt_enter.s
   interrupt/timer.cpp

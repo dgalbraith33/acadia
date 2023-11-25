@@ -7,6 +7,7 @@
 #include "debug/debug.h"
 #include "interrupt/apic.h"
 #include "interrupt/apic_timer.h"
+#include "interrupt/driver_manager.h"
 #include "memory/kernel_heap.h"
 #include "memory/physical_memory.h"
 #include "scheduler/scheduler.h"
@@ -196,27 +197,39 @@ extern "C" void interrupt_apic_timer(InterruptFrame*) {
   gScheduler->Preempt();
 }
 
-glcr::RefPtr<Port> pci1_port;
+extern "C" void isr_keyboard();
+extern "C" void interrupt_keyboard(InterruptFrame*) {
+  glcr::Array<uint8_t> data(1);
+  data[0] = inb(0x60);
+  IpcMessage msg{.data = glcr::Move(data)};
+  DriverManager::Get().WriteMessage(kZIrqKbd, glcr::Move(msg));
+
+  gApic->SignalEOI();
+}
+
 extern "C" void isr_pci1();
 extern "C" void interrupt_pci1(InterruptFrame*) {
-  pci1_port->Send({});
+  DriverManager::Get().WriteMessage(kZIrqPci1, {});
   gApic->SignalEOI();
 }
 
 extern "C" void isr_pci2();
 extern "C" void interrupt_pci2(InterruptFrame*) {
+  DriverManager::Get().WriteMessage(kZIrqPci2, {});
   dbgln("Interrupt PCI line 2");
   gApic->SignalEOI();
 }
 
 extern "C" void isr_pci3();
 extern "C" void interrupt_pci3(InterruptFrame*) {
+  DriverManager::Get().WriteMessage(kZIrqPci3, {});
   dbgln("Interrupt PCI line 3");
   gApic->SignalEOI();
 }
 
 extern "C" void isr_pci4();
 extern "C" void interrupt_pci4(InterruptFrame*) {
+  DriverManager::Get().WriteMessage(kZIrqPci4, {});
   dbgln("Interrupt PCI line 4");
   gApic->SignalEOI();
 }
@@ -230,6 +243,7 @@ void InitIdt() {
 
   gIdt[0x20] = CreateDescriptor(isr_timer);
   gIdt[0x21] = CreateDescriptor(isr_apic_timer);
+  gIdt[0x22] = CreateDescriptor(isr_keyboard);
 
   gIdt[0x30] = CreateDescriptor(isr_pci1);
   gIdt[0x31] = CreateDescriptor(isr_pci2);
@@ -253,5 +267,3 @@ void UpdateFaultHandlersToIst1() {
   };
   asm volatile("lidt %0" ::"m"(idtp));
 }
-
-void RegisterPciPort(const glcr::RefPtr<Port>& port) { pci1_port = port; }

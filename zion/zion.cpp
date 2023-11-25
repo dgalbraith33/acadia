@@ -6,6 +6,7 @@
 #include "debug/debug.h"
 #include "interrupt/apic.h"
 #include "interrupt/apic_timer.h"
+#include "interrupt/driver_manager.h"
 #include "interrupt/interrupt.h"
 #include "interrupt/timer.h"
 #include "loader/init_loader.h"
@@ -46,6 +47,7 @@ extern "C" void zion() {
   // These two need to occur after memory allocation is available.
   Apic::Init();
   ApicTimer::Init();
+  DriverManager driver_manager;
 
   dbgln("[boot] Init syscalls.");
   InitSyscall();

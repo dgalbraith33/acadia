@@ -2,6 +2,7 @@
 
 #include "capability/capability.h"
 #include "debug/debug.h"
+#include "interrupt/driver_manager.h"
 #include "interrupt/interrupt.h"
 #include "object/endpoint.h"
 #include "object/reply_port.h"
@@ -157,13 +158,10 @@ glcr::ErrorCode PortPoll(ZPortPollReq* req) {
 
 glcr::ErrorCode IrqRegister(ZIrqRegisterReq* req) {
   auto& proc = gScheduler->CurrentProcess();
-  if (req->irq_num != Z_IRQ_PCI_BASE) {
-    // FIXME: Don't hardcode this nonsense.
-    return glcr::UNIMPLEMENTED;
-  }
+
   glcr::RefPtr<Port> port = glcr::MakeRefCounted<Port>();
   *req->port_cap = proc.AddNewCapability(port);
-  RegisterPciPort(port);
+  DriverManager::Get().RegisterListener(req->irq_num, port);
   return glcr::OK;
 }
 

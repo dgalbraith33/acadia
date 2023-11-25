@@ -7,5 +7,3 @@
 void InitIdt();
 
 void UpdateFaultHandlersToIst1();
-
-void RegisterPciPort(const glcr::RefPtr<Port>& port);
