@@ -6,7 +6,7 @@
 
 namespace {
 
-bool IsKernel(uint64_t addr) { return (addr & 0xFFFF'FF80'0000'0000); }
+bool IsKernel(uint64_t addr) { return (addr & 0xFFFF'8000'0000'0000); }
 
 }  // namespace
 
@@ -29,6 +29,8 @@ glcr::ErrorCode ThreadStart(ZThreadStartReq* req) {
   auto thread = cap->obj<Thread>();
 
   if (IsKernel(req->entry) || IsKernel(req->arg1) || IsKernel(req->arg2)) {
+    dbgln("Thread start invalid arg: rip {x}, rdi {x}, rsi {x}", req->entry,
+          req->arg1, req->arg2);
     return glcr::INVALID_ARGUMENT;
   }
 
