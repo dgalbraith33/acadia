@@ -1,6 +1,9 @@
 #pragma once
 
+#include <glacier/container/linked_list.h>
 #include <stdint.h>
+
+#include "memory/constants.h"
 
 // Per-process class to manage user stacks.
 //
@@ -24,10 +27,7 @@ class UserStackManager {
   bool IsValidStack(uint64_t vaddr);
 
  private:
-  const uint64_t kStackMax = 0x00008000'00000000;
-  const uint64_t kStackMin = 0x00007FF0'00000000;
-  const uint64_t kStackSize = 0x100000;
+  uint64_t next_stack_ = kUserStackMax;
 
-  uint64_t next_stack_ = kStackMax;
-  uint64_t freed_stacks_ = 0;
+  glcr::LinkedList<uint64_t> freed_stacks_;
 };

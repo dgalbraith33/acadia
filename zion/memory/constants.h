@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 const uint64_t KiB = 0x400;
+const uint64_t MiB = KiB * KiB;
 const uint64_t kPageSize = 4 * KiB;
 
 const uint64_t kKernelSlabHeapStart = 0xFFFF'FFFF'4000'0000;
@@ -20,3 +21,7 @@ const uint64_t kKernelStackEnd = 0xFFFF'FFFF'A000'0000;
 
 const uint64_t kKernelStackSize = 3 * kPageSize;
 const uint64_t kKernelStackOffset = 4 * kPageSize;
+
+const uint64_t kUserStackMin = 0x00007FF0'00000000;
+const uint64_t kUserStackMax = 0x00008000'00000000;
+const uint64_t kUserStackSize = MiB;

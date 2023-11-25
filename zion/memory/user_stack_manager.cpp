@@ -4,12 +4,16 @@
 #include "memory/paging_util.h"
 
 uint64_t UserStackManager::NewUserStack() {
+  if (!freed_stacks_.empty()) {
+    return freed_stacks_.PopFront();
+  }
+
   uint64_t stack = next_stack_;
-  next_stack_ -= kStackSize;
-  if (stack <= kStackMin) {
+  next_stack_ -= kUserStackSize;
+  if (stack <= kUserStackMin) {
     panic("Out of user stacks!");
   }
-  if (stack == kStackMax) {
+  if (stack == kUserStackMax) {
     // Add a additional page boudary between kernel and user space.
     stack -= 0x1000;
   }
@@ -18,12 +22,11 @@ uint64_t UserStackManager::NewUserStack() {
 }
 
 void UserStackManager::FreeUserStack(uint64_t stack_ptr) {
-  freed_stacks_++;
-  dbgln("{} freed user stacks", freed_stacks_);
+  freed_stacks_.PushBack(stack_ptr);
 }
 
 bool UserStackManager::IsValidStack(uint64_t vaddr) {
-  if (vaddr < next_stack_ || vaddr > (kStackMax - 0x1000)) {
+  if (vaddr < next_stack_ || vaddr > (kUserStackMax - 0x1000)) {
     return false;
   }
   // Checks if the address is in the first page of the stack.
