@@ -18,6 +18,8 @@ AddressSpace::AddressSpace() {
   InitializePml4(cr3_);
 }
 
+AddressSpace::~AddressSpace() { CleanupPml4(cr3_); }
+
 glcr::ErrorOr<uint64_t> AddressSpace::AllocateUserStack() {
   uint64_t base = user_stacks_.NewUserStack();
   auto mem_object = glcr::StaticCastRefPtr<MemoryObject>(

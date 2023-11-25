@@ -105,6 +105,8 @@ void Process::Cleanup() {
   PANIC_ON_ERR(vmas_->FreeAddressRange(0, kUserSpaceMax),
                "Failed to cleanup userspace mappings in process exit.");
 
-  // 4. Release paging structures. TODO
+  // 4. Release paging structures.
+  vmas_ = nullptr;
+
   state_ = FINISHED;
 }

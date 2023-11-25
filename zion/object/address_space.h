@@ -62,6 +62,10 @@ class AddressSpace : public KernelObject {
   AddressSpace(const AddressSpace&) = delete;
   AddressSpace(AddressSpace&&) = delete;
 
+  // Deconstructing an address space will free all paging structures associated
+  // with this address space.
+  ~AddressSpace();
+
   uint64_t cr3() { return cr3_; }
 
   // User Mappings.

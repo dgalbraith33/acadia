@@ -87,6 +87,21 @@ uint64_t CurrCr3() {
   return pml4_addr;
 }
 
+void CleanupPageStructure(uint64_t struct_phys, uint64_t level) {
+  uint64_t* struct_virtual =
+      reinterpret_cast<uint64_t*>(boot::GetHigherHalfDirectMap() + struct_phys);
+
+  if (level > 0) {
+    for (uint16_t i = 0; i < 256; i++) {
+      if (struct_virtual[i] & PRESENT_BIT) {
+        CleanupPageStructure(struct_virtual[i] & ~0xFFF, level - 1);
+      }
+    }
+  }
+
+  phys_mem::FreePage(struct_phys);
+}
+
 }  // namespace
 
 void InitializePml4(uint64_t pml4_physical_addr) {
@@ -103,6 +118,20 @@ void InitializePml4(uint64_t pml4_physical_addr) {
   // This is necessary to access values off of the kernel stack.
   uint64_t hhdm = boot::GetHigherHalfDirectMap();
   pml4_virtual[Pml4Index(hhdm)] = *Pml4Entry(curr_cr3, hhdm);
+}
+
+void CleanupPml4(uint64_t pml4_physical_addr) {
+  uint64_t* pml4_virtual = reinterpret_cast<uint64_t*>(
+      boot::GetHigherHalfDirectMap() + pml4_physical_addr);
+
+  // Iterate the first half of the pml4 as it contains user-space mappings.
+  for (uint8_t i = 0; i < 128; i++) {
+    if (pml4_virtual[i] & PRESENT_BIT) {
+      CleanupPageStructure(pml4_virtual[i] & ~0xFFF, 2);
+    }
+  }
+
+  phys_mem::FreePage(pml4_physical_addr);
 }
 
 void MapPage(uint64_t cr3, uint64_t vaddr, uint64_t paddr) {
