@@ -155,7 +155,7 @@ class Parser():
     def consume_check(self, lex_type: LexemeType):
         tok = self.consume()
         if tok.type != lex_type:
-            sys.exit("Expected %s got %s" % (lex_type, tok_type))
+            sys.exit("Expected %s got %s" % (lex_type, tok.type))
 
     def consume_check_identifier(self, name: str):
         tok = self.consume()
