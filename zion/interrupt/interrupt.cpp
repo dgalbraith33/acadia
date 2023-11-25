@@ -110,6 +110,8 @@ extern "C" void interrupt_protection_fault(InterruptFrame* frame) {
   }
   dbgln("Index: {}", err >> 3);
   dbgln("RIP: {x}", frame->rip);
+  dbgln("RAX: {x}, RBX: {x}, RCX: {x}, RDX: {x}", frame->rax, frame->rbx,
+        frame->rcx, frame->rdx);
   dbgln("RSP: {x}", frame->rsp);
   StackUnwind(frame->rbp);
 
