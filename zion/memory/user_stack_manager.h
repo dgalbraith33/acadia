@@ -20,6 +20,8 @@ class UserStackManager {
   UserStackManager() {}
   UserStackManager(const UserStackManager&) = delete;
 
+  // TODO: Create some padding between user stacks to
+  // detect stack overruns.
   uint64_t NewUserStack();
   void FreeUserStack(uint64_t stack_base);
 
