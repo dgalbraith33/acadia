@@ -92,6 +92,9 @@ const V& HashMap<K, V, H>::at(const K& key) const {
 
 template <typename K, typename V, class H>
 bool HashMap<K, V, H>::Contains(const K& key) const {
+  if (data_.size() == 0) {
+    return false;
+  }
   uint64_t hc = H()(key);
   auto& ll = data_[hc % data_.size()];
 
