@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glacier/container/linked_list.h>
 #include <stdint.h>
 
 // KernelStackManager doles out kernel stacks.
@@ -24,5 +25,6 @@ class KernelStackManager {
 
  private:
   uint64_t next_stack_addr_;
-  uint64_t freed_stack_cnt_ = 0;
+
+  glcr::LinkedList<uint64_t> free_stacks_;
 };

@@ -15,6 +15,9 @@ void KernelStackManager::SetupInterruptStack() {
 }
 
 uint64_t KernelStackManager::AllocateKernelStack() {
+  if (!free_stacks_.empty()) {
+    return free_stacks_.PopFront();
+  }
   next_stack_addr_ += kKernelStackOffset;
   if (next_stack_addr_ >= kKernelStackEnd) {
     panic("No more kernel stack space");
@@ -24,6 +27,9 @@ uint64_t KernelStackManager::AllocateKernelStack() {
 }
 
 void KernelStackManager::FreeKernelStack(uint64_t stack_base) {
-  freed_stack_cnt_++;
-  dbgln("Freed kernel stacks using {} KiB", freed_stack_cnt_ * 12);
+  // TODO: Validate this value.
+  if ((stack_base & 0x3FF8) != 0x3FF8) {
+    dbgln("Odd kernel stack free {x}", stack_base);
+  }
+  free_stacks_.PushFront(stack_base);
 }
