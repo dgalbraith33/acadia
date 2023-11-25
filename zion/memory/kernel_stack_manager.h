@@ -21,6 +21,8 @@ class KernelStackManager {
 
   uint64_t AllocateKernelStack();
 
+  // For now we just reuse kernel stacks as-is (don't free the physical memory
+  // or unmap/remap the pages in virtual memory.)
   void FreeKernelStack(uint64_t stack_base);
 
  private:
