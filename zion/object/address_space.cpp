@@ -18,12 +18,18 @@ AddressSpace::AddressSpace() {
   InitializePml4(cr3_);
 }
 
-uint64_t AddressSpace::AllocateUserStack() {
-  return user_stacks_.NewUserStack();
+glcr::ErrorOr<uint64_t> AddressSpace::AllocateUserStack() {
+  uint64_t base = user_stacks_.NewUserStack();
+  auto mem_object = glcr::StaticCastRefPtr<MemoryObject>(
+      glcr::MakeRefCounted<VariableMemoryObject>(kUserStackSize));
+  RET_ERR(MapInMemoryObject(base, mem_object));
+  return base;
 }
 
-void AddressSpace::FreeUserStack(uint64_t rsp) {
-  return user_stacks_.FreeUserStack(rsp);
+glcr::ErrorCode AddressSpace::FreeUserStack(uint64_t base) {
+  RET_ERR(FreeAddressRange(base, base + kUserStackSize));
+  user_stacks_.FreeUserStack(base);
+  return glcr::OK;
 }
 
 uint64_t AddressSpace::GetNextMemMapAddr(uint64_t size, uint64_t align) {
@@ -68,11 +74,6 @@ bool AddressSpace::HandlePageFault(uint64_t vaddr) {
   if (vaddr < kPageSize) {
     // Invalid page access.
     return false;
-  }
-
-  if (user_stacks_.IsValidStack(vaddr)) {
-    MapPage(cr3_, vaddr, phys_mem::AllocatePage());
-    return true;
   }
 
   auto offset_or = mapping_tree_.GetPhysicalPageAtVaddr(vaddr);

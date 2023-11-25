@@ -72,14 +72,15 @@ void Thread::Init() {
 #if K_THREAD_DEBUG
   dbgln("Thread start.", pid(), id_);
 #endif
-  uint64_t rsp_ = process_.vmas()->AllocateUserStack();
-  // TODO: Investigate this further but without this GCC
-  // will emit movaps calls to non-16-bit-aligned stack
-  // addresses.
-  rsp_ -= 0x8;
-  *reinterpret_cast<uint64_t*>(rsp_) = kStackBaseSentinel;
+  auto stack_or = process_.vmas()->AllocateUserStack();
+  if (!stack_or.ok()) {
+    panic("Unable to allocate user stack: {}", stack_or.error());
+  }
+  user_stack_base_ = stack_or.value();
+  uint64_t rsp = user_stack_base_ + kUserStackSize - 0x8;
+  *reinterpret_cast<uint64_t*>(rsp) = kStackBaseSentinel;
   SetRsp0(rsp0_start_);
-  jump_user_space(rip_, rsp_, arg1_, arg2_);
+  jump_user_space(rip_, rsp, arg1_, arg2_);
 }
 void Thread::SetState(State state) {
   if (IsDying()) {
@@ -113,7 +114,8 @@ void Thread::Cleanup() {
   }
 
   // 1. Release User Stack
-  process_.vmas()->FreeUserStack(rsp_);
+  PANIC_ON_ERR(process_.vmas()->FreeUserStack(user_stack_base_),
+               "Unable to free user stack.");
 
   // 2. Unblock waiting threads.
   while (blocked_threads_.size() != 0) {

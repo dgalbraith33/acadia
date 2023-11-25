@@ -65,8 +65,8 @@ class AddressSpace : public KernelObject {
   uint64_t cr3() { return cr3_; }
 
   // User Mappings.
-  uint64_t AllocateUserStack();
-  void FreeUserStack(uint64_t);
+  glcr::ErrorOr<uint64_t> AllocateUserStack();
+  [[nodiscard]] glcr::ErrorCode FreeUserStack(uint64_t stack_base);
   uint64_t GetNextMemMapAddr(uint64_t size, uint64_t align);
 
   // Maps in a memory object at a specific address.

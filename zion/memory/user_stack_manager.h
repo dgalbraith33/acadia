@@ -21,10 +21,7 @@ class UserStackManager {
   UserStackManager(const UserStackManager&) = delete;
 
   uint64_t NewUserStack();
-  void FreeUserStack(uint64_t stack_ptr);
-
-  // Used to check if we should page in this address.
-  bool IsValidStack(uint64_t vaddr);
+  void FreeUserStack(uint64_t stack_base);
 
  private:
   uint64_t next_stack_ = kUserStackMax;
