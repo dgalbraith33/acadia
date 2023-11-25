@@ -25,3 +25,5 @@ const uint64_t kKernelStackOffset = 4 * kPageSize;
 const uint64_t kUserStackMin = 0x00007FF0'00000000;
 const uint64_t kUserStackMax = 0x00008000'00000000;
 const uint64_t kUserStackSize = MiB;
+
+const uint64_t kUserSpaceMax = 0x00008000'00000000;
