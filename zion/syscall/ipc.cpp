@@ -160,9 +160,9 @@ glcr::ErrorCode IrqRegister(ZIrqRegisterReq* req) {
   auto& proc = gScheduler->CurrentProcess();
 
   glcr::RefPtr<Port> port = glcr::MakeRefCounted<Port>();
+
   *req->port_cap = proc.AddNewCapability(port);
-  DriverManager::Get().RegisterListener(req->irq_num, port);
-  return glcr::OK;
+  return DriverManager::Get().RegisterListener(req->irq_num, port);
 }
 
 glcr::ErrorCode EndpointCreate(ZEndpointCreateReq* req) {
