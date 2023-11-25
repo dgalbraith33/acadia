@@ -33,3 +33,13 @@ glcr::RefPtr<Capability> CapabilityTable::ReleaseCapability(uint64_t id) {
   (void)capabilities_.Delete(id);
   return cap;
 }
+
+void CapabilityTable::ReleaseAll() {
+  for (uint64_t i = 0; i < next_cap_id_; i++) {
+    (void)capabilities_.Delete(i);
+  }
+  if (capabilities_.size() != 0) {
+    dbgln("Capabilities still remaining after clear: {x}",
+          capabilities_.size());
+  }
+}

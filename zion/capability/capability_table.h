@@ -25,6 +25,8 @@ class CapabilityTable {
   glcr::RefPtr<Capability> GetCapability(uint64_t id);
   glcr::RefPtr<Capability> ReleaseCapability(uint64_t id);
 
+  void ReleaseAll();
+
  private:
   glcr::RefPtr<Mutex> lock_ = Mutex::Create();
   // TODO: Do some randomization.

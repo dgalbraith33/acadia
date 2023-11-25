@@ -98,7 +98,8 @@ void Process::Cleanup() {
     }
   }
 
-  // 2. Release all capabailities. TODO
+  // 2. Release all capabailities.
+  caps_.ReleaseAll();
 
   // 3. Unmap all user memory. TODO
 
