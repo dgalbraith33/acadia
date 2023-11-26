@@ -1,6 +1,7 @@
 
 #include <mammoth/util/debug.h>
 #include <mammoth/util/init.h>
+#include <yellowstone/yellowstone.yunq.client.h>
 
 #include "keyboard/keyboard_driver.h"
 #include "voyageurs_server.h"
@@ -19,6 +20,15 @@ uint64_t main(uint64_t init_port) {
                    VoyageursServer::Create(driver));
 
   Thread server_thread = server->RunServer();
+
+  YellowstoneClient yellowstone(gInitEndpointCap);
+
+  RegisterEndpointRequest req;
+  req.set_endpoint_name("voyageurs");
+  ASSIGN_OR_RETURN(VoyageursClient client, server->CreateClient());
+  req.set_endpoint_capability(client.Capability());
+  Empty empty;
+  check(yellowstone.RegisterEndpoint(req, empty));
 
   check(server_thread.Join());
   check(keyboard_thread.Join());
