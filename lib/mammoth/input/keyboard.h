@@ -48,6 +48,21 @@ enum Keycode {
 
   kSpace = 0x30,
   kEnter = 0x31,
+  kTab = 0x32,
+
+  kMinus = 0x40,
+  kEquals = 0x41,
+  kLBrace = 0x42,
+  kRBrace = 0x43,
+  kBSlash = 0x44,
+  kFSlash = 0x45,
+  kSemicolon = 0x46,
+  kQuote = 0x47,
+  kComma = 0x48,
+  kPeriod = 0x49,
+
+  kLShift = 0x50,
+  kRShift = 0x51,
 };
 
 enum Action {
@@ -81,8 +96,13 @@ class KeyboardListenerBase {
  private:
   PortServer server_;
 
+  bool lshift_ = false;
+  bool rshift_ = false;
+
   Keycode ScancodeToKeycode(uint8_t scancode);
   Action ScancodeToAction(uint8_t scancode);
+
+  bool IsShift() { return lshift_ || rshift_; }
 };
 
 }  // namespace mmth

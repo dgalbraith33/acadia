@@ -66,15 +66,46 @@ void KeyboardListenerBase::HandleKeycode(Keycode code, Action action) {
 
   if (action == kPressed) {
     if (code >= kA && code <= kZ) {
-      const char* alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-      c = alpha[code - kA];
+      if (IsShift()) {
+        const char* alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        c = alpha[code - kA];
+
+      } else {
+        const char* alpha = "abcdefghijklmnopqrstuvwxyz";
+        c = alpha[code - kA];
+      }
     } else if (code >= k1 && code <= k0) {
-      const char* num = "1234567890";
-      c = num[code - k1];
+      if (IsShift()) {
+        const char* num = "!@#$%^&*()";
+        c = num[code - k1];
+      } else {
+        const char* num = "1234567890";
+        c = num[code - k1];
+      }
+    } else if (code >= kMinus && code <= kPeriod) {
+      if (IsShift()) {
+        const char* sym = "_+{}|?:\"<>";
+        c = sym[code - kMinus];
+      } else {
+        const char* sym = "-=[]\\/;',.";
+        c = sym[code - kMinus];
+      }
     } else if (code == kEnter) {
       c = '\n';
     } else if (code == kSpace) {
       c = ' ';
+    } else if (code == kTab) {
+      c = '\t';
+    } else if (code == kLShift) {
+      lshift_ = true;
+    } else if (code == kRShift) {
+      rshift_ = true;
+    }
+  } else if (action == kReleased) {
+    if (code == kLShift) {
+      lshift_ = false;
+    } else if (code == kRShift) {
+      rshift_ = false;
     }
   }
 
@@ -107,6 +138,12 @@ Keycode KeyboardListenerBase::ScancodeToKeycode(uint8_t scancode) {
       return k9;
     case 0x0B:
       return k0;
+    case 0x0C:
+      return kMinus;
+    case 0x0D:
+      return kEquals;
+    case 0x0F:
+      return kTab;
     case 0x10:
       return kQ;
     case 0x11:
@@ -127,6 +164,12 @@ Keycode KeyboardListenerBase::ScancodeToKeycode(uint8_t scancode) {
       return kO;
     case 0x19:
       return kP;
+    case 0x1A:
+      return kLBrace;
+    case 0x1B:
+      return kRBrace;
+    case 0x1C:
+      return kEnter;
     case 0x1E:
       return kA;
     case 0x1F:
@@ -145,6 +188,14 @@ Keycode KeyboardListenerBase::ScancodeToKeycode(uint8_t scancode) {
       return kK;
     case 0x26:
       return kL;
+    case 0x27:
+      return kSemicolon;
+    case 0x28:
+      return kQuote;
+    case 0x2A:
+      return kLShift;
+    case 0x2B:
+      return kBSlash;
     case 0x2C:
       return kZ;
     case 0x2D:
@@ -159,6 +210,16 @@ Keycode KeyboardListenerBase::ScancodeToKeycode(uint8_t scancode) {
       return kN;
     case 0x32:
       return kM;
+    case 0x33:
+      return kComma;
+    case 0x34:
+      return kPeriod;
+    case 0x35:
+      return kFSlash;
+    case 0x36:
+      return kRShift;
+    case 0x39:
+      return kSpace;
   }
 
   dbgln("Unknown scancode {x}", scancode);
