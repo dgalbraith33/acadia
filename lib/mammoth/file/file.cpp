@@ -1,5 +1,6 @@
 #include "file/file.h"
 
+#include <glacier/string/str_split.h>
 #include <victoriafalls/victoriafalls.yunq.client.h>
 #include <yellowstone/yellowstone.yunq.client.h>
 #include <zglobal.h>
@@ -11,12 +12,8 @@ namespace {
 
 VFSClient* gVfsClient = nullptr;
 
-}  // namespace
-
-void SetVfsCap(z_cap_t vfs_cap) { gVfsClient = new VFSClient(vfs_cap); }
-
-File File::Open(glcr::StringView path) {
-  if (gVfsClient == 0) {
+void GetVfsClientIfNeeded() {
+  if (gVfsClient == nullptr) {
     YellowstoneClient client(gInitEndpointCap);
 
     GetEndpointRequest yreq;
@@ -26,6 +23,14 @@ File File::Open(glcr::StringView path) {
 
     gVfsClient = new VFSClient(yresp.endpoint());
   }
+}
+
+}  // namespace
+
+void SetVfsCap(z_cap_t vfs_cap) { gVfsClient = new VFSClient(vfs_cap); }
+
+File File::Open(glcr::StringView path) {
+  GetVfsClientIfNeeded();
 
   OpenFileRequest req;
   req.set_path(path);
@@ -42,6 +47,22 @@ glcr::StringView File::as_str() {
 void* File::raw_ptr() { return reinterpret_cast<void*>(file_data_.vaddr()); }
 uint8_t* File::byte_ptr() {
   return reinterpret_cast<uint8_t*>(file_data_.vaddr());
+}
+
+glcr::ErrorOr<glcr::Vector<glcr::String>> ListDirectory(glcr::StringView path) {
+  GetVfsClientIfNeeded();
+
+  GetDirectoryRequest req;
+  req.set_path(path);
+  Directory dir;
+  RET_ERR(gVfsClient->GetDirectory(req, dir));
+
+  auto file_views = glcr::StrSplit(dir.filenames(), ',');
+  glcr::Vector<glcr::String> files;
+  for (uint64_t i = 0; i < file_views.size(); i++) {
+    files.PushBack(file_views[i]);
+  }
+  return files;
 }
 
 }  // namespace mmth
