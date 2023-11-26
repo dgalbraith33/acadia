@@ -18,6 +18,8 @@ class PortServer {
   glcr::ErrorCode RecvCap(uint64_t* num_bytes, char* msg, uint64_t* cap);
   glcr::ErrorCode PollForIntCap(uint64_t* msg, uint64_t* cap);
 
+  glcr::ErrorOr<char> RecvChar();
+
   z_cap_t cap() { return port_cap_; }
 
  private:

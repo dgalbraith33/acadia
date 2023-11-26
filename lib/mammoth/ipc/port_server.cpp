@@ -47,4 +47,12 @@ glcr::ErrorCode PortServer::PollForIntCap(uint64_t *msg, uint64_t *cap) {
   return glcr::OK;
 }
 
+glcr::ErrorOr<char> PortServer::RecvChar() {
+  uint64_t bytes = 1;
+  uint64_t caps = 0;
+  char byte;
+  RET_ERR(ZPortRecv(port_cap_, &bytes, &byte, &caps, nullptr));
+  return byte;
+}
+
 }  // namespace mmth

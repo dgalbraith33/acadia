@@ -13,6 +13,7 @@ target_link_libraries(teton
   glacier
   mammoth
   victoriafalls_yunq
+  voyageurs_yunq
   yellowstone_yunq
   )
 

@@ -1,6 +1,8 @@
+#include <mammoth/ipc/port_server.h>
 #include <mammoth/util/debug.h>
 #include <mammoth/util/init.h>
 #include <victoriafalls/victoriafalls.yunq.client.h>
+#include <voyageurs/voyageurs.yunq.client.h>
 #include <yellowstone/yellowstone.yunq.client.h>
 
 #include "framebuffer/console.h"
@@ -28,13 +30,33 @@ uint64_t main(uint64_t init_port) {
   Psf psf("/default8x16.psfu");
   psf.DumpHeader();
 
+  // 3. Write a line to the screen.
   Console console(fbuf, psf);
   console.WriteString("Hello World!\n");
   for (uint8_t i = 0x20; i < 0x7E; i++) {
     console.WriteChar(i);
   }
 
-  // 3. Write a line to the screen.
+  GetEndpointRequest req;
+  req.set_endpoint_name("voyageurs");
+  Endpoint endpoint;
+  RET_ERR(client.GetEndpoint(req, endpoint));
+
+  VoyageursClient voyaguers(endpoint.endpoint());
+  ASSIGN_OR_RETURN(mmth::PortServer server, mmth::PortServer::Create());
+  KeyboardListener listener;
+  ASSIGN_OR_RETURN(mmth::PortClient pclient, server.CreateClient());
+  listener.set_port_capability(pclient.cap());
+  None n;
+  RET_ERR(voyaguers.RegisterKeyboardListener(listener, n));
+
+  while (true) {
+    ASSIGN_OR_RETURN(char c, server.RecvChar());
+    if (c != '\0') {
+      console.WriteChar(c);
+      dbgln("{}", c);
+    }
+  }
 
   return 0;
 }
