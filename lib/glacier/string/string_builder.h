@@ -12,6 +12,9 @@ class StringBuilder {
   virtual void PushBack(const StringView& str) = 0;
   virtual void PushBack(const char str) = 0;
 
+  virtual void DeleteLast() = 0;
+  virtual void Reset() = 0;
+
   virtual String ToString() const = 0;
 
   virtual operator StringView() const = 0;
@@ -29,6 +32,9 @@ class VariableStringBuilder : public StringBuilder {
 
   virtual void PushBack(const StringView& str) override;
   virtual void PushBack(const char str) override;
+
+  virtual void DeleteLast() override;
+  virtual void Reset() override;
 
   virtual String ToString() const override;
 
@@ -55,6 +61,9 @@ class FixedStringBuilder : public StringBuilder {
 
   virtual void PushBack(const StringView& str) override;
   virtual void PushBack(const char str) override;
+
+  virtual void DeleteLast() override;
+  virtual void Reset() override;
 
   virtual String ToString() const override;
 

@@ -19,6 +19,14 @@ void VariableStringBuilder::PushBack(const StringView& str) {
 
 void VariableStringBuilder::PushBack(const char str) { data_.PushBack(str); }
 
+void VariableStringBuilder::DeleteLast() {
+  if (data_.size() > 0) {
+    data_.PopBack();
+  }
+}
+
+void VariableStringBuilder::Reset() { data_ = glcr::Vector<char>(); }
+
 String VariableStringBuilder::ToString() const {
   return String(data_.RawPtr(), size());
 }
@@ -49,5 +57,13 @@ String FixedStringBuilder::ToString() const { return String(buffer_, size_); }
 FixedStringBuilder::operator StringView() const {
   return StringView(buffer_, size_);
 }
+
+void FixedStringBuilder::DeleteLast() {
+  if (size_ > 0) {
+    size_--;
+  }
+}
+
+void FixedStringBuilder::Reset() { size_ = 0; }
 
 }  // namespace glcr

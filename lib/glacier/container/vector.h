@@ -45,6 +45,8 @@ class Vector {
   template <typename... Args>
   void EmplaceBack(Args&&... args);
 
+  T&& PopBack();
+
  private:
   T* data_;
   uint64_t size_;
@@ -117,6 +119,12 @@ void Vector<T>::EmplaceBack(Args&&... args) {
   }
 
   data_[size_++] = T(args...);
+}
+
+template <typename T>
+T&& Vector<T>::PopBack() {
+  size_--;
+  return glcr::Move(data_[size_]);
 }
 
 template <typename T>
