@@ -14,7 +14,9 @@ void Terminal::HandleCharacter(char c) {
 }
 
 void Terminal::ExecuteCommand(const glcr::String& command) {
-  if (command == "cwd") {
+  if (command == "help") {
+    console_.WriteString("Available Commands: cwd\n");
+  } else if (command == "cwd") {
     console_.WriteString(cwd_);
     console_.WriteChar('\n');
   } else {
