@@ -7,7 +7,7 @@
 #include "framebuffer/console.h"
 #include "framebuffer/framebuffer.h"
 #include "framebuffer/psf.h"
-#include "keyboard_listener.h"
+#include "terminal.h"
 
 uint64_t main(uint64_t init_port) {
   ParseInitPort(init_port);
@@ -34,10 +34,10 @@ uint64_t main(uint64_t init_port) {
   Console console(fbuf, psf);
   console.WriteChar('>');
 
-  KeyboardListener listener(console);
-  listener.Register();
+  Terminal terminal(console);
+  terminal.Register();
 
-  Thread lthread = listener.Listen();
+  Thread lthread = terminal.Listen();
 
   check(lthread.Join());
 
