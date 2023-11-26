@@ -19,12 +19,12 @@ void Console::WriteChar(char c) {
   uint8_t* glyph = psf_.glyph(c);
 
   for (uint32_t r = fb_row; r < fb_row + psf_.height(); r++) {
-    for (uint32_t c = fb_col; c < fb_col + psf_.width(); c++) {
-      uint8_t glyph_offset = psf_.width() - (c - fb_col) - 1;
-      if ((glyph[r] & (1 << glyph_offset))) {
-        framebuf_.DrawPixel(r, c, 0xFFFFFFF);
+    for (uint32_t j = fb_col; j < fb_col + psf_.width(); j++) {
+      uint8_t glyph_offset = psf_.width() - (j - fb_col) - 1;
+      if ((glyph[r - fb_row] & (1 << glyph_offset))) {
+        framebuf_.DrawPixel(r, j, 0xFFFFFFF);
       } else {
-        framebuf_.DrawPixel(r, c, 0);
+        framebuf_.DrawPixel(r, j, 0);
       }
     }
   }
