@@ -14,4 +14,6 @@ class Terminal : public mmth::KeyboardListenerBase {
  private:
   Console& console_;
   glcr::VariableStringBuilder current_command_;
+
+  glcr::String cwd_ = "/";
 };

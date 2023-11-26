@@ -14,7 +14,13 @@ void Terminal::HandleCharacter(char c) {
 }
 
 void Terminal::ExecuteCommand(const glcr::String& command) {
-  console_.WriteString("Executing: ");
-  console_.WriteString(command);
-  console_.WriteString("\n>");
+  if (command == "cwd") {
+    console_.WriteString(cwd_);
+    console_.WriteChar('\n');
+  } else {
+    console_.WriteString("Unknown command: ");
+    console_.WriteString(command);
+    console_.WriteChar('\n');
+  }
+  console_.WriteChar('>');
 }
