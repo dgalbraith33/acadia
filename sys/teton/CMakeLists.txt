@@ -2,6 +2,7 @@ add_executable(teton
   framebuffer/console.cpp
   framebuffer/framebuffer.cpp
   framebuffer/psf.cpp
+  keyboard_listener.cpp
   teton.cpp
   )
 

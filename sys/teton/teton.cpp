@@ -2,12 +2,12 @@
 #include <mammoth/util/debug.h>
 #include <mammoth/util/init.h>
 #include <victoriafalls/victoriafalls.yunq.client.h>
-#include <voyageurs/voyageurs.yunq.client.h>
 #include <yellowstone/yellowstone.yunq.client.h>
 
 #include "framebuffer/console.h"
 #include "framebuffer/framebuffer.h"
 #include "framebuffer/psf.h"
+#include "keyboard_listener.h"
 
 uint64_t main(uint64_t init_port) {
   ParseInitPort(init_port);
@@ -37,26 +37,12 @@ uint64_t main(uint64_t init_port) {
     console.WriteChar(i);
   }
 
-  GetEndpointRequest req;
-  req.set_endpoint_name("voyageurs");
-  Endpoint endpoint;
-  RET_ERR(client.GetEndpoint(req, endpoint));
+  KeyboardListener listener(console);
+  listener.Register();
 
-  VoyageursClient voyaguers(endpoint.endpoint());
-  ASSIGN_OR_RETURN(mmth::PortServer server, mmth::PortServer::Create());
-  KeyboardListener listener;
-  ASSIGN_OR_RETURN(mmth::PortClient pclient, server.CreateClient());
-  listener.set_port_capability(pclient.cap());
-  None n;
-  RET_ERR(voyaguers.RegisterKeyboardListener(listener, n));
+  Thread lthread = listener.Listen();
 
-  while (true) {
-    ASSIGN_OR_RETURN(char c, server.RecvChar());
-    if (c != '\0') {
-      console.WriteChar(c);
-      dbgln("{}", c);
-    }
-  }
+  check(lthread.Join());
 
-  return 0;
+  return glcr::OK;
 }

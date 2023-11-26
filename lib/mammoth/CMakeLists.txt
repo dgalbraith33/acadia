@@ -1,5 +1,6 @@
 add_library(mammoth STATIC
   file/file.cpp
+  input/keyboard.cpp
   ipc/channel.cpp
   ipc/endpoint_client.cpp
   ipc/endpoint_server.cpp
@@ -25,6 +26,7 @@ target_link_libraries(mammoth
   glacier
   victoriafalls_yunq
   yellowstone_yunq
+  voyageurs_yunq
   zion_stub
   )
 
