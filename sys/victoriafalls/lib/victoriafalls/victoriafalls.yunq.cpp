@@ -166,3 +166,121 @@ uint64_t OpenFileResponse::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t of
 
   return next_extension;
 }
+void GetDirectoryRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  ParseFromBytesInternal(bytes, offset);
+}
+
+void GetDirectoryRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
+  ParseFromBytesInternal(bytes, offset);
+}
+
+void GetDirectoryRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  CheckHeader(bytes);
+  // Parse path.
+  auto path_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
+
+  set_path(bytes.StringAt(offset + path_pointer.offset, path_pointer.length));
+
+}
+
+uint64_t GetDirectoryRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
+  uint32_t next_extension = header_size + 8 * 1;
+  const uint32_t core_size = next_extension;
+  // Write path.
+  ExtPointer path_ptr{
+    .offset = next_extension,
+    // FIXME: Check downcast of str length.
+    .length = (uint32_t)path().length(),
+  };
+
+  bytes.WriteStringAt(offset + next_extension, path());
+  next_extension += path_ptr.length;
+
+  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 0), path_ptr);
+
+  // The next extension pointer is the length of the message. 
+  WriteHeader(bytes, offset, core_size, next_extension);
+
+  return next_extension;
+}
+
+uint64_t GetDirectoryRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
+  uint32_t next_extension = header_size + 8 * 1;
+  const uint32_t core_size = next_extension;
+  uint64_t next_cap = 0;
+  // Write path.
+  ExtPointer path_ptr{
+    .offset = next_extension,
+    // FIXME: Check downcast of str length.
+    .length = (uint32_t)path().length(),
+  };
+
+  bytes.WriteStringAt(offset + next_extension, path());
+  next_extension += path_ptr.length;
+
+  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 0), path_ptr);
+
+  // The next extension pointer is the length of the message. 
+  WriteHeader(bytes, offset, core_size, next_extension);
+
+  return next_extension;
+}
+void Directory::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  ParseFromBytesInternal(bytes, offset);
+}
+
+void Directory::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
+  ParseFromBytesInternal(bytes, offset);
+}
+
+void Directory::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  CheckHeader(bytes);
+  // Parse filenames.
+  auto filenames_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
+
+  set_filenames(bytes.StringAt(offset + filenames_pointer.offset, filenames_pointer.length));
+
+}
+
+uint64_t Directory::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
+  uint32_t next_extension = header_size + 8 * 1;
+  const uint32_t core_size = next_extension;
+  // Write filenames.
+  ExtPointer filenames_ptr{
+    .offset = next_extension,
+    // FIXME: Check downcast of str length.
+    .length = (uint32_t)filenames().length(),
+  };
+
+  bytes.WriteStringAt(offset + next_extension, filenames());
+  next_extension += filenames_ptr.length;
+
+  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 0), filenames_ptr);
+
+  // The next extension pointer is the length of the message. 
+  WriteHeader(bytes, offset, core_size, next_extension);
+
+  return next_extension;
+}
+
+uint64_t Directory::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
+  uint32_t next_extension = header_size + 8 * 1;
+  const uint32_t core_size = next_extension;
+  uint64_t next_cap = 0;
+  // Write filenames.
+  ExtPointer filenames_ptr{
+    .offset = next_extension,
+    // FIXME: Check downcast of str length.
+    .length = (uint32_t)filenames().length(),
+  };
+
+  bytes.WriteStringAt(offset + next_extension, filenames());
+  next_extension += filenames_ptr.length;
+
+  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 0), filenames_ptr);
+
+  // The next extension pointer is the length of the message. 
+  WriteHeader(bytes, offset, core_size, next_extension);
+
+  return next_extension;
+}

@@ -97,6 +97,17 @@ glcr::ErrorCode VFSServerBase::HandleRequest(const glcr::ByteBuffer& request,
       resp_length = yunq_response.SerializeToBytes(response, kHeaderSize, resp_caps);
       break;
     }
+    case 1: {
+      GetDirectoryRequest yunq_request;
+      Directory yunq_response;
+
+      yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+
+      RET_ERR(HandleGetDirectory(yunq_request, yunq_response));
+
+      resp_length = yunq_response.SerializeToBytes(response, kHeaderSize, resp_caps);
+      break;
+    }
     default: {
       return glcr::UNIMPLEMENTED;
     }

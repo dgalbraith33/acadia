@@ -63,3 +63,48 @@ glcr::ErrorCode VFSServer::HandleOpenFile(const OpenFileRequest& request,
   response.set_size(inode->size);
   return glcr::OK;
 }
+
+glcr::ErrorCode VFSServer::HandleGetDirectory(
+    const GetDirectoryRequest& request, Directory& response) {
+  auto path_tokens = glcr::StrSplit(request.path(), '/');
+
+  if (path_tokens.at(0) != "") {
+    return glcr::INVALID_ARGUMENT;
+  }
+
+  // If there is a trailing slash we can get rid of the empty string.
+  if (path_tokens.at(path_tokens.size() - 1) == "") {
+    path_tokens.PopBack();
+  }
+
+  ASSIGN_OR_RETURN(auto files, driver_.ReadDirectory(2));
+  for (uint64_t i = 1; i < path_tokens.size(); i++) {
+    bool found_token = false;
+    for (uint64_t j = 0; j < files.size() && !found_token; j++) {
+      if (path_tokens.at(i) ==
+          glcr::StringView(files.at(j).name, files.at(j).name_len)) {
+        ASSIGN_OR_RETURN(files, driver_.ReadDirectory(files.at(j).inode));
+        found_token = true;
+      }
+    }
+    if (!found_token) {
+      dbgln("Directory '{}' not found.",
+            glcr::String(path_tokens.at(i)).cstr());
+      return glcr::NOT_FOUND;
+    }
+  }
+
+  glcr::VariableStringBuilder filelist;
+  for (uint64_t i = 0; i < files.size(); i++) {
+    filelist.PushBack(glcr::StringView(files.at(i).name, files.at(i).name_len));
+    filelist.PushBack(',');
+  }
+  // Remove trailing comma.
+  if (filelist.size() > 0) {
+    filelist.DeleteLast();
+  }
+
+  response.set_filenames(filelist.ToString());
+
+  return glcr::OK;
+}

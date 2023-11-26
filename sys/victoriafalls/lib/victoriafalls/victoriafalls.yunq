@@ -1,5 +1,6 @@
 interface VFS {
   method OpenFile(OpenFileRequest) -> (OpenFileResponse);
+  method GetDirectory(GetDirectoryRequest) -> (Directory);
 }
 
 message OpenFileRequest {
@@ -10,4 +11,13 @@ message OpenFileResponse {
   string path;
   u64 size;
   capability memory;
+}
+
+message GetDirectoryRequest {
+  string path;
+}
+
+message Directory {
+  // , separated list of filenames until we have repeated strings.
+  string filenames;
 }

@@ -23,6 +23,8 @@ class VFSServerBase {
 
   [[nodiscard]] virtual glcr::ErrorCode HandleOpenFile(const OpenFileRequest&, OpenFileResponse&) = 0;
 
+  [[nodiscard]] virtual glcr::ErrorCode HandleGetDirectory(const GetDirectoryRequest&, Directory&) = 0;
+
 
  private:
   z_cap_t endpoint_;

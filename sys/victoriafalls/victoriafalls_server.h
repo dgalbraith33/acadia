@@ -12,6 +12,9 @@ class VFSServer : public VFSServerBase {
   glcr::ErrorCode HandleOpenFile(const OpenFileRequest&,
                                  OpenFileResponse&) override;
 
+  glcr::ErrorCode HandleGetDirectory(const GetDirectoryRequest&,
+                                     Directory&) override;
+
  private:
   // FIXME: Don't store this as a reference.
   Ext2Driver& driver_;
