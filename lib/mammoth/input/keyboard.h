@@ -49,6 +49,8 @@ enum Keycode {
   kSpace = 0x30,
   kEnter = 0x31,
   kTab = 0x32,
+  kBackspace = 0x33,
+  kDelete = 0x34,
 
   kMinus = 0x40,
   kEquals = 0x41,
@@ -60,9 +62,20 @@ enum Keycode {
   kQuote = 0x47,
   kComma = 0x48,
   kPeriod = 0x49,
+  kBacktick = 0x4A,
 
   kLShift = 0x50,
   kRShift = 0x51,
+  kLCtrl = 0x52,
+  kRCtrl = 0x53,
+  kLAlt = 0x54,
+  kRAlt = 0x55,
+  kSuper = 0x56,
+  kEsc = 0x57,
+  kUp = 0x58,
+  kDown = 0x59,
+  kLeft = 0x5A,
+  kRight = 0x5B,
 };
 
 enum Action {
@@ -95,6 +108,8 @@ class KeyboardListenerBase {
 
  private:
   PortServer server_;
+
+  bool extended_on_ = false;
 
   bool lshift_ = false;
   bool rshift_ = false;

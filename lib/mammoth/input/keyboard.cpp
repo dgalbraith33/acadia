@@ -55,6 +55,12 @@ void KeyboardListenerBase::ListenLoop() {
       check(scancode_or.error());
     }
     uint8_t scancode = scancode_or.value();
+
+    if (scancode == 0xE0) {
+      extended_on_ = true;
+      continue;
+    }
+
     Keycode k = ScancodeToKeycode(scancode);
     Action a = ScancodeToAction(scancode);
     HandleKeycode(k, a);
@@ -82,12 +88,12 @@ void KeyboardListenerBase::HandleKeycode(Keycode code, Action action) {
         const char* num = "1234567890";
         c = num[code - k1];
       }
-    } else if (code >= kMinus && code <= kPeriod) {
+    } else if (code >= kMinus && code <= kBacktick) {
       if (IsShift()) {
-        const char* sym = "_+{}|?:\"<>";
+        const char* sym = "_+{}|?:\"<>~";
         c = sym[code - kMinus];
       } else {
-        const char* sym = "-=[]\\/;',.";
+        const char* sym = "-=[]\\/;',.`";
         c = sym[code - kMinus];
       }
     } else if (code == kEnter) {
@@ -117,7 +123,35 @@ void KeyboardListenerBase::HandleKeycode(Keycode code, Action action) {
 Keycode KeyboardListenerBase::ScancodeToKeycode(uint8_t scancode) {
   // Cancel out the released bit.
   scancode &= 0x7F;
+  if (extended_on_) {
+    extended_on_ = false;
+
+    switch (scancode) {
+      case 0x1D:
+        return kRCtrl;
+      case 0x38:
+        return kRAlt;
+      case 0x48:
+        return kUp;
+      case 0x4B:
+        return kLeft;
+      case 0x4D:
+        return kRight;
+      case 0x50:
+        return kDown;
+      case 0x53:
+        return kDelete;
+      case 0x5B:
+        return kSuper;
+    }
+    dbgln("Unknown extended scancode {x}", scancode);
+
+    return kUnknownKeycode;
+  }
+
   switch (scancode) {
+    case 0x01:
+      return kEsc;
     case 0x02:
       return k1;
     case 0x03:
@@ -142,6 +176,8 @@ Keycode KeyboardListenerBase::ScancodeToKeycode(uint8_t scancode) {
       return kMinus;
     case 0x0D:
       return kEquals;
+    case 0x0E:
+      return kBackspace;
     case 0x0F:
       return kTab;
     case 0x10:
@@ -170,6 +206,8 @@ Keycode KeyboardListenerBase::ScancodeToKeycode(uint8_t scancode) {
       return kRBrace;
     case 0x1C:
       return kEnter;
+    case 0x1D:
+      return kLCtrl;
     case 0x1E:
       return kA;
     case 0x1F:
@@ -192,6 +230,8 @@ Keycode KeyboardListenerBase::ScancodeToKeycode(uint8_t scancode) {
       return kSemicolon;
     case 0x28:
       return kQuote;
+    case 0x29:
+      return kBacktick;
     case 0x2A:
       return kLShift;
     case 0x2B:
@@ -218,6 +258,8 @@ Keycode KeyboardListenerBase::ScancodeToKeycode(uint8_t scancode) {
       return kFSlash;
     case 0x36:
       return kRShift;
+    case 0x38:
+      return kLAlt;
     case 0x39:
       return kSpace;
   }
