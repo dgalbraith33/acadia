@@ -7,6 +7,16 @@ void Console::WriteChar(char c) {
     CursorReturn();
     return;
   }
+  if (c == '\t') {
+    WriteString("    ");
+    return;
+  }
+  if (c == '\b') {
+    cursor_pos_--;
+    WriteChar(' ');
+    cursor_pos_--;
+    return;
+  }
 
   uint64_t row = cursor_pos_ / cols();
   if (row >= rows()) {

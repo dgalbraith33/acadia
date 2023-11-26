@@ -102,6 +102,8 @@ void KeyboardListenerBase::HandleKeycode(Keycode code, Action action) {
       c = ' ';
     } else if (code == kTab) {
       c = '\t';
+    } else if (code == kBackspace) {
+      c = '\b';
     } else if (code == kLShift) {
       lshift_ = true;
     } else if (code == kRShift) {
