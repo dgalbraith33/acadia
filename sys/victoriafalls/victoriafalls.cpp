@@ -21,8 +21,8 @@ uint64_t main(uint64_t init_cap) {
 
   RegisterEndpointRequest req;
   req.set_endpoint_name("victoriafalls");
-  ASSIGN_OR_RETURN(auto client, server->CreateClient());
-  req.set_endpoint_capability(client.Capability());
+  ASSIGN_OR_RETURN(auto client_cap, server->CreateClientCap());
+  req.set_endpoint_capability(client_cap);
   check(yellowstone.RegisterEndpoint(req));
 
   RET_ERR(server_thread.Join());
