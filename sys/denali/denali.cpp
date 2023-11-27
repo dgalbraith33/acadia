@@ -11,9 +11,8 @@ uint64_t main(uint64_t init_port_cap) {
   check(ParseInitPort(init_port_cap));
 
   YellowstoneClient stub(gInitEndpointCap);
-  Empty empty;
   AhciInfo ahci;
-  RET_ERR(stub.GetAhciInfo(empty, ahci));
+  RET_ERR(stub.GetAhciInfo(ahci));
   mmth::OwnedMemoryRegion ahci_region =
       mmth::OwnedMemoryRegion::FromCapability(ahci.ahci_region());
   ASSIGN_OR_RETURN(auto driver, AhciDriver::Init(glcr::Move(ahci_region)));
@@ -28,7 +27,7 @@ uint64_t main(uint64_t init_port_cap) {
   RegisterEndpointRequest req;
   req.set_endpoint_name("denali");
   req.set_endpoint_capability(client.Capability());
-  check(stub.RegisterEndpoint(req, empty));
+  check(stub.RegisterEndpoint(req));
 
   check(server_thread.Join());
   return 0;

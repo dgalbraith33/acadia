@@ -1,19 +1,15 @@
 interface Yellowstone {
-  method RegisterEndpoint(RegisterEndpointRequest) -> (Empty);
+  method RegisterEndpoint(RegisterEndpointRequest) -> ();
   method GetEndpoint(GetEndpointRequest) -> (Endpoint);
-  method GetAhciInfo(Empty) -> (AhciInfo);
-  method GetFramebufferInfo(Empty) -> (FramebufferInfo);
-  method GetDenali(Empty) -> (DenaliInfo);
+  method GetAhciInfo() -> (AhciInfo);
+  method GetFramebufferInfo() -> (FramebufferInfo);
+  method GetDenali() -> (DenaliInfo);
 }
 
 message RegisterEndpointRequest {
   string endpoint_name;
   capability endpoint_capability;
   }
-
-message Empty {
-
-}
 
 message GetEndpointRequest {
   string endpoint_name;

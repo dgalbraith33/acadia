@@ -29,23 +29,6 @@ class RegisterEndpointRequest {
   // Parses everything except for caps.
   void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
 };
-class Empty {
- public:
-  Empty() {}
-  // Delete copy and move until implemented.
-  Empty(const Empty&) = delete;
-  Empty(Empty&&) = delete;
-
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
-  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
-  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const;
-
- private:
-
-  // Parses everything except for caps.
-  void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
-};
 class GetEndpointRequest {
  public:
   GetEndpointRequest() {}

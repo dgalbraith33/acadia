@@ -8,7 +8,9 @@
 
 
 
-glcr::ErrorCode YellowstoneClient::RegisterEndpoint(const RegisterEndpointRequest& request, Empty& response) {
+
+glcr::ErrorCode YellowstoneClient::RegisterEndpoint(const RegisterEndpointRequest& request) {
+
   uint64_t buffer_size = kBufferSize;
   uint64_t cap_size = kCapBufferSize;
 
@@ -17,7 +19,10 @@ glcr::ErrorCode YellowstoneClient::RegisterEndpoint(const RegisterEndpointReques
   buffer_.WriteAt<uint64_t>(8, 0);
 
   cap_buffer_.Reset();
+
   uint64_t length = request.SerializeToBytes(buffer_, /*offset=*/16, cap_buffer_);
+
+
   buffer_.WriteAt<uint32_t>(4, 16 + length);
 
   z_cap_t reply_port_cap;
@@ -33,14 +38,16 @@ glcr::ErrorCode YellowstoneClient::RegisterEndpoint(const RegisterEndpointReques
   // Check Response Code.
   RET_ERR(buffer_.At<uint64_t>(8));
 
-  response.ParseFromBytes(buffer_, 16, cap_buffer_);
+
 
   return glcr::OK;
 }
 
 
 
+
 glcr::ErrorCode YellowstoneClient::GetEndpoint(const GetEndpointRequest& request, Endpoint& response) {
+
   uint64_t buffer_size = kBufferSize;
   uint64_t cap_size = kCapBufferSize;
 
@@ -49,7 +56,10 @@ glcr::ErrorCode YellowstoneClient::GetEndpoint(const GetEndpointRequest& request
   buffer_.WriteAt<uint64_t>(8, 1);
 
   cap_buffer_.Reset();
+
   uint64_t length = request.SerializeToBytes(buffer_, /*offset=*/16, cap_buffer_);
+
+
   buffer_.WriteAt<uint32_t>(4, 16 + length);
 
   z_cap_t reply_port_cap;
@@ -65,14 +75,18 @@ glcr::ErrorCode YellowstoneClient::GetEndpoint(const GetEndpointRequest& request
   // Check Response Code.
   RET_ERR(buffer_.At<uint64_t>(8));
 
+
   response.ParseFromBytes(buffer_, 16, cap_buffer_);
+
 
   return glcr::OK;
 }
 
 
 
-glcr::ErrorCode YellowstoneClient::GetAhciInfo(const Empty& request, AhciInfo& response) {
+
+glcr::ErrorCode YellowstoneClient::GetAhciInfo(AhciInfo& response) {
+
   uint64_t buffer_size = kBufferSize;
   uint64_t cap_size = kCapBufferSize;
 
@@ -81,7 +95,10 @@ glcr::ErrorCode YellowstoneClient::GetAhciInfo(const Empty& request, AhciInfo& r
   buffer_.WriteAt<uint64_t>(8, 2);
 
   cap_buffer_.Reset();
-  uint64_t length = request.SerializeToBytes(buffer_, /*offset=*/16, cap_buffer_);
+
+  uint64_t length = 0;
+
+
   buffer_.WriteAt<uint32_t>(4, 16 + length);
 
   z_cap_t reply_port_cap;
@@ -97,14 +114,18 @@ glcr::ErrorCode YellowstoneClient::GetAhciInfo(const Empty& request, AhciInfo& r
   // Check Response Code.
   RET_ERR(buffer_.At<uint64_t>(8));
 
+
   response.ParseFromBytes(buffer_, 16, cap_buffer_);
+
 
   return glcr::OK;
 }
 
 
 
-glcr::ErrorCode YellowstoneClient::GetFramebufferInfo(const Empty& request, FramebufferInfo& response) {
+
+glcr::ErrorCode YellowstoneClient::GetFramebufferInfo(FramebufferInfo& response) {
+
   uint64_t buffer_size = kBufferSize;
   uint64_t cap_size = kCapBufferSize;
 
@@ -113,7 +134,10 @@ glcr::ErrorCode YellowstoneClient::GetFramebufferInfo(const Empty& request, Fram
   buffer_.WriteAt<uint64_t>(8, 3);
 
   cap_buffer_.Reset();
-  uint64_t length = request.SerializeToBytes(buffer_, /*offset=*/16, cap_buffer_);
+
+  uint64_t length = 0;
+
+
   buffer_.WriteAt<uint32_t>(4, 16 + length);
 
   z_cap_t reply_port_cap;
@@ -129,14 +153,18 @@ glcr::ErrorCode YellowstoneClient::GetFramebufferInfo(const Empty& request, Fram
   // Check Response Code.
   RET_ERR(buffer_.At<uint64_t>(8));
 
+
   response.ParseFromBytes(buffer_, 16, cap_buffer_);
+
 
   return glcr::OK;
 }
 
 
 
-glcr::ErrorCode YellowstoneClient::GetDenali(const Empty& request, DenaliInfo& response) {
+
+glcr::ErrorCode YellowstoneClient::GetDenali(DenaliInfo& response) {
+
   uint64_t buffer_size = kBufferSize;
   uint64_t cap_size = kCapBufferSize;
 
@@ -145,7 +173,10 @@ glcr::ErrorCode YellowstoneClient::GetDenali(const Empty& request, DenaliInfo& r
   buffer_.WriteAt<uint64_t>(8, 4);
 
   cap_buffer_.Reset();
-  uint64_t length = request.SerializeToBytes(buffer_, /*offset=*/16, cap_buffer_);
+
+  uint64_t length = 0;
+
+
   buffer_.WriteAt<uint32_t>(4, 16 + length);
 
   z_cap_t reply_port_cap;
@@ -161,7 +192,9 @@ glcr::ErrorCode YellowstoneClient::GetDenali(const Empty& request, DenaliInfo& r
   // Check Response Code.
   RET_ERR(buffer_.At<uint64_t>(8));
 
+
   response.ParseFromBytes(buffer_, 16, cap_buffer_);
+
 
   return glcr::OK;
 }

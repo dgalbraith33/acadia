@@ -14,12 +14,11 @@ class YellowstoneServer : public YellowstoneServerBase {
  public:
   static glcr::ErrorOr<glcr::UniquePtr<YellowstoneServer>> Create();
 
-  glcr::ErrorCode HandleGetAhciInfo(const Empty&, AhciInfo&) override;
-  glcr::ErrorCode HandleGetFramebufferInfo(const Empty&,
-                                           FramebufferInfo&) override;
-  glcr::ErrorCode HandleGetDenali(const Empty&, DenaliInfo&) override;
-  glcr::ErrorCode HandleRegisterEndpoint(const RegisterEndpointRequest&,
-                                         Empty&) override;
+  glcr::ErrorCode HandleGetAhciInfo(AhciInfo&) override;
+  glcr::ErrorCode HandleGetFramebufferInfo(FramebufferInfo&) override;
+  glcr::ErrorCode HandleGetDenali(DenaliInfo&) override;
+  glcr::ErrorCode HandleRegisterEndpoint(
+      const RegisterEndpointRequest&) override;
   glcr::ErrorCode HandleGetEndpoint(const GetEndpointRequest&,
                                     Endpoint&) override;
 

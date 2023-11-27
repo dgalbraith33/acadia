@@ -11,9 +11,8 @@ uint64_t main(uint64_t init_cap) {
   dbgln("VFs Started");
 
   YellowstoneClient yellowstone(gInitEndpointCap);
-  Empty empty;
   DenaliInfo denali_info;
-  RET_ERR(yellowstone.GetDenali(empty, denali_info));
+  RET_ERR(yellowstone.GetDenali(denali_info));
   ASSIGN_OR_RETURN(Ext2Driver ext2, Ext2Driver::Init(denali_info));
 
   ASSIGN_OR_RETURN(auto server, VFSServer::Create(ext2));
@@ -24,7 +23,7 @@ uint64_t main(uint64_t init_cap) {
   req.set_endpoint_name("victoriafalls");
   ASSIGN_OR_RETURN(auto client, server->CreateClient());
   req.set_endpoint_capability(client.Capability());
-  check(yellowstone.RegisterEndpoint(req, empty));
+  check(yellowstone.RegisterEndpoint(req));
 
   RET_ERR(server_thread.Join());
 

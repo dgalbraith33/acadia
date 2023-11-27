@@ -87,58 +87,92 @@ glcr::ErrorCode YellowstoneServerBase::HandleRequest(const glcr::ByteBuffer& req
 
   switch(method_select) {
     case 0: {
+
+  
       RegisterEndpointRequest yunq_request;
-      Empty yunq_response;
-
       yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+  
 
-      RET_ERR(HandleRegisterEndpoint(yunq_request, yunq_response));
+  
 
-      resp_length = yunq_response.SerializeToBytes(response, kHeaderSize, resp_caps);
+  
+      RET_ERR(HandleRegisterEndpoint(yunq_request));
+  
+
+  
+      resp_length = 0;
+  
       break;
     }
     case 1: {
+
+  
       GetEndpointRequest yunq_request;
-      Endpoint yunq_response;
-
       yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+  
 
+  
+      Endpoint yunq_response;
+  
+
+  
       RET_ERR(HandleGetEndpoint(yunq_request, yunq_response));
+  
 
+  
       resp_length = yunq_response.SerializeToBytes(response, kHeaderSize, resp_caps);
+  
       break;
     }
     case 2: {
-      Empty yunq_request;
+
+  
+
+  
       AhciInfo yunq_response;
+  
 
-      yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+  
+      RET_ERR(HandleGetAhciInfo(yunq_response));
+  
 
-      RET_ERR(HandleGetAhciInfo(yunq_request, yunq_response));
-
+  
       resp_length = yunq_response.SerializeToBytes(response, kHeaderSize, resp_caps);
+  
       break;
     }
     case 3: {
-      Empty yunq_request;
+
+  
+
+  
       FramebufferInfo yunq_response;
+  
 
-      yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+  
+      RET_ERR(HandleGetFramebufferInfo(yunq_response));
+  
 
-      RET_ERR(HandleGetFramebufferInfo(yunq_request, yunq_response));
-
+  
       resp_length = yunq_response.SerializeToBytes(response, kHeaderSize, resp_caps);
+  
       break;
     }
     case 4: {
-      Empty yunq_request;
+
+  
+
+  
       DenaliInfo yunq_response;
+  
 
-      yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+  
+      RET_ERR(HandleGetDenali(yunq_response));
+  
 
-      RET_ERR(HandleGetDenali(yunq_request, yunq_response));
-
+  
       resp_length = yunq_response.SerializeToBytes(response, kHeaderSize, resp_caps);
+  
       break;
     }
     default: {

@@ -17,15 +17,25 @@ class YellowstoneClient {
   z_cap_t Capability() { return endpoint_; }
 
 
-  [[nodiscard]] glcr::ErrorCode RegisterEndpoint(const RegisterEndpointRequest& request, Empty& response);
+  
+  [[nodiscard]] glcr::ErrorCode RegisterEndpoint(const RegisterEndpointRequest& request);
+  
 
+  
   [[nodiscard]] glcr::ErrorCode GetEndpoint(const GetEndpointRequest& request, Endpoint& response);
+  
 
-  [[nodiscard]] glcr::ErrorCode GetAhciInfo(const Empty& request, AhciInfo& response);
+  
+  [[nodiscard]] glcr::ErrorCode GetAhciInfo(AhciInfo& response);
+  
 
-  [[nodiscard]] glcr::ErrorCode GetFramebufferInfo(const Empty& request, FramebufferInfo& response);
+  
+  [[nodiscard]] glcr::ErrorCode GetFramebufferInfo(FramebufferInfo& response);
+  
 
-  [[nodiscard]] glcr::ErrorCode GetDenali(const Empty& request, DenaliInfo& response);
+  
+  [[nodiscard]] glcr::ErrorCode GetDenali(DenaliInfo& response);
+  
 
  private:
   z_cap_t endpoint_;

@@ -41,15 +41,14 @@ glcr::ErrorOr<glcr::UniquePtr<YellowstoneServer>> YellowstoneServer::Create() {
 YellowstoneServer::YellowstoneServer(z_cap_t endpoint_cap)
     : YellowstoneServerBase(endpoint_cap) {}
 
-glcr::ErrorCode YellowstoneServer::HandleGetAhciInfo(const Empty&,
-                                                     AhciInfo& info) {
+glcr::ErrorCode YellowstoneServer::HandleGetAhciInfo(AhciInfo& info) {
   info.set_ahci_region(pci_reader_.GetAhciVmmo());
   info.set_region_length(kPcieConfigurationSize);
   return glcr::OK;
 }
 
 glcr::ErrorCode YellowstoneServer::HandleGetFramebufferInfo(
-    const Empty&, FramebufferInfo& info) {
+    FramebufferInfo& info) {
   // FIXME: Don't do this for each request.
   mmth::OwnedMemoryRegion region =
       mmth::OwnedMemoryRegion::FromCapability(gBootFramebufferVmmoCap);
@@ -71,8 +70,7 @@ glcr::ErrorCode YellowstoneServer::HandleGetFramebufferInfo(
   return glcr::OK;
 }
 
-glcr::ErrorCode YellowstoneServer::HandleGetDenali(const Empty&,
-                                                   DenaliInfo& info) {
+glcr::ErrorCode YellowstoneServer::HandleGetDenali(DenaliInfo& info) {
   if (!endpoint_map_.Contains("denali")) {
     return glcr::NOT_FOUND;
   }
@@ -85,7 +83,7 @@ glcr::ErrorCode YellowstoneServer::HandleGetDenali(const Empty&,
 }
 
 glcr::ErrorCode YellowstoneServer::HandleRegisterEndpoint(
-    const RegisterEndpointRequest& req, Empty&) {
+    const RegisterEndpointRequest& req) {
   dbgln("Registering {}.", req.endpoint_name().view());
   check(endpoint_map_.Insert(req.endpoint_name(), req.endpoint_capability()));
   if (req.endpoint_name() == "denali") {
