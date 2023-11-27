@@ -96,6 +96,7 @@ bool checksum(uint8_t* addr, uint8_t num_bytes) {
   return check_cnt == 0;
 }
 
+#if K_ACPI_DEBUG
 void dbgsz(const char* c, uint8_t cnt) {
   char cl[cnt + 1];
 
@@ -105,6 +106,7 @@ void dbgsz(const char* c, uint8_t cnt) {
   cl[cnt] = '\0';
   dbgln(cl);
 }
+#endif
 
 uint8_t* SdtDataStart(SdtHeader* sdt) {
   return reinterpret_cast<uint8_t*>(sdt) + sizeof(SdtHeader);
@@ -157,8 +159,8 @@ void ParseMadt(SdtHeader* rsdt) {
   while (reinterpret_cast<uint64_t>(entry) < max_addr) {
     switch (entry->type) {
       case 0: {
-        MadtLocalApic* local = reinterpret_cast<MadtLocalApic*>(entry);
 #if K_ACPI_DEBUG
+        MadtLocalApic* local = reinterpret_cast<MadtLocalApic*>(entry);
         dbgln("Local APIC (Proc id, id, flags): {x}, {x}, {x}",
               local->processor_id, local->apic_id, +local->flags);
 #endif
@@ -177,9 +179,9 @@ void ParseMadt(SdtHeader* rsdt) {
         break;
       }
       case 2: {
+#if K_ACPI_DEBUG
         MadtIoApicInterruptSource* src =
             reinterpret_cast<MadtIoApicInterruptSource*>(entry);
-#if K_ACPI_DEBUG
         dbgln("IO Source (Bus, IRQ, GSI, flags): {x}, {x}, {x}, {x}",
               src->bus_source, src->irq_source, +src->global_system_interrupt,
               +src->flags);
@@ -187,9 +189,9 @@ void ParseMadt(SdtHeader* rsdt) {
         break;
       }
       case 4: {
+#if K_ACPI_DEBUG
         MadtLocalApicNonMaskable* lnmi =
             reinterpret_cast<MadtLocalApicNonMaskable*>(entry);
-#if K_ACPI_DEBUG
         dbgln("Local NMI (proc id, flags, lint#): {x}, {x}, {x}",
               lnmi->apic_processor_id, +lnmi->flags, lnmi->lint_num);
 #endif

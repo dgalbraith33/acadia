@@ -15,12 +15,6 @@ void dbgputchar(char c) {
   outb(COM1, c);
 }
 
-void dbgcstr(const char* str) {
-  for (; *str != '\0'; str++) {
-    dbgputchar(*str);
-  }
-}
-
 void dbg(const glcr::StringView& str) {
   for (uint64_t i = 0; i < str.size(); i++) {
     dbgputchar(str[i]);

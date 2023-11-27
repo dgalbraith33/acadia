@@ -41,7 +41,6 @@ static TaskStateSegment gTaskStateSegment;
 extern "C" void ReloadSegments();
 
 uint64_t CreateSegment(uint64_t access, uint64_t flags) {
-  uint64_t base = 0;
   access &= 0xFF;
   flags &= 0xF0;
   flags |= 0xF;  // For the highest 4 bits of the limit.

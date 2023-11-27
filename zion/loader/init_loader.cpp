@@ -84,20 +84,6 @@ uint64_t LoadElfProgram(Process& dest_proc, uint64_t base, uint64_t offset) {
   return header->entry;
 }
 
-bool streq(const char* a, const char* b) {
-  while (true) {
-    if (*a == '\0' && *b == '\0') return true;
-    if (*a == '\0' || *b == '\0') {
-      return false;
-    }
-    if (*a != *b) {
-      return false;
-    }
-    a++;
-    b++;
-  }
-}
-
 void DumpModules() {
 #if K_INIT_DEBUG
   const limine_module_response& resp = boot::GetModules();
@@ -188,7 +174,7 @@ void LoadInitProgram() {
   }
 
   // Start process.
-  const limine_file& init_prog = GetInitProgram("/sys/yellowstone");
+  limine_file init_prog = GetInitProgram("/sys/yellowstone");
   uint64_t entry = LoadElfProgram(
       *proc, reinterpret_cast<uint64_t>(init_prog.address), init_prog.size);
   proc->CreateThread()->Start(entry, port_cap, 0);
