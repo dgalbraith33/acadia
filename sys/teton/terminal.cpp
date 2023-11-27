@@ -25,10 +25,22 @@ void Terminal::ExecuteCommand(const glcr::String& command) {
   }
   glcr::StringView cmd = tokens[0];
   if (cmd == "help") {
-    console_.WriteString("Available Commands: cwd\n");
+    console_.WriteString("Available Commands: cwd cd ls\n");
   } else if (cmd == "cwd") {
     console_.WriteString(cwd_);
     console_.WriteChar('\n');
+  } else if (cmd == "cd") {
+    if (tokens.size() != 2) {
+      console_.WriteString("Provide an absolute path.\n>");
+      return;
+    }
+    auto files_or = mmth::ListDirectory(tokens[1]);
+    if (files_or.ok()) {
+      cwd_ = tokens[1];
+    } else {
+      console_.WriteString(glcr::StrFormat("Error: {}\n", files_or.error()));
+    }
+
   } else if (cmd == "ls") {
     glcr::StringView directory;
     if (tokens.size() > 1) {
