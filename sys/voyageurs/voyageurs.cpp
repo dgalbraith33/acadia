@@ -25,8 +25,8 @@ uint64_t main(uint64_t init_port) {
 
   RegisterEndpointRequest req;
   req.set_endpoint_name("voyageurs");
-  ASSIGN_OR_RETURN(VoyageursClient client, server->CreateClient());
-  req.set_endpoint_capability(client.Capability());
+  ASSIGN_OR_RETURN(z_cap_t client_cap, server->CreateClientCap());
+  req.set_endpoint_capability(client_cap);
   check(yellowstone.RegisterEndpoint(req));
 
   check(server_thread.Join());
