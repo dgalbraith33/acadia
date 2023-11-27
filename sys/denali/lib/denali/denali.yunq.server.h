@@ -17,6 +17,7 @@ class DenaliServerBase {
   DenaliServerBase(DenaliServerBase&&) = delete;
   virtual ~DenaliServerBase();
 
+  glcr::ErrorOr<z_cap_t> CreateClientCap();
   glcr::ErrorOr<DenaliClient> CreateClient();
 
   [[nodiscard]] Thread RunServer();

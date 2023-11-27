@@ -13,6 +13,7 @@ class VoyageursClient {
   VoyageursClient(z_cap_t Voyageurs_cap) : endpoint_(Voyageurs_cap) {}
   VoyageursClient(const VoyageursClient&) = delete;
   VoyageursClient(VoyageursClient&& other) : endpoint_(other.endpoint_) {other.endpoint_ = 0;};
+  ~VoyageursClient();
 
   z_cap_t Capability() { return endpoint_; }
 

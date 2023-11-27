@@ -24,7 +24,9 @@ KeyboardListenerBase::KeyboardListenerBase() {
 }
 
 void KeyboardListenerBase::Register() {
-  YellowstoneClient client(gInitEndpointCap);
+  uint64_t dup_cap;
+  check(ZCapDuplicate(gInitEndpointCap, kZionPerm_All, &dup_cap));
+  YellowstoneClient client(dup_cap);
 
   GetEndpointRequest req;
   req.set_endpoint_name("voyageurs");

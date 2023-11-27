@@ -17,6 +17,7 @@ class VFSServerBase {
   VFSServerBase(VFSServerBase&&) = delete;
   virtual ~VFSServerBase();
 
+  glcr::ErrorOr<z_cap_t> CreateClientCap();
   glcr::ErrorOr<VFSClient> CreateClient();
 
   [[nodiscard]] Thread RunServer();

@@ -17,6 +17,7 @@ class {{interface.name}}ServerBase {
   {{interface.name}}ServerBase({{interface.name}}ServerBase&&) = delete;
   virtual ~{{interface.name}}ServerBase();
 
+  glcr::ErrorOr<z_cap_t> CreateClientCap();
   glcr::ErrorOr<{{interface.name}}Client> CreateClient();
 
   [[nodiscard]] Thread RunServer();

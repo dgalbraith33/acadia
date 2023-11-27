@@ -13,6 +13,7 @@ class VFSClient {
   VFSClient(z_cap_t VFS_cap) : endpoint_(VFS_cap) {}
   VFSClient(const VFSClient&) = delete;
   VFSClient(VFSClient&& other) : endpoint_(other.endpoint_) {other.endpoint_ = 0;};
+  ~VFSClient();
 
   z_cap_t Capability() { return endpoint_; }
 

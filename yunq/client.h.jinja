@@ -14,6 +14,7 @@ class {{interface.name}}Client {
   {{interface.name}}Client(z_cap_t {{interface.name}}_cap) : endpoint_({{interface.name}}_cap) {}
   {{interface.name}}Client(const {{interface.name}}Client&) = delete;
   {{interface.name}}Client({{interface.name}}Client&& other) : endpoint_(other.endpoint_) {other.endpoint_ = 0;};
+  ~{{interface.name}}Client();
 
   z_cap_t Capability() { return endpoint_; }
 

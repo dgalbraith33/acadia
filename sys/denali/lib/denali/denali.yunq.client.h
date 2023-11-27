@@ -13,6 +13,7 @@ class DenaliClient {
   DenaliClient(z_cap_t Denali_cap) : endpoint_(Denali_cap) {}
   DenaliClient(const DenaliClient&) = delete;
   DenaliClient(DenaliClient&& other) : endpoint_(other.endpoint_) {other.endpoint_ = 0;};
+  ~DenaliClient();
 
   z_cap_t Capability() { return endpoint_; }
 

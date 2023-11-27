@@ -17,6 +17,7 @@ class YellowstoneServerBase {
   YellowstoneServerBase(YellowstoneServerBase&&) = delete;
   virtual ~YellowstoneServerBase();
 
+  glcr::ErrorOr<z_cap_t> CreateClientCap();
   glcr::ErrorOr<YellowstoneClient> CreateClient();
 
   [[nodiscard]] Thread RunServer();

@@ -17,6 +17,7 @@ class VoyageursServerBase {
   VoyageursServerBase(VoyageursServerBase&&) = delete;
   virtual ~VoyageursServerBase();
 
+  glcr::ErrorOr<z_cap_t> CreateClientCap();
   glcr::ErrorOr<VoyageursClient> CreateClient();
 
   [[nodiscard]] Thread RunServer();

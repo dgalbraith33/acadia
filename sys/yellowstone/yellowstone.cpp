@@ -25,13 +25,13 @@ uint64_t main(uint64_t port_cap) {
   ASSIGN_OR_RETURN(auto server, YellowstoneServer::Create());
   Thread server_thread = server->RunServer();
 
-  ASSIGN_OR_RETURN(YellowstoneClient client1, server->CreateClient());
-  check(SpawnProcess(gBootDenaliVmmoCap, client1.Capability()));
+  ASSIGN_OR_RETURN(uint64_t client_cap, server->CreateClientCap());
+  check(SpawnProcess(gBootDenaliVmmoCap, client_cap));
 
   server->WaitDenaliRegistered();
 
-  ASSIGN_OR_RETURN(YellowstoneClient client2, server->CreateClient());
-  check(SpawnProcess(gBootVictoriaFallsVmmoCap, client2.Capability()));
+  ASSIGN_OR_RETURN(client_cap, server->CreateClientCap());
+  check(SpawnProcess(gBootVictoriaFallsVmmoCap, client_cap));
 
   server->WaitVictoriaFallsRegistered();
 
@@ -47,9 +47,9 @@ uint64_t main(uint64_t port_cap) {
       mmth::File binary =
           mmth::File::Open(glcr::StrFormat("/bin/{}", files[i]));
 
-      ASSIGN_OR_RETURN(YellowstoneClient client3, server->CreateClient());
+      ASSIGN_OR_RETURN(client_cap, server->CreateClientCap());
       check(mmth::SpawnProcessFromElfRegion((uint64_t)binary.raw_ptr(),
-                                            client3.Capability()));
+                                            client_cap));
     }
   }
 

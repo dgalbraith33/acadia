@@ -35,6 +35,12 @@ DenaliServerBase::~DenaliServerBase() {
   }
 }
 
+glcr::ErrorOr<z_cap_t> DenaliServerBase::CreateClientCap() {
+  uint64_t client_cap;
+  RET_ERR(ZCapDuplicate(endpoint_, ~(kZionPerm_Read), &client_cap));
+  return client_cap;
+}
+
 glcr::ErrorOr<DenaliClient> DenaliServerBase::CreateClient() {
   uint64_t client_cap;
   RET_ERR(ZCapDuplicate(endpoint_, ~(kZionPerm_Read), &client_cap));

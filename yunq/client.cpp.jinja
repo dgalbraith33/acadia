@@ -3,9 +3,17 @@
 
 #include <glacier/buffer/byte_buffer.h>
 #include <glacier/buffer/cap_buffer.h>
+#include <mammoth/util/debug.h>
 #include <zcall.h>
 
 {% for interface in interfaces %}
+
+{{interface.name}}Client::~{{interface.name}}Client() {
+  if (endpoint_ != 0) {
+    check(ZCapRelease(endpoint_));
+    }
+}
+
 {% for method in interface.methods %}
 
 {% if method.request == None %}

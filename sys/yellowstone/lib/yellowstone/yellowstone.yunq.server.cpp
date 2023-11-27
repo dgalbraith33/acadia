@@ -35,6 +35,12 @@ YellowstoneServerBase::~YellowstoneServerBase() {
   }
 }
 
+glcr::ErrorOr<z_cap_t> YellowstoneServerBase::CreateClientCap() {
+  uint64_t client_cap;
+  RET_ERR(ZCapDuplicate(endpoint_, ~(kZionPerm_Read), &client_cap));
+  return client_cap;
+}
+
 glcr::ErrorOr<YellowstoneClient> YellowstoneServerBase::CreateClient() {
   uint64_t client_cap;
   RET_ERR(ZCapDuplicate(endpoint_, ~(kZionPerm_Read), &client_cap));

@@ -87,7 +87,9 @@ glcr::ErrorCode YellowstoneServer::HandleRegisterEndpoint(
   dbgln("Registering {}.", req.endpoint_name().view());
   check(endpoint_map_.Insert(req.endpoint_name(), req.endpoint_capability()));
   if (req.endpoint_name() == "denali") {
-    auto part_info_or = HandleDenaliRegistration(req.endpoint_capability());
+    z_cap_t dup_cap;
+    check(ZCapDuplicate(req.endpoint_capability(), kZionPerm_All, &dup_cap));
+    auto part_info_or = HandleDenaliRegistration(dup_cap);
     if (!part_info_or.ok()) {
       check(part_info_or.error());
     }

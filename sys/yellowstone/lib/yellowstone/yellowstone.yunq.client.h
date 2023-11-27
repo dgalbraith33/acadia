@@ -13,6 +13,7 @@ class YellowstoneClient {
   YellowstoneClient(z_cap_t Yellowstone_cap) : endpoint_(Yellowstone_cap) {}
   YellowstoneClient(const YellowstoneClient&) = delete;
   YellowstoneClient(YellowstoneClient&& other) : endpoint_(other.endpoint_) {other.endpoint_ = 0;};
+  ~YellowstoneClient();
 
   z_cap_t Capability() { return endpoint_; }
 

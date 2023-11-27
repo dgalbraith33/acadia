@@ -35,6 +35,12 @@ VoyageursServerBase::~VoyageursServerBase() {
   }
 }
 
+glcr::ErrorOr<z_cap_t> VoyageursServerBase::CreateClientCap() {
+  uint64_t client_cap;
+  RET_ERR(ZCapDuplicate(endpoint_, ~(kZionPerm_Read), &client_cap));
+  return client_cap;
+}
+
 glcr::ErrorOr<VoyageursClient> VoyageursServerBase::CreateClient() {
   uint64_t client_cap;
   RET_ERR(ZCapDuplicate(endpoint_, ~(kZionPerm_Read), &client_cap));

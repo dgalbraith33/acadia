@@ -3,8 +3,16 @@
 
 #include <glacier/buffer/byte_buffer.h>
 #include <glacier/buffer/cap_buffer.h>
+#include <mammoth/util/debug.h>
 #include <zcall.h>
 
+
+
+VoyageursClient::~VoyageursClient() {
+  if (endpoint_ != 0) {
+    check(ZCapRelease(endpoint_));
+    }
+}
 
 
 

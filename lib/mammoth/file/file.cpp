@@ -3,6 +3,7 @@
 #include <glacier/string/str_split.h>
 #include <victoriafalls/victoriafalls.yunq.client.h>
 #include <yellowstone/yellowstone.yunq.client.h>
+#include <zcall.h>
 #include <zglobal.h>
 
 #include "util/debug.h"
@@ -14,7 +15,11 @@ VFSClient* gVfsClient = nullptr;
 
 void GetVfsClientIfNeeded() {
   if (gVfsClient == nullptr) {
-    YellowstoneClient client(gInitEndpointCap);
+    // TODO: Add an unowned client so we don't have to duplicate this cap every
+    // time.
+    uint64_t dup_cap;
+    check(ZCapDuplicate(gInitEndpointCap, kZionPerm_All, &dup_cap));
+    YellowstoneClient client(dup_cap);
 
     GetEndpointRequest yreq;
     yreq.set_endpoint_name("victoriafalls");

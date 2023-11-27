@@ -35,6 +35,12 @@ VFSServerBase::~VFSServerBase() {
   }
 }
 
+glcr::ErrorOr<z_cap_t> VFSServerBase::CreateClientCap() {
+  uint64_t client_cap;
+  RET_ERR(ZCapDuplicate(endpoint_, ~(kZionPerm_Read), &client_cap));
+  return client_cap;
+}
+
 glcr::ErrorOr<VFSClient> VFSServerBase::CreateClient() {
   uint64_t client_cap;
   RET_ERR(ZCapDuplicate(endpoint_, ~(kZionPerm_Read), &client_cap));
