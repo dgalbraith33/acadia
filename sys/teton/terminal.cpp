@@ -25,8 +25,8 @@ void Terminal::ExecuteCommand(const glcr::String& command) {
   }
   glcr::StringView cmd = tokens[0];
   if (cmd == "help") {
-    console_.WriteString("Available Commands: cwd cd ls\n");
-  } else if (cmd == "cwd") {
+    console_.WriteString("Available Commands: pwd cd ls\n");
+  } else if (cmd == "pwd") {
     console_.WriteString(cwd_);
     console_.WriteChar('\n');
   } else if (cmd == "cd") {
