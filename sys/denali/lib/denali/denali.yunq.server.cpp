@@ -29,6 +29,12 @@ void DenaliServerBaseThreadBootstrap(void* server_base) {
   ((DenaliServerBase*)server_base)->ServerThread();
 }
 
+DenaliServerBase::~DenaliServerBase() {
+  if (endpoint_ != 0) {
+    check(ZCapRelease(endpoint_));
+  }
+}
+
 glcr::ErrorOr<DenaliClient> DenaliServerBase::CreateClient() {
   uint64_t client_cap;
   RET_ERR(ZCapDuplicate(endpoint_, ~(kZionPerm_Read), &client_cap));
@@ -87,25 +93,43 @@ glcr::ErrorCode DenaliServerBase::HandleRequest(const glcr::ByteBuffer& request,
 
   switch(method_select) {
     case 0: {
+
+  
       ReadRequest yunq_request;
-      ReadResponse yunq_response;
-
       yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+  
 
+  
+      ReadResponse yunq_response;
+  
+
+  
       RET_ERR(HandleRead(yunq_request, yunq_response));
+  
 
+  
       resp_length = yunq_response.SerializeToBytes(response, kHeaderSize, resp_caps);
+  
       break;
     }
     case 1: {
+
+  
       ReadManyRequest yunq_request;
-      ReadResponse yunq_response;
-
       yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+  
 
+  
+      ReadResponse yunq_response;
+  
+
+  
       RET_ERR(HandleReadMany(yunq_request, yunq_response));
+  
 
+  
       resp_length = yunq_response.SerializeToBytes(response, kHeaderSize, resp_caps);
+  
       break;
     }
     default: {

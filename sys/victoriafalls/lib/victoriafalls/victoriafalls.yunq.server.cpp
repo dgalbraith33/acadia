@@ -29,6 +29,12 @@ void VFSServerBaseThreadBootstrap(void* server_base) {
   ((VFSServerBase*)server_base)->ServerThread();
 }
 
+VFSServerBase::~VFSServerBase() {
+  if (endpoint_ != 0) {
+    check(ZCapRelease(endpoint_));
+  }
+}
+
 glcr::ErrorOr<VFSClient> VFSServerBase::CreateClient() {
   uint64_t client_cap;
   RET_ERR(ZCapDuplicate(endpoint_, ~(kZionPerm_Read), &client_cap));
@@ -87,25 +93,43 @@ glcr::ErrorCode VFSServerBase::HandleRequest(const glcr::ByteBuffer& request,
 
   switch(method_select) {
     case 0: {
+
+  
       OpenFileRequest yunq_request;
-      OpenFileResponse yunq_response;
-
       yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+  
 
+  
+      OpenFileResponse yunq_response;
+  
+
+  
       RET_ERR(HandleOpenFile(yunq_request, yunq_response));
+  
 
+  
       resp_length = yunq_response.SerializeToBytes(response, kHeaderSize, resp_caps);
+  
       break;
     }
     case 1: {
+
+  
       GetDirectoryRequest yunq_request;
-      Directory yunq_response;
-
       yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+  
 
+  
+      Directory yunq_response;
+  
+
+  
       RET_ERR(HandleGetDirectory(yunq_request, yunq_response));
+  
 
+  
       resp_length = yunq_response.SerializeToBytes(response, kHeaderSize, resp_caps);
+  
       break;
     }
     default: {

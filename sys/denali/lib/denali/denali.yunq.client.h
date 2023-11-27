@@ -17,9 +17,13 @@ class DenaliClient {
   z_cap_t Capability() { return endpoint_; }
 
 
+  
   [[nodiscard]] glcr::ErrorCode Read(const ReadRequest& request, ReadResponse& response);
+  
 
+  
   [[nodiscard]] glcr::ErrorCode ReadMany(const ReadManyRequest& request, ReadResponse& response);
+  
 
  private:
   z_cap_t endpoint_;

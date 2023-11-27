@@ -15,6 +15,7 @@ class YellowstoneServerBase {
   YellowstoneServerBase(z_cap_t Yellowstone_cap) : endpoint_(Yellowstone_cap) {}
   YellowstoneServerBase(const YellowstoneServerBase&) = delete;
   YellowstoneServerBase(YellowstoneServerBase&&) = delete;
+  virtual ~YellowstoneServerBase();
 
   glcr::ErrorOr<YellowstoneClient> CreateClient();
 

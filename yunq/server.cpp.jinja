@@ -29,6 +29,12 @@ void {{interface.name}}ServerBaseThreadBootstrap(void* server_base) {
   (({{interface.name}}ServerBase*)server_base)->ServerThread();
 }
 
+{{interface.name}}ServerBase::~{{interface.name}}ServerBase() {
+  if (endpoint_ != 0) {
+    check(ZCapRelease(endpoint_));
+  }
+}
+
 glcr::ErrorOr<{{interface.name}}Client> {{interface.name}}ServerBase::CreateClient() {
   uint64_t client_cap;
   RET_ERR(ZCapDuplicate(endpoint_, ~(kZionPerm_Read), &client_cap));

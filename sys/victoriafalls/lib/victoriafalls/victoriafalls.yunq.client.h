@@ -17,9 +17,13 @@ class VFSClient {
   z_cap_t Capability() { return endpoint_; }
 
 
+  
   [[nodiscard]] glcr::ErrorCode OpenFile(const OpenFileRequest& request, OpenFileResponse& response);
+  
 
+  
   [[nodiscard]] glcr::ErrorCode GetDirectory(const GetDirectoryRequest& request, Directory& response);
+  
 
  private:
   z_cap_t endpoint_;

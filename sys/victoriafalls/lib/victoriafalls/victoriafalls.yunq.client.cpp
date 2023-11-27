@@ -8,7 +8,9 @@
 
 
 
+
 glcr::ErrorCode VFSClient::OpenFile(const OpenFileRequest& request, OpenFileResponse& response) {
+
   uint64_t buffer_size = kBufferSize;
   uint64_t cap_size = kCapBufferSize;
 
@@ -17,7 +19,10 @@ glcr::ErrorCode VFSClient::OpenFile(const OpenFileRequest& request, OpenFileResp
   buffer_.WriteAt<uint64_t>(8, 0);
 
   cap_buffer_.Reset();
+
   uint64_t length = request.SerializeToBytes(buffer_, /*offset=*/16, cap_buffer_);
+
+
   buffer_.WriteAt<uint32_t>(4, 16 + length);
 
   z_cap_t reply_port_cap;
@@ -33,14 +38,18 @@ glcr::ErrorCode VFSClient::OpenFile(const OpenFileRequest& request, OpenFileResp
   // Check Response Code.
   RET_ERR(buffer_.At<uint64_t>(8));
 
+
   response.ParseFromBytes(buffer_, 16, cap_buffer_);
+
 
   return glcr::OK;
 }
 
 
 
+
 glcr::ErrorCode VFSClient::GetDirectory(const GetDirectoryRequest& request, Directory& response) {
+
   uint64_t buffer_size = kBufferSize;
   uint64_t cap_size = kCapBufferSize;
 
@@ -49,7 +58,10 @@ glcr::ErrorCode VFSClient::GetDirectory(const GetDirectoryRequest& request, Dire
   buffer_.WriteAt<uint64_t>(8, 1);
 
   cap_buffer_.Reset();
+
   uint64_t length = request.SerializeToBytes(buffer_, /*offset=*/16, cap_buffer_);
+
+
   buffer_.WriteAt<uint32_t>(4, 16 + length);
 
   z_cap_t reply_port_cap;
@@ -65,7 +77,9 @@ glcr::ErrorCode VFSClient::GetDirectory(const GetDirectoryRequest& request, Dire
   // Check Response Code.
   RET_ERR(buffer_.At<uint64_t>(8));
 
+
   response.ParseFromBytes(buffer_, 16, cap_buffer_);
+
 
   return glcr::OK;
 }

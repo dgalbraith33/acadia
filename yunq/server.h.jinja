@@ -15,6 +15,7 @@ class {{interface.name}}ServerBase {
   {{interface.name}}ServerBase(z_cap_t {{interface.name}}_cap) : endpoint_({{interface.name}}_cap) {}
   {{interface.name}}ServerBase(const {{interface.name}}ServerBase&) = delete;
   {{interface.name}}ServerBase({{interface.name}}ServerBase&&) = delete;
+  virtual ~{{interface.name}}ServerBase();
 
   glcr::ErrorOr<{{interface.name}}Client> CreateClient();
 

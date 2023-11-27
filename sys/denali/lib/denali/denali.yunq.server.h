@@ -15,15 +15,20 @@ class DenaliServerBase {
   DenaliServerBase(z_cap_t Denali_cap) : endpoint_(Denali_cap) {}
   DenaliServerBase(const DenaliServerBase&) = delete;
   DenaliServerBase(DenaliServerBase&&) = delete;
+  virtual ~DenaliServerBase();
 
   glcr::ErrorOr<DenaliClient> CreateClient();
 
   [[nodiscard]] Thread RunServer();
 
 
+
   [[nodiscard]] virtual glcr::ErrorCode HandleRead(const ReadRequest&, ReadResponse&) = 0;
 
+
+
   [[nodiscard]] virtual glcr::ErrorCode HandleReadMany(const ReadManyRequest&, ReadResponse&) = 0;
+
 
 
  private:

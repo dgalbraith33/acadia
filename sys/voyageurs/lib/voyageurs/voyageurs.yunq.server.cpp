@@ -29,6 +29,12 @@ void VoyageursServerBaseThreadBootstrap(void* server_base) {
   ((VoyageursServerBase*)server_base)->ServerThread();
 }
 
+VoyageursServerBase::~VoyageursServerBase() {
+  if (endpoint_ != 0) {
+    check(ZCapRelease(endpoint_));
+  }
+}
+
 glcr::ErrorOr<VoyageursClient> VoyageursServerBase::CreateClient() {
   uint64_t client_cap;
   RET_ERR(ZCapDuplicate(endpoint_, ~(kZionPerm_Read), &client_cap));

@@ -29,6 +29,12 @@ void YellowstoneServerBaseThreadBootstrap(void* server_base) {
   ((YellowstoneServerBase*)server_base)->ServerThread();
 }
 
+YellowstoneServerBase::~YellowstoneServerBase() {
+  if (endpoint_ != 0) {
+    check(ZCapRelease(endpoint_));
+  }
+}
+
 glcr::ErrorOr<YellowstoneClient> YellowstoneServerBase::CreateClient() {
   uint64_t client_cap;
   RET_ERR(ZCapDuplicate(endpoint_, ~(kZionPerm_Read), &client_cap));

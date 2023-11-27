@@ -15,6 +15,7 @@ class VoyageursServerBase {
   VoyageursServerBase(z_cap_t Voyageurs_cap) : endpoint_(Voyageurs_cap) {}
   VoyageursServerBase(const VoyageursServerBase&) = delete;
   VoyageursServerBase(VoyageursServerBase&&) = delete;
+  virtual ~VoyageursServerBase();
 
   glcr::ErrorOr<VoyageursClient> CreateClient();
 
