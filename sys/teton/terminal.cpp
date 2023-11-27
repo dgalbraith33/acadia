@@ -3,6 +3,8 @@
 #include <glacier/string/str_format.h>
 #include <glacier/string/str_split.h>
 #include <mammoth/file/file.h>
+#include <mammoth/proc/process.h>
+#include <zglobal.h>
 
 void Terminal::HandleCharacter(char c) {
   console_.WriteChar(c);
@@ -58,6 +60,16 @@ void Terminal::ExecuteCommand(const glcr::String& command) {
         console_.WriteChar('\n');
       }
     }
+  } else if (cmd == "exec") {
+    if (tokens.size() != 2) {
+      console_.WriteString("Provide the name of an executable.\n>");
+      return;
+    }
+    auto file = mmth::File::Open(tokens[1]);
+
+    // TODO: Wait until the process exits.
+    mmth::SpawnProcessFromElfRegion((uint64_t)file.raw_ptr(), gInitEndpointCap);
+
   } else {
     console_.WriteString("Unknown command: ");
     console_.WriteString(command);
