@@ -21,7 +21,13 @@ class {{interface.name}}ServerBase {
   [[nodiscard]] Thread RunServer();
 
 {% for method in interface.methods %}
+{% if method.request == None %}
+  [[nodiscard]] virtual glcr::ErrorCode Handle{{method.name}}({{method.response}}&) = 0;
+{% elif method.response == None %}
+  [[nodiscard]] virtual glcr::ErrorCode Handle{{method.name}}(const {{method.request}}&) = 0;
+{% else %}
   [[nodiscard]] virtual glcr::ErrorCode Handle{{method.name}}(const {{method.request}}&, {{method.response}}&) = 0;
+{% endif %}
 {% endfor %}
 
  private:

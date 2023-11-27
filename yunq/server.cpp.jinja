@@ -88,14 +88,29 @@ glcr::ErrorCode {{interface.name}}ServerBase::HandleRequest(const glcr::ByteBuff
   switch(method_select) {
 {%- for method in interface.methods %}
     case {{loop.index0}}: {
+
+  {% if method.request != None %}
       {{method.request}} yunq_request;
-      {{method.response}} yunq_response;
-
       yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+  {% endif %}
 
+  {% if method.response != None %}
+      {{method.response}} yunq_response;
+  {% endif %}
+
+  {% if method.request == None %}
+      RET_ERR(Handle{{method.name}}(yunq_response));
+  {% elif method.response == None %}
+      RET_ERR(Handle{{method.name}}(yunq_request));
+  {% else %}
       RET_ERR(Handle{{method.name}}(yunq_request, yunq_response));
+  {% endif %}
 
+  {% if method.response != None %}
       resp_length = yunq_response.SerializeToBytes(response, kHeaderSize, resp_caps);
+  {% else %}
+      resp_length = 0;
+  {% endif %}
       break;
     }
 {%- endfor %}

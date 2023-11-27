@@ -1,7 +1,7 @@
 // Generated file -- DO NOT MODIFY.
 #include "example.yunq.server.h"
 
-#include <mammoth/debug.h>
+#include <mammoth/util/debug.h>
 #include <zcall.h>
 
 namespace {
@@ -87,12 +87,19 @@ glcr::ErrorCode VFSServerBase::HandleRequest(const glcr::ByteBuffer& request,
 
   switch(method_select) {
     case 0: {
+
+  
       OpenFileRequest yunq_request;
-      File yunq_response;
-
       yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+  
 
+  
+      File yunq_response;
+  
+
+  
       RET_ERR(Handleopen(yunq_request, yunq_response));
+  
 
       resp_length = yunq_response.SerializeToBytes(response, kHeaderSize, resp_caps);
       break;

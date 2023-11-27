@@ -18,7 +18,13 @@ class {{interface.name}}Client {
   z_cap_t Capability() { return endpoint_; }
 
 {% for method in interface.methods %}
+  {% if method.request == None %}
+  [[nodiscard]] glcr::ErrorCode {{method.name}}({{method.response}}& response);
+  {% elif method.response == None %}
+  [[nodiscard]] glcr::ErrorCode {{method.name}}(const {{method.request}}& request);
+  {% else %}
   [[nodiscard]] glcr::ErrorCode {{method.name}}(const {{method.request}}& request, {{method.response}}& response);
+  {% endif %}
 {% endfor %}
  private:
   z_cap_t endpoint_;

@@ -211,13 +211,20 @@ class Parser():
 
         self.consume_check(LexemeType.LEFT_PAREN)
         
-        request = self.consume_identifier()
+        request = None
+        # FIXME: Fix error handling here (and for response). We want to show
+        # "expected rparen or identifier" if type is wrong rather than just 
+        # "expected rparen".
+        if self.peektype() == LexemeType.NAME:
+            request = self.consume_identifier()
 
         self.consume_check(LexemeType.RIGHT_PAREN)
         self.consume_check(LexemeType.ARROW)
         self.consume_check(LexemeType.LEFT_PAREN)
 
-        response = self.consume_identifier()
+        response = None
+        if self.peektype() == LexemeType.NAME:
+            response = self.consume_identifier()
 
         self.consume_check(LexemeType.RIGHT_PAREN)
         self.consume_check(LexemeType.SEMICOLON)
@@ -269,14 +276,18 @@ def type_check(decls: list[Decl]):
     for decl in decls:
         if type(decl) is Interface:
             for method in decl.methods:
-                if method.request not in name_dict.keys():
-                    sys.exit("Request type '%s' for '%s.%s' does not exist" % (method.request, decl.name, method.name))
-                if type(name_dict[method.request]) is not Message:
-                    sys.exit("Request type '%s' for '%s.%s' should be a message" % (method.request, decl.name, method.name))
-                if method.response not in name_dict.keys():
-                    sys.exit("Response type '%s' for '%s.%s' does not exist" % (method.response, decl.name, method.name))
-                if type(name_dict[method.response]) is not Message:
-                    sys.exit("Response type '%s' for '%s.%s' should be a message" % (method.response, decl.name, method.name))
+                if method.request is None and method.response is None:
+                    sys.exit("Method '%s.%s' cannot have empty request and response" % (decl.name, method.name))
+                if method.request is not None:
+                  if method.request not in name_dict.keys():
+                      sys.exit("Request type '%s' for '%s.%s' does not exist" % (method.request, decl.name, method.name))
+                  if type(name_dict[method.request]) is not Message:
+                      sys.exit("Request type '%s' for '%s.%s' should be a message" % (method.request, decl.name, method.name))
+                if method.response is not None:
+                  if method.response not in name_dict.keys():
+                      sys.exit("Response type '%s' for '%s.%s' does not exist" % (method.response, decl.name, method.name))
+                  if type(name_dict[method.response]) is not Message:
+                      sys.exit("Response type '%s' for '%s.%s' should be a message" % (method.response, decl.name, method.name))
 
 def print_ast(decls: list[Decl]):
     for decl in decls:

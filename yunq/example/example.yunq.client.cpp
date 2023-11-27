@@ -8,7 +8,9 @@
 
 
 
+
 glcr::ErrorCode VFSClient::open(const OpenFileRequest& request, File& response) {
+
   uint64_t buffer_size = kBufferSize;
   uint64_t cap_size = kCapBufferSize;
 
@@ -17,7 +19,10 @@ glcr::ErrorCode VFSClient::open(const OpenFileRequest& request, File& response) 
   buffer_.WriteAt<uint64_t>(8, 0);
 
   cap_buffer_.Reset();
+
   uint64_t length = request.SerializeToBytes(buffer_, /*offset=*/16, cap_buffer_);
+
+
   buffer_.WriteAt<uint32_t>(4, 16 + length);
 
   z_cap_t reply_port_cap;
@@ -33,7 +38,9 @@ glcr::ErrorCode VFSClient::open(const OpenFileRequest& request, File& response) 
   // Check Response Code.
   RET_ERR(buffer_.At<uint64_t>(8));
 
+
   response.ParseFromBytes(buffer_, 16, cap_buffer_);
+
 
   return glcr::OK;
 }

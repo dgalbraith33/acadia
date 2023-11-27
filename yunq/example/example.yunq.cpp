@@ -44,9 +44,9 @@ void OpenFileRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint
   // Parse options.
   auto options_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 1));
 
-  options_.Resize(options_pointer.length);
+  options_.Resize(options_pointer.length / sizeof(uint64_t));
   for (uint64_t i = offset + options_pointer.offset;
-       i < offset + options_pointer.offset + (sizeof(uint64_t) * options_pointer.length);
+       i < offset + options_pointer.offset + options_pointer.length;
        i += sizeof(uint64_t)) {
     options_.PushBack(bytes.At<uint64_t>(i));
   }
