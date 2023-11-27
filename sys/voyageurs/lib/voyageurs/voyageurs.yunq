@@ -1,12 +1,8 @@
 interface Voyageurs {
-  method RegisterKeyboardListener(KeyboardListener) -> (None);
+  method RegisterKeyboardListener(KeyboardListener) -> ();
 }
 
 message KeyboardListener {
   capability port_capability;
-}
-
-message None {
-
 }
 

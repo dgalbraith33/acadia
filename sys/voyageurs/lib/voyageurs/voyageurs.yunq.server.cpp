@@ -87,14 +87,21 @@ glcr::ErrorCode VoyageursServerBase::HandleRequest(const glcr::ByteBuffer& reque
 
   switch(method_select) {
     case 0: {
+
+  
       KeyboardListener yunq_request;
-      None yunq_response;
-
       yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+  
 
-      RET_ERR(HandleRegisterKeyboardListener(yunq_request, yunq_response));
+  
 
-      resp_length = yunq_response.SerializeToBytes(response, kHeaderSize, resp_caps);
+  
+      RET_ERR(HandleRegisterKeyboardListener(yunq_request));
+  
+
+  
+      resp_length = 0;
+  
       break;
     }
     default: {

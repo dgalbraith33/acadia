@@ -75,36 +75,3 @@ uint64_t KeyboardListener::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t of
 
   return next_extension;
 }
-void None::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  ParseFromBytesInternal(bytes, offset);
-}
-
-void None::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  ParseFromBytesInternal(bytes, offset);
-}
-
-void None::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  CheckHeader(bytes);
-
-}
-
-uint64_t None::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
-  uint32_t next_extension = header_size + 8 * 0;
-  const uint32_t core_size = next_extension;
-
-  // The next extension pointer is the length of the message. 
-  WriteHeader(bytes, offset, core_size, next_extension);
-
-  return next_extension;
-}
-
-uint64_t None::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
-  uint32_t next_extension = header_size + 8 * 0;
-  const uint32_t core_size = next_extension;
-  uint64_t next_cap = 0;
-
-  // The next extension pointer is the length of the message. 
-  WriteHeader(bytes, offset, core_size, next_extension);
-
-  return next_extension;
-}

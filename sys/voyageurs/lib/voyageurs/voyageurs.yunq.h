@@ -26,20 +26,3 @@ class KeyboardListener {
   // Parses everything except for caps.
   void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
 };
-class None {
- public:
-  None() {}
-  // Delete copy and move until implemented.
-  None(const None&) = delete;
-  None(None&&) = delete;
-
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
-  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
-  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const;
-
- private:
-
-  // Parses everything except for caps.
-  void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
-};

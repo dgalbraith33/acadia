@@ -17,7 +17,9 @@ class VoyageursClient {
   z_cap_t Capability() { return endpoint_; }
 
 
-  [[nodiscard]] glcr::ErrorCode RegisterKeyboardListener(const KeyboardListener& request, None& response);
+  
+  [[nodiscard]] glcr::ErrorCode RegisterKeyboardListener(const KeyboardListener& request);
+  
 
  private:
   z_cap_t endpoint_;

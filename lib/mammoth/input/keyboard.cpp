@@ -40,8 +40,7 @@ void KeyboardListenerBase::Register() {
     crash("Failed to create client", client_or.error());
   }
   listn.set_port_capability(client_or.value().cap());
-  None n;
-  check(vclient.RegisterKeyboardListener(listn, n));
+  check(vclient.RegisterKeyboardListener(listn));
 }
 
 Thread KeyboardListenerBase::Listen() {

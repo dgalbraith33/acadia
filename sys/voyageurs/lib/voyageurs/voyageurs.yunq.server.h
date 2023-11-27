@@ -21,7 +21,9 @@ class VoyageursServerBase {
   [[nodiscard]] Thread RunServer();
 
 
-  [[nodiscard]] virtual glcr::ErrorCode HandleRegisterKeyboardListener(const KeyboardListener&, None&) = 0;
+
+  [[nodiscard]] virtual glcr::ErrorCode HandleRegisterKeyboardListener(const KeyboardListener&) = 0;
+
 
 
  private:

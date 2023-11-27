@@ -12,7 +12,7 @@ class VoyageursServer : public VoyageursServerBase {
       KeyboardDriver& keyboard_driver);
 
   virtual glcr::ErrorCode HandleRegisterKeyboardListener(
-      const KeyboardListener& listener, None&) override;
+      const KeyboardListener& listener) override;
 
  private:
   KeyboardDriver& keyboard_driver_;

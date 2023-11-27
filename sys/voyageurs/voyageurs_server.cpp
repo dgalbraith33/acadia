@@ -9,7 +9,7 @@ glcr::ErrorOr<glcr::UniquePtr<VoyageursServer>> VoyageursServer::Create(
 }
 
 glcr::ErrorCode VoyageursServer::HandleRegisterKeyboardListener(
-    const KeyboardListener& listener, None&) {
+    const KeyboardListener& listener) {
   keyboard_driver_.RegisterListener(listener.port_capability());
   return glcr::OK;
 }
