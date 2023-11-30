@@ -1,6 +1,9 @@
 // Generated file -- DO NOT MODIFY.
 #include "yellowstone.yunq.h"
 
+
+namespace yellowstone {
+
 namespace {
 
 const uint64_t header_size = 24;  // 4x uint32, 1x uint64
@@ -427,3 +430,6 @@ uint64_t DenaliInfo::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, 
 
   return next_extension;
 }
+
+
+}  // namepace yellowstone

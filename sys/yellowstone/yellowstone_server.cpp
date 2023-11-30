@@ -11,6 +11,7 @@
 #include "hw/gpt.h"
 #include "hw/pcie.h"
 
+namespace yellowstone {
 namespace {
 
 struct PartitionInfo {
@@ -125,3 +126,5 @@ void YellowstoneServer::WaitDenaliRegistered() { has_denali_semaphore_.Wait(); }
 void YellowstoneServer::WaitVictoriaFallsRegistered() {
   has_victoriafalls_semaphore_.Wait();
 }
+
+}  // namespace yellowstone

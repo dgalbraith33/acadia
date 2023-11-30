@@ -7,6 +7,10 @@
 #include "ahci/ahci_driver.h"
 #include "denali_server.h"
 
+using yellowstone::AhciInfo;
+using yellowstone::RegisterEndpointRequest;
+using yellowstone::YellowstoneClient;
+
 uint64_t main(uint64_t init_port_cap) {
   check(ParseInitPort(init_port_cap));
 

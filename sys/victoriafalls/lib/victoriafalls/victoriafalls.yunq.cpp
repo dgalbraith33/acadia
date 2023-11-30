@@ -1,6 +1,7 @@
 // Generated file -- DO NOT MODIFY.
 #include "victoriafalls.yunq.h"
 
+
 namespace {
 
 const uint64_t header_size = 24;  // 4x uint32, 1x uint64
@@ -284,3 +285,4 @@ uint64_t Directory::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, g
 
   return next_extension;
 }
+

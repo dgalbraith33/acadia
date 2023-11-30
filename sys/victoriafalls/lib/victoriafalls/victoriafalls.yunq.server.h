@@ -10,6 +10,8 @@
 
 
 
+
+
 class VFSServerBase {
  public:
   VFSServerBase(z_cap_t VFS_cap) : endpoint_(VFS_cap) {}
@@ -42,4 +44,6 @@ class VFSServerBase {
                                               glcr::ByteBuffer& response, uint64_t& resp_length,
                                               glcr::CapBuffer& resp_caps);
 };
+
+
 

@@ -22,7 +22,7 @@ uint64_t main(uint64_t port_cap) {
   check(ParseInitPort(port_cap));
   dbgln("Yellowstone Initializing.");
 
-  ASSIGN_OR_RETURN(auto server, YellowstoneServer::Create());
+  ASSIGN_OR_RETURN(auto server, yellowstone::YellowstoneServer::Create());
   Thread server_thread = server->RunServer();
 
   ASSIGN_OR_RETURN(uint64_t client_cap, server->CreateClientCap());

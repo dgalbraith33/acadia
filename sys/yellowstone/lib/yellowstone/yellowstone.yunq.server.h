@@ -9,6 +9,10 @@
 #include "yellowstone.yunq.client.h"
 
 
+namespace yellowstone {
+
+
+
 
 class YellowstoneServerBase {
  public:
@@ -55,3 +59,7 @@ class YellowstoneServerBase {
                                               glcr::CapBuffer& resp_caps);
 };
 
+
+
+
+}  // namepace yellowstone

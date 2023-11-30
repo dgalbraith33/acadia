@@ -8,6 +8,7 @@
 
 
 
+
 VFSClient::~VFSClient() {
   if (endpoint_ != 0) {
     check(ZCapRelease(endpoint_));
@@ -91,5 +92,7 @@ glcr::ErrorCode VFSClient::GetDirectory(const GetDirectoryRequest& request, Dire
 
   return glcr::OK;
 }
+
+
 
 

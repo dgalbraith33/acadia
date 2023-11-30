@@ -4,6 +4,7 @@
 #include <mammoth/util/debug.h>
 #include <zcall.h>
 
+
 namespace {
 
 const uint32_t kSentinel = 0xBEEFDEAD;
@@ -122,3 +123,5 @@ glcr::ErrorCode VoyageursServerBase::HandleRequest(const glcr::ByteBuffer& reque
   }
   return glcr::OK;
 }
+
+

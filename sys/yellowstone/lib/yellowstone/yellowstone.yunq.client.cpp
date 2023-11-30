@@ -7,6 +7,9 @@
 #include <zcall.h>
 
 
+namespace yellowstone {
+
+
 
 YellowstoneClient::~YellowstoneClient() {
   if (endpoint_ != 0) {
@@ -208,3 +211,7 @@ glcr::ErrorCode YellowstoneClient::GetDenali(DenaliInfo& response) {
 }
 
 
+
+
+
+}  // namepace yellowstone

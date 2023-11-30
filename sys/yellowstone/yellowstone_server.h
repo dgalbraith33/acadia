@@ -10,6 +10,8 @@
 #include "hw/pcie.h"
 #include "lib/yellowstone/yellowstone.yunq.server.h"
 
+namespace yellowstone {
+
 class YellowstoneServer : public YellowstoneServerBase {
  public:
   static glcr::ErrorOr<glcr::UniquePtr<YellowstoneServer>> Create();
@@ -39,3 +41,5 @@ class YellowstoneServer : public YellowstoneServerBase {
 
   YellowstoneServer(z_cap_t endpoint_cap);
 };
+
+}  // namespace yellowstone

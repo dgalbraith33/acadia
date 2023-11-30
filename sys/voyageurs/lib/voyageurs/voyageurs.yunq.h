@@ -6,6 +6,8 @@
 #include <glacier/container/vector.h>
 #include <glacier/string/string.h>
 #include <ztypes.h>
+
+
 class KeyboardListener {
  public:
   KeyboardListener() {}
@@ -26,3 +28,4 @@ class KeyboardListener {
   // Parses everything except for caps.
   void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
 };
+

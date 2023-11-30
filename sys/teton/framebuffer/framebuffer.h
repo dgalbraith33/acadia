@@ -5,7 +5,7 @@
 
 class Framebuffer {
  public:
-  Framebuffer(const FramebufferInfo& info);
+  Framebuffer(const yellowstone::FramebufferInfo& info);
 
   void DrawPixel(uint32_t row, uint32_t col, uint32_t pixel);
 
@@ -17,7 +17,7 @@ class Framebuffer {
  private:
   // FIXME: Implement Yunq copy or move so we
   // don't have to store a reference here.
-  const FramebufferInfo& fb_info_;
+  const yellowstone::FramebufferInfo& fb_info_;
 
   mmth::OwnedMemoryRegion fb_memory_;
   uint32_t* fb_;

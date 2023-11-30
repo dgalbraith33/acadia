@@ -5,6 +5,10 @@
 #include "fs/ext2/ext2_driver.h"
 #include "victoriafalls_server.h"
 
+using yellowstone::DenaliInfo;
+using yellowstone::RegisterEndpointRequest;
+using yellowstone::YellowstoneClient;
+
 uint64_t main(uint64_t init_cap) {
   ParseInitPort(init_cap);
 

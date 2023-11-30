@@ -8,6 +8,7 @@
 
 
 
+
 DenaliClient::~DenaliClient() {
   if (endpoint_ != 0) {
     check(ZCapRelease(endpoint_));
@@ -91,5 +92,7 @@ glcr::ErrorCode DenaliClient::ReadMany(const ReadManyRequest& request, ReadRespo
 
   return glcr::OK;
 }
+
+
 
 

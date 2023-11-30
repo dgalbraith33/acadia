@@ -8,6 +8,7 @@
 
 
 
+
 VoyageursClient::~VoyageursClient() {
   if (endpoint_ != 0) {
     check(ZCapRelease(endpoint_));
@@ -50,5 +51,7 @@ glcr::ErrorCode VoyageursClient::RegisterKeyboardListener(const KeyboardListener
 
   return glcr::OK;
 }
+
+
 
 

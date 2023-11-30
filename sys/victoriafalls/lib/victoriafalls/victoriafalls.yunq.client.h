@@ -8,6 +8,7 @@
 
 #include "victoriafalls.yunq.h"
 
+
 class VFSClient {
  public:
   VFSClient(z_cap_t VFS_cap) : endpoint_(VFS_cap) {}
@@ -33,3 +34,4 @@ class VFSClient {
   uint64_t kCapBufferSize = 0x10;
   glcr::CapBuffer cap_buffer_{kCapBufferSize};
 };
+

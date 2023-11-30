@@ -1,3 +1,5 @@
+package yellowstone;
+
 interface Yellowstone {
   method RegisterEndpoint(RegisterEndpointRequest) -> ();
   method GetEndpoint(GetEndpointRequest) -> (Endpoint);

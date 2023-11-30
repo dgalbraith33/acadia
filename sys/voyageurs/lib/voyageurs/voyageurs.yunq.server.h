@@ -10,6 +10,8 @@
 
 
 
+
+
 class VoyageursServerBase {
  public:
   VoyageursServerBase(z_cap_t Voyageurs_cap) : endpoint_(Voyageurs_cap) {}
@@ -38,4 +40,6 @@ class VoyageursServerBase {
                                               glcr::ByteBuffer& response, uint64_t& resp_length,
                                               glcr::CapBuffer& resp_caps);
 };
+
+
 

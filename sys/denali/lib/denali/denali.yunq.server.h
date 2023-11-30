@@ -10,6 +10,8 @@
 
 
 
+
+
 class DenaliServerBase {
  public:
   DenaliServerBase(z_cap_t Denali_cap) : endpoint_(Denali_cap) {}
@@ -42,4 +44,6 @@ class DenaliServerBase {
                                               glcr::ByteBuffer& response, uint64_t& resp_length,
                                               glcr::CapBuffer& resp_caps);
 };
+
+
 

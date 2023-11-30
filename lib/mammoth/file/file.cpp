@@ -11,6 +11,10 @@
 namespace mmth {
 namespace {
 
+using yellowstone::Endpoint;
+using yellowstone::GetEndpointRequest;
+using yellowstone::YellowstoneClient;
+
 VFSClient* gVfsClient = nullptr;
 
 void GetVfsClientIfNeeded() {

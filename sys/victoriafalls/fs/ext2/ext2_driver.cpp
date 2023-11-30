@@ -3,7 +3,8 @@
 #include <glacier/string/string.h>
 #include <mammoth/util/debug.h>
 
-glcr::ErrorOr<Ext2Driver> Ext2Driver::Init(const DenaliInfo& denali_info) {
+glcr::ErrorOr<Ext2Driver> Ext2Driver::Init(
+    const yellowstone::DenaliInfo& denali_info) {
   ASSIGN_OR_RETURN(glcr::SharedPtr<Ext2BlockReader> reader,
                    Ext2BlockReader::Init(glcr::Move(denali_info)));
 

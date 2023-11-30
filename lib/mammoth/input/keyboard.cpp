@@ -9,6 +9,10 @@
 namespace mmth {
 namespace {
 
+using yellowstone::Endpoint;
+using yellowstone::GetEndpointRequest;
+using yellowstone::YellowstoneClient;
+
 void KeyboardListenerEntry(void* keyboard_base) {
   reinterpret_cast<KeyboardListenerBase*>(keyboard_base)->ListenLoop();
 }

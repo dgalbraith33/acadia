@@ -6,6 +6,9 @@
 #include "keyboard/keyboard_driver.h"
 #include "voyageurs_server.h"
 
+using yellowstone::RegisterEndpointRequest;
+using yellowstone::YellowstoneClient;
+
 uint64_t main(uint64_t init_port) {
   ParseInitPort(init_port);
 

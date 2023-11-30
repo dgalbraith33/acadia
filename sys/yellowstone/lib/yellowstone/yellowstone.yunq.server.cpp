@@ -4,6 +4,9 @@
 #include <mammoth/util/debug.h>
 #include <zcall.h>
 
+
+namespace yellowstone {
+
 namespace {
 
 const uint32_t kSentinel = 0xBEEFDEAD;
@@ -193,3 +196,7 @@ glcr::ErrorCode YellowstoneServerBase::HandleRequest(const glcr::ByteBuffer& req
   }
   return glcr::OK;
 }
+
+
+
+}  // namepace yellowstone

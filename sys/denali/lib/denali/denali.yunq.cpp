@@ -1,6 +1,7 @@
 // Generated file -- DO NOT MODIFY.
 #include "denali.yunq.h"
 
+
 namespace {
 
 const uint64_t header_size = 24;  // 4x uint32, 1x uint64
@@ -249,3 +250,4 @@ uint64_t ReadResponse::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset
 
   return next_extension;
 }
+

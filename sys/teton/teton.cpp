@@ -9,6 +9,9 @@
 #include "framebuffer/psf.h"
 #include "terminal.h"
 
+using yellowstone::FramebufferInfo;
+using yellowstone::YellowstoneClient;
+
 uint64_t main(uint64_t init_port) {
   ParseInitPort(init_port);
 

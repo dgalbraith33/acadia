@@ -4,6 +4,7 @@
 #include <mammoth/util/debug.h>
 #include <zcall.h>
 
+
 namespace {
 
 const uint32_t kSentinel = 0xBEEFDEAD;
@@ -144,3 +145,5 @@ glcr::ErrorCode DenaliServerBase::HandleRequest(const glcr::ByteBuffer& request,
   }
   return glcr::OK;
 }
+
+

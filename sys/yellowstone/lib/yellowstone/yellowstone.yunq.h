@@ -6,6 +6,10 @@
 #include <glacier/container/vector.h>
 #include <glacier/string/string.h>
 #include <ztypes.h>
+
+
+namespace yellowstone {
+
 class RegisterEndpointRequest {
  public:
   RegisterEndpointRequest() {}
@@ -171,3 +175,6 @@ class DenaliInfo {
   // Parses everything except for caps.
   void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
 };
+
+
+}  // namepace yellowstone

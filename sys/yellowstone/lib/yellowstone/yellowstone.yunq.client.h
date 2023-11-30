@@ -8,6 +8,9 @@
 
 #include "yellowstone.yunq.h"
 
+
+namespace yellowstone {
+
 class YellowstoneClient {
  public:
   YellowstoneClient(z_cap_t Yellowstone_cap) : endpoint_(Yellowstone_cap) {}
@@ -45,3 +48,6 @@ class YellowstoneClient {
   uint64_t kCapBufferSize = 0x10;
   glcr::CapBuffer cap_buffer_{kCapBufferSize};
 };
+
+
+}  // namepace yellowstone

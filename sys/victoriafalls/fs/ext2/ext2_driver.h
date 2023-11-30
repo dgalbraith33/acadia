@@ -10,7 +10,8 @@
 
 class Ext2Driver {
  public:
-  static glcr::ErrorOr<Ext2Driver> Init(const DenaliInfo& denali_info);
+  static glcr::ErrorOr<Ext2Driver> Init(
+      const yellowstone::DenaliInfo& denali_info);
 
   glcr::ErrorCode ProbePartition();
 

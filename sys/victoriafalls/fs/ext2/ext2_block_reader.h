@@ -16,7 +16,7 @@
 class Ext2BlockReader {
  public:
   static glcr::ErrorOr<glcr::SharedPtr<Ext2BlockReader>> Init(
-      const DenaliInfo& denali_info);
+      const yellowstone::DenaliInfo& denali_info);
 
   // TODO: Consider creating a new class wrapper with these computations.
   Superblock* GetSuperblock();

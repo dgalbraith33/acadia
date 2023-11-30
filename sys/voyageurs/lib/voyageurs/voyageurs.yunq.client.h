@@ -8,6 +8,7 @@
 
 #include "voyageurs.yunq.h"
 
+
 class VoyageursClient {
  public:
   VoyageursClient(z_cap_t Voyageurs_cap) : endpoint_(Voyageurs_cap) {}
@@ -29,3 +30,4 @@ class VoyageursClient {
   uint64_t kCapBufferSize = 0x10;
   glcr::CapBuffer cap_buffer_{kCapBufferSize};
 };
+

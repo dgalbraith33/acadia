@@ -8,6 +8,7 @@
 
 #include "denali.yunq.h"
 
+
 class DenaliClient {
  public:
   DenaliClient(z_cap_t Denali_cap) : endpoint_(Denali_cap) {}
@@ -33,3 +34,4 @@ class DenaliClient {
   uint64_t kCapBufferSize = 0x10;
   glcr::CapBuffer cap_buffer_{kCapBufferSize};
 };
+

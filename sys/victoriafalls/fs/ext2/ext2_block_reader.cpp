@@ -3,7 +3,7 @@
 #include <mammoth/util/debug.h>
 
 glcr::ErrorOr<glcr::SharedPtr<Ext2BlockReader>> Ext2BlockReader::Init(
-    const DenaliInfo& denali_info) {
+    const yellowstone::DenaliInfo& denali_info) {
   // Read 1024 bytes from 1024 offset.
   // FIXME: Don't assume 512 byte sectors somehow.
   DenaliClient client(denali_info.denali_endpoint());
