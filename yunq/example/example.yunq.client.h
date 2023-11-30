@@ -8,11 +8,15 @@
 
 #include "example.yunq.h"
 
+
+namespace srv::file {
+
 class VFSClient {
  public:
   VFSClient(z_cap_t VFS_cap) : endpoint_(VFS_cap) {}
   VFSClient(const VFSClient&) = delete;
   VFSClient(VFSClient&& other) : endpoint_(other.endpoint_) {other.endpoint_ = 0;};
+  ~VFSClient();
 
   z_cap_t Capability() { return endpoint_; }
 
@@ -28,3 +32,6 @@ class VFSClient {
   uint64_t kCapBufferSize = 0x10;
   glcr::CapBuffer cap_buffer_{kCapBufferSize};
 };
+
+
+}  // namepace srv::file

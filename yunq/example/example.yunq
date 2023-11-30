@@ -1,3 +1,5 @@
+package srv.file;
+
 interface VFS {
   method open (OpenFileRequest) -> (File);
 }

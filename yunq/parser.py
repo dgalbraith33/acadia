@@ -16,6 +16,7 @@ class LexemeType(Enum):
     RIGHT_PAREN = 6
     ARROW = 7
     SEMICOLON = 8
+    DOT = 9
 
 
 class Lexeme():
@@ -55,6 +56,8 @@ def lexer(program: str):
             tokens.append(Lexeme(LexemeType.RIGHT_PAREN))
         elif curr == ';':
             tokens.append(Lexeme(LexemeType.SEMICOLON))
+        elif curr == '.':
+            tokens.append(Lexeme(LexemeType.DOT))
         elif curr == '-':
             current += 1
             if program[current] == '>': 
@@ -77,6 +80,12 @@ def lexer(program: str):
 
     return tokens
 
+class Package():
+    def __init__(self, names: list[str]):
+        self.names = names
+
+    def cpp_namespace(self):
+        return "::".join(self.names)
 
 class Method():
     def __init__(self, name: str, request: str, response: str):
@@ -174,11 +183,25 @@ class Parser():
         token = self.consume()
         if token.type != LexemeType.NAME:
             sys.exit("Unexpected token: %s", token)
+        if token.value == "package":
+            # TODO: Enforce that package decl comes before all messages and interface.
+            return self.package()
         if token.value == "message":
             return self.message()
         elif token.value == "interface":
             return self.interface()
-        sys.exit("Unexpected identifier '%s', expected message or interface" % token.value)
+        sys.exit("Unexpected identifier '%s', expected package, message, interface" % token.value)
+
+    def package(self):
+        names = [self.consume_identifier()]
+
+        while self.peektype() == LexemeType.DOT:
+            self.consume_check(LexemeType.DOT)
+            names += [self.consume_identifier()]
+
+        self.consume_check(LexemeType.SEMICOLON)
+
+        return Package(names)
 
     def interface(self):
         # "interface" consumed by decl.
@@ -273,6 +296,8 @@ class Parser():
         return Field(field_type, name, repeated)
 
 def type_check(decls: list[Decl]):
+    if sum(1 for decl in decls if type(decl) is Package) > 1:
+        sys.exit("Cannot have more than one package declaration")
     for decl in decls:
         if type(decl) is Interface:
             for method in decl.methods:
@@ -291,7 +316,9 @@ def type_check(decls: list[Decl]):
 
 def print_ast(decls: list[Decl]):
     for decl in decls:
-        if type(decl) is Interface:
+        if type(decl) is Package:
+            print("%s (Package)" % decl.cpp_namespace())
+        elif type(decl) is Interface:
             print("%s (Interface)" % decl.name)
             for method in decl.methods:
                 print("\t%s (%s -> %s)" % (method.name, method.request, method.response))

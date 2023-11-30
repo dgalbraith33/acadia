@@ -1,6 +1,9 @@
 // Generated file -- DO NOT MODIFY.
 #include "example.yunq.h"
 
+
+namespace srv::file {
+
 namespace {
 
 const uint64_t header_size = 24;  // 4x uint32, 1x uint64
@@ -202,3 +205,6 @@ uint64_t File::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::
 
   return next_extension;
 }
+
+
+}  // namepace srv::file

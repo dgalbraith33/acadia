@@ -8,6 +8,10 @@
 #include "{{file}}.h"
 #include "{{file}}.client.h"
 
+{% if package != None %}
+namespace {{package.cpp_namespace()}} {
+{% endif %}
+
 {% for interface in interfaces %}
 
 class {{interface.name}}ServerBase {
@@ -44,3 +48,7 @@ class {{interface.name}}ServerBase {
 };
 
 {% endfor %}
+
+{% if package != None %}
+}  // namepace {{package.cpp_namespace()}}
+{% endif %}

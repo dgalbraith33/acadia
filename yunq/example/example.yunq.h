@@ -6,6 +6,10 @@
 #include <glacier/container/vector.h>
 #include <glacier/string/string.h>
 #include <ztypes.h>
+
+
+namespace srv::file {
+
 class OpenFileRequest {
  public:
   OpenFileRequest() {}
@@ -55,3 +59,6 @@ class File {
   // Parses everything except for caps.
   void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
 };
+
+
+}  // namepace srv::file

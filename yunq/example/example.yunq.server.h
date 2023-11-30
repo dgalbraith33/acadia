@@ -9,13 +9,19 @@
 #include "example.yunq.client.h"
 
 
+namespace srv::file {
+
+
+
 
 class VFSServerBase {
  public:
   VFSServerBase(z_cap_t VFS_cap) : endpoint_(VFS_cap) {}
   VFSServerBase(const VFSServerBase&) = delete;
   VFSServerBase(VFSServerBase&&) = delete;
+  virtual ~VFSServerBase();
 
+  glcr::ErrorOr<z_cap_t> CreateClientCap();
   glcr::ErrorOr<VFSClient> CreateClient();
 
   [[nodiscard]] Thread RunServer();
@@ -37,3 +43,7 @@ class VFSServerBase {
                                               glcr::CapBuffer& resp_caps);
 };
 
+
+
+
+}  // namepace srv::file

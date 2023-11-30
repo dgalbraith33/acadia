@@ -4,6 +4,9 @@
 #include <mammoth/util/debug.h>
 #include <zcall.h>
 
+
+namespace srv::file {
+
 namespace {
 
 const uint32_t kSentinel = 0xBEEFDEAD;
@@ -27,6 +30,18 @@ void WriteHeader(glcr::ByteBuffer& buffer, uint64_t message_length) {
 
 void VFSServerBaseThreadBootstrap(void* server_base) {
   ((VFSServerBase*)server_base)->ServerThread();
+}
+
+VFSServerBase::~VFSServerBase() {
+  if (endpoint_ != 0) {
+    check(ZCapRelease(endpoint_));
+  }
+}
+
+glcr::ErrorOr<z_cap_t> VFSServerBase::CreateClientCap() {
+  uint64_t client_cap;
+  RET_ERR(ZCapDuplicate(endpoint_, ~(kZionPerm_Read), &client_cap));
+  return client_cap;
 }
 
 glcr::ErrorOr<VFSClient> VFSServerBase::CreateClient() {
@@ -101,7 +116,9 @@ glcr::ErrorCode VFSServerBase::HandleRequest(const glcr::ByteBuffer& request,
       RET_ERR(Handleopen(yunq_request, yunq_response));
   
 
+  
       resp_length = yunq_response.SerializeToBytes(response, kHeaderSize, resp_caps);
+  
       break;
     }
     default: {
@@ -110,3 +127,7 @@ glcr::ErrorCode VFSServerBase::HandleRequest(const glcr::ByteBuffer& request,
   }
   return glcr::OK;
 }
+
+
+
+}  // namepace srv::file

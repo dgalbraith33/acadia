@@ -4,6 +4,9 @@
 #include <mammoth/util/debug.h>
 #include <zcall.h>
 
+{% if package != None %}
+namespace {{package.cpp_namespace()}} {
+{% endif %}
 namespace {
 
 const uint32_t kSentinel = 0xBEEFDEAD;
@@ -133,3 +136,7 @@ glcr::ErrorCode {{interface.name}}ServerBase::HandleRequest(const glcr::ByteBuff
   return glcr::OK;
 }
 {% endfor %}
+
+{% if package != None %}
+}  // namepace {{package.cpp_namespace()}}
+{% endif %}
