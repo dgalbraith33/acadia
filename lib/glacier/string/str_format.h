@@ -44,6 +44,9 @@ void StrFormatValue(StringBuilder& builder, char const* const& value,
                     StringView opts);
 
 template <>
+void StrFormatValue(StringBuilder& builder, const String& value,
+                    StringView opts);
+template <>
 void StrFormatValue(StringBuilder& builder, const StringView& value,
                     StringView opts);
 

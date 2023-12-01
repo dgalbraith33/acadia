@@ -2,6 +2,7 @@
 #pragma once
 
 #include <glacier/status/error_or.h>
+#include <glacier/status/status.h>
 #include <mammoth/proc/thread.h>
 #include <ztypes.h>
 
@@ -28,23 +29,23 @@ class YellowstoneServerBase {
 
 
 
-  [[nodiscard]] virtual glcr::ErrorCode HandleRegisterEndpoint(const RegisterEndpointRequest&) = 0;
+  [[nodiscard]] virtual glcr::Status HandleRegisterEndpoint(const RegisterEndpointRequest&) = 0;
 
 
 
-  [[nodiscard]] virtual glcr::ErrorCode HandleGetEndpoint(const GetEndpointRequest&, Endpoint&) = 0;
+  [[nodiscard]] virtual glcr::Status HandleGetEndpoint(const GetEndpointRequest&, Endpoint&) = 0;
 
 
 
-  [[nodiscard]] virtual glcr::ErrorCode HandleGetAhciInfo(AhciInfo&) = 0;
+  [[nodiscard]] virtual glcr::Status HandleGetAhciInfo(AhciInfo&) = 0;
 
 
 
-  [[nodiscard]] virtual glcr::ErrorCode HandleGetFramebufferInfo(FramebufferInfo&) = 0;
+  [[nodiscard]] virtual glcr::Status HandleGetFramebufferInfo(FramebufferInfo&) = 0;
 
 
 
-  [[nodiscard]] virtual glcr::ErrorCode HandleGetDenali(DenaliInfo&) = 0;
+  [[nodiscard]] virtual glcr::Status HandleGetDenali(DenaliInfo&) = 0;
 
 
 
@@ -54,9 +55,9 @@ class YellowstoneServerBase {
   friend void YellowstoneServerBaseThreadBootstrap(void*);
   void ServerThread();
 
-  [[nodiscard]] glcr::ErrorCode HandleRequest(const glcr::ByteBuffer& request, const glcr::CapBuffer& req_caps,
-                                              glcr::ByteBuffer& response, uint64_t& resp_length,
-                                              glcr::CapBuffer& resp_caps);
+  [[nodiscard]] glcr::Status HandleRequest(const glcr::ByteBuffer& request, const glcr::CapBuffer& req_caps,
+                                           glcr::ByteBuffer& response, uint64_t& resp_length,
+                                           glcr::CapBuffer& resp_caps);
 };
 
 

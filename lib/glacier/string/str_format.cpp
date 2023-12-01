@@ -73,6 +73,12 @@ void StrFormatValue(StringBuilder& builder, char const* const& value,
 }
 
 template <>
+void StrFormatValue(StringBuilder& builder, const String& value,
+                    StringView opts) {
+  StrFormatInternal(builder, value);
+}
+
+template <>
 void StrFormatValue(StringBuilder& builder, const StringView& value,
                     StringView opts) {
   StrFormatInternal(builder, value);

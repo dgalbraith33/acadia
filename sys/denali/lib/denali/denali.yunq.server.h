@@ -2,6 +2,7 @@
 #pragma once
 
 #include <glacier/status/error_or.h>
+#include <glacier/status/status.h>
 #include <mammoth/proc/thread.h>
 #include <ztypes.h>
 
@@ -26,11 +27,11 @@ class DenaliServerBase {
 
 
 
-  [[nodiscard]] virtual glcr::ErrorCode HandleRead(const ReadRequest&, ReadResponse&) = 0;
+  [[nodiscard]] virtual glcr::Status HandleRead(const ReadRequest&, ReadResponse&) = 0;
 
 
 
-  [[nodiscard]] virtual glcr::ErrorCode HandleReadMany(const ReadManyRequest&, ReadResponse&) = 0;
+  [[nodiscard]] virtual glcr::Status HandleReadMany(const ReadManyRequest&, ReadResponse&) = 0;
 
 
 
@@ -40,9 +41,9 @@ class DenaliServerBase {
   friend void DenaliServerBaseThreadBootstrap(void*);
   void ServerThread();
 
-  [[nodiscard]] glcr::ErrorCode HandleRequest(const glcr::ByteBuffer& request, const glcr::CapBuffer& req_caps,
-                                              glcr::ByteBuffer& response, uint64_t& resp_length,
-                                              glcr::CapBuffer& resp_caps);
+  [[nodiscard]] glcr::Status HandleRequest(const glcr::ByteBuffer& request, const glcr::CapBuffer& req_caps,
+                                           glcr::ByteBuffer& response, uint64_t& resp_length,
+                                           glcr::CapBuffer& resp_caps);
 };
 
 

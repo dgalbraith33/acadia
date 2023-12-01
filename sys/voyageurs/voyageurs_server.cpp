@@ -8,10 +8,10 @@ glcr::ErrorOr<glcr::UniquePtr<VoyageursServer>> VoyageursServer::Create(
       new VoyageursServer(cap, keyboard_driver));
 }
 
-glcr::ErrorCode VoyageursServer::HandleRegisterKeyboardListener(
+glcr::Status VoyageursServer::HandleRegisterKeyboardListener(
     const KeyboardListener& listener) {
   keyboard_driver_.RegisterListener(listener.port_capability());
-  return glcr::OK;
+  return glcr::Status::Ok();
 }
 
 VoyageursServer::VoyageursServer(z_cap_t voyageurs_cap,

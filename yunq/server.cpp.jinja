@@ -75,9 +75,10 @@ void {{interface.name}}ServerBase::ServerThread() {
     
     glcr::ErrorCode reply_err = glcr::OK;
     resp_cap.Reset();
-    glcr::ErrorCode err = HandleRequest(recv_buffer, recv_cap, resp_buffer, resp_length, resp_cap);
-    if (err != glcr::OK) {
-      WriteError(resp_buffer, err);
+    glcr::Status err = HandleRequest(recv_buffer, recv_cap, resp_buffer, resp_length, resp_cap);
+    if (!err) {
+      WriteError(resp_buffer, err.code());
+      dbgln("Responding Error {}", err.message());
       reply_err = static_cast<glcr::ErrorCode>(ZReplyPortSend(reply_port_cap, kHeaderSize, resp_buffer.RawPtr(), 0, nullptr));
     } else {
       WriteHeader(resp_buffer, resp_length);
@@ -90,12 +91,12 @@ void {{interface.name}}ServerBase::ServerThread() {
 
 }
 
-glcr::ErrorCode {{interface.name}}ServerBase::HandleRequest(const glcr::ByteBuffer& request,
-                                                            const glcr::CapBuffer& req_caps,
-                                                            glcr::ByteBuffer& response, uint64_t& resp_length,
-                                                            glcr::CapBuffer& resp_caps) {
+glcr::Status {{interface.name}}ServerBase::HandleRequest(const glcr::ByteBuffer& request,
+                                                         const glcr::CapBuffer& req_caps,
+                                                         glcr::ByteBuffer& response, uint64_t& resp_length,
+                                                         glcr::CapBuffer& resp_caps) {
   if (request.At<uint32_t>(0) != kSentinel) {
-    return glcr::INVALID_ARGUMENT;
+    return glcr::InvalidArgument("Request Not Valid");
   } 
   
   uint64_t method_select = request.At<uint64_t>(8);
@@ -106,11 +107,7 @@ glcr::ErrorCode {{interface.name}}ServerBase::HandleRequest(const glcr::ByteBuff
 
   {% if method.request != None %}
       {{method.request}} yunq_request;
-      // TODO: Return status.
-      auto status = yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
-      if (!status) {
-        return status.code();
-      }
+      RETURN_ERROR(yunq_request.ParseFromBytes(request, kHeaderSize, req_caps));
   {% endif %}
 
   {% if method.response != None %}
@@ -118,11 +115,11 @@ glcr::ErrorCode {{interface.name}}ServerBase::HandleRequest(const glcr::ByteBuff
   {% endif %}
 
   {% if method.request == None %}
-      RET_ERR(Handle{{method.name}}(yunq_response));
+      RETURN_ERROR(Handle{{method.name}}(yunq_response));
   {% elif method.response == None %}
-      RET_ERR(Handle{{method.name}}(yunq_request));
+      RETURN_ERROR(Handle{{method.name}}(yunq_request));
   {% else %}
-      RET_ERR(Handle{{method.name}}(yunq_request, yunq_response));
+      RETURN_ERROR(Handle{{method.name}}(yunq_request, yunq_response));
   {% endif %}
 
   {% if method.response != None %}
@@ -134,10 +131,10 @@ glcr::ErrorCode {{interface.name}}ServerBase::HandleRequest(const glcr::ByteBuff
     }
 {%- endfor %}
     default: {
-      return glcr::UNIMPLEMENTED;
+      return glcr::Unimplemented("Method unimplemented by server.");
     }
   }
-  return glcr::OK;
+  return glcr::Status::Ok();
 }
 {% endfor %}
 

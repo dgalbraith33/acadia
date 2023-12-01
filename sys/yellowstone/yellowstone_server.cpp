@@ -42,13 +42,13 @@ glcr::ErrorOr<glcr::UniquePtr<YellowstoneServer>> YellowstoneServer::Create() {
 YellowstoneServer::YellowstoneServer(z_cap_t endpoint_cap)
     : YellowstoneServerBase(endpoint_cap) {}
 
-glcr::ErrorCode YellowstoneServer::HandleGetAhciInfo(AhciInfo& info) {
+glcr::Status YellowstoneServer::HandleGetAhciInfo(AhciInfo& info) {
   info.set_ahci_region(pci_reader_.GetAhciVmmo());
   info.set_region_length(kPcieConfigurationSize);
-  return glcr::OK;
+  return glcr::Status::Ok();
 }
 
-glcr::ErrorCode YellowstoneServer::HandleGetFramebufferInfo(
+glcr::Status YellowstoneServer::HandleGetFramebufferInfo(
     FramebufferInfo& info) {
   // FIXME: Don't do this for each request.
   mmth::OwnedMemoryRegion region =
@@ -68,22 +68,22 @@ glcr::ErrorCode YellowstoneServer::HandleGetFramebufferInfo(
   info.set_blue_mask_size(fb->blue_mask_size);
   info.set_blue_mask_shift(fb->blue_mask_shift);
 
-  return glcr::OK;
+  return glcr::Status::Ok();
 }
 
-glcr::ErrorCode YellowstoneServer::HandleGetDenali(DenaliInfo& info) {
+glcr::Status YellowstoneServer::HandleGetDenali(DenaliInfo& info) {
   if (!endpoint_map_.Contains("denali")) {
-    return glcr::NOT_FOUND;
+    return glcr::NotFound("Denali Capability Not registered");
   }
   z_cap_t new_denali;
   check(ZCapDuplicate(endpoint_map_.at("denali"), kZionPerm_All, &new_denali));
   info.set_denali_endpoint(new_denali);
   info.set_device_id(device_id_);
   info.set_lba_offset(lba_offset_);
-  return glcr::OK;
+  return glcr::Status::Ok();
 }
 
-glcr::ErrorCode YellowstoneServer::HandleRegisterEndpoint(
+glcr::Status YellowstoneServer::HandleRegisterEndpoint(
     const RegisterEndpointRequest& req) {
   dbgln("Registering {}.", req.endpoint_name().view());
   check(endpoint_map_.Insert(req.endpoint_name(), req.endpoint_capability()));
@@ -106,19 +106,20 @@ glcr::ErrorCode YellowstoneServer::HandleRegisterEndpoint(
   } else {
     dbgln("[WARN] Got endpoint cap type: {}", req.endpoint_name().cstr());
   }
-  return glcr::OK;
+  return glcr::Status::Ok();
 }
 
-glcr::ErrorCode YellowstoneServer::HandleGetEndpoint(
-    const GetEndpointRequest& req, Endpoint& resp) {
+glcr::Status YellowstoneServer::HandleGetEndpoint(const GetEndpointRequest& req,
+                                                  Endpoint& resp) {
   if (!endpoint_map_.Contains(req.endpoint_name())) {
-    return glcr::NOT_FOUND;
+    return glcr::NotFound(
+        glcr::StrFormat("Endpoint '{}' not found.", req.endpoint_name()));
   }
   z_cap_t cap = endpoint_map_.at(req.endpoint_name());
   z_cap_t new_cap;
   check(ZCapDuplicate(cap, kZionPerm_All, &new_cap));
   resp.set_endpoint(new_cap);
-  return glcr::OK;
+  return glcr::Status::Ok();
 }
 
 void YellowstoneServer::WaitDenaliRegistered() { has_denali_semaphore_.Wait(); }

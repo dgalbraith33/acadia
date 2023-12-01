@@ -11,7 +11,7 @@ class VoyageursServer : public VoyageursServerBase {
   static glcr::ErrorOr<glcr::UniquePtr<VoyageursServer>> Create(
       KeyboardDriver& keyboard_driver);
 
-  virtual glcr::ErrorCode HandleRegisterKeyboardListener(
+  virtual glcr::Status HandleRegisterKeyboardListener(
       const KeyboardListener& listener) override;
 
  private:

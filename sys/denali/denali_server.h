@@ -10,10 +10,9 @@ class DenaliServer : public DenaliServerBase {
   static glcr::ErrorOr<glcr::UniquePtr<DenaliServer>> Create(
       AhciDriver& driver);
 
-  glcr::ErrorCode HandleRead(const ReadRequest& req,
-                             ReadResponse& resp) override;
-  glcr::ErrorCode HandleReadMany(const ReadManyRequest& req,
-                                 ReadResponse& resp) override;
+  glcr::Status HandleRead(const ReadRequest& req, ReadResponse& resp) override;
+  glcr::Status HandleReadMany(const ReadManyRequest& req,
+                              ReadResponse& resp) override;
 
  private:
   static const uint64_t kBuffSize = 1024;

@@ -2,6 +2,7 @@
 #pragma once
 
 #include <glacier/status/error_or.h>
+#include <glacier/status/status.h>
 #include <mammoth/proc/thread.h>
 #include <ztypes.h>
 
@@ -26,7 +27,7 @@ class VoyageursServerBase {
 
 
 
-  [[nodiscard]] virtual glcr::ErrorCode HandleRegisterKeyboardListener(const KeyboardListener&) = 0;
+  [[nodiscard]] virtual glcr::Status HandleRegisterKeyboardListener(const KeyboardListener&) = 0;
 
 
 
@@ -36,9 +37,9 @@ class VoyageursServerBase {
   friend void VoyageursServerBaseThreadBootstrap(void*);
   void ServerThread();
 
-  [[nodiscard]] glcr::ErrorCode HandleRequest(const glcr::ByteBuffer& request, const glcr::CapBuffer& req_caps,
-                                              glcr::ByteBuffer& response, uint64_t& resp_length,
-                                              glcr::CapBuffer& resp_caps);
+  [[nodiscard]] glcr::Status HandleRequest(const glcr::ByteBuffer& request, const glcr::CapBuffer& req_caps,
+                                           glcr::ByteBuffer& response, uint64_t& resp_length,
+                                           glcr::CapBuffer& resp_caps);
 };
 
 

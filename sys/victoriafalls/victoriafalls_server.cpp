@@ -11,13 +11,13 @@ glcr::ErrorOr<glcr::UniquePtr<VFSServer>> VFSServer::Create(
   return glcr::UniquePtr<VFSServer>(new VFSServer(endpoint_cap, driver));
 }
 
-glcr::ErrorCode VFSServer::HandleOpenFile(const OpenFileRequest& request,
-                                          OpenFileResponse& response) {
+glcr::Status VFSServer::HandleOpenFile(const OpenFileRequest& request,
+                                       OpenFileResponse& response) {
   auto path_tokens = glcr::StrSplit(request.path(), '/');
   // Require all paths to be absolute rather than relative.
   // If the path starts with '/' then the first token will be empty.
   if (path_tokens.at(0) != "") {
-    return glcr::INVALID_ARGUMENT;
+    return glcr::InvalidArgument("Open file supports only absolute paths.");
   }
 
   ASSIGN_OR_RETURN(auto files, driver_.ReadDirectory(2));
@@ -31,9 +31,8 @@ glcr::ErrorCode VFSServer::HandleOpenFile(const OpenFileRequest& request,
       }
     }
     if (!found_token) {
-      dbgln("Directory '{}' not found.",
-            glcr::String(path_tokens.at(i)).cstr());
-      return glcr::NOT_FOUND;
+      return glcr::NotFound(glcr::StrFormat("Directory '{}' not found.",
+                                            glcr::String(path_tokens.at(i))));
     }
   }
 
@@ -48,8 +47,9 @@ glcr::ErrorCode VFSServer::HandleOpenFile(const OpenFileRequest& request,
     }
   }
   if (!region) {
-    dbgln("File '{}' not found.",
-          glcr::String(path_tokens.at(path_tokens.size() - 1)).cstr());
+    return glcr::NotFound(
+        glcr::StrFormat("File '{}' not found.",
+                        glcr::String(path_tokens.at(path_tokens.size() - 1))));
   }
 
   response.set_path(request.path());
@@ -61,15 +61,15 @@ glcr::ErrorCode VFSServer::HandleOpenFile(const OpenFileRequest& request,
   ASSIGN_OR_RETURN(Inode * inode, driver_.GetInode(inode_num));
   // FIXME: This technically only sets the lower 32 bits.
   response.set_size(inode->size);
-  return glcr::OK;
+  return glcr::Status::Ok();
 }
 
-glcr::ErrorCode VFSServer::HandleGetDirectory(
-    const GetDirectoryRequest& request, Directory& response) {
+glcr::Status VFSServer::HandleGetDirectory(const GetDirectoryRequest& request,
+                                           Directory& response) {
   auto path_tokens = glcr::StrSplit(request.path(), '/');
 
   if (path_tokens.at(0) != "") {
-    return glcr::INVALID_ARGUMENT;
+    return glcr::InvalidArgument("Get Directory only supports absolute path.");
   }
 
   // If there is a trailing slash we can get rid of the empty string.
@@ -88,9 +88,8 @@ glcr::ErrorCode VFSServer::HandleGetDirectory(
       }
     }
     if (!found_token) {
-      dbgln("Directory '{}' not found.",
-            glcr::String(path_tokens.at(i)).cstr());
-      return glcr::NOT_FOUND;
+      return glcr::NotFound(glcr::StrFormat("Directory '{}' not found.",
+                                            glcr::String(path_tokens.at(i))));
     }
   }
 
@@ -106,5 +105,5 @@ glcr::ErrorCode VFSServer::HandleGetDirectory(
 
   response.set_filenames(filelist.ToString());
 
-  return glcr::OK;
+  return glcr::Status::Ok();
 }

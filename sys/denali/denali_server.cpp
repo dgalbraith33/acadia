@@ -12,8 +12,8 @@ glcr::ErrorOr<glcr::UniquePtr<DenaliServer>> DenaliServer::Create(
   return glcr::UniquePtr<DenaliServer>(new DenaliServer(cap, driver));
 }
 
-glcr::ErrorCode DenaliServer::HandleRead(const ReadRequest& req,
-                                         ReadResponse& resp) {
+glcr::Status DenaliServer::HandleRead(const ReadRequest& req,
+                                      ReadResponse& resp) {
   ASSIGN_OR_RETURN(AhciDevice * device, driver_.GetDevice(req.device_id()));
 
   uint64_t paddr;
@@ -28,15 +28,15 @@ glcr::ErrorCode DenaliServer::HandleRead(const ReadRequest& req,
   resp.set_device_id(req.device_id());
   resp.set_size(req.size());
   resp.set_memory(region.DuplicateCap());
-  return glcr::OK;
+  return glcr::Status::Ok();
 }
 
-glcr::ErrorCode DenaliServer::HandleReadMany(const ReadManyRequest& req,
-                                             ReadResponse& resp) {
+glcr::Status DenaliServer::HandleReadMany(const ReadManyRequest& req,
+                                          ReadResponse& resp) {
   ASSIGN_OR_RETURN(AhciDevice * device, driver_.GetDevice(req.device_id()));
 
   if (req.lba().size() != req.sector_cnt().size()) {
-    return glcr::INVALID_ARGUMENT;
+    return glcr::InvalidArgument("LBA and Sector Cnt must be the same length.");
   }
 
   uint64_t sector_cnt = 0;
@@ -60,5 +60,5 @@ glcr::ErrorCode DenaliServer::HandleReadMany(const ReadManyRequest& req,
   resp.set_device_id(req.device_id());
   resp.set_size(sector_cnt);
   resp.set_memory(region.DuplicateCap());
-  return glcr::OK;
+  return glcr::Status::Ok();
 }

@@ -9,11 +9,11 @@ class VFSServer : public VFSServerBase {
  public:
   static glcr::ErrorOr<glcr::UniquePtr<VFSServer>> Create(Ext2Driver& driver);
 
-  glcr::ErrorCode HandleOpenFile(const OpenFileRequest&,
-                                 OpenFileResponse&) override;
+  glcr::Status HandleOpenFile(const OpenFileRequest&,
+                              OpenFileResponse&) override;
 
-  glcr::ErrorCode HandleGetDirectory(const GetDirectoryRequest&,
-                                     Directory&) override;
+  glcr::Status HandleGetDirectory(const GetDirectoryRequest&,
+                                  Directory&) override;
 
  private:
   // FIXME: Don't store this as a reference.
