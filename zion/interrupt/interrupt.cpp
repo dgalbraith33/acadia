@@ -79,7 +79,7 @@ extern "C" void interrupt_divide_by_zero(InterruptFrame* frame) {
   StackUnwind(frame->rbp);
 
   if (IsUserSpace(frame->rip)) {
-    gScheduler->CurrentProcess().Exit();
+    gScheduler->CurrentProcess().Exit(glcr::INTERNAL);
     UNREACHABLE
   }
   panic("DIV0");
@@ -91,7 +91,7 @@ extern "C" void interrupt_invalid_opcode(InterruptFrame* frame) {
   StackUnwind(frame->rbp);
 
   if (IsUserSpace(frame->rip)) {
-    gScheduler->CurrentProcess().Exit();
+    gScheduler->CurrentProcess().Exit(glcr::INTERNAL);
     UNREACHABLE
   }
   panic("INVALID OPCODE");
@@ -117,7 +117,7 @@ extern "C" void interrupt_protection_fault(InterruptFrame* frame) {
   StackUnwind(frame->rbp);
 
   if (IsUserSpace(frame->rip)) {
-    gScheduler->CurrentProcess().Exit();
+    gScheduler->CurrentProcess().Exit(glcr::INTERNAL);
     UNREACHABLE
   }
   panic("GP");
@@ -159,7 +159,7 @@ extern "C" void interrupt_page_fault(InterruptFrame* frame) {
   StackUnwind(frame->rbp);
 
   if (IsUserSpace(frame->rip)) {
-    gScheduler->CurrentProcess().Exit();
+    gScheduler->CurrentProcess().Exit(glcr::INTERNAL);
     UNREACHABLE
   }
 
@@ -170,7 +170,7 @@ extern "C" void isr_fpe_fault();
 extern "C" void interrupt_fpe_fault(InterruptFrame* frame) {
   dbgln("Floating point exception.");
   if (IsUserSpace(frame->rip)) {
-    gScheduler->CurrentProcess().Exit();
+    gScheduler->CurrentProcess().Exit(glcr::INTERNAL);
     UNREACHABLE
   }
   panic("Floating point exception");

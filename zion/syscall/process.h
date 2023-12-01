@@ -4,3 +4,4 @@
 
 z_err_t ProcessExit(ZProcessExitReq* req);
 z_err_t ProcessSpawn(ZProcessSpawnReq* req);
+z_err_t ProcessWait(ZProcessWaitReq* req);

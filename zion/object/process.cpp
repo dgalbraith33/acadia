@@ -59,10 +59,11 @@ uint64_t Process::AddExistingCapability(const glcr::RefPtr<Capability>& cap) {
   return caps_.AddExistingCapability(cap);
 }
 
-void Process::Exit() {
+void Process::Exit(uint64_t exit_code) {
   // TODO: Check this state elsewhere to ensure that we don't for instance
   // create a running thread on a finished process.
   state_ = CLEANUP;
+  exit_code_ = exit_code;
 
   for (uint64_t i = 0; i < threads_.size(); i++) {
     if (!threads_[i]->IsDying()) {

@@ -10,6 +10,7 @@ z_err_t SysCall1(uint64_t code, const void* req);
 SYS1(ProcessExit, uint64_t, code);
 SYS5(ProcessSpawn, z_cap_t, proc_cap, z_cap_t, bootstrap_cap, z_cap_t*,
      new_proc_cap, z_cap_t*, new_vmas_cap, z_cap_t*, new_bootstrap_cap);
+SYS2(ProcessWait, z_cap_t, proc_cap, z_err_t*, exit_code);
 
 SYS2(ThreadCreate, z_cap_t, proc_cap, z_cap_t*, thread_cap);
 SYS4(ThreadStart, z_cap_t, thread_cap, uint64_t, entry, uint64_t, arg1,

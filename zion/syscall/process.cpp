@@ -9,7 +9,7 @@
 z_err_t ProcessExit(ZProcessExitReq* req) {
   auto curr_thread = gScheduler->CurrentThread();
   dbgln("Exit code: {}", static_cast<glcr::ErrorCode>(req->code));
-  curr_thread->process().Exit();
+  curr_thread->process().Exit(req->code);
   panic("Returned from thread exit");
   return glcr::UNIMPLEMENTED;
 }
@@ -37,5 +37,19 @@ z_err_t ProcessSpawn(ZProcessSpawnReq* req) {
         curr_proc.ReleaseCapability(req->bootstrap_cap));
   }
 
+  return glcr::OK;
+}
+
+z_err_t ProcessWait(ZProcessWaitReq* req) {
+  auto& curr_proc = gScheduler->CurrentProcess();
+  auto cap = curr_proc.GetCapability(req->proc_cap);
+  RET_ERR(ValidateCapability<Process>(cap, kZionPerm_Read));
+
+  auto proc = cap->obj<Process>();
+  if (proc->id() == curr_proc.id()) {
+    return glcr::INVALID_ARGUMENT;
+  }
+  proc->GetThread(0)->Wait();
+  *req->exit_code = proc->exit_code();
   return glcr::OK;
 }

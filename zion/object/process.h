@@ -57,10 +57,11 @@ class Process : public KernelObject {
   uint64_t AddExistingCapability(const glcr::RefPtr<Capability>& cap);
 
   State GetState() { return state_; }
+  uint64_t exit_code() { return exit_code_; }
 
   // This stops all of the processes threads (they will no longer be scheduled)
   // and flags the process for cleanup.
-  void Exit();
+  void Exit(uint64_t code);
 
   // This *should not* be called from a thread that belongs to this process.
   // Rather it should be called from the cleanup thread.
@@ -76,6 +77,7 @@ class Process : public KernelObject {
   uint64_t id_;
   glcr::RefPtr<AddressSpace> vmas_;
   State state_;
+  uint64_t exit_code_ = -1;
 
   uint64_t next_thread_id_ = 0;
 

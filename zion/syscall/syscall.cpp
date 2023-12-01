@@ -53,6 +53,7 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req) {
     // syscall/process.h
     CASE(ProcessExit);
     CASE(ProcessSpawn);
+    CASE(ProcessWait);
     // syscall/thread.h
     CASE(ThreadCreate);
     CASE(ThreadStart);
