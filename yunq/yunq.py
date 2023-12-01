@@ -21,7 +21,6 @@ def main():
 
         parser = Parser(lexemes)
         ast = parser.parse()
-        print_ast(ast)
         type_check(ast)
 
     messages = [m for m in ast if type(m) is Message]
