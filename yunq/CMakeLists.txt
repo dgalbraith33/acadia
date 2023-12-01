@@ -17,6 +17,8 @@ macro(yunq_gen dir include_dir name)
 
   target_link_libraries(${target}
     mammoth
+    glacier
+    yunq
     )
   set_target_properties(${target} PROPERTIES
     COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${BASE_COMPILE_FLAGS}"

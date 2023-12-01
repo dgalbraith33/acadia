@@ -1,6 +1,8 @@
 // Generated file -- DO NOT MODIFY.
 #include "denali.yunq.h"
 
+#include <yunq/serialize.h>
+
 
 namespace {
 
@@ -11,33 +13,19 @@ struct ExtPointer {
   uint32_t length;
 };
 
-void CheckHeader(const glcr::ByteBuffer& bytes) {
-  // TODO: Check ident.
-  // TODO: Parse core size.
-  // TODO: Parse extension size.
-  // TODO: Check CRC32
-  // TODO: Parse options.
-}
-
-void WriteHeader(glcr::ByteBuffer& bytes, uint64_t offset, uint32_t core_size, uint32_t extension_size) {
-  bytes.WriteAt<uint32_t>(offset + 0, 0xDEADBEEF);  // TODO: Chose a more unique ident sequence.
-  bytes.WriteAt<uint32_t>(offset + 4, core_size);
-  bytes.WriteAt<uint32_t>(offset + 8, extension_size);
-  bytes.WriteAt<uint32_t>(offset + 12, 0); // TODO: Calculate CRC32.
-  bytes.WriteAt<uint64_t>(offset + 16, 0); // TODO: Add options.
-}
-
 }  // namespace
-void ReadRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  ParseFromBytesInternal(bytes, offset);
+glcr::Status ReadRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  return glcr::Status::Ok();
 }
 
-void ReadRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  ParseFromBytesInternal(bytes, offset);
+glcr::Status ReadRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
+  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  return glcr::Status::Ok();
 }
 
-void ReadRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  CheckHeader(bytes);
+glcr::Status ReadRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  RETURN_ERROR(yunq::CheckHeader(bytes));
   // Parse device_id.
   set_device_id(bytes.At<uint64_t>(offset + header_size + (8 * 0)));
   // Parse lba.
@@ -45,6 +33,7 @@ void ReadRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t
   // Parse size.
   set_size(bytes.At<uint64_t>(offset + header_size + (8 * 2)));
 
+  return glcr::Status::Ok();
 }
 
 uint64_t ReadRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
@@ -58,7 +47,7 @@ uint64_t ReadRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset)
   bytes.WriteAt<uint64_t>(offset + header_size + (8 * 2), size());
 
   // The next extension pointer is the length of the message. 
-  WriteHeader(bytes, offset, core_size, next_extension);
+  yunq::WriteHeader(bytes, offset, core_size, next_extension);
 
   return next_extension;
 }
@@ -75,20 +64,22 @@ uint64_t ReadRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset,
   bytes.WriteAt<uint64_t>(offset + header_size + (8 * 2), size());
 
   // The next extension pointer is the length of the message. 
-  WriteHeader(bytes, offset, core_size, next_extension);
+  yunq::WriteHeader(bytes, offset, core_size, next_extension);
 
   return next_extension;
 }
-void ReadManyRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  ParseFromBytesInternal(bytes, offset);
+glcr::Status ReadManyRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  return glcr::Status::Ok();
 }
 
-void ReadManyRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  ParseFromBytesInternal(bytes, offset);
+glcr::Status ReadManyRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
+  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  return glcr::Status::Ok();
 }
 
-void ReadManyRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  CheckHeader(bytes);
+glcr::Status ReadManyRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  RETURN_ERROR(yunq::CheckHeader(bytes));
   // Parse device_id.
   set_device_id(bytes.At<uint64_t>(offset + header_size + (8 * 0)));
   // Parse lba.
@@ -112,6 +103,7 @@ void ReadManyRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint
   }
 
 
+  return glcr::Status::Ok();
 }
 
 uint64_t ReadManyRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
@@ -147,7 +139,7 @@ uint64_t ReadManyRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t off
   }
 
   // The next extension pointer is the length of the message. 
-  WriteHeader(bytes, offset, core_size, next_extension);
+  yunq::WriteHeader(bytes, offset, core_size, next_extension);
 
   return next_extension;
 }
@@ -186,27 +178,29 @@ uint64_t ReadManyRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t off
   }
 
   // The next extension pointer is the length of the message. 
-  WriteHeader(bytes, offset, core_size, next_extension);
+  yunq::WriteHeader(bytes, offset, core_size, next_extension);
 
   return next_extension;
 }
-void ReadResponse::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  ParseFromBytesInternal(bytes, offset);
+glcr::Status ReadResponse::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
   // Parse memory.
   // FIXME: Implement in-buffer capabilities for inprocess serialization.
   set_memory(0);
+  return glcr::Status::Ok();
 }
 
-void ReadResponse::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  ParseFromBytesInternal(bytes, offset);
+glcr::Status ReadResponse::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
+  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
   // Parse memory.
   uint64_t memory_ptr = bytes.At<uint64_t>(offset + header_size + (8 * 2));
 
   set_memory(caps.At(memory_ptr));
+  return glcr::Status::Ok();
 }
 
-void ReadResponse::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  CheckHeader(bytes);
+glcr::Status ReadResponse::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  RETURN_ERROR(yunq::CheckHeader(bytes));
   // Parse device_id.
   set_device_id(bytes.At<uint64_t>(offset + header_size + (8 * 0)));
   // Parse size.
@@ -214,6 +208,7 @@ void ReadResponse::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_
   // Parse memory.
   // Skip Cap.
 
+  return glcr::Status::Ok();
 }
 
 uint64_t ReadResponse::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
@@ -228,7 +223,7 @@ uint64_t ReadResponse::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset
   bytes.WriteAt<uint64_t>(offset + header_size + (8 * 2), 0);
 
   // The next extension pointer is the length of the message. 
-  WriteHeader(bytes, offset, core_size, next_extension);
+  yunq::WriteHeader(bytes, offset, core_size, next_extension);
 
   return next_extension;
 }
@@ -246,7 +241,7 @@ uint64_t ReadResponse::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset
   bytes.WriteAt<uint64_t>(offset + header_size + (8 * 2), next_cap++);
 
   // The next extension pointer is the length of the message. 
-  WriteHeader(bytes, offset, core_size, next_extension);
+  yunq::WriteHeader(bytes, offset, core_size, next_extension);
 
   return next_extension;
 }

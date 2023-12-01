@@ -3,6 +3,7 @@
 
 #include <glacier/buffer/byte_buffer.h>
 #include <glacier/buffer/cap_buffer.h>
+#include <glacier/status/status.h>
 #include <glacier/container/vector.h>
 #include <glacier/string/string.h>
 #include <ztypes.h>
@@ -15,8 +16,8 @@ class KeyboardListener {
   KeyboardListener(const KeyboardListener&) = delete;
   KeyboardListener(KeyboardListener&&) = delete;
 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const z_cap_t& port_capability() const { return port_capability_; }
@@ -26,6 +27,6 @@ class KeyboardListener {
   z_cap_t port_capability_;
 
   // Parses everything except for caps.
-  void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
 };
 

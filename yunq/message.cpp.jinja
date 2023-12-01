@@ -1,6 +1,8 @@
 // Generated file -- DO NOT MODIFY.
 #include "{{file}}.h"
 
+#include <yunq/serialize.h>
+
 {% if package != None %}
 namespace {{package.cpp_namespace()}} {
 {% endif %}
@@ -13,27 +15,11 @@ struct ExtPointer {
   uint32_t length;
 };
 
-void CheckHeader(const glcr::ByteBuffer& bytes) {
-  // TODO: Check ident.
-  // TODO: Parse core size.
-  // TODO: Parse extension size.
-  // TODO: Check CRC32
-  // TODO: Parse options.
-}
-
-void WriteHeader(glcr::ByteBuffer& bytes, uint64_t offset, uint32_t core_size, uint32_t extension_size) {
-  bytes.WriteAt<uint32_t>(offset + 0, 0xDEADBEEF);  // TODO: Chose a more unique ident sequence.
-  bytes.WriteAt<uint32_t>(offset + 4, core_size);
-  bytes.WriteAt<uint32_t>(offset + 8, extension_size);
-  bytes.WriteAt<uint32_t>(offset + 12, 0); // TODO: Calculate CRC32.
-  bytes.WriteAt<uint64_t>(offset + 16, 0); // TODO: Add options.
-}
-
 }  // namespace
 
 {%- for message in messages %}
-void {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  ParseFromBytesInternal(bytes, offset);
+glcr::Status {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
 
 {%- for field in message.fields %}
 {%- if field.type == Type.CAPABILITY %}
@@ -42,10 +28,11 @@ void {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t of
   set_{{field.name}}(0);
 {%- endif %}
 {%- endfor %}
+  return glcr::Status::Ok();
 }
 
-void {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  ParseFromBytesInternal(bytes, offset);
+glcr::Status {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
+  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
 
 {%- for field in message.fields %}
 {%- if field.type == Type.CAPABILITY %}
@@ -55,10 +42,11 @@ void {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t of
   set_{{field.name}}(caps.At({{field.name}}_ptr));
 {%- endif %}
 {%- endfor %}
+  return glcr::Status::Ok();
 }
 
-void {{message.name}}::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  CheckHeader(bytes);
+glcr::Status {{message.name}}::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  RETURN_ERROR(yunq::CheckHeader(bytes));
 
 {%- for field in message.fields %}
   // Parse {{field.name}}.
@@ -88,6 +76,7 @@ void {{message.name}}::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uin
 {% endif %}
 {%- endfor %}
 
+  return glcr::Status::Ok();
 }
 
 uint64_t {{message.name}}::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
@@ -135,7 +124,7 @@ uint64_t {{message.name}}::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t of
 {%- endfor %}
 
   // The next extension pointer is the length of the message. 
-  WriteHeader(bytes, offset, core_size, next_extension);
+  yunq::WriteHeader(bytes, offset, core_size, next_extension);
 
   return next_extension;
 }
@@ -186,7 +175,7 @@ uint64_t {{message.name}}::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t of
 {%- endfor %}
 
   // The next extension pointer is the length of the message. 
-  WriteHeader(bytes, offset, core_size, next_extension);
+  yunq::WriteHeader(bytes, offset, core_size, next_extension);
 
   return next_extension;
 }

@@ -3,6 +3,7 @@
 
 #include <glacier/buffer/byte_buffer.h>
 #include <glacier/buffer/cap_buffer.h>
+#include <glacier/status/status.h>
 #include <glacier/container/vector.h>
 #include <glacier/string/string.h>
 #include <ztypes.h>
@@ -15,8 +16,8 @@ class OpenFileRequest {
   OpenFileRequest(const OpenFileRequest&) = delete;
   OpenFileRequest(OpenFileRequest&&) = delete;
 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const glcr::String& path() const { return path_; }
@@ -26,7 +27,7 @@ class OpenFileRequest {
   glcr::String path_;
 
   // Parses everything except for caps.
-  void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
 };
 class OpenFileResponse {
  public:
@@ -35,8 +36,8 @@ class OpenFileResponse {
   OpenFileResponse(const OpenFileResponse&) = delete;
   OpenFileResponse(OpenFileResponse&&) = delete;
 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const glcr::String& path() const { return path_; }
@@ -52,7 +53,7 @@ class OpenFileResponse {
   z_cap_t memory_;
 
   // Parses everything except for caps.
-  void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
 };
 class GetDirectoryRequest {
  public:
@@ -61,8 +62,8 @@ class GetDirectoryRequest {
   GetDirectoryRequest(const GetDirectoryRequest&) = delete;
   GetDirectoryRequest(GetDirectoryRequest&&) = delete;
 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const glcr::String& path() const { return path_; }
@@ -72,7 +73,7 @@ class GetDirectoryRequest {
   glcr::String path_;
 
   // Parses everything except for caps.
-  void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
 };
 class Directory {
  public:
@@ -81,8 +82,8 @@ class Directory {
   Directory(const Directory&) = delete;
   Directory(Directory&&) = delete;
 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const glcr::String& filenames() const { return filenames_; }
@@ -92,6 +93,6 @@ class Directory {
   glcr::String filenames_;
 
   // Parses everything except for caps.
-  void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
 };
 

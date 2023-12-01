@@ -3,6 +3,7 @@
 
 #include <glacier/buffer/byte_buffer.h>
 #include <glacier/buffer/cap_buffer.h>
+#include <glacier/status/status.h>
 #include <glacier/container/vector.h>
 #include <glacier/string/string.h>
 #include <ztypes.h>
@@ -17,8 +18,8 @@ class RegisterEndpointRequest {
   RegisterEndpointRequest(const RegisterEndpointRequest&) = delete;
   RegisterEndpointRequest(RegisterEndpointRequest&&) = delete;
 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const glcr::String& endpoint_name() const { return endpoint_name_; }
@@ -31,7 +32,7 @@ class RegisterEndpointRequest {
   z_cap_t endpoint_capability_;
 
   // Parses everything except for caps.
-  void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
 };
 class GetEndpointRequest {
  public:
@@ -40,8 +41,8 @@ class GetEndpointRequest {
   GetEndpointRequest(const GetEndpointRequest&) = delete;
   GetEndpointRequest(GetEndpointRequest&&) = delete;
 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const glcr::String& endpoint_name() const { return endpoint_name_; }
@@ -51,7 +52,7 @@ class GetEndpointRequest {
   glcr::String endpoint_name_;
 
   // Parses everything except for caps.
-  void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
 };
 class Endpoint {
  public:
@@ -60,8 +61,8 @@ class Endpoint {
   Endpoint(const Endpoint&) = delete;
   Endpoint(Endpoint&&) = delete;
 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const z_cap_t& endpoint() const { return endpoint_; }
@@ -71,7 +72,7 @@ class Endpoint {
   z_cap_t endpoint_;
 
   // Parses everything except for caps.
-  void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
 };
 class AhciInfo {
  public:
@@ -80,8 +81,8 @@ class AhciInfo {
   AhciInfo(const AhciInfo&) = delete;
   AhciInfo(AhciInfo&&) = delete;
 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const z_cap_t& ahci_region() const { return ahci_region_; }
@@ -94,7 +95,7 @@ class AhciInfo {
   uint64_t region_length_;
 
   // Parses everything except for caps.
-  void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
 };
 class FramebufferInfo {
  public:
@@ -103,8 +104,8 @@ class FramebufferInfo {
   FramebufferInfo(const FramebufferInfo&) = delete;
   FramebufferInfo(FramebufferInfo&&) = delete;
 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const uint64_t& address_phys() const { return address_phys_; }
@@ -147,7 +148,7 @@ class FramebufferInfo {
   uint64_t blue_mask_shift_;
 
   // Parses everything except for caps.
-  void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
 };
 class DenaliInfo {
  public:
@@ -156,8 +157,8 @@ class DenaliInfo {
   DenaliInfo(const DenaliInfo&) = delete;
   DenaliInfo(DenaliInfo&&) = delete;
 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const z_cap_t& denali_endpoint() const { return denali_endpoint_; }
@@ -173,7 +174,7 @@ class DenaliInfo {
   uint64_t lba_offset_;
 
   // Parses everything except for caps.
-  void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
 };
 
 

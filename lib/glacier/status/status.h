@@ -1,7 +1,7 @@
 #pragma once
 
-#include "status/error.h"
-#include "string/string.h"
+#include "glacier/status/error.h"
+#include "glacier/string/string.h"
 
 namespace glcr {
 
@@ -21,43 +21,57 @@ class Status {
   ErrorCode code_;
   String message_;
 
-  Status();
+  Status() : code_(OK) {}
 };
 
-Status InvalidArgument(StringView message) {
+inline Status InvalidArgument(StringView message) {
   return Status(INVALID_ARGUMENT, message);
 }
 
-Status NotFound(StringView message) { return Status(NOT_FOUND, message); }
+inline Status NotFound(StringView message) {
+  return Status(NOT_FOUND, message);
+}
 
-Status PermissionDenied(StringView message) {
+inline Status PermissionDenied(StringView message) {
   return Status(PERMISSION_DENIED, message);
 }
 
-Status NullPtr(StringView message) { return Status(NULL_PTR, message); }
+inline Status NullPtr(StringView message) { return Status(NULL_PTR, message); }
 
-Status Empty(StringView message) { return Status(EMPTY, message); }
+inline Status Empty(StringView message) { return Status(EMPTY, message); }
 
-Status AlreadyExists(StringView message) {
+inline Status AlreadyExists(StringView message) {
   return Status(ALREADY_EXISTS, message);
 }
 
-Status BufferSize(StringView message) { return Status(BUFFER_SIZE, message); }
+inline Status BufferSize(StringView message) {
+  return Status(BUFFER_SIZE, message);
+}
 
-Status FailedPrecondition(StringView message) {
+inline Status FailedPrecondition(StringView message) {
   return Status(FAILED_PRECONDITION, message);
 }
 
-Status Internal(StringView message) { return Status(INTERNAL, message); }
+inline Status Internal(StringView message) { return Status(INTERNAL, message); }
 
-Status Unimplemented(StringView message) {
+inline Status Unimplemented(StringView message) {
   return Status(UNIMPLEMENTED, message);
 }
 
-Status Exhausted(StringView message) { return Status(EXHAUSTED, message); }
+inline Status Exhausted(StringView message) {
+  return Status(EXHAUSTED, message);
+}
 
-Status InvalidResponse(StringView message) {
+inline Status InvalidResponse(StringView message) {
   return Status(INVALID_RESPONSE, message);
 }
+
+#define RETURN_ERROR(expr)        \
+  {                               \
+    glcr::Status _tmp_err = expr; \
+    if (!_tmp_err) {              \
+      return _tmp_err;            \
+    }                             \
+  }
 
 }  // namespace glcr

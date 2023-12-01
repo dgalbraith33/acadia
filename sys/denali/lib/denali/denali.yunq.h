@@ -3,6 +3,7 @@
 
 #include <glacier/buffer/byte_buffer.h>
 #include <glacier/buffer/cap_buffer.h>
+#include <glacier/status/status.h>
 #include <glacier/container/vector.h>
 #include <glacier/string/string.h>
 #include <ztypes.h>
@@ -15,8 +16,8 @@ class ReadRequest {
   ReadRequest(const ReadRequest&) = delete;
   ReadRequest(ReadRequest&&) = delete;
 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const uint64_t& device_id() const { return device_id_; }
@@ -32,7 +33,7 @@ class ReadRequest {
   uint64_t size_;
 
   // Parses everything except for caps.
-  void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
 };
 class ReadManyRequest {
  public:
@@ -41,8 +42,8 @@ class ReadManyRequest {
   ReadManyRequest(const ReadManyRequest&) = delete;
   ReadManyRequest(ReadManyRequest&&) = delete;
 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const uint64_t& device_id() const { return device_id_; }
@@ -58,7 +59,7 @@ class ReadManyRequest {
   glcr::Vector<uint64_t> sector_cnt_;
 
   // Parses everything except for caps.
-  void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
 };
 class ReadResponse {
  public:
@@ -67,8 +68,8 @@ class ReadResponse {
   ReadResponse(const ReadResponse&) = delete;
   ReadResponse(ReadResponse&&) = delete;
 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
+  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const uint64_t& device_id() const { return device_id_; }
@@ -84,6 +85,6 @@ class ReadResponse {
   z_cap_t memory_;
 
   // Parses everything except for caps.
-  void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
 };
 

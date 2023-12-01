@@ -1,6 +1,8 @@
 // Generated file -- DO NOT MODIFY.
 #include "voyageurs.yunq.h"
 
+#include <yunq/serialize.h>
+
 
 namespace {
 
@@ -11,43 +13,30 @@ struct ExtPointer {
   uint32_t length;
 };
 
-void CheckHeader(const glcr::ByteBuffer& bytes) {
-  // TODO: Check ident.
-  // TODO: Parse core size.
-  // TODO: Parse extension size.
-  // TODO: Check CRC32
-  // TODO: Parse options.
-}
-
-void WriteHeader(glcr::ByteBuffer& bytes, uint64_t offset, uint32_t core_size, uint32_t extension_size) {
-  bytes.WriteAt<uint32_t>(offset + 0, 0xDEADBEEF);  // TODO: Chose a more unique ident sequence.
-  bytes.WriteAt<uint32_t>(offset + 4, core_size);
-  bytes.WriteAt<uint32_t>(offset + 8, extension_size);
-  bytes.WriteAt<uint32_t>(offset + 12, 0); // TODO: Calculate CRC32.
-  bytes.WriteAt<uint64_t>(offset + 16, 0); // TODO: Add options.
-}
-
 }  // namespace
-void KeyboardListener::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  ParseFromBytesInternal(bytes, offset);
+glcr::Status KeyboardListener::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
   // Parse port_capability.
   // FIXME: Implement in-buffer capabilities for inprocess serialization.
   set_port_capability(0);
+  return glcr::Status::Ok();
 }
 
-void KeyboardListener::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  ParseFromBytesInternal(bytes, offset);
+glcr::Status KeyboardListener::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
+  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
   // Parse port_capability.
   uint64_t port_capability_ptr = bytes.At<uint64_t>(offset + header_size + (8 * 0));
 
   set_port_capability(caps.At(port_capability_ptr));
+  return glcr::Status::Ok();
 }
 
-void KeyboardListener::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  CheckHeader(bytes);
+glcr::Status KeyboardListener::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  RETURN_ERROR(yunq::CheckHeader(bytes));
   // Parse port_capability.
   // Skip Cap.
 
+  return glcr::Status::Ok();
 }
 
 uint64_t KeyboardListener::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
@@ -58,7 +47,7 @@ uint64_t KeyboardListener::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t of
   bytes.WriteAt<uint64_t>(offset + header_size + (8 * 0), 0);
 
   // The next extension pointer is the length of the message. 
-  WriteHeader(bytes, offset, core_size, next_extension);
+  yunq::WriteHeader(bytes, offset, core_size, next_extension);
 
   return next_extension;
 }
@@ -72,7 +61,7 @@ uint64_t KeyboardListener::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t of
   bytes.WriteAt<uint64_t>(offset + header_size + (8 * 0), next_cap++);
 
   // The next extension pointer is the length of the message. 
-  WriteHeader(bytes, offset, core_size, next_extension);
+  yunq::WriteHeader(bytes, offset, core_size, next_extension);
 
   return next_extension;
 }

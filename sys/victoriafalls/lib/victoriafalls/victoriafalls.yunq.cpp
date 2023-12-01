@@ -1,6 +1,8 @@
 // Generated file -- DO NOT MODIFY.
 #include "victoriafalls.yunq.h"
 
+#include <yunq/serialize.h>
+
 
 namespace {
 
@@ -11,38 +13,25 @@ struct ExtPointer {
   uint32_t length;
 };
 
-void CheckHeader(const glcr::ByteBuffer& bytes) {
-  // TODO: Check ident.
-  // TODO: Parse core size.
-  // TODO: Parse extension size.
-  // TODO: Check CRC32
-  // TODO: Parse options.
-}
-
-void WriteHeader(glcr::ByteBuffer& bytes, uint64_t offset, uint32_t core_size, uint32_t extension_size) {
-  bytes.WriteAt<uint32_t>(offset + 0, 0xDEADBEEF);  // TODO: Chose a more unique ident sequence.
-  bytes.WriteAt<uint32_t>(offset + 4, core_size);
-  bytes.WriteAt<uint32_t>(offset + 8, extension_size);
-  bytes.WriteAt<uint32_t>(offset + 12, 0); // TODO: Calculate CRC32.
-  bytes.WriteAt<uint64_t>(offset + 16, 0); // TODO: Add options.
-}
-
 }  // namespace
-void OpenFileRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  ParseFromBytesInternal(bytes, offset);
+glcr::Status OpenFileRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  return glcr::Status::Ok();
 }
 
-void OpenFileRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  ParseFromBytesInternal(bytes, offset);
+glcr::Status OpenFileRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
+  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  return glcr::Status::Ok();
 }
 
-void OpenFileRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  CheckHeader(bytes);
+glcr::Status OpenFileRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  RETURN_ERROR(yunq::CheckHeader(bytes));
   // Parse path.
   auto path_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
 
   set_path(bytes.StringAt(offset + path_pointer.offset, path_pointer.length));
 
+  return glcr::Status::Ok();
 }
 
 uint64_t OpenFileRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
@@ -61,7 +50,7 @@ uint64_t OpenFileRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t off
   bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 0), path_ptr);
 
   // The next extension pointer is the length of the message. 
-  WriteHeader(bytes, offset, core_size, next_extension);
+  yunq::WriteHeader(bytes, offset, core_size, next_extension);
 
   return next_extension;
 }
@@ -83,27 +72,29 @@ uint64_t OpenFileRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t off
   bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 0), path_ptr);
 
   // The next extension pointer is the length of the message. 
-  WriteHeader(bytes, offset, core_size, next_extension);
+  yunq::WriteHeader(bytes, offset, core_size, next_extension);
 
   return next_extension;
 }
-void OpenFileResponse::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  ParseFromBytesInternal(bytes, offset);
+glcr::Status OpenFileResponse::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
   // Parse memory.
   // FIXME: Implement in-buffer capabilities for inprocess serialization.
   set_memory(0);
+  return glcr::Status::Ok();
 }
 
-void OpenFileResponse::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  ParseFromBytesInternal(bytes, offset);
+glcr::Status OpenFileResponse::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
+  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
   // Parse memory.
   uint64_t memory_ptr = bytes.At<uint64_t>(offset + header_size + (8 * 2));
 
   set_memory(caps.At(memory_ptr));
+  return glcr::Status::Ok();
 }
 
-void OpenFileResponse::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  CheckHeader(bytes);
+glcr::Status OpenFileResponse::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  RETURN_ERROR(yunq::CheckHeader(bytes));
   // Parse path.
   auto path_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
 
@@ -113,6 +104,7 @@ void OpenFileResponse::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uin
   // Parse memory.
   // Skip Cap.
 
+  return glcr::Status::Ok();
 }
 
 uint64_t OpenFileResponse::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
@@ -136,7 +128,7 @@ uint64_t OpenFileResponse::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t of
   bytes.WriteAt<uint64_t>(offset + header_size + (8 * 2), 0);
 
   // The next extension pointer is the length of the message. 
-  WriteHeader(bytes, offset, core_size, next_extension);
+  yunq::WriteHeader(bytes, offset, core_size, next_extension);
 
   return next_extension;
 }
@@ -163,25 +155,28 @@ uint64_t OpenFileResponse::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t of
   bytes.WriteAt<uint64_t>(offset + header_size + (8 * 2), next_cap++);
 
   // The next extension pointer is the length of the message. 
-  WriteHeader(bytes, offset, core_size, next_extension);
+  yunq::WriteHeader(bytes, offset, core_size, next_extension);
 
   return next_extension;
 }
-void GetDirectoryRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  ParseFromBytesInternal(bytes, offset);
+glcr::Status GetDirectoryRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  return glcr::Status::Ok();
 }
 
-void GetDirectoryRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  ParseFromBytesInternal(bytes, offset);
+glcr::Status GetDirectoryRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
+  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  return glcr::Status::Ok();
 }
 
-void GetDirectoryRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  CheckHeader(bytes);
+glcr::Status GetDirectoryRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  RETURN_ERROR(yunq::CheckHeader(bytes));
   // Parse path.
   auto path_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
 
   set_path(bytes.StringAt(offset + path_pointer.offset, path_pointer.length));
 
+  return glcr::Status::Ok();
 }
 
 uint64_t GetDirectoryRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
@@ -200,7 +195,7 @@ uint64_t GetDirectoryRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t
   bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 0), path_ptr);
 
   // The next extension pointer is the length of the message. 
-  WriteHeader(bytes, offset, core_size, next_extension);
+  yunq::WriteHeader(bytes, offset, core_size, next_extension);
 
   return next_extension;
 }
@@ -222,25 +217,28 @@ uint64_t GetDirectoryRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t
   bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 0), path_ptr);
 
   // The next extension pointer is the length of the message. 
-  WriteHeader(bytes, offset, core_size, next_extension);
+  yunq::WriteHeader(bytes, offset, core_size, next_extension);
 
   return next_extension;
 }
-void Directory::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  ParseFromBytesInternal(bytes, offset);
+glcr::Status Directory::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  return glcr::Status::Ok();
 }
 
-void Directory::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  ParseFromBytesInternal(bytes, offset);
+glcr::Status Directory::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
+  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  return glcr::Status::Ok();
 }
 
-void Directory::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  CheckHeader(bytes);
+glcr::Status Directory::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
+  RETURN_ERROR(yunq::CheckHeader(bytes));
   // Parse filenames.
   auto filenames_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
 
   set_filenames(bytes.StringAt(offset + filenames_pointer.offset, filenames_pointer.length));
 
+  return glcr::Status::Ok();
 }
 
 uint64_t Directory::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
@@ -259,7 +257,7 @@ uint64_t Directory::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) c
   bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 0), filenames_ptr);
 
   // The next extension pointer is the length of the message. 
-  WriteHeader(bytes, offset, core_size, next_extension);
+  yunq::WriteHeader(bytes, offset, core_size, next_extension);
 
   return next_extension;
 }
@@ -281,7 +279,7 @@ uint64_t Directory::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, g
   bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 0), filenames_ptr);
 
   // The next extension pointer is the length of the message. 
-  WriteHeader(bytes, offset, core_size, next_extension);
+  yunq::WriteHeader(bytes, offset, core_size, next_extension);
 
   return next_extension;
 }
