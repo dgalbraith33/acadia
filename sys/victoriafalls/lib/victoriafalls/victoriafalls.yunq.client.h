@@ -20,11 +20,11 @@ class VFSClient {
 
 
   
-  [[nodiscard]] glcr::ErrorCode OpenFile(const OpenFileRequest& request, OpenFileResponse& response);
+  [[nodiscard]] glcr::Status OpenFile(const OpenFileRequest& request, OpenFileResponse& response);
   
 
   
-  [[nodiscard]] glcr::ErrorCode GetDirectory(const GetDirectoryRequest& request, Directory& response);
+  [[nodiscard]] glcr::Status GetDirectory(const GetDirectoryRequest& request, Directory& response);
   
 
  private:

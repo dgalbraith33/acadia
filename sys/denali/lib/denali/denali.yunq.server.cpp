@@ -104,7 +104,6 @@ glcr::Status DenaliServerBase::HandleRequest(const glcr::ByteBuffer& request,
 
   
       ReadRequest yunq_request;
-      // TODO: Return status.
       RETURN_ERROR(yunq_request.ParseFromBytes(request, kHeaderSize, req_caps));
   
 
@@ -125,7 +124,6 @@ glcr::Status DenaliServerBase::HandleRequest(const glcr::ByteBuffer& request,
 
   
       ReadManyRequest yunq_request;
-      // TODO: Return status.
       RETURN_ERROR(yunq_request.ParseFromBytes(request, kHeaderSize, req_caps));
   
 

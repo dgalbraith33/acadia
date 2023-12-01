@@ -20,11 +20,11 @@ namespace {{package.cpp_namespace()}} {
 {% for method in interface.methods %}
 
 {% if method.request == None %}
-glcr::ErrorCode {{interface.name}}Client::{{method.name}}({{method.response}}& response) {
+glcr::Status {{interface.name}}Client::{{method.name}}({{method.response}}& response) {
 {% elif method.response == None %}
-glcr::ErrorCode {{interface.name}}Client::{{method.name}}(const {{method.request}}& request) {
+glcr::Status {{interface.name}}Client::{{method.name}}(const {{method.request}}& request) {
 {% else %}
-glcr::ErrorCode {{interface.name}}Client::{{method.name}}(const {{method.request}}& request, {{method.response}}& response) {
+glcr::Status {{interface.name}}Client::{{method.name}}(const {{method.request}}& request, {{method.response}}& response) {
 {% endif %}
   uint64_t buffer_size = kBufferSize;
   uint64_t cap_size = kCapBufferSize;
@@ -49,18 +49,14 @@ glcr::ErrorCode {{interface.name}}Client::{{method.name}}(const {{method.request
   RET_ERR(ZReplyPortRecv(reply_port_cap, &buffer_size, buffer_.RawPtr(), &cap_size, cap_buffer_.RawPtr()));
 
   if (buffer_.At<uint32_t>(0) != kSentinel) {
-    return glcr::INVALID_RESPONSE;
+    return glcr::InvalidResponse("Got an invalid response from server.");
   }
 
   // Check Response Code.
   RET_ERR(buffer_.At<uint64_t>(8));
 
 {% if method.response != None %}
-  // TODO: Return status.
-  auto status = response.ParseFromBytes(buffer_, 16, cap_buffer_);
-  if (!status) {
-    return status.code();
-  }
+  RETURN_ERROR(response.ParseFromBytes(buffer_, 16, cap_buffer_));
 {% endif %}
 
   return glcr::OK;

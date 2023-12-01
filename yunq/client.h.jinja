@@ -23,11 +23,11 @@ class {{interface.name}}Client {
 
 {% for method in interface.methods %}
   {% if method.request == None %}
-  [[nodiscard]] glcr::ErrorCode {{method.name}}({{method.response}}& response);
+  [[nodiscard]] glcr::Status {{method.name}}({{method.response}}& response);
   {% elif method.response == None %}
-  [[nodiscard]] glcr::ErrorCode {{method.name}}(const {{method.request}}& request);
+  [[nodiscard]] glcr::Status {{method.name}}(const {{method.request}}& request);
   {% else %}
-  [[nodiscard]] glcr::ErrorCode {{method.name}}(const {{method.request}}& request, {{method.response}}& response);
+  [[nodiscard]] glcr::Status {{method.name}}(const {{method.request}}& request, {{method.response}}& response);
   {% endif %}
 {% endfor %}
  private:

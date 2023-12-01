@@ -18,7 +18,7 @@ VoyageursClient::~VoyageursClient() {
 
 
 
-glcr::ErrorCode VoyageursClient::RegisterKeyboardListener(const KeyboardListener& request) {
+glcr::Status VoyageursClient::RegisterKeyboardListener(const KeyboardListener& request) {
 
   uint64_t buffer_size = kBufferSize;
   uint64_t cap_size = kCapBufferSize;
@@ -41,7 +41,7 @@ glcr::ErrorCode VoyageursClient::RegisterKeyboardListener(const KeyboardListener
   RET_ERR(ZReplyPortRecv(reply_port_cap, &buffer_size, buffer_.RawPtr(), &cap_size, cap_buffer_.RawPtr()));
 
   if (buffer_.At<uint32_t>(0) != kSentinel) {
-    return glcr::INVALID_RESPONSE;
+    return glcr::InvalidResponse("Got an invalid response from server.");
   }
 
   // Check Response Code.

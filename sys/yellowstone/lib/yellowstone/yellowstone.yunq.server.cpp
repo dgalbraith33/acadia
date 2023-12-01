@@ -78,6 +78,7 @@ void YellowstoneServerBase::ServerThread() {
     glcr::Status err = HandleRequest(recv_buffer, recv_cap, resp_buffer, resp_length, resp_cap);
     if (!err) {
       WriteError(resp_buffer, err.code());
+      dbgln("Responding Error {}", err.message());
       reply_err = static_cast<glcr::ErrorCode>(ZReplyPortSend(reply_port_cap, kHeaderSize, resp_buffer.RawPtr(), 0, nullptr));
     } else {
       WriteHeader(resp_buffer, resp_length);
@@ -105,7 +106,6 @@ glcr::Status YellowstoneServerBase::HandleRequest(const glcr::ByteBuffer& reques
 
   
       RegisterEndpointRequest yunq_request;
-      // TODO: Return status.
       RETURN_ERROR(yunq_request.ParseFromBytes(request, kHeaderSize, req_caps));
   
 
@@ -124,7 +124,6 @@ glcr::Status YellowstoneServerBase::HandleRequest(const glcr::ByteBuffer& reques
 
   
       GetEndpointRequest yunq_request;
-      // TODO: Return status.
       RETURN_ERROR(yunq_request.ParseFromBytes(request, kHeaderSize, req_caps));
   
 

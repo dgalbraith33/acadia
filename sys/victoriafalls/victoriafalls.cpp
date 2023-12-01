@@ -16,7 +16,7 @@ uint64_t main(uint64_t init_cap) {
 
   YellowstoneClient yellowstone(gInitEndpointCap);
   DenaliInfo denali_info;
-  RET_ERR(yellowstone.GetDenali(denali_info));
+  check(yellowstone.GetDenali(denali_info));
   ASSIGN_OR_RETURN(Ext2Driver ext2, Ext2Driver::Init(denali_info));
 
   ASSIGN_OR_RETURN(auto server, VFSServer::Create(ext2));

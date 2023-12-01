@@ -20,7 +20,7 @@ class VoyageursClient {
 
 
   
-  [[nodiscard]] glcr::ErrorCode RegisterKeyboardListener(const KeyboardListener& request);
+  [[nodiscard]] glcr::Status RegisterKeyboardListener(const KeyboardListener& request);
   
 
  private:

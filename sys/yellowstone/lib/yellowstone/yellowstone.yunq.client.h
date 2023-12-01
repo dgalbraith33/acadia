@@ -22,23 +22,23 @@ class YellowstoneClient {
 
 
   
-  [[nodiscard]] glcr::ErrorCode RegisterEndpoint(const RegisterEndpointRequest& request);
+  [[nodiscard]] glcr::Status RegisterEndpoint(const RegisterEndpointRequest& request);
   
 
   
-  [[nodiscard]] glcr::ErrorCode GetEndpoint(const GetEndpointRequest& request, Endpoint& response);
+  [[nodiscard]] glcr::Status GetEndpoint(const GetEndpointRequest& request, Endpoint& response);
   
 
   
-  [[nodiscard]] glcr::ErrorCode GetAhciInfo(AhciInfo& response);
+  [[nodiscard]] glcr::Status GetAhciInfo(AhciInfo& response);
   
 
   
-  [[nodiscard]] glcr::ErrorCode GetFramebufferInfo(FramebufferInfo& response);
+  [[nodiscard]] glcr::Status GetFramebufferInfo(FramebufferInfo& response);
   
 
   
-  [[nodiscard]] glcr::ErrorCode GetDenali(DenaliInfo& response);
+  [[nodiscard]] glcr::Status GetDenali(DenaliInfo& response);
   
 
  private:

@@ -21,7 +21,7 @@ uint64_t main(uint64_t init_port) {
   YellowstoneClient client(gInitEndpointCap);
 
   FramebufferInfo framebuffer;
-  RET_ERR(client.GetFramebufferInfo(framebuffer));
+  check(client.GetFramebufferInfo(framebuffer));
   dbgln("FB addr {x}, bpp {}, width {} , height {}, pitch {}",
         framebuffer.address_phys(), framebuffer.bpp(), framebuffer.width(),
         framebuffer.height(), framebuffer.pitch());

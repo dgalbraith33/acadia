@@ -20,7 +20,7 @@ YellowstoneClient::~YellowstoneClient() {
 
 
 
-glcr::ErrorCode YellowstoneClient::RegisterEndpoint(const RegisterEndpointRequest& request) {
+glcr::Status YellowstoneClient::RegisterEndpoint(const RegisterEndpointRequest& request) {
 
   uint64_t buffer_size = kBufferSize;
   uint64_t cap_size = kCapBufferSize;
@@ -43,7 +43,7 @@ glcr::ErrorCode YellowstoneClient::RegisterEndpoint(const RegisterEndpointReques
   RET_ERR(ZReplyPortRecv(reply_port_cap, &buffer_size, buffer_.RawPtr(), &cap_size, cap_buffer_.RawPtr()));
 
   if (buffer_.At<uint32_t>(0) != kSentinel) {
-    return glcr::INVALID_RESPONSE;
+    return glcr::InvalidResponse("Got an invalid response from server.");
   }
 
   // Check Response Code.
@@ -57,7 +57,7 @@ glcr::ErrorCode YellowstoneClient::RegisterEndpoint(const RegisterEndpointReques
 
 
 
-glcr::ErrorCode YellowstoneClient::GetEndpoint(const GetEndpointRequest& request, Endpoint& response) {
+glcr::Status YellowstoneClient::GetEndpoint(const GetEndpointRequest& request, Endpoint& response) {
 
   uint64_t buffer_size = kBufferSize;
   uint64_t cap_size = kCapBufferSize;
@@ -80,18 +80,14 @@ glcr::ErrorCode YellowstoneClient::GetEndpoint(const GetEndpointRequest& request
   RET_ERR(ZReplyPortRecv(reply_port_cap, &buffer_size, buffer_.RawPtr(), &cap_size, cap_buffer_.RawPtr()));
 
   if (buffer_.At<uint32_t>(0) != kSentinel) {
-    return glcr::INVALID_RESPONSE;
+    return glcr::InvalidResponse("Got an invalid response from server.");
   }
 
   // Check Response Code.
   RET_ERR(buffer_.At<uint64_t>(8));
 
 
-  // TODO: Return status.
-  auto status = response.ParseFromBytes(buffer_, 16, cap_buffer_);
-  if (!status) {
-    return status.code();
-  }
+  RETURN_ERROR(response.ParseFromBytes(buffer_, 16, cap_buffer_));
 
 
   return glcr::OK;
@@ -100,7 +96,7 @@ glcr::ErrorCode YellowstoneClient::GetEndpoint(const GetEndpointRequest& request
 
 
 
-glcr::ErrorCode YellowstoneClient::GetAhciInfo(AhciInfo& response) {
+glcr::Status YellowstoneClient::GetAhciInfo(AhciInfo& response) {
 
   uint64_t buffer_size = kBufferSize;
   uint64_t cap_size = kCapBufferSize;
@@ -123,18 +119,14 @@ glcr::ErrorCode YellowstoneClient::GetAhciInfo(AhciInfo& response) {
   RET_ERR(ZReplyPortRecv(reply_port_cap, &buffer_size, buffer_.RawPtr(), &cap_size, cap_buffer_.RawPtr()));
 
   if (buffer_.At<uint32_t>(0) != kSentinel) {
-    return glcr::INVALID_RESPONSE;
+    return glcr::InvalidResponse("Got an invalid response from server.");
   }
 
   // Check Response Code.
   RET_ERR(buffer_.At<uint64_t>(8));
 
 
-  // TODO: Return status.
-  auto status = response.ParseFromBytes(buffer_, 16, cap_buffer_);
-  if (!status) {
-    return status.code();
-  }
+  RETURN_ERROR(response.ParseFromBytes(buffer_, 16, cap_buffer_));
 
 
   return glcr::OK;
@@ -143,7 +135,7 @@ glcr::ErrorCode YellowstoneClient::GetAhciInfo(AhciInfo& response) {
 
 
 
-glcr::ErrorCode YellowstoneClient::GetFramebufferInfo(FramebufferInfo& response) {
+glcr::Status YellowstoneClient::GetFramebufferInfo(FramebufferInfo& response) {
 
   uint64_t buffer_size = kBufferSize;
   uint64_t cap_size = kCapBufferSize;
@@ -166,18 +158,14 @@ glcr::ErrorCode YellowstoneClient::GetFramebufferInfo(FramebufferInfo& response)
   RET_ERR(ZReplyPortRecv(reply_port_cap, &buffer_size, buffer_.RawPtr(), &cap_size, cap_buffer_.RawPtr()));
 
   if (buffer_.At<uint32_t>(0) != kSentinel) {
-    return glcr::INVALID_RESPONSE;
+    return glcr::InvalidResponse("Got an invalid response from server.");
   }
 
   // Check Response Code.
   RET_ERR(buffer_.At<uint64_t>(8));
 
 
-  // TODO: Return status.
-  auto status = response.ParseFromBytes(buffer_, 16, cap_buffer_);
-  if (!status) {
-    return status.code();
-  }
+  RETURN_ERROR(response.ParseFromBytes(buffer_, 16, cap_buffer_));
 
 
   return glcr::OK;
@@ -186,7 +174,7 @@ glcr::ErrorCode YellowstoneClient::GetFramebufferInfo(FramebufferInfo& response)
 
 
 
-glcr::ErrorCode YellowstoneClient::GetDenali(DenaliInfo& response) {
+glcr::Status YellowstoneClient::GetDenali(DenaliInfo& response) {
 
   uint64_t buffer_size = kBufferSize;
   uint64_t cap_size = kCapBufferSize;
@@ -209,18 +197,14 @@ glcr::ErrorCode YellowstoneClient::GetDenali(DenaliInfo& response) {
   RET_ERR(ZReplyPortRecv(reply_port_cap, &buffer_size, buffer_.RawPtr(), &cap_size, cap_buffer_.RawPtr()));
 
   if (buffer_.At<uint32_t>(0) != kSentinel) {
-    return glcr::INVALID_RESPONSE;
+    return glcr::InvalidResponse("Got an invalid response from server.");
   }
 
   // Check Response Code.
   RET_ERR(buffer_.At<uint64_t>(8));
 
 
-  // TODO: Return status.
-  auto status = response.ParseFromBytes(buffer_, 16, cap_buffer_);
-  if (!status) {
-    return status.code();
-  }
+  RETURN_ERROR(response.ParseFromBytes(buffer_, 16, cap_buffer_));
 
 
   return glcr::OK;

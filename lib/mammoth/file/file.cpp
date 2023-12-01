@@ -64,7 +64,11 @@ glcr::ErrorOr<glcr::Vector<glcr::String>> ListDirectory(glcr::StringView path) {
   GetDirectoryRequest req;
   req.set_path(path);
   Directory dir;
-  RET_ERR(gVfsClient->GetDirectory(req, dir));
+  auto status = gVfsClient->GetDirectory(req, dir);
+  if (!status.ok()) {
+    dbgln("Error in getting directory: {}", status.message());
+    return status.code();
+  }
 
   auto file_views = glcr::StrSplit(dir.filenames(), ',');
   glcr::Vector<glcr::String> files;

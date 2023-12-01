@@ -18,7 +18,7 @@ VFSClient::~VFSClient() {
 
 
 
-glcr::ErrorCode VFSClient::OpenFile(const OpenFileRequest& request, OpenFileResponse& response) {
+glcr::Status VFSClient::OpenFile(const OpenFileRequest& request, OpenFileResponse& response) {
 
   uint64_t buffer_size = kBufferSize;
   uint64_t cap_size = kCapBufferSize;
@@ -41,18 +41,14 @@ glcr::ErrorCode VFSClient::OpenFile(const OpenFileRequest& request, OpenFileResp
   RET_ERR(ZReplyPortRecv(reply_port_cap, &buffer_size, buffer_.RawPtr(), &cap_size, cap_buffer_.RawPtr()));
 
   if (buffer_.At<uint32_t>(0) != kSentinel) {
-    return glcr::INVALID_RESPONSE;
+    return glcr::InvalidResponse("Got an invalid response from server.");
   }
 
   // Check Response Code.
   RET_ERR(buffer_.At<uint64_t>(8));
 
 
-  // TODO: Return status.
-  auto status = response.ParseFromBytes(buffer_, 16, cap_buffer_);
-  if (!status) {
-    return status.code();
-  }
+  RETURN_ERROR(response.ParseFromBytes(buffer_, 16, cap_buffer_));
 
 
   return glcr::OK;
@@ -61,7 +57,7 @@ glcr::ErrorCode VFSClient::OpenFile(const OpenFileRequest& request, OpenFileResp
 
 
 
-glcr::ErrorCode VFSClient::GetDirectory(const GetDirectoryRequest& request, Directory& response) {
+glcr::Status VFSClient::GetDirectory(const GetDirectoryRequest& request, Directory& response) {
 
   uint64_t buffer_size = kBufferSize;
   uint64_t cap_size = kCapBufferSize;
@@ -84,18 +80,14 @@ glcr::ErrorCode VFSClient::GetDirectory(const GetDirectoryRequest& request, Dire
   RET_ERR(ZReplyPortRecv(reply_port_cap, &buffer_size, buffer_.RawPtr(), &cap_size, cap_buffer_.RawPtr()));
 
   if (buffer_.At<uint32_t>(0) != kSentinel) {
-    return glcr::INVALID_RESPONSE;
+    return glcr::InvalidResponse("Got an invalid response from server.");
   }
 
   // Check Response Code.
   RET_ERR(buffer_.At<uint64_t>(8));
 
 
-  // TODO: Return status.
-  auto status = response.ParseFromBytes(buffer_, 16, cap_buffer_);
-  if (!status) {
-    return status.code();
-  }
+  RETURN_ERROR(response.ParseFromBytes(buffer_, 16, cap_buffer_));
 
 
   return glcr::OK;

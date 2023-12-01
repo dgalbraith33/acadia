@@ -10,7 +10,7 @@ class GptReader {
  public:
   GptReader(glcr::UniquePtr<DenaliClient> denali);
 
-  glcr::ErrorCode ParsePartitionTables();
+  glcr::Status ParsePartitionTables();
 
   uint64_t GetPrimaryPartitionLba() { return primary_partition_lba_; }
 

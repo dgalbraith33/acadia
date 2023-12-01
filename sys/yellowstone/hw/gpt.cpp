@@ -57,29 +57,29 @@ struct PartitionEntry {
 GptReader::GptReader(glcr::UniquePtr<DenaliClient> denali)
     : denali_(glcr::Move(denali)) {}
 
-glcr::ErrorCode GptReader::ParsePartitionTables() {
+glcr::Status GptReader::ParsePartitionTables() {
   ReadRequest req;
   req.set_device_id(0);
   req.set_lba(0);
   req.set_size(2);
   ReadResponse resp;
-  RET_ERR(denali_->Read(req, resp));
+  RETURN_ERROR(denali_->Read(req, resp));
   mmth::OwnedMemoryRegion lba_1_and_2 =
       mmth::OwnedMemoryRegion::FromCapability(resp.memory());
   uint16_t* mbr_sig = reinterpret_cast<uint16_t*>(lba_1_and_2.vaddr() + 0x1FE);
   if (*mbr_sig != 0xAA55) {
-    dbgln("Invalid MBR Sig: {x}", *mbr_sig);
-    return glcr::FAILED_PRECONDITION;
+    return glcr::FailedPrecondition(
+        glcr::StrFormat("Invalid MBR Sig: {x}", *mbr_sig));
   }
   MbrPartition* first_partition =
       reinterpret_cast<MbrPartition*>(lba_1_and_2.vaddr() + 0x1BE);
   if (first_partition->boot_indicator != 0) {
-    dbgln("Boot indicator set: {}", first_partition->boot_indicator);
-    return glcr::FAILED_PRECONDITION;
+    return glcr::FailedPrecondition(glcr::StrFormat(
+        "Boot indicator set: {}", first_partition->boot_indicator));
   }
   if (first_partition->os_type != 0xEE) {
-    dbgln("Incorrect OS type: {x}", first_partition->os_type);
-    return glcr::FAILED_PRECONDITION;
+    return glcr::FailedPrecondition(
+        glcr::StrFormat("Incorrect OS type: {x}", first_partition->os_type));
   }
 #if GPT_DEBUG
   dbgln("LBAs: ({x}, {x})", first_partition->starting_lba,
@@ -105,7 +105,7 @@ glcr::ErrorCode GptReader::ParsePartitionTables() {
   req.set_device_id(0);
   req.set_lba(header->lba_partition_entries);
   req.set_size(num_blocks);
-  RET_ERR(denali_->Read(req, resp));
+  RETURN_ERROR(denali_->Read(req, resp));
   mmth::OwnedMemoryRegion part_table =
       mmth::OwnedMemoryRegion::FromCapability(resp.memory());
   for (uint64_t i = 0; i < num_partitions; i++) {
@@ -130,5 +130,5 @@ glcr::ErrorCode GptReader::ParsePartitionTables() {
     }
   }
 
-  return glcr::OK;
+  return glcr::Status::Ok();
 }

@@ -23,7 +23,11 @@ glcr::ErrorOr<PartitionInfo> HandleDenaliRegistration(z_cap_t endpoint_cap) {
   GptReader reader(
       glcr::UniquePtr<DenaliClient>(new DenaliClient(endpoint_cap)));
 
-  RET_ERR(reader.ParsePartitionTables());
+  auto status = reader.ParsePartitionTables();
+  if (!status.ok()) {
+    dbgln("GPT Reader: {}", status.message());
+    return status.code();
+  }
 
   return PartitionInfo{.device_id = 0,
                        .partition_lba = reader.GetPrimaryPartitionLba()};

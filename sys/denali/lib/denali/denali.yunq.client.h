@@ -20,11 +20,11 @@ class DenaliClient {
 
 
   
-  [[nodiscard]] glcr::ErrorCode Read(const ReadRequest& request, ReadResponse& response);
+  [[nodiscard]] glcr::Status Read(const ReadRequest& request, ReadResponse& response);
   
 
   
-  [[nodiscard]] glcr::ErrorCode ReadMany(const ReadManyRequest& request, ReadResponse& response);
+  [[nodiscard]] glcr::Status ReadMany(const ReadManyRequest& request, ReadResponse& response);
   
 
  private:

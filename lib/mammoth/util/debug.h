@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glacier/status/status.h>
 #include <glacier/string/str_format.h>
 #include <glacier/string/string_view.h>
 #include <stdint.h>
@@ -16,5 +17,6 @@ void dbgln(const glcr::StringView& fmt, Args... args) {
 // Checks that the code is ok.
 // if not exits the process.
 void check(uint64_t);
+void check(const glcr::Status&);
 
 void crash(const char*, z_err_t);

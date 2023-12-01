@@ -11,11 +11,11 @@ class Status {
   Status(ErrorCode code) : code_(code), message_() {}
   Status(ErrorCode code, StringView message) : code_(code), message_(message) {}
 
-  explicit operator bool() { return ok(); }
-  bool ok() { return code_ == OK; }
+  explicit operator bool() const { return ok(); }
+  bool ok() const { return code_ == OK; }
 
-  ErrorCode code() { return code_; }
-  StringView message() { return message_; }
+  ErrorCode code() const { return code_; }
+  StringView message() const { return message_; }
 
  private:
   ErrorCode code_;

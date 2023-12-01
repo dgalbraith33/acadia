@@ -12,7 +12,11 @@ glcr::ErrorOr<glcr::SharedPtr<Ext2BlockReader>> Ext2BlockReader::Init(
   req.set_lba(denali_info.lba_offset() + 2);
   req.set_size(2);
   ReadResponse resp;
-  RET_ERR(client.Read(req, resp));
+  auto status = client.Read(req, resp);
+  if (!status.ok()) {
+    dbgln("Failed to read superblock: {}", status.message());
+    return status.code();
+  }
   mmth::OwnedMemoryRegion superblock =
       mmth::OwnedMemoryRegion::FromCapability(resp.memory());
 
@@ -70,7 +74,11 @@ glcr::ErrorOr<mmth::OwnedMemoryRegion> Ext2BlockReader::ReadBlocks(
   req.set_lba(lba_offset_ + block_number * SectorsPerBlock());
   req.set_size(num_blocks * SectorsPerBlock());
   ReadResponse resp;
-  RET_ERR(denali_.Read(req, resp));
+  auto status = denali_.Read(req, resp);
+  if (!status.ok()) {
+    dbgln("Failed to read blocks: {}", status.message());
+    return status.code();
+  }
   return mmth::OwnedMemoryRegion::FromCapability(resp.memory());
 }
 
@@ -92,7 +100,11 @@ glcr::ErrorOr<mmth::OwnedMemoryRegion> Ext2BlockReader::ReadBlocks(
   }
   dbgln("Read many: {x}", req.lba().size());
   ReadResponse resp;
-  RET_ERR(denali_.ReadMany(req, resp));
+  auto status = denali_.ReadMany(req, resp);
+  if (!status.ok()) {
+    dbgln("Failed to read blocks: {}", status.message());
+    return status.code();
+  }
   return mmth::OwnedMemoryRegion::FromCapability(resp.memory());
 }
 

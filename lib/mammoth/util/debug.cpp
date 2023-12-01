@@ -15,6 +15,14 @@ void check(uint64_t code) {
   (void)ZProcessExit(code);
 }
 
+void check(const glcr::Status& status) {
+  if (status.ok()) {
+    return;
+  }
+  dbgln("Crash: {}", status.message());
+  (void)ZProcessExit(status.code());
+}
+
 void crash(const char* str, uint64_t code) {
   dbgln(str);
   (void)ZProcessExit(code);
