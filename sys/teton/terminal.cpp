@@ -4,7 +4,7 @@
 #include <glacier/string/str_split.h>
 #include <mammoth/file/file.h>
 #include <mammoth/proc/process.h>
-#include <zglobal.h>
+#include <mammoth/util/init.h>
 
 void Terminal::HandleCharacter(char c) {
   console_.WriteChar(c);

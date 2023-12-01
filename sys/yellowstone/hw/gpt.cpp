@@ -5,7 +5,6 @@
 #include <mammoth/util/debug.h>
 #include <mammoth/util/memory_region.h>
 #include <zcall.h>
-#include <zglobal.h>
 
 #define GPT_DEBUG 0
 

@@ -1,8 +1,8 @@
 #include <glacier/container/intrusive_list.h>
 #include <glacier/string/str_format.h>
+#include <mammoth/util/init.h>
 #include <stdint.h>
 #include <zcall.h>
-#include <zglobal.h>
 
 #include "util/debug.h"
 

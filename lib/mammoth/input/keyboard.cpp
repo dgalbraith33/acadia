@@ -1,8 +1,8 @@
 #include "input/keyboard.h"
 
+#include <mammoth/util/init.h>
 #include <voyageurs/voyageurs.yunq.client.h>
 #include <yellowstone/yellowstone.yunq.client.h>
-#include <zglobal.h>
 
 #include "util/debug.h"
 
