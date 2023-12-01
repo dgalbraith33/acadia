@@ -106,7 +106,11 @@ glcr::ErrorCode {{interface.name}}ServerBase::HandleRequest(const glcr::ByteBuff
 
   {% if method.request != None %}
       {{method.request}} yunq_request;
-      yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+      // TODO: Return status.
+      auto status = yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+      if (!status) {
+        return status.code();
+      }
   {% endif %}
 
   {% if method.response != None %}

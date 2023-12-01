@@ -34,7 +34,7 @@ glcr::Status RegisterEndpointRequest::ParseFromBytes(const glcr::ByteBuffer& byt
 }
 
 glcr::Status RegisterEndpointRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(yunq::CheckHeader(bytes));
+  RETURN_ERROR(yunq::CheckHeader(bytes, offset));
   // Parse endpoint_name.
   auto endpoint_name_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
 
@@ -104,7 +104,7 @@ glcr::Status GetEndpointRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, u
 }
 
 glcr::Status GetEndpointRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(yunq::CheckHeader(bytes));
+  RETURN_ERROR(yunq::CheckHeader(bytes, offset));
   // Parse endpoint_name.
   auto endpoint_name_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
 
@@ -173,7 +173,7 @@ glcr::Status Endpoint::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t of
 }
 
 glcr::Status Endpoint::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(yunq::CheckHeader(bytes));
+  RETURN_ERROR(yunq::CheckHeader(bytes, offset));
   // Parse endpoint.
   // Skip Cap.
 
@@ -224,7 +224,7 @@ glcr::Status AhciInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t of
 }
 
 glcr::Status AhciInfo::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(yunq::CheckHeader(bytes));
+  RETURN_ERROR(yunq::CheckHeader(bytes, offset));
   // Parse ahci_region.
   // Skip Cap.
   // Parse region_length.
@@ -274,7 +274,7 @@ glcr::Status FramebufferInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint
 }
 
 glcr::Status FramebufferInfo::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(yunq::CheckHeader(bytes));
+  RETURN_ERROR(yunq::CheckHeader(bytes, offset));
   // Parse address_phys.
   set_address_phys(bytes.At<uint64_t>(offset + header_size + (8 * 0)));
   // Parse width.
@@ -389,7 +389,7 @@ glcr::Status DenaliInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t 
 }
 
 glcr::Status DenaliInfo::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(yunq::CheckHeader(bytes));
+  RETURN_ERROR(yunq::CheckHeader(bytes, offset));
   // Parse denali_endpoint.
   // Skip Cap.
   // Parse device_id.

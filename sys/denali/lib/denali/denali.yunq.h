@@ -16,8 +16,8 @@ class ReadRequest {
   ReadRequest(const ReadRequest&) = delete;
   ReadRequest(ReadRequest&&) = delete;
 
-  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
-  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset);
+  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const uint64_t& device_id() const { return device_id_; }
@@ -42,8 +42,8 @@ class ReadManyRequest {
   ReadManyRequest(const ReadManyRequest&) = delete;
   ReadManyRequest(ReadManyRequest&&) = delete;
 
-  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
-  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset);
+  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const uint64_t& device_id() const { return device_id_; }
@@ -68,8 +68,8 @@ class ReadResponse {
   ReadResponse(const ReadResponse&) = delete;
   ReadResponse(ReadResponse&&) = delete;
 
-  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
-  glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset);
+  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const uint64_t& device_id() const { return device_id_; }

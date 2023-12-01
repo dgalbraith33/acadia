@@ -48,7 +48,11 @@ glcr::ErrorCode DenaliClient::Read(const ReadRequest& request, ReadResponse& res
   RET_ERR(buffer_.At<uint64_t>(8));
 
 
-  response.ParseFromBytes(buffer_, 16, cap_buffer_);
+  // TODO: Return status.
+  auto status = response.ParseFromBytes(buffer_, 16, cap_buffer_);
+  if (!status) {
+    return status.code();
+  }
 
 
   return glcr::OK;
@@ -87,7 +91,11 @@ glcr::ErrorCode DenaliClient::ReadMany(const ReadManyRequest& request, ReadRespo
   RET_ERR(buffer_.At<uint64_t>(8));
 
 
-  response.ParseFromBytes(buffer_, 16, cap_buffer_);
+  // TODO: Return status.
+  auto status = response.ParseFromBytes(buffer_, 16, cap_buffer_);
+  if (!status) {
+    return status.code();
+  }
 
 
   return glcr::OK;

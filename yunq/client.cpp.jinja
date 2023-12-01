@@ -56,7 +56,11 @@ glcr::ErrorCode {{interface.name}}Client::{{method.name}}(const {{method.request
   RET_ERR(buffer_.At<uint64_t>(8));
 
 {% if method.response != None %}
-  response.ParseFromBytes(buffer_, 16, cap_buffer_);
+  // TODO: Return status.
+  auto status = response.ParseFromBytes(buffer_, 16, cap_buffer_);
+  if (!status) {
+    return status.code();
+  }
 {% endif %}
 
   return glcr::OK;

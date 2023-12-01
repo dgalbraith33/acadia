@@ -87,7 +87,11 @@ glcr::ErrorCode YellowstoneClient::GetEndpoint(const GetEndpointRequest& request
   RET_ERR(buffer_.At<uint64_t>(8));
 
 
-  response.ParseFromBytes(buffer_, 16, cap_buffer_);
+  // TODO: Return status.
+  auto status = response.ParseFromBytes(buffer_, 16, cap_buffer_);
+  if (!status) {
+    return status.code();
+  }
 
 
   return glcr::OK;
@@ -126,7 +130,11 @@ glcr::ErrorCode YellowstoneClient::GetAhciInfo(AhciInfo& response) {
   RET_ERR(buffer_.At<uint64_t>(8));
 
 
-  response.ParseFromBytes(buffer_, 16, cap_buffer_);
+  // TODO: Return status.
+  auto status = response.ParseFromBytes(buffer_, 16, cap_buffer_);
+  if (!status) {
+    return status.code();
+  }
 
 
   return glcr::OK;
@@ -165,7 +173,11 @@ glcr::ErrorCode YellowstoneClient::GetFramebufferInfo(FramebufferInfo& response)
   RET_ERR(buffer_.At<uint64_t>(8));
 
 
-  response.ParseFromBytes(buffer_, 16, cap_buffer_);
+  // TODO: Return status.
+  auto status = response.ParseFromBytes(buffer_, 16, cap_buffer_);
+  if (!status) {
+    return status.code();
+  }
 
 
   return glcr::OK;
@@ -204,7 +216,11 @@ glcr::ErrorCode YellowstoneClient::GetDenali(DenaliInfo& response) {
   RET_ERR(buffer_.At<uint64_t>(8));
 
 
-  response.ParseFromBytes(buffer_, 16, cap_buffer_);
+  // TODO: Return status.
+  auto status = response.ParseFromBytes(buffer_, 16, cap_buffer_);
+  if (!status) {
+    return status.code();
+  }
 
 
   return glcr::OK;

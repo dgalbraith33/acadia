@@ -32,7 +32,7 @@ glcr::Status KeyboardListener::ParseFromBytes(const glcr::ByteBuffer& bytes, uin
 }
 
 glcr::Status KeyboardListener::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(yunq::CheckHeader(bytes));
+  RETURN_ERROR(yunq::CheckHeader(bytes, offset));
   // Parse port_capability.
   // Skip Cap.
 

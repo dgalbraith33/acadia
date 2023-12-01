@@ -103,7 +103,11 @@ glcr::ErrorCode VFSServerBase::HandleRequest(const glcr::ByteBuffer& request,
 
   
       OpenFileRequest yunq_request;
-      yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+      // TODO: Return status.
+      auto status = yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+      if (!status) {
+        return status.code();
+      }
   
 
   
@@ -123,7 +127,11 @@ glcr::ErrorCode VFSServerBase::HandleRequest(const glcr::ByteBuffer& request,
 
   
       GetDirectoryRequest yunq_request;
-      yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+      // TODO: Return status.
+      auto status = yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+      if (!status) {
+        return status.code();
+      }
   
 
   

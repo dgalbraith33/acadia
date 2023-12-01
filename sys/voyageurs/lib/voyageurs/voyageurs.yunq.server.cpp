@@ -103,7 +103,11 @@ glcr::ErrorCode VoyageursServerBase::HandleRequest(const glcr::ByteBuffer& reque
 
   
       KeyboardListener yunq_request;
-      yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+      // TODO: Return status.
+      auto status = yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+      if (!status) {
+        return status.code();
+      }
   
 
   

@@ -46,7 +46,7 @@ glcr::Status {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uin
 }
 
 glcr::Status {{message.name}}::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(yunq::CheckHeader(bytes));
+  RETURN_ERROR(yunq::CheckHeader(bytes, offset));
 
 {%- for field in message.fields %}
   // Parse {{field.name}}.

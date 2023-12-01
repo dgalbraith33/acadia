@@ -25,7 +25,7 @@ glcr::Status OpenFileRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint
 }
 
 glcr::Status OpenFileRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(yunq::CheckHeader(bytes));
+  RETURN_ERROR(yunq::CheckHeader(bytes, offset));
   // Parse path.
   auto path_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
 
@@ -94,7 +94,7 @@ glcr::Status OpenFileResponse::ParseFromBytes(const glcr::ByteBuffer& bytes, uin
 }
 
 glcr::Status OpenFileResponse::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(yunq::CheckHeader(bytes));
+  RETURN_ERROR(yunq::CheckHeader(bytes, offset));
   // Parse path.
   auto path_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
 
@@ -170,7 +170,7 @@ glcr::Status GetDirectoryRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, 
 }
 
 glcr::Status GetDirectoryRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(yunq::CheckHeader(bytes));
+  RETURN_ERROR(yunq::CheckHeader(bytes, offset));
   // Parse path.
   auto path_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
 
@@ -232,7 +232,7 @@ glcr::Status Directory::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t o
 }
 
 glcr::Status Directory::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(yunq::CheckHeader(bytes));
+  RETURN_ERROR(yunq::CheckHeader(bytes, offset));
   // Parse filenames.
   auto filenames_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
 

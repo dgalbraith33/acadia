@@ -48,7 +48,11 @@ glcr::ErrorCode VFSClient::OpenFile(const OpenFileRequest& request, OpenFileResp
   RET_ERR(buffer_.At<uint64_t>(8));
 
 
-  response.ParseFromBytes(buffer_, 16, cap_buffer_);
+  // TODO: Return status.
+  auto status = response.ParseFromBytes(buffer_, 16, cap_buffer_);
+  if (!status) {
+    return status.code();
+  }
 
 
   return glcr::OK;
@@ -87,7 +91,11 @@ glcr::ErrorCode VFSClient::GetDirectory(const GetDirectoryRequest& request, Dire
   RET_ERR(buffer_.At<uint64_t>(8));
 
 
-  response.ParseFromBytes(buffer_, 16, cap_buffer_);
+  // TODO: Return status.
+  auto status = response.ParseFromBytes(buffer_, 16, cap_buffer_);
+  if (!status) {
+    return status.code();
+  }
 
 
   return glcr::OK;

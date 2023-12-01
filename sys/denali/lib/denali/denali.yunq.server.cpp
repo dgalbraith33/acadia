@@ -103,7 +103,11 @@ glcr::ErrorCode DenaliServerBase::HandleRequest(const glcr::ByteBuffer& request,
 
   
       ReadRequest yunq_request;
-      yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+      // TODO: Return status.
+      auto status = yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+      if (!status) {
+        return status.code();
+      }
   
 
   
@@ -123,7 +127,11 @@ glcr::ErrorCode DenaliServerBase::HandleRequest(const glcr::ByteBuffer& request,
 
   
       ReadManyRequest yunq_request;
-      yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+      // TODO: Return status.
+      auto status = yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+      if (!status) {
+        return status.code();
+      }
   
 
   
