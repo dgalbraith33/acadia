@@ -6,6 +6,7 @@
 #include "glacier/container/linked_list.h"
 #include "glacier/container/pair.h"
 #include "glacier/status/error.h"
+#include "glacier/string/str_format.h"
 #include "glacier/string/string.h"
 #include "glacier/util/hash.h"
 
@@ -52,6 +53,8 @@ class HashMap {
   [[nodiscard]] ErrorCode Delete(const K&);
 
   void Resize(uint64_t new_size);
+
+  void DebugIntoStr(StringBuilder& builder) const;
 
  private:
   Array<LinkedList<Pair<K, V>>> data_;
@@ -208,6 +211,28 @@ void HashMap<K, V, H>::ResizeIfNecessary() {
     Resize(8);
   } else if (load() > 75) {
     Resize(data_.size() * 2);
+  }
+}
+
+template <typename K, typename V>
+void StrFormatValue(StringBuilder& builder, const HashMap<K, V>& value,
+                    StringView opts) {
+  value.DebugIntoStr(builder);
+}
+
+template <typename K, typename V, class H>
+void HashMap<K, V, H>::DebugIntoStr(StringBuilder& builder) const {
+  for (uint64_t i = 0; i < data_.size(); i++) {
+    if (data_[i].size() == 0) {
+      continue;
+    }
+    StrFormatValue(builder, i, "");
+    builder.PushBack(": ");
+    auto& ll = data_[i];
+    for (auto& item : ll) {
+      StrFormatInternal(builder, "{},", item.first());
+    }
+    builder.PushBack('\n');
   }
 }
 

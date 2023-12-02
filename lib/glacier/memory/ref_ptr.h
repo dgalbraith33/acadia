@@ -1,5 +1,7 @@
 #pragma once
 
+#include "glacier/string/str_format.h"
+
 namespace glcr {
 
 template <typename T>
@@ -98,6 +100,12 @@ RefPtr<T> AdoptPtr(T* ptr) {
 template <typename T, typename U>
 RefPtr<T> StaticCastRefPtr(const RefPtr<U>& ref) {
   return RefPtr(static_cast<T*>(ref.get()), RefPtr<T>::DontAdopt);
+}
+
+template <typename T>
+void StrFormatValue(StringBuilder& builder, const RefPtr<T>& value,
+                    StringView opts) {
+  StrFormatValue(builder, (uint64_t)value.get(), opts);
 }
 
 }  // namespace glcr
