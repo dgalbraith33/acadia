@@ -4,6 +4,7 @@
 #include <glacier/string/str_split.h>
 #include <mammoth/file/file.h>
 #include <mammoth/proc/process.h>
+#include <mammoth/util/debug.h>
 #include <mammoth/util/init.h>
 
 void Terminal::HandleCharacter(char c) {
@@ -68,7 +69,19 @@ void Terminal::ExecuteCommand(const glcr::String& command) {
     auto file = mmth::File::Open(tokens[1]);
 
     // TODO: Wait until the process exits.
-    mmth::SpawnProcessFromElfRegion((uint64_t)file.raw_ptr(), gInitEndpointCap);
+    auto error_or_cap = mmth::SpawnProcessFromElfRegion(
+        (uint64_t)file.raw_ptr(), gInitEndpointCap);
+    if (!error_or_cap.ok()) {
+      console_.WriteString(
+          glcr::StrFormat("Error: {}\n", error_or_cap.error()));
+      return;
+    }
+    uint64_t err_code;
+    check(ZProcessWait(error_or_cap.value(), &err_code));
+    if (err_code != 0) {
+      console_.WriteString(glcr::StrFormat(
+          "Process Error: {}\n", static_cast<glcr::ErrorCode>(err_code)));
+    }
 
   } else {
     console_.WriteString("Unknown command: ");

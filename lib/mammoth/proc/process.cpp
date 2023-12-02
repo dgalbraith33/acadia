@@ -103,8 +103,8 @@ uint64_t LoadElfProgram(uint64_t base, uint64_t as_cap) {
 
 }  // namespace
 
-glcr::ErrorCode SpawnProcessFromElfRegion(uint64_t program,
-                                          z_cap_t yellowstone_client) {
+glcr::ErrorOr<z_cap_t> SpawnProcessFromElfRegion(uint64_t program,
+                                                 z_cap_t yellowstone_client) {
   uint64_t proc_cap;
   uint64_t as_cap;
   uint64_t foreign_port_id;
@@ -130,7 +130,9 @@ glcr::ErrorCode SpawnProcessFromElfRegion(uint64_t program,
   uint64_t thread_cap;
   RET_ERR(ZThreadCreate(proc_cap, &thread_cap));
 
-  RET_ERR(pclient.WriteMessage<uint64_t>(Z_INIT_SELF_PROC, proc_cap));
+  uint64_t dup_proc_cap;
+  RET_ERR(ZCapDuplicate(proc_cap, kZionPerm_All, &dup_proc_cap));
+  RET_ERR(pclient.WriteMessage<uint64_t>(Z_INIT_SELF_PROC, dup_proc_cap));
   RET_ERR(pclient.WriteMessage<uint64_t>(Z_INIT_SELF_VMAS, as_cap));
   RET_ERR(pclient.WriteMessage<uint64_t>(Z_INIT_ENDPOINT, yellowstone_client));
 
@@ -139,7 +141,7 @@ glcr::ErrorCode SpawnProcessFromElfRegion(uint64_t program,
 #endif
   RET_ERR(ZThreadStart(thread_cap, entry_point, foreign_port_id, 0));
 
-  return glcr::OK;
+  return proc_cap;
 }
 
 }  // namespace mmth

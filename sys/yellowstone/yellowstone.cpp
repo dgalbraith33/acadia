@@ -15,7 +15,12 @@
 glcr::ErrorCode SpawnProcess(z_cap_t vmmo_cap, z_cap_t yellowstone_cap) {
   mmth::OwnedMemoryRegion region =
       mmth::OwnedMemoryRegion::FromCapability(vmmo_cap);
-  return mmth::SpawnProcessFromElfRegion(region.vaddr(), yellowstone_cap);
+  auto error_or =
+      mmth::SpawnProcessFromElfRegion(region.vaddr(), yellowstone_cap);
+  if (error_or.ok()) {
+    return glcr::OK;
+  }
+  return error_or.error();
 }
 
 uint64_t main(uint64_t port_cap) {
@@ -48,8 +53,11 @@ uint64_t main(uint64_t port_cap) {
           mmth::File::Open(glcr::StrFormat("/bin/{}", files[i]));
 
       ASSIGN_OR_RETURN(client_cap, server->CreateClientCap());
-      check(mmth::SpawnProcessFromElfRegion((uint64_t)binary.raw_ptr(),
-                                            client_cap));
+      auto error_or = mmth::SpawnProcessFromElfRegion(
+          (uint64_t)binary.raw_ptr(), client_cap);
+      if (!error_or.ok()) {
+        check(error_or.error());
+      }
     }
   }
 
