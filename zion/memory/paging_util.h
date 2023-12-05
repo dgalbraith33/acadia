@@ -4,6 +4,8 @@
 
 #include "object/process.h"
 
+uint64_t CurrCr3();
+
 void InitializePml4(uint64_t pml4_physical_addr);
 void CleanupPml4(uint64_t pml4_physical_addr);
 

@@ -81,12 +81,6 @@ uint64_t PagePhysIfResident(uint64_t cr3, uint64_t virt) {
 
 uint64_t Pml4Index(uint64_t addr) { return (addr >> PML_OFFSET) & 0x1FF; }
 
-uint64_t CurrCr3() {
-  uint64_t pml4_addr = 0;
-  asm volatile("mov %%cr3, %0;" : "=r"(pml4_addr));
-  return pml4_addr;
-}
-
 void CleanupPageStructure(uint64_t struct_phys, uint64_t level) {
   uint64_t* struct_virtual =
       reinterpret_cast<uint64_t*>(boot::GetHigherHalfDirectMap() + struct_phys);
@@ -103,6 +97,12 @@ void CleanupPageStructure(uint64_t struct_phys, uint64_t level) {
 }
 
 }  // namespace
+
+uint64_t CurrCr3() {
+  uint64_t pml4_addr = 0;
+  asm volatile("mov %%cr3, %0;" : "=r"(pml4_addr));
+  return pml4_addr;
+}
 
 void InitializePml4(uint64_t pml4_physical_addr) {
   uint64_t* pml4_virtual = reinterpret_cast<uint64_t*>(

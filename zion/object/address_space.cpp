@@ -65,6 +65,24 @@ glcr::ErrorOr<uint64_t> AddressSpace::MapInMemoryObject(
   return vaddr;
 }
 
+glcr::ErrorCode AddressSpace::FreeAddressRange(uint64_t vaddr_base,
+                                               uint64_t vaddr_limit) {
+  RET_ERR(mapping_tree_.FreeMemoryRange(vaddr_base, vaddr_limit));
+
+  // If this is the current address space we need to invalidate any pages.
+  // TODO: Consider moving this to the Mapping Tree implmementation to only
+  // call this instruction for pages that we know are mapped.
+  if (cr3_ == CurrCr3()) {
+    for (uint64_t addr = vaddr_base; addr < vaddr_limit; addr += kPageSize) {
+      asm volatile("invlpg (%0)" : : "b"(addr) : "memory");
+    }
+    // Clobber vaddr_limit as well in case of an alignment issue.
+    asm volatile("invlpg (%0)" : : "b"(vaddr_limit) : "memory");
+  }
+
+  return glcr::OK;
+}
+
 uint64_t AddressSpace::AllocateKernelStack() {
   return KernelVmm::AcquireKernelStack();
 }
