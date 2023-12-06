@@ -29,5 +29,6 @@ z_err_t AddressSpaceUnmap(ZAddressSpaceUnmapReq* req) {
   RET_ERR(ValidateCapability<AddressSpace>(vmas_cap, kZionPerm_Write));
 
   auto vmas = vmas_cap->obj<AddressSpace>();
-  return vmas->FreeAddressRange(req->lower_addr, req->upper_addr);
+  return vmas->FreeAddressRange(req->lower_addr, req->upper_addr,
+                                /* is_dying_proc= */ true);
 }

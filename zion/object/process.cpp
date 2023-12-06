@@ -103,8 +103,9 @@ void Process::Cleanup() {
   caps_.ReleaseAll();
 
   // 3. Unmap all user memory.
-  PANIC_ON_ERR(vmas_->FreeAddressRange(0, kUserSpaceMax),
-               "Failed to cleanup userspace mappings in process exit.");
+  PANIC_ON_ERR(
+      vmas_->FreeAddressRange(0, kUserSpaceMax, /* is_dying_proc= */ true),
+      "Failed to cleanup userspace mappings in process exit.");
 
   // 4. Release paging structures.
   vmas_ = nullptr;

@@ -29,7 +29,8 @@ glcr::ErrorOr<uint64_t> AddressSpace::AllocateUserStack() {
 }
 
 glcr::ErrorCode AddressSpace::FreeUserStack(uint64_t base) {
-  RET_ERR(FreeAddressRange(base, base + kUserStackSize));
+  RET_ERR(FreeAddressRange(base, base + kUserStackSize,
+                           /* is_dying_proc= */ false));
   user_stacks_.FreeUserStack(base);
   return glcr::OK;
 }
@@ -66,19 +67,21 @@ glcr::ErrorOr<uint64_t> AddressSpace::MapInMemoryObject(
 }
 
 glcr::ErrorCode AddressSpace::FreeAddressRange(uint64_t vaddr_base,
-                                               uint64_t vaddr_limit) {
+                                               uint64_t vaddr_limit,
+                                               bool is_dying_proc) {
   RET_ERR(mapping_tree_.FreeMemoryRange(vaddr_base, vaddr_limit));
 
-  // If this is the current address space we need to invalidate any pages.
+  if (is_dying_proc) {
+    return glcr::OK;
+  }
+
   // TODO: Consider moving this to the Mapping Tree implmementation to only
   // call this instruction for pages that we know are mapped.
-  if (cr3_ == CurrCr3()) {
-    for (uint64_t addr = vaddr_base; addr < vaddr_limit; addr += kPageSize) {
-      asm volatile("invlpg (%0)" : : "b"(addr) : "memory");
-    }
-    // Clobber vaddr_limit as well in case of an alignment issue.
-    asm volatile("invlpg (%0)" : : "b"(vaddr_limit) : "memory");
+  for (uint64_t addr = vaddr_base; addr < vaddr_limit; addr += kPageSize) {
+    UnmapPage(cr3_, addr);
   }
+  // Clobber vaddr_limit as well in case of an alignment issue.
+  UnmapPage(cr3_, vaddr_limit);
 
   return glcr::OK;
 }

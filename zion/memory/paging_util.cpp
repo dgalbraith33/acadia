@@ -96,13 +96,13 @@ void CleanupPageStructure(uint64_t struct_phys, uint64_t level) {
   phys_mem::FreePage(struct_phys);
 }
 
-}  // namespace
-
 uint64_t CurrCr3() {
   uint64_t pml4_addr = 0;
   asm volatile("mov %%cr3, %0;" : "=r"(pml4_addr));
   return pml4_addr;
 }
+
+}  // namespace
 
 void InitializePml4(uint64_t pml4_physical_addr) {
   uint64_t* pml4_virtual = reinterpret_cast<uint64_t*>(
@@ -164,6 +164,32 @@ void MapPage(uint64_t cr3, uint64_t vaddr, uint64_t paddr) {
     *pt_entry = paddr | access_bits;
   } else {
     panic("Page already allocated.");
+  }
+}
+
+void UnmapPage(uint64_t cr3, uint64_t vaddr) {
+  uint64_t* pml4_entry = Pml4Entry(cr3, vaddr);
+  if (!(*pml4_entry & PRESENT_BIT)) {
+    return;
+  }
+
+  uint64_t* pdp_entry = PageDirectoryPointerEntry(*pml4_entry, vaddr);
+  if (!(*pdp_entry & PRESENT_BIT)) {
+    return;
+  }
+  uint64_t* pd_entry = PageDirectoryEntry(*pdp_entry, vaddr);
+  if (!(*pd_entry & PRESENT_BIT)) {
+    return;
+  }
+
+  uint64_t* pt_entry = PageTableEntry(*pd_entry, vaddr);
+  if (!(*pt_entry & PRESENT_BIT)) {
+    return;
+  }
+
+  *pt_entry &= ~PRESENT_BIT;
+  if (cr3 == CurrCr3()) {
+    asm volatile("invlpg (%0)" : : "b"(vaddr) : "memory");
   }
 }
 

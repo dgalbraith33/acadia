@@ -82,7 +82,8 @@ class AddressSpace : public KernelObject {
       const glcr::RefPtr<MemoryObject>& mem_obj, uint64_t align);
 
   [[nodiscard]] glcr::ErrorCode FreeAddressRange(uint64_t vaddr_base,
-                                                 uint64_t vaddr_limit);
+                                                 uint64_t vaddr_limit,
+                                                 bool is_dying_proc);
 
   // Kernel Mappings.
   uint64_t AllocateKernelStack();
