@@ -17,19 +17,9 @@
 
 - Use a buddy allocator with a real free when an object is too large for
   the slab allocator.
-- Free kernel stacks on thread/process exit.
-
-## Process Management
-
-- Clean up process state and capabilities when it exits.
-
-## Processor
-
-- Enable all instruction types before passing to user space.
 
 ## Faults and Interrupts
 
-- Exit process rather than panicking on unhandled Page Fault (and others).
 - Add additional fault handlers to avoid GP faults.
 - Improve process for registering interrupt handlers.
 
