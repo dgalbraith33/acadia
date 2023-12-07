@@ -23,11 +23,15 @@ class Scheduler {
   void Preempt();
   void Yield();
 
+  void Sleep(uint64_t millis);
+
  private:
   bool enabled_ = false;
 
   glcr::RefPtr<Thread> current_thread_;
   glcr::IntrusiveList<Thread> runnable_threads_;
+
+  glcr::IntrusiveList<Thread> sleeping_threads_;
 
   glcr::RefPtr<Thread> sleep_thread_;
 
@@ -35,6 +39,7 @@ class Scheduler {
   void SwapToCurrent(Thread& prev);
 
   void ClearDeadThreadsFromFront();
+  void DecrementSleepingThreads();
 };
 
 extern Scheduler* gScheduler;

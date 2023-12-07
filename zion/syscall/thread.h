@@ -8,3 +8,4 @@ glcr::ErrorCode ThreadCreate(ZThreadCreateReq* req);
 glcr::ErrorCode ThreadStart(ZThreadStartReq* req);
 glcr::ErrorCode ThreadExit(ZThreadExitReq*);
 glcr::ErrorCode ThreadWait(ZThreadWaitReq* req);
+glcr::ErrorCode ThreadSleep(ZThreadSleepReq* req);

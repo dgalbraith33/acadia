@@ -59,6 +59,7 @@ extern "C" z_err_t SyscallHandler(uint64_t call_id, void* req) {
     CASE(ThreadStart);
     CASE(ThreadExit);
     CASE(ThreadWait);
+    CASE(ThreadSleep);
     // syscall/address_space.h
     CASE(AddressSpaceMap);
     CASE(AddressSpaceUnmap);

@@ -19,6 +19,7 @@ const uint64_t kZionThreadCreate = 0x10;
 const uint64_t kZionThreadStart = 0x11;
 const uint64_t kZionThreadExit = 0x12;
 const uint64_t kZionThreadWait = 0x13;
+const uint64_t kZionThreadSleep = 0x14;
 
 // Memory Calls
 const uint64_t kZionAddressSpaceMap = 0x21;

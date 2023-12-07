@@ -29,6 +29,7 @@ class Thread : public KernelObject, public glcr::IntrusiveListNode<Thread> {
     RUNNING,
     RUNNABLE,
     BLOCKED,
+    SLEEPING,
     CLEANUP,
     FINISHED,
   };
@@ -69,6 +70,9 @@ class Thread : public KernelObject, public glcr::IntrusiveListNode<Thread> {
 
   void Wait();
 
+  void SetSleepTicks(uint64_t sleep_ticks) { sleep_ticks_ = sleep_ticks; }
+  bool DecrementSleepTicks() { return --sleep_ticks_ == 0; }
+
  private:
   friend class glcr::MakeRefCountedFriend<Thread>;
   Thread(Process& proc, uint64_t tid);
@@ -79,6 +83,7 @@ class Thread : public KernelObject, public glcr::IntrusiveListNode<Thread> {
   State state_ = CREATED;
   bool is_kernel_ = false;
   uint64_t user_stack_base_;
+  uint64_t sleep_ticks_;
 
   // Startup Context for the thread.
   uint64_t rip_;

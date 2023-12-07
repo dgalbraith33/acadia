@@ -45,14 +45,11 @@ void Scheduler::Preempt() {
     return;
   }
 
+  DecrementSleepingThreads();
+
   ClearDeadThreadsFromFront();
 
   asm volatile("cli");
-  if (current_thread_ == sleep_thread_) {
-    // Sleep should never be preempted. (We should yield it if another thread
-    // becomes scheduleable).
-    return;
-  }
 
   if (runnable_threads_.size() == 0) {
     // Continue.
@@ -102,9 +99,33 @@ void Scheduler::Yield() {
   SwapToCurrent(*prev);
 }
 
+void Scheduler::Sleep(uint64_t millis) {
+  // FIXME: Improve resolution of sleep calls.
+  uint64_t ticks = (millis / 50) + 1;
+  current_thread_->SetSleepTicks(ticks);
+  current_thread_->SetState(Thread::SLEEPING);
+  sleeping_threads_.PushBack(current_thread_);
+  Yield();
+}
+
 void Scheduler::ClearDeadThreadsFromFront() {
   while (runnable_threads_.size() > 0 &&
          runnable_threads_.PeekFront()->IsDying()) {
     runnable_threads_.PopFront();
+  }
+}
+
+void Scheduler::DecrementSleepingThreads() {
+  auto thread = sleeping_threads_.PeekFront();
+  while (thread) {
+    if (thread->DecrementSleepTicks()) {
+      auto thread_next = thread->next_;
+      sleeping_threads_.Remove(thread);
+      thread->SetState(Thread::RUNNABLE);
+      runnable_threads_.PushBack(thread);
+      thread = thread_next;
+    } else {
+      thread = thread->next_;
+    }
   }
 }

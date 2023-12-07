@@ -53,3 +53,8 @@ glcr::ErrorCode ThreadWait(ZThreadWaitReq* req) {
   thread->Wait();
   return glcr::OK;
 }
+
+glcr::ErrorCode ThreadSleep(ZThreadSleepReq* req) {
+  gScheduler->Sleep(req->millis);
+  return glcr::OK;
+}
