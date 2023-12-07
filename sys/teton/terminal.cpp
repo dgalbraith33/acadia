@@ -68,9 +68,14 @@ void Terminal::ExecuteCommand(const glcr::String& command) {
     }
     auto file = mmth::File::Open(tokens[1]);
 
-    // TODO: Wait until the process exits.
-    auto error_or_cap = mmth::SpawnProcessFromElfRegion(
-        (uint64_t)file.raw_ptr(), gInitEndpointCap);
+    z_cap_t endpoint;
+    if (ZCapDuplicate(gInitEndpointCap, kZionPerm_All, &endpoint) != glcr::OK) {
+      console_.WriteString("Couldn't duplicate yellowstone cap for spawn");
+      return;
+    }
+
+    auto error_or_cap =
+        mmth::SpawnProcessFromElfRegion((uint64_t)file.raw_ptr(), endpoint);
     if (!error_or_cap.ok()) {
       console_.WriteString(
           glcr::StrFormat("Error: {}\n", error_or_cap.error()));
