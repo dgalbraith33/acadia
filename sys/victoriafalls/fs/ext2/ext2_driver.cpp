@@ -3,6 +3,8 @@
 #include <glacier/string/string.h>
 #include <mammoth/util/debug.h>
 
+#define EXT2_DEBUG 0
+
 glcr::ErrorOr<Ext2Driver> Ext2Driver::Init(
     const yellowstone::DenaliInfo& denali_info) {
   ASSIGN_OR_RETURN(glcr::SharedPtr<Ext2BlockReader> reader,
@@ -23,6 +25,8 @@ glcr::ErrorCode Ext2Driver::ProbePartition() {
     dbgln("Invalid EXT2 magic code: {x}");
     return glcr::INVALID_ARGUMENT;
   }
+
+#if EXT2_DEBUG
   dbgln("Block size: 0x{x}", 1024 << superblock->log_block_size);
 
   dbgln("Blocks: 0x{x} (0x{x} per group)", superblock->blocks_count,
@@ -36,6 +40,7 @@ glcr::ErrorCode Ext2Driver::ProbePartition() {
   dbgln("State: {x}", superblock->state);
 
   dbgln("Created by: {x}", superblock->creator_os);
+#endif
 
   return glcr::OK;
 }
@@ -63,7 +68,6 @@ glcr::ErrorOr<glcr::Vector<DirEntry>> Ext2Driver::ReadDirectory(
 
   glcr::Vector<DirEntry> directory;
   for (uint64_t i = 0; i < real_block_cnt; i++) {
-    dbgln("Getting block {x}", inode->block[i]);
     ASSIGN_OR_RETURN(mmth::OwnedMemoryRegion block,
                      ext2_reader_->ReadBlock(inode->block[i]));
     uint64_t addr = block.vaddr();
@@ -71,6 +75,7 @@ glcr::ErrorOr<glcr::Vector<DirEntry>> Ext2Driver::ReadDirectory(
       DirEntry* entry = reinterpret_cast<DirEntry*>(addr);
       directory.PushBack(*entry);
       glcr::StringView name(entry->name, entry->name_len);
+#if EXT2_DEBUG
       switch (entry->file_type) {
         case kExt2FtFile:
           dbgln("FILE (0x{x}): {}", entry->inode, name);
@@ -81,6 +86,7 @@ glcr::ErrorOr<glcr::Vector<DirEntry>> Ext2Driver::ReadDirectory(
         default:
           dbgln("UNK  (0x{x}): {}", entry->inode, name);
       }
+#endif
       addr += entry->record_length;
     }
   }

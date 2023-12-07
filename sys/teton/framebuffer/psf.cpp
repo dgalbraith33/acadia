@@ -3,6 +3,8 @@
 #include <glacier/memory/move.h>
 #include <mammoth/util/debug.h>
 
+#define PSF_DEBUG 0
+
 namespace {
 
 const uint32_t kMagic = 0x864AB572;
@@ -16,6 +18,7 @@ Psf::Psf(glcr::StringView path)
 }
 
 void Psf::DumpHeader() {
+#if PSF_DEBUG
   dbgln("Magic: {x}", header_->magic);
   dbgln("Version: {x}", header_->version);
   dbgln("Header Sz: {x}", header_->headersize);
@@ -24,6 +27,7 @@ void Psf::DumpHeader() {
   dbgln("Glyph Size: {x}", header_->bytesperglyph);
   dbgln("Height: {x}", header_->height);
   dbgln("Width: {x}", header_->width);
+#endif
 }
 
 void Psf::EnsureValid() {
