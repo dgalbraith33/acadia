@@ -20,6 +20,8 @@ class IntrusiveList {
   void PushFront(const RefPtr<T>& obj);
   void PushBack(const RefPtr<T>& obj);
 
+  void Remove(const RefPtr<T>& obj);
+
   RefPtr<T> PopFront();
   RefPtr<T> PopBack();
 
@@ -62,6 +64,29 @@ void IntrusiveList<T>::PushBack(const RefPtr<T>& obj) {
   obj->prev_ = back_;
   obj->next_ = nullptr;
   back_ = obj;
+}
+
+template <typename T>
+void IntrusiveList<T>::Remove(const RefPtr<T>& obj) {
+  if (!obj) {
+    return;
+  }
+  if (front_ == obj) {
+    front_ = obj->next_;
+  }
+  if (back_ == obj) {
+    back_ = obj->prev_;
+  }
+  if (obj->prev_) {
+    obj->prev_->next_ = obj->next_;
+  }
+  if (obj->next_) {
+    obj->next_->prev_ = obj->prev_;
+  }
+
+  obj->prev_ = nullptr;
+  obj->next_ = nullptr;
+  size_--;
 }
 
 template <typename T>
