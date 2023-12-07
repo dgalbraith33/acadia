@@ -144,7 +144,11 @@ glcr::ErrorOr<mmth::OwnedMemoryRegion> Ext2Driver::ReadFile(
       if (block_inner >= real_block_cnt) {
         break;
       }
-      blocks_to_read.PushBack(single_indr_block_array[j]);
+      if (single_indr_block_array[j] != 0) {
+        blocks_to_read.PushBack(single_indr_block_array[j]);
+      } else {
+        dbgln("WARN skipping 0 block in inode");
+      }
     }
   }
 
