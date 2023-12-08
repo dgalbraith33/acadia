@@ -113,7 +113,7 @@ extern "C" void interrupt_protection_fault(InterruptFrame* frame) {
   dbgln("RIP: {x}", frame->rip);
   dbgln("RAX: {x}, RBX: {x}, RCX: {x}, RDX: {x}", frame->rax, frame->rbx,
         frame->rcx, frame->rdx);
-  dbgln("RSP: {x}", frame->rsp);
+  dbgln("RSP: {x}, RBP: {x}", frame->rsp, frame->rbp);
   StackUnwind(frame->rbp);
 
   if (IsUserSpace(frame->rip)) {
