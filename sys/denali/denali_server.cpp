@@ -6,7 +6,7 @@
 #include <zcall.h>
 
 glcr::ErrorOr<glcr::UniquePtr<DenaliServer>> DenaliServer::Create(
-    AhciDriver& driver) {
+    AhciController& driver) {
   z_cap_t cap;
   RET_ERR(ZEndpointCreate(&cap));
   return glcr::UniquePtr<DenaliServer>(new DenaliServer(cap, driver));

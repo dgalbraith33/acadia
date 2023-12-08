@@ -37,6 +37,10 @@ struct PciMsiCap {
   uint16_t message_data;
 } __attribute__((packed));
 
+const uint32_t kGlobalHostControl_HW_Reset = 1;
+const uint32_t kGlobalHostControl_AHCI_Enable = (1 << 31);
+const uint32_t kGlobalHostControl_Interrupt_Enable = (1 << 1);
+
 struct AhciHba {
   uint32_t capabilities;
   uint32_t global_host_control;
@@ -50,6 +54,9 @@ struct AhciHba {
   uint32_t capabilities_ext;
   uint32_t bohc;  // 0x28, BIOS/OS handoff control and status
 } __attribute__((packed));
+
+const uint32_t kCommand_FIS_Receive_Enable = (1 << 4);
+const uint32_t kCommand_Start = 1;
 
 struct AhciPort {
   uint64_t command_list_base;

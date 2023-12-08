@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <yellowstone/yellowstone.yunq.client.h>
 
-#include "ahci/ahci_driver.h"
+#include "ahci/ahci_controller.h"
 #include "denali_server.h"
 
 using yellowstone::AhciInfo;
@@ -19,7 +19,7 @@ uint64_t main(uint64_t init_port_cap) {
   check(stub.GetAhciInfo(ahci));
   mmth::OwnedMemoryRegion ahci_region =
       mmth::OwnedMemoryRegion::FromCapability(ahci.ahci_region());
-  ASSIGN_OR_RETURN(auto driver, AhciDriver::Init(glcr::Move(ahci_region)));
+  ASSIGN_OR_RETURN(auto driver, AhciController::Init(glcr::Move(ahci_region)));
 
   ASSIGN_OR_RETURN(glcr::UniquePtr<DenaliServer> server,
                    DenaliServer::Create(*driver));

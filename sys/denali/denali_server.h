@@ -2,13 +2,13 @@
 
 #include <glacier/status/error.h>
 
-#include "ahci/ahci_driver.h"
+#include "ahci/ahci_controller.h"
 #include "lib/denali/denali.yunq.server.h"
 
 class DenaliServer : public DenaliServerBase {
  public:
   static glcr::ErrorOr<glcr::UniquePtr<DenaliServer>> Create(
-      AhciDriver& driver);
+      AhciController& driver);
 
   glcr::Status HandleRead(const ReadRequest& req, ReadResponse& resp) override;
   glcr::Status HandleReadMany(const ReadManyRequest& req,
@@ -18,8 +18,8 @@ class DenaliServer : public DenaliServerBase {
   static const uint64_t kBuffSize = 1024;
   uint8_t read_buffer_[kBuffSize];
 
-  AhciDriver& driver_;
+  AhciController& driver_;
 
-  DenaliServer(z_cap_t endpoint_cap, AhciDriver& driver)
+  DenaliServer(z_cap_t endpoint_cap, AhciController& driver)
       : DenaliServerBase(endpoint_cap), driver_(driver) {}
 };

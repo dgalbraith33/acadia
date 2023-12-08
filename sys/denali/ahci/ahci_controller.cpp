@@ -1,4 +1,4 @@
-#include "ahci/ahci_driver.h"
+#include "ahci/ahci_controller.h"
 
 #include <glacier/status/error.h>
 #include <glacier/status/error_or.h>
@@ -11,7 +11,7 @@ namespace {
 const uint64_t kGhc_InteruptEnable = 0x2;
 
 void interrupt_thread(void* void_driver) {
-  AhciDriver* driver = static_cast<AhciDriver*>(void_driver);
+  AhciController* driver = static_cast<AhciController*>(void_driver);
 
   driver->InterruptLoop();
 
@@ -20,31 +20,32 @@ void interrupt_thread(void* void_driver) {
 
 }  // namespace
 
-glcr::ErrorOr<glcr::UniquePtr<AhciDriver>> AhciDriver::Init(
+glcr::ErrorOr<glcr::UniquePtr<AhciController>> AhciController::Init(
     mmth::OwnedMemoryRegion&& pci_region) {
-  glcr::UniquePtr<AhciDriver> driver(new AhciDriver(glcr::Move(pci_region)));
-  // RET_ERR(driver->LoadCapabilities());
+  glcr::UniquePtr<AhciController> driver(
+      new AhciController(glcr::Move(pci_region)));
   RET_ERR(driver->LoadHbaRegisters());
-  RET_ERR(driver->LoadDevices());
+  driver->DumpCapabilities();
+  RET_ERR(driver->ResetHba());
   RET_ERR(driver->RegisterIrq());
-  // driver->DumpCapabilities();
+  RET_ERR(driver->LoadDevices());
   // driver->DumpPorts();
   return driver;
 }
 
-glcr::ErrorOr<AhciDevice*> AhciDriver::GetDevice(uint64_t id) {
+glcr::ErrorOr<AhciDevice*> AhciController::GetDevice(uint64_t id) {
   if (id >= 32) {
     return glcr::INVALID_ARGUMENT;
   }
 
-  if (devices_[id] != nullptr && !devices_[id]->IsInit()) {
+  if (devices_[id].empty()) {
     return glcr::NOT_FOUND;
   }
 
-  return devices_[id];
+  return devices_[id].get();
 }
 
-void AhciDriver::DumpCapabilities() {
+void AhciController::DumpCapabilities() {
   dbgln("AHCI Capabilities:");
   uint32_t caps = ahci_hba_->capabilities;
 
@@ -122,26 +123,25 @@ void AhciDriver::DumpCapabilities() {
   dbgln("Control {x}", ahci_hba_->global_host_control);
 }
 
-void AhciDriver::DumpPorts() {
+void AhciController::DumpPorts() {
   for (uint64_t i = 0; i < 6; i++) {
-    AhciDevice* dev = devices_[i];
-    if (dev == nullptr || !dev->IsInit()) {
+    if (devices_[i].empty()) {
       continue;
     }
 
     dbgln("");
     dbgln("Port {}:", i);
-    dev->DumpInfo();
+    devices_[i]->DumpInfo();
   }
 }
 
-void AhciDriver::InterruptLoop() {
+void AhciController::InterruptLoop() {
   dbgln("Starting interrupt loop");
   while (true) {
     uint64_t bytes, caps;
     check(ZPortRecv(irq_port_cap_, &bytes, nullptr, &caps, nullptr));
     for (uint64_t i = 0; i < 32; i++) {
-      if (devices_[i] != nullptr && devices_[i]->IsInit() &&
+      if (!devices_[i].empty() && devices_[i]->IsInit() &&
           (ahci_hba_->interrupt_status & (1 << i))) {
         devices_[i]->HandleIrq();
         ahci_hba_->interrupt_status &= ~(1 << i);
@@ -150,7 +150,7 @@ void AhciDriver::InterruptLoop() {
   }
 }
 
-glcr::ErrorCode AhciDriver::LoadCapabilities() {
+glcr::ErrorCode AhciController::LoadCapabilities() {
   if (!(pci_device_header_->status_reg & 0x10)) {
     dbgln("No caps!");
     return glcr::FAILED_PRECONDITION;
@@ -179,7 +179,7 @@ glcr::ErrorCode AhciDriver::LoadCapabilities() {
   return glcr::OK;
 }
 
-glcr::ErrorCode AhciDriver::RegisterIrq() {
+glcr::ErrorCode AhciController::RegisterIrq() {
   if (pci_device_header_->interrupt_pin == 0) {
     crash("Can't register IRQ without a pin num", glcr::INVALID_ARGUMENT);
   }
@@ -205,7 +205,7 @@ glcr::ErrorCode AhciDriver::RegisterIrq() {
   return glcr::OK;
 }
 
-glcr::ErrorCode AhciDriver::LoadHbaRegisters() {
+glcr::ErrorCode AhciController::LoadHbaRegisters() {
   ahci_region_ = mmth::OwnedMemoryRegion ::DirectPhysical(
       pci_device_header_->abar, 0x1100);
   ahci_hba_ = reinterpret_cast<AhciHba*>(ahci_region_.vaddr());
@@ -215,15 +215,34 @@ glcr::ErrorCode AhciDriver::LoadHbaRegisters() {
   return glcr::OK;
 }
 
-glcr::ErrorCode AhciDriver::LoadDevices() {
-  for (uint8_t i = 0; i < 32; i++) {
+glcr::ErrorCode AhciController::ResetHba() {
+  ahci_hba_->global_host_control |= kGlobalHostControl_HW_Reset;
+
+  // TODO: Consider sleeping here.
+  while (ahci_hba_->global_host_control & kGlobalHostControl_HW_Reset) {
+    continue;
+  }
+
+  ahci_hba_->global_host_control |= kGlobalHostControl_AHCI_Enable;
+
+  return static_cast<glcr::ErrorCode>(ZThreadSleep(50));
+}
+
+glcr::ErrorCode AhciController::LoadDevices() {
+  for (uint8_t i = 0; i <= num_ports_; i++) {
     if (!(ahci_hba_->port_implemented & (1 << i))) {
-      devices_[i] = nullptr;
       continue;
     }
+
     uint64_t port_addr =
         reinterpret_cast<uint64_t>(ahci_hba_) + 0x100 + (0x80 * i);
+    AhciPort* port = reinterpret_cast<AhciPort*>(port_addr);
+    if ((port->sata_status & 0x103) != 0x103) {
+      continue;
+    }
+
     devices_[i] = new AhciDevice(reinterpret_cast<AhciPort*>(port_addr));
+    devices_[i]->DumpInfo();
   }
   return glcr::OK;
 }

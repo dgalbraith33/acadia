@@ -6,7 +6,8 @@
 
 AhciDevice::AhciDevice(AhciPort* port) : port_struct_(port) {
   if ((port_struct_->sata_status & 0x103) != 0x103) {
-    return;
+    crash("Creating device on port without a device",
+          glcr::FAILED_PRECONDITION);
   }
 
   // 0x0-0x400 -> Command List
@@ -22,35 +23,46 @@ AhciDevice::AhciDevice(AhciPort* port) : port_struct_(port) {
   received_fis_ =
       reinterpret_cast<ReceivedFis*>(command_structures_.vaddr() + 0x400);
   port_struct_->fis_base = paddr + 0x400;
+  port_struct_->command |= kCommand_FIS_Receive_Enable;
 
   command_tables_ =
       reinterpret_cast<CommandTable*>(command_structures_.vaddr() + 0x500);
 
   for (uint64_t i = 0; i < 32; i++) {
+    // This leaves space for 2 prdt entries.
     command_list_->command_headers[i].command_table_base_addr =
         (paddr + 0x500) + (0x100 * i);
+    commands_[i] = nullptr;
   }
   port_struct_->interrupt_enable = 0xFFFFFFFF;
-  // Reset the CMD and FRE bits since we move these structures.
-  // FIXME: I think we need to poll these bits to make sure they become
-  // 0 before setting them back to one.
-  port_struct_->command &= ~(0x00000011);
-  port_struct_->command |= 0x00000011;
+  port_struct_->sata_error = -1;
+  port_struct_->command |= kCommand_Start;
 }
 
 glcr::ErrorCode AhciDevice::IssueCommand(Command* command) {
-  command->PopulateFis(command_tables_->command_fis);
-  command->PopulatePrdt(command_tables_->prdt);
+  uint64_t slot;
+  for (slot = 0; slot < 32; slot++) {
+    if (commands_[slot] == nullptr) {
+      break;
+    }
+  }
+  if (slot == 32) {
+    dbgln("All slots full");
+    return glcr::INTERNAL;
+  }
+  CommandTable* command_table = command_tables_ + slot;
+  command->PopulateFis(command_tables_[slot].command_fis);
+  command->PopulatePrdt(command_tables_[slot].prdt);
 
-  command_list_->command_headers[0].command =
+  command_list_->command_headers[slot].command =
       (sizeof(HostToDeviceRegisterFis) / 2) & 0x1F;
-  command_list_->command_headers[0].prd_table_length = 1;
-  command_list_->command_headers[0].prd_byte_count = 0;
+  command_list_->command_headers[slot].prd_table_length = 1;
+  command_list_->command_headers[slot].prd_byte_count = 0;
 
-  commands_[0] = command;
+  commands_[slot] = command;
 
-  commands_issued_ |= 1;
-  port_struct_->command_issue |= 1;
+  commands_issued_ |= 1 << slot;
+  port_struct_->command_issue |= 1 << slot;
 
   return glcr::OK;
 }
@@ -61,17 +73,9 @@ void AhciDevice::DumpInfo() {
   dbgln("Command: {x}", port_struct_->command);
   dbgln("Signature: {x}", port_struct_->signature);
   dbgln("SATA status: {x}", port_struct_->sata_status);
+  dbgln("SATA error: {x}", port_struct_->sata_error);
   dbgln("Int status: {x}", port_struct_->interrupt_status);
   dbgln("Int enable: {x}", port_struct_->interrupt_enable);
-
-  // Just dump one command info for now.
-  for (uint64_t i = 0; i < 32; i++) {
-    dbgln("Command Header: {}", i);
-    dbgln("Command {x}", command_list_->command_headers[i].command);
-    dbgln("PRD Len: {x}", command_list_->command_headers[i].prd_table_length);
-    dbgln("Command Table {x}",
-          command_list_->command_headers[i].command_table_base_addr);
-  }
 }
 
 void AhciDevice::HandleIrq() {
