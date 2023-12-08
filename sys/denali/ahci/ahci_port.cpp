@@ -28,12 +28,12 @@ AhciPort::AhciPort(AhciPortHba* port) : port_struct_(port) {
   command_tables_ = glcr::ArrayView(
       reinterpret_cast<CommandTable*>(command_structures_.vaddr() + 0x500), 32);
 
+  commands_issued_ = 0;
   command_signals_ = glcr::Array<mmth::Semaphore>(32);
   for (uint64_t i = 0; i < 32; i++) {
     // This leaves space for 2 prdt entries.
     command_list_->command_headers[i].command_table_base_addr =
         (paddr + 0x500) + (0x100 * i);
-    commands_[i] = nullptr;
   }
   port_struct_->interrupt_enable = 0xFFFFFFFF;
   // kInterrupt_D2H_FIS | kInterrupt_PIO_FIS | kInterrupt_DMA_FIS |
@@ -45,17 +45,17 @@ AhciPort::AhciPort(AhciPortHba* port) : port_struct_(port) {
 glcr::ErrorCode AhciPort::Identify() {
   if (IsSata()) {
     IdentifyDeviceCommand identify(this);
-    ASSIGN_OR_RETURN(auto* sem, IssueCommand(&identify));
+    ASSIGN_OR_RETURN(auto* sem, IssueCommand(identify));
     sem->Wait();
     identify.OnComplete();
   }
   return glcr::OK;
 }
 
-glcr::ErrorOr<mmth::Semaphore*> AhciPort::IssueCommand(Command* command) {
+glcr::ErrorOr<mmth::Semaphore*> AhciPort::IssueCommand(const Command& command) {
   uint64_t slot;
   for (slot = 0; slot < 32; slot++) {
-    if (commands_[slot] == nullptr) {
+    if (!(commands_issued_ & (1 << slot))) {
       break;
     }
   }
@@ -63,15 +63,13 @@ glcr::ErrorOr<mmth::Semaphore*> AhciPort::IssueCommand(Command* command) {
     dbgln("All slots full");
     return glcr::INTERNAL;
   }
-  command->PopulateFis(command_tables_[slot].command_fis);
-  command->PopulatePrdt(command_tables_[slot].prdt);
+  command.PopulateFis(command_tables_[slot].command_fis);
+  command.PopulatePrdt(command_tables_[slot].prdt);
 
   command_list_->command_headers[slot].command =
       (sizeof(HostToDeviceRegisterFis) / 2) & 0x1F | (1 << 7);
   command_list_->command_headers[slot].prd_table_length = 1;
   command_list_->command_headers[slot].prd_byte_count = 0;
-
-  commands_[slot] = command;
 
   commands_issued_ |= (1 << slot);
   port_struct_->command_issue |= (1 << slot);
@@ -161,10 +159,9 @@ void AhciPort::HandleIrq() {
 
   for (uint64_t i = 0; i < 32; i++) {
     if (commands_finished & (1 << i)) {
-      commands_issued_ &= ~(1 << i);
-      // FIXME: Pass error codes to the callback.
+      // TODO: Pass error codes to the callback.
       command_signals_[i].Signal();
-      commands_[i] = nullptr;
+      commands_issued_ &= ~(1 << i);
     }
   }
 }

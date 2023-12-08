@@ -21,7 +21,7 @@ glcr::Status DenaliServer::HandleRead(const ReadRequest& req,
       mmth::OwnedMemoryRegion::ContiguousPhysical(req.size() * 512, &paddr);
 
   DmaReadCommand command(req.lba(), req.size(), paddr);
-  ASSIGN_OR_RETURN(auto semaphore, device->IssueCommand(&command));
+  ASSIGN_OR_RETURN(auto semaphore, device->IssueCommand(command));
   semaphore->Wait();
 
   resp.set_device_id(req.device_id());
@@ -50,7 +50,7 @@ glcr::Status DenaliServer::HandleReadMany(const ReadManyRequest& req,
     uint64_t lba = req.lba().at(i);
     uint64_t size = req.sector_cnt().at(i);
     DmaReadCommand command(lba, size, region_paddr);
-    ASSIGN_OR_RETURN(auto semaphore, device->IssueCommand(&command));
+    ASSIGN_OR_RETURN(auto semaphore, device->IssueCommand(command));
     semaphore->Wait();
 
     region_paddr += size * 512;

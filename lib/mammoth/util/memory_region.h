@@ -25,14 +25,14 @@ class OwnedMemoryRegion {
   static OwnedMemoryRegion ContiguousPhysical(uint64_t size, uint64_t* paddr);
   static OwnedMemoryRegion DirectPhysical(uint64_t paddr, uint64_t size);
 
-  uint64_t vaddr() { return vaddr_; }
-  uint64_t size() { return size_; }
+  uint64_t vaddr() const { return vaddr_; }
+  uint64_t size() const { return size_; }
 
-  z_cap_t cap() { return vmmo_cap_; }
+  z_cap_t cap() const { return vmmo_cap_; }
   z_cap_t DuplicateCap();
 
-  bool empty() { return vmmo_cap_ != 0; }
-  explicit operator bool() { return vmmo_cap_ != 0; }
+  bool empty() const { return vmmo_cap_ == 0; }
+  explicit operator bool() const { return vmmo_cap_ != 0; }
 
  private:
   OwnedMemoryRegion(uint64_t vmmo_cap, uint64_t vaddr, uint64_t size)

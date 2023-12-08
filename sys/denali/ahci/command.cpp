@@ -19,7 +19,7 @@ void* memcpy(void* dest, const void* src, uint64_t count) {
 
 Command::~Command() {}
 
-void IdentifyDeviceCommand::PopulateFis(uint8_t* command_fis) {
+void IdentifyDeviceCommand::PopulateFis(uint8_t* command_fis) const {
   HostToDeviceRegisterFis fis __attribute__((aligned(16))){
       .fis_type = FIS_TYPE_REG_H2D,
       .pmp_and_c = 0x80,
@@ -30,7 +30,7 @@ void IdentifyDeviceCommand::PopulateFis(uint8_t* command_fis) {
   memcpy(command_fis, &fis, sizeof(fis));
 }
 
-void IdentifyDeviceCommand::PopulatePrdt(PhysicalRegionDescriptor* prdt) {
+void IdentifyDeviceCommand::PopulatePrdt(PhysicalRegionDescriptor* prdt) const {
   prdt[0].region_address = paddr_;
   prdt[0].byte_count = 0x200 - 1;
   dbgln("paddr: {x}", paddr_);
@@ -56,7 +56,7 @@ DmaReadCommand::DmaReadCommand(uint64_t lba, uint64_t sector_cnt,
 
 DmaReadCommand::~DmaReadCommand() {}
 
-void DmaReadCommand::PopulateFis(uint8_t* command_fis) {
+void DmaReadCommand::PopulateFis(uint8_t* command_fis) const {
   HostToDeviceRegisterFis fis{
       .fis_type = FIS_TYPE_REG_H2D,
       .pmp_and_c = 0x80,
@@ -83,7 +83,7 @@ void DmaReadCommand::PopulateFis(uint8_t* command_fis) {
   memcpy(command_fis, &fis, sizeof(fis));
 }
 
-void DmaReadCommand::PopulatePrdt(PhysicalRegionDescriptor* prdt) {
+void DmaReadCommand::PopulatePrdt(PhysicalRegionDescriptor* prdt) const {
   prdt[0].region_address = paddr_;
   prdt[0].byte_count = sector_cnt_ * 512;
 }

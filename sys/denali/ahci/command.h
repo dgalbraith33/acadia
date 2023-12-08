@@ -12,15 +12,15 @@ class Command {
  public:
   Command() = default;
   virtual ~Command();
-  virtual void PopulateFis(uint8_t* command_fis) = 0;
-  virtual void PopulatePrdt(PhysicalRegionDescriptor* prdt) = 0;
+  virtual void PopulateFis(uint8_t* command_fis) const = 0;
+  virtual void PopulatePrdt(PhysicalRegionDescriptor* prdt) const = 0;
 };
 
 class IdentifyDeviceCommand : public Command {
  public:
   IdentifyDeviceCommand(AhciPort* port) : port_(port) {}
-  virtual void PopulateFis(uint8_t* command_fis) override;
-  virtual void PopulatePrdt(PhysicalRegionDescriptor* prdt) override;
+  virtual void PopulateFis(uint8_t* command_fis) const override;
+  virtual void PopulatePrdt(PhysicalRegionDescriptor* prdt) const override;
 
   void OnComplete();
 
@@ -37,8 +37,8 @@ class DmaReadCommand : public Command {
 
   virtual ~DmaReadCommand() override;
 
-  void PopulateFis(uint8_t* command_fis) override;
-  void PopulatePrdt(PhysicalRegionDescriptor* prdt) override;
+  void PopulateFis(uint8_t* command_fis) const override;
+  void PopulatePrdt(PhysicalRegionDescriptor* prdt) const override;
 
  private:
   uint64_t lba_;

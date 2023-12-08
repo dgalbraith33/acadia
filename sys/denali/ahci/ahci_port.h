@@ -23,7 +23,7 @@ class AhciPort {
 
   glcr::ErrorCode Identify();
 
-  glcr::ErrorOr<mmth::Semaphore*> IssueCommand(Command* command);
+  glcr::ErrorOr<mmth::Semaphore*> IssueCommand(const Command& command);
 
   void HandleIrq();
 
@@ -38,7 +38,6 @@ class AhciPort {
   volatile ReceivedFis* received_fis_ = nullptr;
   glcr::ArrayView<CommandTable> command_tables_;
 
-  Command* commands_[32];
   glcr::Array<mmth::Semaphore> command_signals_;
   uint32_t commands_issued_ = 0;
 };
