@@ -58,6 +58,12 @@ struct AhciHba {
 const uint32_t kCommand_FIS_Receive_Enable = (1 << 4);
 const uint32_t kCommand_Start = 1;
 
+const uint32_t kInterrupt_D2H_FIS = 1;
+const uint32_t kInterrupt_PIO_FIS = (1 << 1);
+const uint32_t kInterrupt_DMA_FIS = (1 << 2);
+const uint32_t kInterrupt_DeviceBits_FIS = (1 << 3);
+const uint32_t kInterrupt_Unknown_FIS = (1 << 4);
+
 struct AhciPort {
   uint64_t command_list_base;
   uint64_t fis_base;
@@ -237,7 +243,13 @@ struct DeviceToHostRegisterFis {
 
   uint32_t reserved3;
 } __attribute__((packed));
+
 struct SetDeviceBitsFis {
+  uint8_t fis_type;
+  uint8_t pmport_and_i;
+  uint8_t status;
+  uint8_t error;
+  uint32_t reserved;
 } __attribute__((packed));
 
 struct ReceivedFis {

@@ -34,7 +34,7 @@ glcr::ErrorOr<glcr::UniquePtr<AhciController>> AhciController::Init(
 }
 
 glcr::ErrorOr<AhciDevice*> AhciController::GetDevice(uint64_t id) {
-  if (id >= 32) {
+  if (id >= num_ports_) {
     return glcr::INVALID_ARGUMENT;
   }
 
@@ -140,9 +140,8 @@ void AhciController::InterruptLoop() {
   while (true) {
     uint64_t bytes, caps;
     check(ZPortRecv(irq_port_cap_, &bytes, nullptr, &caps, nullptr));
-    for (uint64_t i = 0; i < 32; i++) {
-      if (!devices_[i].empty() && devices_[i]->IsInit() &&
-          (ahci_hba_->interrupt_status & (1 << i))) {
+    for (uint64_t i = 0; i < num_ports_; i++) {
+      if (!devices_[i].empty() && (ahci_hba_->interrupt_status & (1 << i))) {
         devices_[i]->HandleIrq();
         ahci_hba_->interrupt_status &= ~(1 << i);
       }

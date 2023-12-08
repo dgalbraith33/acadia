@@ -34,7 +34,9 @@ AhciDevice::AhciDevice(AhciPort* port) : port_struct_(port) {
         (paddr + 0x500) + (0x100 * i);
     commands_[i] = nullptr;
   }
-  port_struct_->interrupt_enable = 0xFFFFFFFF;
+  port_struct_->interrupt_enable =
+      kInterrupt_D2H_FIS | kInterrupt_PIO_FIS | kInterrupt_DMA_FIS |
+      kInterrupt_DeviceBits_FIS | kInterrupt_Unknown_FIS;
   port_struct_->sata_error = -1;
   port_struct_->command |= kCommand_Start;
 }
@@ -77,48 +79,78 @@ void AhciDevice::DumpInfo() {
   dbgln("Int enable: {x}", port_struct_->interrupt_enable);
 }
 
+bool CheckFisType(FIS_TYPE expected, uint8_t actual) {
+  if (expected == actual) {
+    return true;
+  }
+  dbgln("BAD FIS TYPE (exp,act): {x}, {x}", static_cast<uint64_t>(expected),
+        static_cast<uint64_t>(actual));
+  return false;
+}
+
 void AhciDevice::HandleIrq() {
   uint32_t int_status = port_struct_->interrupt_status;
-  // FIXME: Probably only clear the interrupts we know how to handle.
   port_struct_->interrupt_status = int_status;
 
-  uint32_t commands_finished = commands_issued_ & ~port_struct_->command_issue;
-
-  // FIXME: Pass error codes to the callback.
-  for (uint64_t i = 0; i < 32; i++) {
-    if (commands_finished & (1 << i)) {
-      commands_issued_ &= ~(1 << i);
-      commands_[i]->SignalComplete();
-    }
-  }
-
-  // TODO: Do something with this information.
-  if (int_status & 0x1) {
+  bool has_error = false;
+  if (int_status & kInterrupt_D2H_FIS) {
+    dbgln("D2H Received");
     // Device to host.
     volatile DeviceToHostRegisterFis& fis =
         received_fis_->device_to_host_register_fis;
-    if (fis.fis_type != FIS_TYPE_REG_D2H) {
-      dbgln("BAD FIS TYPE (exp,act): {x}, {x}",
-            static_cast<uint64_t>(FIS_TYPE_REG_D2H),
-            static_cast<uint64_t>(fis.fis_type));
+    if (!CheckFisType(FIS_TYPE_REG_D2H, fis.fis_type)) {
       return;
     }
     if (fis.error) {
       dbgln("D2H err: {x}", fis.error);
       dbgln("status: {x}", fis.status);
+      has_error = true;
     }
   }
-  if (int_status & 0x2) {
+  if (int_status & kInterrupt_PIO_FIS) {
+    dbgln("PIO Received");
     // PIO.
     volatile PioSetupFis& fis = received_fis_->pio_set_fis;
-    if (fis.fis_type != FIS_TYPE_PIO_SETUP) {
-      dbgln("BAD FIS TYPE (exp,act): {x}, {x}",
-            static_cast<uint64_t>(FIS_TYPE_PIO_SETUP),
-            static_cast<uint64_t>(fis.fis_type));
+    if (!CheckFisType(FIS_TYPE_PIO_SETUP, fis.fis_type)) {
       return;
     }
     if (fis.error) {
       dbgln("PIO err: {x}", fis.error);
+      dbgln("status: {x}", fis.status);
+      has_error = true;
+    }
+  }
+  if (int_status & kInterrupt_DMA_FIS) {
+    dbgln("DMA Received");
+    volatile DmaFis& fis = received_fis_->dma_fis;
+    if (!CheckFisType(FIS_TYPE_DMA_SETUP, fis.fis_type)) {
+      return;
+    }
+    // TODO: Actually do something with this FIS.
+  }
+  if (int_status & kInterrupt_DeviceBits_FIS) {
+    dbgln("Device Bits Received");
+    volatile SetDeviceBitsFis& fis = received_fis_->set_device_bits_fis;
+    if (!CheckFisType(FIS_TYPE_DEV_BITS, fis.fis_type)) {
+      return;
+    }
+    if (fis.error) {
+      dbgln("SetDeviceBits err: {x}", fis.error);
+      dbgln("status: {x}", fis.status);
+      has_error = true;
+    }
+  }
+  if (int_status & kInterrupt_Unknown_FIS) {
+    dbgln("Unknown FIS recieved, type: {x}", received_fis_->unknown_fis[0]);
+  }
+  uint32_t commands_finished = commands_issued_ & ~port_struct_->command_issue;
+
+  for (uint64_t i = 0; i < 32; i++) {
+    if (commands_finished & (1 << i)) {
+      commands_issued_ &= ~(1 << i);
+      // FIXME: Pass error codes to the callback.
+      commands_[i]->SignalComplete();
+      commands_[i] = nullptr;
     }
   }
 }
