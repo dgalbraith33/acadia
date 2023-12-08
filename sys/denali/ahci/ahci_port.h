@@ -4,6 +4,7 @@
 #include <glacier/container/array_view.h>
 #include <glacier/status/error.h>
 #include <glacier/status/error_or.h>
+#include <mammoth/sync/semaphore.h>
 #include <mammoth/util/memory_region.h>
 #include <ztypes.h>
 
@@ -23,8 +24,8 @@ class AhciPort {
 
   glcr::ErrorCode Identify();
 
-  glcr::ErrorOr<mmth::Semaphore*> IssueCommand(const Command& command);
-  glcr::ErrorOr<mmth::Semaphore*> IssueCommand(const CommandInfo& command);
+  glcr::ErrorOr<mmth::Semaphore*> IssueRead(uint64_t lba, uint16_t sector_cnt,
+                                            uint64_t paddr);
 
   void HandleIrq();
 
@@ -41,4 +42,6 @@ class AhciPort {
 
   glcr::Array<mmth::Semaphore> command_signals_;
   uint32_t commands_issued_ = 0;
+
+  glcr::ErrorOr<mmth::Semaphore*> IssueCommand(const CommandInfo& command);
 };

@@ -63,29 +63,16 @@ glcr::ErrorCode AhciPort::Identify() {
   return glcr::OK;
 }
 
-glcr::ErrorOr<mmth::Semaphore*> AhciPort::IssueCommand(const Command& command) {
-  uint64_t slot;
-  for (slot = 0; slot < 32; slot++) {
-    if (!(commands_issued_ & (1 << slot))) {
-      break;
-    }
-  }
-  if (slot == 32) {
-    dbgln("All slots full");
-    return glcr::INTERNAL;
-  }
-  command.PopulateFis(command_tables_[slot].command_fis);
-  command.PopulatePrdt(command_tables_[slot].prdt);
-
-  command_list_->command_headers[slot].command =
-      (sizeof(HostToDeviceRegisterFis) / 2) & 0x1F | (1 << 7);
-  command_list_->command_headers[slot].prd_table_length = 1;
-  command_list_->command_headers[slot].prd_byte_count = 0;
-
-  commands_issued_ |= (1 << slot);
-  port_struct_->command_issue |= (1 << slot);
-
-  return &command_signals_[slot];
+glcr::ErrorOr<mmth::Semaphore*> AhciPort::IssueRead(uint64_t lba,
+                                                    uint16_t sector_cnt,
+                                                    uint64_t paddr) {
+  CommandInfo read{
+      .command = kDmaReadExt,
+      .lba = lba,
+      .sectors = sector_cnt,
+      .paddr = paddr,
+  };
+  return IssueCommand(read);
 }
 
 glcr::ErrorOr<mmth::Semaphore*> AhciPort::IssueCommand(
