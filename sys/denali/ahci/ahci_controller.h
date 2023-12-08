@@ -27,7 +27,7 @@ class AhciController {
   mmth::OwnedMemoryRegion ahci_region_;
   volatile AhciHba* ahci_hba_ = nullptr;
 
-  glcr::UniquePtr<AhciPort> devices_[32];
+  glcr::UniquePtr<AhciPort> ports_[32];
 
   Thread irq_thread_;
   uint64_t irq_port_cap_ = 0;
@@ -38,7 +38,7 @@ class AhciController {
   glcr::ErrorCode LoadCapabilities();
   glcr::ErrorCode LoadHbaRegisters();
   glcr::ErrorCode ResetHba();
-  glcr::ErrorCode LoadDevices();
+  glcr::ErrorCode LoadPorts();
 
   AhciController(mmth::OwnedMemoryRegion&& pci_region)
       : pci_region_(glcr::Move(pci_region)),

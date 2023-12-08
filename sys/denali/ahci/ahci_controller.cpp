@@ -28,7 +28,7 @@ glcr::ErrorOr<glcr::UniquePtr<AhciController>> AhciController::Init(
   driver->DumpCapabilities();
   RET_ERR(driver->ResetHba());
   RET_ERR(driver->RegisterIrq());
-  RET_ERR(driver->LoadDevices());
+  RET_ERR(driver->LoadPorts());
   // driver->DumpPorts();
   return driver;
 }
@@ -38,11 +38,11 @@ glcr::ErrorOr<AhciPort*> AhciController::GetDevice(uint64_t id) {
     return glcr::INVALID_ARGUMENT;
   }
 
-  if (devices_[id].empty()) {
+  if (ports_[id].empty()) {
     return glcr::NOT_FOUND;
   }
 
-  return devices_[id].get();
+  return ports_[id].get();
 }
 
 void AhciController::DumpCapabilities() {
@@ -125,13 +125,13 @@ void AhciController::DumpCapabilities() {
 
 void AhciController::DumpPorts() {
   for (uint64_t i = 0; i < 6; i++) {
-    if (devices_[i].empty()) {
+    if (ports_[i].empty()) {
       continue;
     }
 
     dbgln("");
     dbgln("Port {}:", i);
-    devices_[i]->DumpInfo();
+    ports_[i]->DumpInfo();
   }
 }
 
@@ -141,8 +141,8 @@ void AhciController::InterruptLoop() {
     uint64_t bytes, caps;
     check(ZPortRecv(irq_port_cap_, &bytes, nullptr, &caps, nullptr));
     for (uint64_t i = 0; i < num_ports_; i++) {
-      if (!devices_[i].empty() && (ahci_hba_->interrupt_status & (1 << i))) {
-        devices_[i]->HandleIrq();
+      if (!ports_[i].empty() && (ahci_hba_->interrupt_status & (1 << i))) {
+        ports_[i]->HandleIrq();
         ahci_hba_->interrupt_status &= ~(1 << i);
       }
     }
@@ -229,7 +229,7 @@ glcr::ErrorCode AhciController::ResetHba() {
   return static_cast<glcr::ErrorCode>(ZThreadSleep(50));
 }
 
-glcr::ErrorCode AhciController::LoadDevices() {
+glcr::ErrorCode AhciController::LoadPorts() {
   for (uint8_t i = 0; i <= num_ports_; i++) {
     if (!(ahci_hba_->port_implemented & (1 << i))) {
       continue;
@@ -242,9 +242,9 @@ glcr::ErrorCode AhciController::LoadDevices() {
       continue;
     }
 
-    devices_[i] = new AhciPort(reinterpret_cast<AhciPortHba*>(port_addr));
+    ports_[i] = new AhciPort(reinterpret_cast<AhciPortHba*>(port_addr));
     // TODO: Maybe continue to the next device if this fails.
-    RET_ERR(devices_[i]->Identify());
+    RET_ERR(ports_[i]->Identify());
   }
   return glcr::OK;
 }
