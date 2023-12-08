@@ -55,10 +55,20 @@ glcr::ErrorCode AhciPort::Identify() {
     ASSIGN_OR_RETURN(auto* sem, IssueCommand(identify));
     sem->Wait();
     uint16_t* ident = reinterpret_cast<uint16_t*>(region.vaddr());
-    uint32_t* sector_size = reinterpret_cast<uint32_t*>(ident + 117);
-    dbgln("Sector size: {}", *sector_size);
-    uint64_t* lbas = reinterpret_cast<uint64_t*>(ident + 100);
-    dbgln("LBA Count: {}", *lbas);
+    if (ident[106] & (1 << 12)) {
+      sector_size_ = *reinterpret_cast<uint32_t*>(ident + 117);
+    } else {
+      sector_size_ = 512;
+    }
+
+    if (ident[83] & (1 << 10)) {
+      lba_count_ = *reinterpret_cast<uint64_t*>(ident + 100);
+    } else {
+      lba_count_ = *reinterpret_cast<uint32_t*>(ident + 60);
+    }
+    dbgln("Sector size: {x}", sector_size_);
+    dbgln("LBA Count: {x}", lba_count_);
+    is_init_ = true;
   }
   return glcr::OK;
 }

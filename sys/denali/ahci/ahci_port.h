@@ -20,7 +20,7 @@ class AhciPort {
   void DumpInfo();
 
   bool IsSata() { return port_struct_->signature == 0x101; }
-  bool IsInit() { return port_struct_ != nullptr && command_structures_; }
+  bool IsInit() { return is_init_; }
 
   glcr::ErrorCode Identify();
 
@@ -42,6 +42,10 @@ class AhciPort {
 
   glcr::Array<mmth::Semaphore> command_signals_;
   uint32_t commands_issued_ = 0;
+
+  bool is_init_ = false;
+  uint64_t lba_count_ = 0;
+  uint32_t sector_size_ = 0;
 
   glcr::ErrorOr<mmth::Semaphore*> IssueCommand(const CommandInfo& command);
 };
