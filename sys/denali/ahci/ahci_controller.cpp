@@ -243,12 +243,8 @@ glcr::ErrorCode AhciController::LoadDevices() {
     }
 
     devices_[i] = new AhciPort(reinterpret_cast<AhciPortHba*>(port_addr));
-
-    if (devices_[i]->IsSata()) {
-      IdentifyDeviceCommand identify(devices_[i].get());
-      devices_[i]->IssueCommand(&identify);
-      identify.WaitComplete();
-    }
+    // TODO: Maybe continue to the next device if this fails.
+    RET_ERR(devices_[i]->Identify());
   }
   return glcr::OK;
 }

@@ -28,6 +28,7 @@ AhciPort::AhciPort(AhciPortHba* port) : port_struct_(port) {
   command_tables_ = glcr::ArrayView(
       reinterpret_cast<CommandTable*>(command_structures_.vaddr() + 0x500), 32);
 
+  command_signals_ = glcr::Array<mmth::Semaphore>(32);
   for (uint64_t i = 0; i < 32; i++) {
     // This leaves space for 2 prdt entries.
     command_list_->command_headers[i].command_table_base_addr =
@@ -41,7 +42,17 @@ AhciPort::AhciPort(AhciPortHba* port) : port_struct_(port) {
   port_struct_->command |= kCommand_Start;
 }
 
-glcr::ErrorCode AhciPort::IssueCommand(Command* command) {
+glcr::ErrorCode AhciPort::Identify() {
+  if (IsSata()) {
+    IdentifyDeviceCommand identify(this);
+    ASSIGN_OR_RETURN(auto* sem, IssueCommand(&identify));
+    sem->Wait();
+    identify.OnComplete();
+  }
+  return glcr::OK;
+}
+
+glcr::ErrorOr<mmth::Semaphore*> AhciPort::IssueCommand(Command* command) {
   uint64_t slot;
   for (slot = 0; slot < 32; slot++) {
     if (commands_[slot] == nullptr) {
@@ -65,7 +76,7 @@ glcr::ErrorCode AhciPort::IssueCommand(Command* command) {
   commands_issued_ |= (1 << slot);
   port_struct_->command_issue |= (1 << slot);
 
-  return glcr::OK;
+  return &command_signals_[slot];
 }
 
 void AhciPort::DumpInfo() {
@@ -152,7 +163,7 @@ void AhciPort::HandleIrq() {
     if (commands_finished & (1 << i)) {
       commands_issued_ &= ~(1 << i);
       // FIXME: Pass error codes to the callback.
-      commands_[i]->SignalComplete();
+      command_signals_[i].Signal();
       commands_[i] = nullptr;
     }
   }

@@ -19,12 +19,6 @@ void* memcpy(void* dest, const void* src, uint64_t count) {
 
 Command::~Command() {}
 
-void Command::SignalComplete() {
-  OnComplete();
-  callback_semaphore_.Signal();
-}
-void Command::WaitComplete() { callback_semaphore_.Wait(); }
-
 void IdentifyDeviceCommand::PopulateFis(uint8_t* command_fis) {
   HostToDeviceRegisterFis fis __attribute__((aligned(16))){
       .fis_type = FIS_TYPE_REG_H2D,

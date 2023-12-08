@@ -1,7 +1,9 @@
 #pragma once
 
+#include <glacier/container/array.h>
 #include <glacier/container/array_view.h>
 #include <glacier/status/error.h>
+#include <glacier/status/error_or.h>
 #include <mammoth/util/memory_region.h>
 #include <ztypes.h>
 
@@ -19,7 +21,9 @@ class AhciPort {
   bool IsSata() { return port_struct_->signature == 0x101; }
   bool IsInit() { return port_struct_ != nullptr && command_structures_; }
 
-  glcr::ErrorCode IssueCommand(Command* command);
+  glcr::ErrorCode Identify();
+
+  glcr::ErrorOr<mmth::Semaphore*> IssueCommand(Command* command);
 
   void HandleIrq();
 
@@ -35,5 +39,6 @@ class AhciPort {
   glcr::ArrayView<CommandTable> command_tables_;
 
   Command* commands_[32];
+  glcr::Array<mmth::Semaphore> command_signals_;
   uint32_t commands_issued_ = 0;
 };

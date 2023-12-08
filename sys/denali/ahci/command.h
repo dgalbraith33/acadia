@@ -14,15 +14,6 @@ class Command {
   virtual ~Command();
   virtual void PopulateFis(uint8_t* command_fis) = 0;
   virtual void PopulatePrdt(PhysicalRegionDescriptor* prdt) = 0;
-  void WaitComplete();
-  void SignalComplete();
-
-  virtual void OnComplete() {}
-
- private:
-  // TODO: Make this owned by the device so that we don't have to create a new
-  // one with the kernel every time a command is issued.
-  mmth::Semaphore callback_semaphore_;
 };
 
 class IdentifyDeviceCommand : public Command {
@@ -31,7 +22,7 @@ class IdentifyDeviceCommand : public Command {
   virtual void PopulateFis(uint8_t* command_fis) override;
   virtual void PopulatePrdt(PhysicalRegionDescriptor* prdt) override;
 
-  virtual void OnComplete() override;
+  void OnComplete();
 
  private:
   AhciPort* port_;
