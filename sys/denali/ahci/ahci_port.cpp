@@ -166,8 +166,6 @@ void AhciPort::HandleIrq() {
 
   bool has_error = false;
   if (int_status & kInterrupt_D2H_FIS) {
-    dbgln("D2H Received");
-    // Device to host.
     volatile DeviceToHostRegisterFis& fis =
         received_fis_->device_to_host_register_fis;
     if (!CheckFisType(FIS_TYPE_REG_D2H, fis.fis_type)) {
@@ -182,13 +180,10 @@ void AhciPort::HandleIrq() {
     }
   }
   if (int_status & kInterrupt_PIO_FIS) {
-    dbgln("PIO Received");
-    // PIO.
     volatile PioSetupFis& fis = received_fis_->pio_set_fis;
     if (!CheckFisType(FIS_TYPE_PIO_SETUP, fis.fis_type)) {
       return;
     }
-    dbgln("Count: {x} {x} {x}", fis.counth, fis.countl, fis.e_status);
     if (fis.error) {
       dbgln("PIO err: {x}", fis.error);
       dbgln("status: {x}", fis.status);
@@ -196,7 +191,6 @@ void AhciPort::HandleIrq() {
     }
   }
   if (int_status & kInterrupt_DMA_FIS) {
-    dbgln("DMA Received");
     volatile DmaFis& fis = received_fis_->dma_fis;
     if (!CheckFisType(FIS_TYPE_DMA_SETUP, fis.fis_type)) {
       return;
@@ -204,7 +198,6 @@ void AhciPort::HandleIrq() {
     // TODO: Actually do something with this FIS.
   }
   if (int_status & kInterrupt_DeviceBits_FIS) {
-    dbgln("Device Bits Received");
     volatile SetDeviceBitsFis& fis = received_fis_->set_device_bits_fis;
     if (!CheckFisType(FIS_TYPE_DEV_BITS, fis.fis_type)) {
       return;
