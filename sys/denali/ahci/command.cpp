@@ -1,5 +1,7 @@
 #include "ahci/command.h"
 
+#include <mammoth/util/debug.h>
+
 #include "ahci/ahci.h"
 
 namespace {
@@ -17,12 +19,46 @@ void* memcpy(void* dest, const void* src, uint64_t count) {
 
 Command::~Command() {}
 
+void Command::SignalComplete() {
+  OnComplete();
+  callback_semaphore_.Signal();
+}
+void Command::WaitComplete() { callback_semaphore_.Wait(); }
+
+void IdentifyDeviceCommand::PopulateFis(uint8_t* command_fis) {
+  HostToDeviceRegisterFis fis __attribute__((aligned(16))){
+      .fis_type = FIS_TYPE_REG_H2D,
+      .pmp_and_c = 0x80,
+      .command = kIdentifyDevice,
+      .device = 0,
+  };
+
+  memcpy(command_fis, &fis, sizeof(fis));
+}
+
+void IdentifyDeviceCommand::PopulatePrdt(PhysicalRegionDescriptor* prdt) {
+  prdt[0].region_address = paddr_;
+  prdt[0].byte_count = 0x200 - 1;
+  dbgln("paddr: {x}", paddr_);
+  uint16_t* ident = reinterpret_cast<uint16_t*>(identify_.vaddr());
+  dbgln("vaddr: {x}", identify_.vaddr());
+  for (uint32_t i = 0; i < 256; i++) {
+    ident[i] = 0;
+  }
+}
+
+void IdentifyDeviceCommand::OnComplete() {
+  uint16_t* ident = reinterpret_cast<uint16_t*>(identify_.vaddr());
+  uint32_t* sector_size = reinterpret_cast<uint32_t*>(ident + 117);
+  dbgln("Sector size: {}", *sector_size);
+  uint64_t* lbas = reinterpret_cast<uint64_t*>(ident + 100);
+  dbgln("LBA Count: {}", *lbas);
+  // TODO tell the port its sector size.
+}
+
 DmaReadCommand::DmaReadCommand(uint64_t lba, uint64_t sector_cnt,
                                uint64_t paddr)
-    : lba_(lba),
-      sector_cnt_(sector_cnt),
-      paddr_(paddr),
-      callback_semaphore_() {}
+    : lba_(lba), sector_cnt_(sector_cnt), paddr_(paddr) {}
 
 DmaReadCommand::~DmaReadCommand() {}
 
@@ -30,7 +66,7 @@ void DmaReadCommand::PopulateFis(uint8_t* command_fis) {
   HostToDeviceRegisterFis fis{
       .fis_type = FIS_TYPE_REG_H2D,
       .pmp_and_c = 0x80,
-      .command = 0x25,
+      .command = kDmaReadExt,
       .featurel = 0,
 
       .lba0 = static_cast<uint8_t>(lba_ & 0xFF),
@@ -50,14 +86,10 @@ void DmaReadCommand::PopulateFis(uint8_t* command_fis) {
       .reserved = 0,
   };
 
-  uint64_t bytes = sector_cnt_ * 512;
-
   memcpy(command_fis, &fis, sizeof(fis));
 }
+
 void DmaReadCommand::PopulatePrdt(PhysicalRegionDescriptor* prdt) {
   prdt[0].region_address = paddr_;
   prdt[0].byte_count = sector_cnt_ * 512;
 }
-
-void DmaReadCommand::SignalComplete() { callback_semaphore_.Signal(); }
-void DmaReadCommand::WaitComplete() { callback_semaphore_.Wait(); }

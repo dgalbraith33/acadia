@@ -14,7 +14,7 @@ glcr::ErrorOr<glcr::UniquePtr<DenaliServer>> DenaliServer::Create(
 
 glcr::Status DenaliServer::HandleRead(const ReadRequest& req,
                                       ReadResponse& resp) {
-  ASSIGN_OR_RETURN(AhciDevice * device, driver_.GetDevice(req.device_id()));
+  ASSIGN_OR_RETURN(AhciPort * device, driver_.GetDevice(req.device_id()));
 
   uint64_t paddr;
   mmth::OwnedMemoryRegion region =
@@ -33,7 +33,7 @@ glcr::Status DenaliServer::HandleRead(const ReadRequest& req,
 
 glcr::Status DenaliServer::HandleReadMany(const ReadManyRequest& req,
                                           ReadResponse& resp) {
-  ASSIGN_OR_RETURN(AhciDevice * device, driver_.GetDevice(req.device_id()));
+  ASSIGN_OR_RETURN(AhciPort * device, driver_.GetDevice(req.device_id()));
 
   if (req.lba().size() != req.sector_cnt().size()) {
     return glcr::InvalidArgument("LBA and Sector Cnt must be the same length.");

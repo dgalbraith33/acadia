@@ -33,7 +33,7 @@ glcr::ErrorOr<glcr::UniquePtr<AhciController>> AhciController::Init(
   return driver;
 }
 
-glcr::ErrorOr<AhciDevice*> AhciController::GetDevice(uint64_t id) {
+glcr::ErrorOr<AhciPort*> AhciController::GetDevice(uint64_t id) {
   if (id >= num_ports_) {
     return glcr::INVALID_ARGUMENT;
   }
@@ -237,13 +237,18 @@ glcr::ErrorCode AhciController::LoadDevices() {
 
     uint64_t port_addr =
         reinterpret_cast<uint64_t>(ahci_hba_) + 0x100 + (0x80 * i);
-    AhciPort* port = reinterpret_cast<AhciPort*>(port_addr);
+    AhciPortHba* port = reinterpret_cast<AhciPortHba*>(port_addr);
     if ((port->sata_status & 0x103) != 0x103) {
       continue;
     }
 
-    devices_[i] = new AhciDevice(reinterpret_cast<AhciPort*>(port_addr));
-    devices_[i]->DumpInfo();
+    devices_[i] = new AhciPort(reinterpret_cast<AhciPortHba*>(port_addr));
+
+    if (devices_[i]->IsSata()) {
+      IdentifyDeviceCommand identify(devices_[i].get());
+      devices_[i]->IssueCommand(&identify);
+      identify.WaitComplete();
+    }
   }
   return glcr::OK;
 }

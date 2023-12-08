@@ -6,7 +6,7 @@
 #include <ztypes.h>
 
 #include "ahci/ahci.h"
-#include "ahci/ahci_device.h"
+#include "ahci/ahci_port.h"
 
 class AhciController {
  public:
@@ -16,7 +16,7 @@ class AhciController {
 
   void InterruptLoop();
 
-  glcr::ErrorOr<AhciDevice*> GetDevice(uint64_t id);
+  glcr::ErrorOr<AhciPort*> GetDevice(uint64_t id);
 
   void DumpCapabilities();
   void DumpPorts();
@@ -27,7 +27,7 @@ class AhciController {
   mmth::OwnedMemoryRegion ahci_region_;
   volatile AhciHba* ahci_hba_ = nullptr;
 
-  glcr::UniquePtr<AhciDevice> devices_[32];
+  glcr::UniquePtr<AhciPort> devices_[32];
 
   Thread irq_thread_;
   uint64_t irq_port_cap_ = 0;

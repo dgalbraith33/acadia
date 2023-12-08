@@ -1,10 +1,10 @@
-#include "ahci/ahci_device.h"
+#include "ahci/ahci_port.h"
 
 #include <glacier/status/error.h>
 #include <mammoth/util/debug.h>
 #include <zcall.h>
 
-AhciDevice::AhciDevice(AhciPort* port) : port_struct_(port) {
+AhciPort::AhciPort(AhciPortHba* port) : port_struct_(port) {
   if ((port_struct_->sata_status & 0x103) != 0x103) {
     crash("Creating device on port without a device",
           glcr::FAILED_PRECONDITION);
@@ -34,14 +34,14 @@ AhciDevice::AhciDevice(AhciPort* port) : port_struct_(port) {
         (paddr + 0x500) + (0x100 * i);
     commands_[i] = nullptr;
   }
-  port_struct_->interrupt_enable =
-      kInterrupt_D2H_FIS | kInterrupt_PIO_FIS | kInterrupt_DMA_FIS |
-      kInterrupt_DeviceBits_FIS | kInterrupt_Unknown_FIS;
+  port_struct_->interrupt_enable = 0xFFFFFFFF;
+  // kInterrupt_D2H_FIS | kInterrupt_PIO_FIS | kInterrupt_DMA_FIS |
+  // kInterrupt_DeviceBits_FIS | kInterrupt_Unknown_FIS;
   port_struct_->sata_error = -1;
   port_struct_->command |= kCommand_Start;
 }
 
-glcr::ErrorCode AhciDevice::IssueCommand(Command* command) {
+glcr::ErrorCode AhciPort::IssueCommand(Command* command) {
   uint64_t slot;
   for (slot = 0; slot < 32; slot++) {
     if (commands_[slot] == nullptr) {
@@ -56,7 +56,7 @@ glcr::ErrorCode AhciDevice::IssueCommand(Command* command) {
   command->PopulatePrdt(command_tables_[slot].prdt);
 
   command_list_->command_headers[slot].command =
-      (sizeof(HostToDeviceRegisterFis) / 2) & 0x1F;
+      (sizeof(HostToDeviceRegisterFis) / 2) & 0x1F | (1 << 7);
   command_list_->command_headers[slot].prd_table_length = 1;
   command_list_->command_headers[slot].prd_byte_count = 0;
 
@@ -68,7 +68,7 @@ glcr::ErrorCode AhciDevice::IssueCommand(Command* command) {
   return glcr::OK;
 }
 
-void AhciDevice::DumpInfo() {
+void AhciPort::DumpInfo() {
   dbgln("Comlist: {x}", port_struct_->command_list_base);
   dbgln("FIS: {x}", port_struct_->fis_base);
   dbgln("Command: {x}", port_struct_->command);
@@ -88,7 +88,7 @@ bool CheckFisType(FIS_TYPE expected, uint8_t actual) {
   return false;
 }
 
-void AhciDevice::HandleIrq() {
+void AhciPort::HandleIrq() {
   uint32_t int_status = port_struct_->interrupt_status;
   port_struct_->interrupt_status = int_status;
 
@@ -103,7 +103,9 @@ void AhciDevice::HandleIrq() {
     }
     if (fis.error) {
       dbgln("D2H err: {x}", fis.error);
+
       dbgln("status: {x}", fis.status);
+      dbgln("Error: {x}", port_struct_->sata_error);
       has_error = true;
     }
   }
@@ -114,6 +116,7 @@ void AhciDevice::HandleIrq() {
     if (!CheckFisType(FIS_TYPE_PIO_SETUP, fis.fis_type)) {
       return;
     }
+    dbgln("Count: {x} {x} {x}", fis.counth, fis.countl, fis.e_status);
     if (fis.error) {
       dbgln("PIO err: {x}", fis.error);
       dbgln("status: {x}", fis.status);

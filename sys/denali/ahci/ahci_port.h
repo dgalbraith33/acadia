@@ -8,25 +8,26 @@
 #include "ahci/ahci.h"
 #include "ahci/command.h"
 
-class AhciDevice {
+class AhciPort {
  public:
-  AhciDevice() {}
+  AhciPort() {}
   // Caller retains ownership of the pointer.
-  AhciDevice(AhciPort* port_struct);
+  AhciPort(AhciPortHba* port_struct);
 
   void DumpInfo();
 
+  bool IsSata() { return port_struct_->signature == 0x101; }
   bool IsInit() { return port_struct_ != nullptr && command_structures_; }
 
   glcr::ErrorCode IssueCommand(Command* command);
 
   void HandleIrq();
 
-  AhciDevice(const AhciDevice&) = delete;
-  AhciDevice& operator=(const AhciDevice&) = delete;
+  AhciPort(const AhciPort&) = delete;
+  AhciPort& operator=(const AhciPort&) = delete;
 
  private:
-  volatile AhciPort* port_struct_ = nullptr;
+  volatile AhciPortHba* port_struct_ = nullptr;
   mmth::OwnedMemoryRegion command_structures_;
 
   volatile CommandList* command_list_ = nullptr;

@@ -64,7 +64,7 @@ const uint32_t kInterrupt_DMA_FIS = (1 << 2);
 const uint32_t kInterrupt_DeviceBits_FIS = (1 << 3);
 const uint32_t kInterrupt_Unknown_FIS = (1 << 4);
 
-struct AhciPort {
+struct AhciPortHba {
   uint64_t command_list_base;
   uint64_t fis_base;
   uint32_t interrupt_status;
@@ -190,6 +190,9 @@ struct PioSetupFis {
   uint8_t rsv4[2];  // Reserved
 } __attribute__((packed));
 
+const uint8_t kIdentifyDevice = 0xEC;
+const uint8_t kDmaReadExt = 0x25;
+
 struct HostToDeviceRegisterFis {
   uint8_t fis_type;  // FIS_TYPE_REG_H2D
   uint8_t pmp_and_c;
@@ -216,6 +219,7 @@ struct HostToDeviceRegisterFis {
   // DWORD 4
   uint32_t reserved;  // Reserved
 } __attribute__((packed));
+
 struct DeviceToHostRegisterFis {
   // DWORD 0
   uint8_t fis_type;  // FIS_TYPE_REG_D2H
