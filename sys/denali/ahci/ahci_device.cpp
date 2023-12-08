@@ -25,8 +25,8 @@ AhciDevice::AhciDevice(AhciPort* port) : port_struct_(port) {
   port_struct_->fis_base = paddr + 0x400;
   port_struct_->command |= kCommand_FIS_Receive_Enable;
 
-  command_tables_ =
-      reinterpret_cast<CommandTable*>(command_structures_.vaddr() + 0x500);
+  command_tables_ = glcr::ArrayView(
+      reinterpret_cast<CommandTable*>(command_structures_.vaddr() + 0x500), 32);
 
   for (uint64_t i = 0; i < 32; i++) {
     // This leaves space for 2 prdt entries.
@@ -50,7 +50,6 @@ glcr::ErrorCode AhciDevice::IssueCommand(Command* command) {
     dbgln("All slots full");
     return glcr::INTERNAL;
   }
-  CommandTable* command_table = command_tables_ + slot;
   command->PopulateFis(command_tables_[slot].command_fis);
   command->PopulatePrdt(command_tables_[slot].prdt);
 
@@ -61,8 +60,8 @@ glcr::ErrorCode AhciDevice::IssueCommand(Command* command) {
 
   commands_[slot] = command;
 
-  commands_issued_ |= 1 << slot;
-  port_struct_->command_issue |= 1 << slot;
+  commands_issued_ |= (1 << slot);
+  port_struct_->command_issue |= (1 << slot);
 
   return glcr::OK;
 }
@@ -96,7 +95,8 @@ void AhciDevice::HandleIrq() {
   // TODO: Do something with this information.
   if (int_status & 0x1) {
     // Device to host.
-    DeviceToHostRegisterFis& fis = received_fis_->device_to_host_register_fis;
+    volatile DeviceToHostRegisterFis& fis =
+        received_fis_->device_to_host_register_fis;
     if (fis.fis_type != FIS_TYPE_REG_D2H) {
       dbgln("BAD FIS TYPE (exp,act): {x}, {x}",
             static_cast<uint64_t>(FIS_TYPE_REG_D2H),
@@ -110,7 +110,7 @@ void AhciDevice::HandleIrq() {
   }
   if (int_status & 0x2) {
     // PIO.
-    PioSetupFis& fis = received_fis_->pio_set_fis;
+    volatile PioSetupFis& fis = received_fis_->pio_set_fis;
     if (fis.fis_type != FIS_TYPE_PIO_SETUP) {
       dbgln("BAD FIS TYPE (exp,act): {x}, {x}",
             static_cast<uint64_t>(FIS_TYPE_PIO_SETUP),

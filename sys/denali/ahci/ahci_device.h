@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glacier/container/array_view.h>
 #include <glacier/status/error.h>
 #include <mammoth/util/memory_region.h>
 #include <ztypes.h>
@@ -25,13 +26,13 @@ class AhciDevice {
   AhciDevice& operator=(const AhciDevice&) = delete;
 
  private:
-  AhciPort* port_struct_ = nullptr;
+  volatile AhciPort* port_struct_ = nullptr;
   mmth::OwnedMemoryRegion command_structures_;
 
-  CommandList* command_list_ = nullptr;
-  ReceivedFis* received_fis_ = nullptr;
-  CommandTable* command_tables_ = nullptr;
+  volatile CommandList* command_list_ = nullptr;
+  volatile ReceivedFis* received_fis_ = nullptr;
+  glcr::ArrayView<CommandTable> command_tables_;
 
   Command* commands_[32];
-  volatile uint32_t commands_issued_ = 0;
+  uint32_t commands_issued_ = 0;
 };

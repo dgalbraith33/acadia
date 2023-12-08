@@ -155,10 +155,12 @@ glcr::ErrorCode AhciController::LoadCapabilities() {
     dbgln("No caps!");
     return glcr::FAILED_PRECONDITION;
   }
-  uint8_t* base = reinterpret_cast<uint8_t*>(pci_device_header_);
+  volatile uint8_t* base =
+      reinterpret_cast<volatile uint8_t*>(pci_device_header_);
   uint16_t offset = pci_device_header_->cap_ptr;
   do {
-    uint16_t* cap = reinterpret_cast<uint16_t*>(base + offset);
+    volatile uint16_t* cap =
+        reinterpret_cast<volatile uint16_t*>(base + offset);
     switch (*cap & 0xFF) {
       case 0x01:
         dbgln("Power Management");

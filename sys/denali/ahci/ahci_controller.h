@@ -23,7 +23,7 @@ class AhciController {
 
  private:
   mmth::OwnedMemoryRegion pci_region_;
-  PciDeviceHeader* pci_device_header_ = nullptr;
+  volatile PciDeviceHeader* pci_device_header_ = nullptr;
   mmth::OwnedMemoryRegion ahci_region_;
   volatile AhciHba* ahci_hba_ = nullptr;
 

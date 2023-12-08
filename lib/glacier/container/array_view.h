@@ -10,7 +10,9 @@ class ArrayView {
   ArrayView() : data_(nullptr), size_(0) {}
 
   ArrayView(const ArrayView&) = default;
+  ArrayView& operator=(const ArrayView&) = default;
   ArrayView(ArrayView&&) = default;
+  ArrayView& operator=(ArrayView&&) = default;
 
   ArrayView(T* data, uint64_t size) : data_(data), size_(size) {}
 
