@@ -24,6 +24,7 @@ class AhciPort {
   glcr::ErrorCode Identify();
 
   glcr::ErrorOr<mmth::Semaphore*> IssueCommand(const Command& command);
+  glcr::ErrorOr<mmth::Semaphore*> IssueCommand(const CommandInfo& command);
 
   void HandleIrq();
 

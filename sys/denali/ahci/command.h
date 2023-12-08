@@ -8,27 +8,19 @@
 
 class AhciPort;
 
+struct CommandInfo {
+  uint8_t command;
+  uint64_t lba;
+  uint16_t sectors;
+  uint64_t paddr;
+};
+
 class Command {
  public:
   Command() = default;
   virtual ~Command();
   virtual void PopulateFis(uint8_t* command_fis) const = 0;
   virtual void PopulatePrdt(PhysicalRegionDescriptor* prdt) const = 0;
-};
-
-class IdentifyDeviceCommand : public Command {
- public:
-  IdentifyDeviceCommand(AhciPort* port) : port_(port) {}
-  virtual void PopulateFis(uint8_t* command_fis) const override;
-  virtual void PopulatePrdt(PhysicalRegionDescriptor* prdt) const override;
-
-  void OnComplete();
-
- private:
-  AhciPort* port_;
-  uint64_t paddr_;
-  mmth::OwnedMemoryRegion identify_ =
-      mmth::OwnedMemoryRegion::ContiguousPhysical(0x200, &paddr_);
 };
 
 class DmaReadCommand : public Command {

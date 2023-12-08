@@ -44,10 +44,21 @@ AhciPort::AhciPort(AhciPortHba* port) : port_struct_(port) {
 
 glcr::ErrorCode AhciPort::Identify() {
   if (IsSata()) {
-    IdentifyDeviceCommand identify(this);
+    CommandInfo identify{
+        .command = kIdentifyDevice,
+        .lba = 0,
+        .sectors = 1,
+        .paddr = 0,
+    };
+    auto region =
+        mmth::OwnedMemoryRegion::ContiguousPhysical(0x200, &identify.paddr);
     ASSIGN_OR_RETURN(auto* sem, IssueCommand(identify));
     sem->Wait();
-    identify.OnComplete();
+    uint16_t* ident = reinterpret_cast<uint16_t*>(region.vaddr());
+    uint32_t* sector_size = reinterpret_cast<uint32_t*>(ident + 117);
+    dbgln("Sector size: {}", *sector_size);
+    uint64_t* lbas = reinterpret_cast<uint64_t*>(ident + 100);
+    dbgln("LBA Count: {}", *lbas);
   }
   return glcr::OK;
 }
@@ -71,6 +82,61 @@ glcr::ErrorOr<mmth::Semaphore*> AhciPort::IssueCommand(const Command& command) {
   command_list_->command_headers[slot].prd_table_length = 1;
   command_list_->command_headers[slot].prd_byte_count = 0;
 
+  commands_issued_ |= (1 << slot);
+  port_struct_->command_issue |= (1 << slot);
+
+  return &command_signals_[slot];
+}
+
+glcr::ErrorOr<mmth::Semaphore*> AhciPort::IssueCommand(
+    const CommandInfo& command) {
+  uint64_t slot;
+  for (slot = 0; slot < 32; slot++) {
+    if (!(commands_issued_ & (1 << slot))) {
+      break;
+    }
+  }
+  if (slot == 32) {
+    dbgln("All slots full");
+    return glcr::INTERNAL;
+  }
+
+  auto* fis = reinterpret_cast<HostToDeviceRegisterFis*>(
+      command_tables_[slot].command_fis);
+  *fis = HostToDeviceRegisterFis{
+      .fis_type = FIS_TYPE_REG_H2D,
+      .pmp_and_c = 0x80,
+      .command = command.command,
+      .featurel = 0,
+
+      .lba0 = static_cast<uint8_t>(command.lba & 0xFF),
+      .lba1 = static_cast<uint8_t>((command.lba >> 8) & 0xFF),
+      .lba2 = static_cast<uint8_t>((command.lba >> 16) & 0xFF),
+      .device = (1 << 6),  // ATA LBA Mode
+
+      .lba3 = static_cast<uint8_t>((command.lba >> 24) & 0xFF),
+      .lba4 = static_cast<uint8_t>((command.lba >> 32) & 0xFF),
+      .lba5 = static_cast<uint8_t>((command.lba >> 40) & 0xFF),
+      .featureh = 0,
+
+      .count = command.sectors,
+      .icc = 0,
+      .control = 0,
+
+      .reserved = 0,
+  };
+
+  command_tables_[slot].prdt[0].region_address = command.paddr;
+  command_tables_[slot].prdt[0].byte_count = 512 * command.sectors;
+
+  command_list_->command_headers[slot].prd_table_length = 1;
+  command_list_->command_headers[slot].command =
+      (sizeof(HostToDeviceRegisterFis) / 2) & 0x1F;
+  // Set prefetch bit.
+  command_list_->command_headers[slot].command |= (1 << 7);
+
+  // TODO: Synchronization-wise we need to ensure this is set in the same
+  // critical section as where we select a slot.
   commands_issued_ |= (1 << slot);
   port_struct_->command_issue |= (1 << slot);
 
