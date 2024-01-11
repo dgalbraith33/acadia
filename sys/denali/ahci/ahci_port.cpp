@@ -128,7 +128,7 @@ glcr::ErrorOr<mmth::Semaphore*> AhciPort::IssueCommand(
 
   command_list_->command_headers[slot].prd_table_length = 1;
   command_list_->command_headers[slot].command =
-      (sizeof(HostToDeviceRegisterFis) / 2) & 0x1F;
+      (sizeof(HostToDeviceRegisterFis) / 4) & 0x1F;
   // Set prefetch bit.
   command_list_->command_headers[slot].command |= (1 << 7);
 
@@ -171,7 +171,8 @@ void AhciPort::HandleIrq() {
     if (!CheckFisType(FIS_TYPE_REG_D2H, fis.fis_type)) {
       return;
     }
-    if (fis.error) {
+    // Check is init to avoid showing an error from the COMRESET operation.
+    if (fis.error && is_init_) {
       dbgln("D2H err: {x}", fis.error);
 
       dbgln("status: {x}", fis.status);
