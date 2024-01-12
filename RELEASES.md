@@ -1,5 +1,24 @@
 # Releases
 
+## AcadiaOS 0.1.1 (WIP)
+
+### Denali
+
+- AHCI Driver can use more than one command slot.
+- Resets AHCI Controller on start.
+- Uses IDENTIFY DEVICE to get sector size.
+
+### Glacier
+
+- Unit Testing setup for Host Machine
+- Unit Tests for: Vector
+- Added Iterators for: Vector, Array, ArrayView
+- HashMap Move Semantics
+
+### Yunq
+
+- Moved message parsing/serialization to shared library.
+
 ## AcadiaOS 0.1.0 (2023-12-08)
 
 This marks the first release of AcadiaOS! There is very little user functionality currently but a
