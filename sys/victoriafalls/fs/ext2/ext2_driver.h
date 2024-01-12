@@ -28,4 +28,6 @@ class Ext2Driver {
   Ext2Driver(const glcr::SharedPtr<Ext2BlockReader>& reader,
              glcr::UniquePtr<InodeTable> inode_table)
       : ext2_reader_(reader), inode_table_(glcr::Move(inode_table)) {}
+
+  glcr::ErrorOr<mmth::OwnedMemoryRegion> ReadInode(Inode* inode);
 };

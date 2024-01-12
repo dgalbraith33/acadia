@@ -56,39 +56,28 @@ glcr::ErrorOr<glcr::Vector<DirEntry>> Ext2Driver::ReadDirectory(
     dbgln("Reading non directory.");
     return glcr::INVALID_ARGUMENT;
   }
-
-  // This calculation is cursed.
-  uint64_t real_block_cnt =
-      (inode->blocks - 1) / (ext2_reader_->BlockSize() / 512) + 1;
-
-  if (real_block_cnt > 12) {
-    dbgln("Cant handle indirect blocks yet");
-    return glcr::FAILED_PRECONDITION;
-  }
+  ASSIGN_OR_RETURN(mmth::OwnedMemoryRegion dir, ReadInode(inode));
 
   glcr::Vector<DirEntry> directory;
-  for (uint64_t i = 0; i < real_block_cnt; i++) {
-    ASSIGN_OR_RETURN(mmth::OwnedMemoryRegion block,
-                     ext2_reader_->ReadBlock(inode->block[i]));
-    uint64_t addr = block.vaddr();
-    while (addr < block.vaddr() + ext2_reader_->BlockSize()) {
-      DirEntry* entry = reinterpret_cast<DirEntry*>(addr);
-      directory.PushBack(*entry);
-      glcr::StringView name(entry->name, entry->name_len);
+
+  uint64_t addr = dir.vaddr();
+  while (addr < dir.vaddr() + ext2_reader_->BlockSize()) {
+    DirEntry* entry = reinterpret_cast<DirEntry*>(addr);
+    directory.PushBack(*entry);
+    glcr::StringView name(entry->name, entry->name_len);
 #if EXT2_DEBUG
-      switch (entry->file_type) {
-        case kExt2FtFile:
-          dbgln("FILE (0x{x}): {}", entry->inode, name);
-          break;
-        case kExt2FtDirectory:
-          dbgln("DIR  (0x{x}): {}", entry->inode, name);
-          break;
-        default:
-          dbgln("UNK  (0x{x}): {}", entry->inode, name);
-      }
-#endif
-      addr += entry->record_length;
+    switch (entry->file_type) {
+      case kExt2FtFile:
+        dbgln("FILE (0x{x}): {}", entry->inode, name);
+        break;
+      case kExt2FtDirectory:
+        dbgln("DIR  (0x{x}): {}", entry->inode, name);
+        break;
+      default:
+        dbgln("UNK  (0x{x}): {}", entry->inode, name);
     }
+#endif
+    addr += entry->record_length;
   }
   return directory;
 }
@@ -101,7 +90,10 @@ glcr::ErrorOr<mmth::OwnedMemoryRegion> Ext2Driver::ReadFile(
     dbgln("Reading non file.");
     return glcr::INVALID_ARGUMENT;
   }
+  return ReadInode(inode);
+}
 
+glcr::ErrorOr<mmth::OwnedMemoryRegion> Ext2Driver::ReadInode(Inode* inode) {
   // This calculation is cursed.
   uint64_t real_block_cnt =
       (inode->blocks - 1) / (ext2_reader_->BlockSize() / 512) + 1;
