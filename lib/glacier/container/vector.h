@@ -37,6 +37,7 @@ class Vector {
 
   // Setters.
   // FIXME: Handle downsizing.
+  // TODO: Rename this so it is clear that this only affects capacity.
   void Resize(uint64_t capacity);
 
   void PushBack(const T& item);

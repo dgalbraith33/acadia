@@ -65,9 +65,9 @@ void Process::Exit(uint64_t exit_code) {
   state_ = CLEANUP;
   exit_code_ = exit_code;
 
-  for (uint64_t i = 0; i < threads_.size(); i++) {
-    if (!threads_[i]->IsDying()) {
-      threads_[i]->SetState(Thread::CLEANUP);
+  for (const auto& t : threads_) {
+    if (!t->IsDying()) {
+      t->SetState(Thread::CLEANUP);
     }
   }
 
@@ -93,9 +93,9 @@ void Process::Cleanup() {
   }
 
   // 1. For each thread, call cleanup.
-  for (uint64_t i = 0; i < threads_.size(); i++) {
-    if (threads_[i]->GetState() == Thread::CLEANUP) {
-      threads_[i]->Cleanup();
+  for (const auto& t : threads_) {
+    if (t->GetState() == Thread::CLEANUP) {
+      t->Cleanup();
     }
   }
 

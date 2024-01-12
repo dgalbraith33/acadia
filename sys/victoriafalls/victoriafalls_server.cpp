@@ -94,8 +94,8 @@ glcr::Status VFSServer::HandleGetDirectory(const GetDirectoryRequest& request,
   }
 
   glcr::VariableStringBuilder filelist;
-  for (uint64_t i = 0; i < files.size(); i++) {
-    filelist.PushBack(glcr::StringView(files.at(i).name, files.at(i).name_len));
+  for (const DirEntry& file : files) {
+    filelist.PushBack(glcr::StringView(file.name, file.name_len));
     filelist.PushBack(',');
   }
   // Remove trailing comma.

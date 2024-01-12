@@ -47,10 +47,9 @@ uint64_t main(uint64_t port_cap) {
   glcr::Vector<glcr::StringView> files =
       glcr::StrSplit(init_file.as_str(), '\n');
 
-  for (uint64_t i = 0; i < files.size(); i++) {
-    if (!files[i].empty()) {
-      mmth::File binary =
-          mmth::File::Open(glcr::StrFormat("/bin/{}", files[i]));
+  for (glcr::StringView& file : files) {
+    if (!file.empty()) {
+      mmth::File binary = mmth::File::Open(glcr::StrFormat("/bin/{}", file));
 
       ASSIGN_OR_RETURN(client_cap, server->CreateClientCap());
       auto error_or = mmth::SpawnProcessFromElfRegion(

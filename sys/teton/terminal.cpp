@@ -55,9 +55,8 @@ void Terminal::ExecuteCommand(const glcr::String& command) {
     if (!files_or.ok()) {
       console_.WriteString(glcr::StrFormat("Error: {}\n", files_or.error()));
     } else {
-      auto& files = files_or.value();
-      for (uint64_t i = 0; i < files.size(); i++) {
-        console_.WriteString(files[i]);
+      for (const auto& file : files_or.value()) {
+        console_.WriteString(file);
         console_.WriteChar('\n');
       }
     }

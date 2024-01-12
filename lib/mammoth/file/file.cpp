@@ -72,8 +72,8 @@ glcr::ErrorOr<glcr::Vector<glcr::String>> ListDirectory(glcr::StringView path) {
 
   auto file_views = glcr::StrSplit(dir.filenames(), ',');
   glcr::Vector<glcr::String> files;
-  for (uint64_t i = 0; i < file_views.size(); i++) {
-    files.PushBack(file_views[i]);
+  for (const auto& view : glcr::StrSplit(dir.filenames(), ',')) {
+    files.PushBack(view);
   }
   return files;
 }

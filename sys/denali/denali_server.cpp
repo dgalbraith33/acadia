@@ -39,8 +39,8 @@ glcr::Status DenaliServer::HandleReadMany(const ReadManyRequest& req,
   }
 
   uint64_t sector_cnt = 0;
-  for (uint64_t i = 0; i < req.sector_cnt().size(); i++) {
-    sector_cnt += req.sector_cnt().at(i);
+  for (uint64_t cnt : req.sector_cnt()) {
+    sector_cnt += cnt;
   }
   uint64_t region_paddr;
   mmth::OwnedMemoryRegion region = mmth::OwnedMemoryRegion::ContiguousPhysical(
