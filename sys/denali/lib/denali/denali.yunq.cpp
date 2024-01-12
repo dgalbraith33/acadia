@@ -16,25 +16,25 @@ struct ExtPointer {
 
 }  // namespace
 glcr::Status ReadRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
   return glcr::Status::Ok();
 }
 
 glcr::Status ReadRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
   return glcr::Status::Ok();
 }
 
-glcr::Status ReadRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(yunq::CheckHeader(bytes, offset));
-
-  yunq::MessageView view(bytes, offset);
+glcr::Status ReadRequest::ParseFromBytesInternal(const yunq::MessageView& message) {
+  RETURN_ERROR(message.CheckHeader());
   // Parse device_id.
-  ASSIGN_OR_RETURN(device_id_, view.ReadField<uint64_t>(0));
+  ASSIGN_OR_RETURN(device_id_, message.ReadField<uint64_t>(0));
   // Parse lba.
-  ASSIGN_OR_RETURN(lba_, view.ReadField<uint64_t>(1));
+  ASSIGN_OR_RETURN(lba_, message.ReadField<uint64_t>(1));
   // Parse size.
-  ASSIGN_OR_RETURN(size_, view.ReadField<uint64_t>(2));
+  ASSIGN_OR_RETURN(size_, message.ReadField<uint64_t>(2));
 
   return glcr::Status::Ok();
 }
@@ -72,26 +72,26 @@ uint64_t ReadRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset,
   return next_extension;
 }
 glcr::Status ReadManyRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
   return glcr::Status::Ok();
 }
 
 glcr::Status ReadManyRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
   return glcr::Status::Ok();
 }
 
-glcr::Status ReadManyRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(yunq::CheckHeader(bytes, offset));
-
-  yunq::MessageView view(bytes, offset);
+glcr::Status ReadManyRequest::ParseFromBytesInternal(const yunq::MessageView& message) {
+  RETURN_ERROR(message.CheckHeader());
   // Parse device_id.
-  ASSIGN_OR_RETURN(device_id_, view.ReadField<uint64_t>(0));
+  ASSIGN_OR_RETURN(device_id_, message.ReadField<uint64_t>(0));
   // Parse lba.
-  ASSIGN_OR_RETURN(lba_, view.ReadRepeated<uint64_t>(1));
+  ASSIGN_OR_RETURN(lba_, message.ReadRepeated<uint64_t>(1));
 
   // Parse sector_cnt.
-  ASSIGN_OR_RETURN(sector_cnt_, view.ReadRepeated<uint64_t>(2));
+  ASSIGN_OR_RETURN(sector_cnt_, message.ReadRepeated<uint64_t>(2));
 
 
   return glcr::Status::Ok();
@@ -174,7 +174,8 @@ uint64_t ReadManyRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t off
   return next_extension;
 }
 glcr::Status ReadResponse::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse memory.
   // FIXME: Implement in-buffer capabilities for inprocess serialization.
   set_memory(0);
@@ -182,7 +183,8 @@ glcr::Status ReadResponse::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_
 }
 
 glcr::Status ReadResponse::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse memory.
   uint64_t memory_ptr = bytes.At<uint64_t>(offset + header_size + (8 * 2));
 
@@ -190,14 +192,12 @@ glcr::Status ReadResponse::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_
   return glcr::Status::Ok();
 }
 
-glcr::Status ReadResponse::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(yunq::CheckHeader(bytes, offset));
-
-  yunq::MessageView view(bytes, offset);
+glcr::Status ReadResponse::ParseFromBytesInternal(const yunq::MessageView& message) {
+  RETURN_ERROR(message.CheckHeader());
   // Parse device_id.
-  ASSIGN_OR_RETURN(device_id_, view.ReadField<uint64_t>(0));
+  ASSIGN_OR_RETURN(device_id_, message.ReadField<uint64_t>(0));
   // Parse size.
-  ASSIGN_OR_RETURN(size_, view.ReadField<uint64_t>(1));
+  ASSIGN_OR_RETURN(size_, message.ReadField<uint64_t>(1));
   // Parse memory.
 
   return glcr::Status::Ok();

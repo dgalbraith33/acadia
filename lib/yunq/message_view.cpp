@@ -2,14 +2,32 @@
 
 namespace yunq {
 
+namespace {
+
+const uint64_t kIdentByte = 0x33441122;
+
+}  // namespace
+
+glcr::Status MessageView::CheckHeader() const {
+  if (buffer_.At<uint32_t>(offset_ + 0) != kIdentByte) {
+    return glcr::InvalidArgument("Trying to parse an invalid yunq message.");
+  }
+  // TODO: Parse core size.
+  // TODO: Parse extension size.
+  // TODO: Check CRC32
+  // TODO: Parse options.
+  return glcr::Status::Ok();
+}
+
 template <>
-glcr::ErrorOr<uint64_t> MessageView::ReadField<uint64_t>(uint64_t field_index) {
+glcr::ErrorOr<uint64_t> MessageView::ReadField<uint64_t>(
+    uint64_t field_index) const {
   return buffer_.At<uint64_t>(field_offset(field_index));
 }
 
 template <>
 glcr::ErrorOr<glcr::String> MessageView::ReadField<glcr::String>(
-    uint64_t field_index) {
+    uint64_t field_index) const {
   ExtensionPointer ptr =
       buffer_.At<ExtensionPointer>(field_offset(field_index));
 
@@ -18,7 +36,7 @@ glcr::ErrorOr<glcr::String> MessageView::ReadField<glcr::String>(
 
 template <>
 glcr::ErrorOr<glcr::Vector<uint64_t>> MessageView::ReadRepeated<uint64_t>(
-    uint64_t field_index) {
+    uint64_t field_index) const {
   ExtensionPointer pointer =
       buffer_.At<ExtensionPointer>(field_offset(field_index));
 

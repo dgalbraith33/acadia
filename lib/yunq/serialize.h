@@ -5,9 +5,6 @@
 
 namespace yunq {
 
-[[nodiscard]] glcr::Status CheckHeader(const glcr::ByteBuffer& buffer,
-                                       uint64_t offset);
-
 void WriteHeader(glcr::ByteBuffer& bytes, uint64_t offset, uint32_t core_size,
                  uint32_t extension_size);
 

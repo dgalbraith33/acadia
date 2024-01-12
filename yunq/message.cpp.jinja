@@ -20,7 +20,8 @@ struct ExtPointer {
 
 {%- for message in messages %}
 glcr::Status {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
 
 {%- for field in message.fields %}
 {%- if field.type == Type.CAPABILITY %}
@@ -33,7 +34,8 @@ glcr::Status {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uin
 }
 
 glcr::Status {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
 
 {%- for field in message.fields %}
 {%- if field.type == Type.CAPABILITY %}
@@ -46,19 +48,17 @@ glcr::Status {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uin
   return glcr::Status::Ok();
 }
 
-glcr::Status {{message.name}}::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(yunq::CheckHeader(bytes, offset));
-
-  yunq::MessageView view(bytes, offset);
+glcr::Status {{message.name}}::ParseFromBytesInternal(const yunq::MessageView& message) {
+  RETURN_ERROR(message.CheckHeader());
 
 {%- for field in message.fields %}
   // Parse {{field.name}}.
 {%- if field.type != Type.CAPABILITY %}
 
 {%- if not field.repeated %}
-  ASSIGN_OR_RETURN({{field.name}}_, view.ReadField<{{field.cpp_type()}}>({{loop.index0}}));
+  ASSIGN_OR_RETURN({{field.name}}_, message.ReadField<{{field.cpp_type()}}>({{loop.index0}}));
 {%- else %}
-  ASSIGN_OR_RETURN({{field.name}}_, view.ReadRepeated<{{field.cpp_type()}}>({{loop.index0}}));
+  ASSIGN_OR_RETURN({{field.name}}_, message.ReadRepeated<{{field.cpp_type()}}>({{loop.index0}}));
 {% endif %}
 
 {%- endif %}

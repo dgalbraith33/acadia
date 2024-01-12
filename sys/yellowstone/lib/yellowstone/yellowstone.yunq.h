@@ -6,6 +6,7 @@
 #include <glacier/status/status.h>
 #include <glacier/container/vector.h>
 #include <glacier/string/string.h>
+#include <yunq/message_view.h>
 #include <ztypes.h>
 
 
@@ -32,7 +33,7 @@ class RegisterEndpointRequest {
   z_cap_t endpoint_capability_;
 
   // Parses everything except for caps.
-  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
 };
 class GetEndpointRequest {
  public:
@@ -52,7 +53,7 @@ class GetEndpointRequest {
   glcr::String endpoint_name_;
 
   // Parses everything except for caps.
-  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
 };
 class Endpoint {
  public:
@@ -72,7 +73,7 @@ class Endpoint {
   z_cap_t endpoint_;
 
   // Parses everything except for caps.
-  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
 };
 class AhciInfo {
  public:
@@ -95,7 +96,7 @@ class AhciInfo {
   uint64_t region_length_;
 
   // Parses everything except for caps.
-  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
 };
 class FramebufferInfo {
  public:
@@ -148,7 +149,7 @@ class FramebufferInfo {
   uint64_t blue_mask_shift_;
 
   // Parses everything except for caps.
-  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
 };
 class DenaliInfo {
  public:
@@ -174,7 +175,7 @@ class DenaliInfo {
   uint64_t lba_offset_;
 
   // Parses everything except for caps.
-  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
 };
 
 

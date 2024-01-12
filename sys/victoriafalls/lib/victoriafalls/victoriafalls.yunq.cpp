@@ -16,21 +16,21 @@ struct ExtPointer {
 
 }  // namespace
 glcr::Status OpenFileRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
   return glcr::Status::Ok();
 }
 
 glcr::Status OpenFileRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
   return glcr::Status::Ok();
 }
 
-glcr::Status OpenFileRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(yunq::CheckHeader(bytes, offset));
-
-  yunq::MessageView view(bytes, offset);
+glcr::Status OpenFileRequest::ParseFromBytesInternal(const yunq::MessageView& message) {
+  RETURN_ERROR(message.CheckHeader());
   // Parse path.
-  ASSIGN_OR_RETURN(path_, view.ReadField<glcr::String>(0));
+  ASSIGN_OR_RETURN(path_, message.ReadField<glcr::String>(0));
 
   return glcr::Status::Ok();
 }
@@ -78,7 +78,8 @@ uint64_t OpenFileRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t off
   return next_extension;
 }
 glcr::Status OpenFileResponse::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse memory.
   // FIXME: Implement in-buffer capabilities for inprocess serialization.
   set_memory(0);
@@ -86,7 +87,8 @@ glcr::Status OpenFileResponse::ParseFromBytes(const glcr::ByteBuffer& bytes, uin
 }
 
 glcr::Status OpenFileResponse::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse memory.
   uint64_t memory_ptr = bytes.At<uint64_t>(offset + header_size + (8 * 2));
 
@@ -94,14 +96,12 @@ glcr::Status OpenFileResponse::ParseFromBytes(const glcr::ByteBuffer& bytes, uin
   return glcr::Status::Ok();
 }
 
-glcr::Status OpenFileResponse::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(yunq::CheckHeader(bytes, offset));
-
-  yunq::MessageView view(bytes, offset);
+glcr::Status OpenFileResponse::ParseFromBytesInternal(const yunq::MessageView& message) {
+  RETURN_ERROR(message.CheckHeader());
   // Parse path.
-  ASSIGN_OR_RETURN(path_, view.ReadField<glcr::String>(0));
+  ASSIGN_OR_RETURN(path_, message.ReadField<glcr::String>(0));
   // Parse size.
-  ASSIGN_OR_RETURN(size_, view.ReadField<uint64_t>(1));
+  ASSIGN_OR_RETURN(size_, message.ReadField<uint64_t>(1));
   // Parse memory.
 
   return glcr::Status::Ok();
@@ -160,21 +160,21 @@ uint64_t OpenFileResponse::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t of
   return next_extension;
 }
 glcr::Status GetDirectoryRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
   return glcr::Status::Ok();
 }
 
 glcr::Status GetDirectoryRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
   return glcr::Status::Ok();
 }
 
-glcr::Status GetDirectoryRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(yunq::CheckHeader(bytes, offset));
-
-  yunq::MessageView view(bytes, offset);
+glcr::Status GetDirectoryRequest::ParseFromBytesInternal(const yunq::MessageView& message) {
+  RETURN_ERROR(message.CheckHeader());
   // Parse path.
-  ASSIGN_OR_RETURN(path_, view.ReadField<glcr::String>(0));
+  ASSIGN_OR_RETURN(path_, message.ReadField<glcr::String>(0));
 
   return glcr::Status::Ok();
 }
@@ -222,21 +222,21 @@ uint64_t GetDirectoryRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t
   return next_extension;
 }
 glcr::Status Directory::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
   return glcr::Status::Ok();
 }
 
 glcr::Status Directory::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
   return glcr::Status::Ok();
 }
 
-glcr::Status Directory::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(yunq::CheckHeader(bytes, offset));
-
-  yunq::MessageView view(bytes, offset);
+glcr::Status Directory::ParseFromBytesInternal(const yunq::MessageView& message) {
+  RETURN_ERROR(message.CheckHeader());
   // Parse filenames.
-  ASSIGN_OR_RETURN(filenames_, view.ReadField<glcr::String>(0));
+  ASSIGN_OR_RETURN(filenames_, message.ReadField<glcr::String>(0));
 
   return glcr::Status::Ok();
 }

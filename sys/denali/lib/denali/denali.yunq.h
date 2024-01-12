@@ -6,6 +6,7 @@
 #include <glacier/status/status.h>
 #include <glacier/container/vector.h>
 #include <glacier/string/string.h>
+#include <yunq/message_view.h>
 #include <ztypes.h>
 
 
@@ -33,7 +34,7 @@ class ReadRequest {
   uint64_t size_;
 
   // Parses everything except for caps.
-  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
 };
 class ReadManyRequest {
  public:
@@ -59,7 +60,7 @@ class ReadManyRequest {
   glcr::Vector<uint64_t> sector_cnt_;
 
   // Parses everything except for caps.
-  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
 };
 class ReadResponse {
  public:
@@ -85,6 +86,6 @@ class ReadResponse {
   z_cap_t memory_;
 
   // Parses everything except for caps.
-  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
 };
 

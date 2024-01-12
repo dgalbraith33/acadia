@@ -6,6 +6,7 @@
 #include <glacier/status/status.h>
 #include <glacier/container/vector.h>
 #include <glacier/string/string.h>
+#include <yunq/message_view.h>
 #include <ztypes.h>
 
 
@@ -27,6 +28,6 @@ class KeyboardListener {
   z_cap_t port_capability_;
 
   // Parses everything except for caps.
-  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
 };
 

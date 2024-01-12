@@ -6,6 +6,7 @@
 #include <glacier/status/status.h>
 #include <glacier/container/vector.h>
 #include <glacier/string/string.h>
+#include <yunq/message_view.h>
 #include <ztypes.h>
 
 
@@ -27,7 +28,7 @@ class OpenFileRequest {
   glcr::String path_;
 
   // Parses everything except for caps.
-  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
 };
 class OpenFileResponse {
  public:
@@ -53,7 +54,7 @@ class OpenFileResponse {
   z_cap_t memory_;
 
   // Parses everything except for caps.
-  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
 };
 class GetDirectoryRequest {
  public:
@@ -73,7 +74,7 @@ class GetDirectoryRequest {
   glcr::String path_;
 
   // Parses everything except for caps.
-  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
 };
 class Directory {
  public:
@@ -93,6 +94,6 @@ class Directory {
   glcr::String filenames_;
 
   // Parses everything except for caps.
-  glcr::Status ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
 };
 

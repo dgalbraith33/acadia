@@ -18,7 +18,8 @@ struct ExtPointer {
 
 }  // namespace
 glcr::Status RegisterEndpointRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse endpoint_capability.
   // FIXME: Implement in-buffer capabilities for inprocess serialization.
   set_endpoint_capability(0);
@@ -26,7 +27,8 @@ glcr::Status RegisterEndpointRequest::ParseFromBytes(const glcr::ByteBuffer& byt
 }
 
 glcr::Status RegisterEndpointRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse endpoint_capability.
   uint64_t endpoint_capability_ptr = bytes.At<uint64_t>(offset + header_size + (8 * 1));
 
@@ -34,12 +36,10 @@ glcr::Status RegisterEndpointRequest::ParseFromBytes(const glcr::ByteBuffer& byt
   return glcr::Status::Ok();
 }
 
-glcr::Status RegisterEndpointRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(yunq::CheckHeader(bytes, offset));
-
-  yunq::MessageView view(bytes, offset);
+glcr::Status RegisterEndpointRequest::ParseFromBytesInternal(const yunq::MessageView& message) {
+  RETURN_ERROR(message.CheckHeader());
   // Parse endpoint_name.
-  ASSIGN_OR_RETURN(endpoint_name_, view.ReadField<glcr::String>(0));
+  ASSIGN_OR_RETURN(endpoint_name_, message.ReadField<glcr::String>(0));
   // Parse endpoint_capability.
 
   return glcr::Status::Ok();
@@ -94,21 +94,21 @@ uint64_t RegisterEndpointRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint
   return next_extension;
 }
 glcr::Status GetEndpointRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
   return glcr::Status::Ok();
 }
 
 glcr::Status GetEndpointRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
   return glcr::Status::Ok();
 }
 
-glcr::Status GetEndpointRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(yunq::CheckHeader(bytes, offset));
-
-  yunq::MessageView view(bytes, offset);
+glcr::Status GetEndpointRequest::ParseFromBytesInternal(const yunq::MessageView& message) {
+  RETURN_ERROR(message.CheckHeader());
   // Parse endpoint_name.
-  ASSIGN_OR_RETURN(endpoint_name_, view.ReadField<glcr::String>(0));
+  ASSIGN_OR_RETURN(endpoint_name_, message.ReadField<glcr::String>(0));
 
   return glcr::Status::Ok();
 }
@@ -156,7 +156,8 @@ uint64_t GetEndpointRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t 
   return next_extension;
 }
 glcr::Status Endpoint::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse endpoint.
   // FIXME: Implement in-buffer capabilities for inprocess serialization.
   set_endpoint(0);
@@ -164,7 +165,8 @@ glcr::Status Endpoint::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t of
 }
 
 glcr::Status Endpoint::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse endpoint.
   uint64_t endpoint_ptr = bytes.At<uint64_t>(offset + header_size + (8 * 0));
 
@@ -172,10 +174,8 @@ glcr::Status Endpoint::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t of
   return glcr::Status::Ok();
 }
 
-glcr::Status Endpoint::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(yunq::CheckHeader(bytes, offset));
-
-  yunq::MessageView view(bytes, offset);
+glcr::Status Endpoint::ParseFromBytesInternal(const yunq::MessageView& message) {
+  RETURN_ERROR(message.CheckHeader());
   // Parse endpoint.
 
   return glcr::Status::Ok();
@@ -208,7 +208,8 @@ uint64_t Endpoint::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, gl
   return next_extension;
 }
 glcr::Status AhciInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse ahci_region.
   // FIXME: Implement in-buffer capabilities for inprocess serialization.
   set_ahci_region(0);
@@ -216,7 +217,8 @@ glcr::Status AhciInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t of
 }
 
 glcr::Status AhciInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse ahci_region.
   uint64_t ahci_region_ptr = bytes.At<uint64_t>(offset + header_size + (8 * 0));
 
@@ -224,13 +226,11 @@ glcr::Status AhciInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t of
   return glcr::Status::Ok();
 }
 
-glcr::Status AhciInfo::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(yunq::CheckHeader(bytes, offset));
-
-  yunq::MessageView view(bytes, offset);
+glcr::Status AhciInfo::ParseFromBytesInternal(const yunq::MessageView& message) {
+  RETURN_ERROR(message.CheckHeader());
   // Parse ahci_region.
   // Parse region_length.
-  ASSIGN_OR_RETURN(region_length_, view.ReadField<uint64_t>(1));
+  ASSIGN_OR_RETURN(region_length_, message.ReadField<uint64_t>(1));
 
   return glcr::Status::Ok();
 }
@@ -266,43 +266,43 @@ uint64_t AhciInfo::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, gl
   return next_extension;
 }
 glcr::Status FramebufferInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
   return glcr::Status::Ok();
 }
 
 glcr::Status FramebufferInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
   return glcr::Status::Ok();
 }
 
-glcr::Status FramebufferInfo::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(yunq::CheckHeader(bytes, offset));
-
-  yunq::MessageView view(bytes, offset);
+glcr::Status FramebufferInfo::ParseFromBytesInternal(const yunq::MessageView& message) {
+  RETURN_ERROR(message.CheckHeader());
   // Parse address_phys.
-  ASSIGN_OR_RETURN(address_phys_, view.ReadField<uint64_t>(0));
+  ASSIGN_OR_RETURN(address_phys_, message.ReadField<uint64_t>(0));
   // Parse width.
-  ASSIGN_OR_RETURN(width_, view.ReadField<uint64_t>(1));
+  ASSIGN_OR_RETURN(width_, message.ReadField<uint64_t>(1));
   // Parse height.
-  ASSIGN_OR_RETURN(height_, view.ReadField<uint64_t>(2));
+  ASSIGN_OR_RETURN(height_, message.ReadField<uint64_t>(2));
   // Parse pitch.
-  ASSIGN_OR_RETURN(pitch_, view.ReadField<uint64_t>(3));
+  ASSIGN_OR_RETURN(pitch_, message.ReadField<uint64_t>(3));
   // Parse bpp.
-  ASSIGN_OR_RETURN(bpp_, view.ReadField<uint64_t>(4));
+  ASSIGN_OR_RETURN(bpp_, message.ReadField<uint64_t>(4));
   // Parse memory_model.
-  ASSIGN_OR_RETURN(memory_model_, view.ReadField<uint64_t>(5));
+  ASSIGN_OR_RETURN(memory_model_, message.ReadField<uint64_t>(5));
   // Parse red_mask_size.
-  ASSIGN_OR_RETURN(red_mask_size_, view.ReadField<uint64_t>(6));
+  ASSIGN_OR_RETURN(red_mask_size_, message.ReadField<uint64_t>(6));
   // Parse red_mask_shift.
-  ASSIGN_OR_RETURN(red_mask_shift_, view.ReadField<uint64_t>(7));
+  ASSIGN_OR_RETURN(red_mask_shift_, message.ReadField<uint64_t>(7));
   // Parse green_mask_size.
-  ASSIGN_OR_RETURN(green_mask_size_, view.ReadField<uint64_t>(8));
+  ASSIGN_OR_RETURN(green_mask_size_, message.ReadField<uint64_t>(8));
   // Parse green_mask_shift.
-  ASSIGN_OR_RETURN(green_mask_shift_, view.ReadField<uint64_t>(9));
+  ASSIGN_OR_RETURN(green_mask_shift_, message.ReadField<uint64_t>(9));
   // Parse blue_mask_size.
-  ASSIGN_OR_RETURN(blue_mask_size_, view.ReadField<uint64_t>(10));
+  ASSIGN_OR_RETURN(blue_mask_size_, message.ReadField<uint64_t>(10));
   // Parse blue_mask_shift.
-  ASSIGN_OR_RETURN(blue_mask_shift_, view.ReadField<uint64_t>(11));
+  ASSIGN_OR_RETURN(blue_mask_shift_, message.ReadField<uint64_t>(11));
 
   return glcr::Status::Ok();
 }
@@ -376,7 +376,8 @@ uint64_t FramebufferInfo::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t off
   return next_extension;
 }
 glcr::Status DenaliInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse denali_endpoint.
   // FIXME: Implement in-buffer capabilities for inprocess serialization.
   set_denali_endpoint(0);
@@ -384,7 +385,8 @@ glcr::Status DenaliInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t 
 }
 
 glcr::Status DenaliInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  RETURN_ERROR(ParseFromBytesInternal(bytes, offset));
+  yunq::MessageView message(bytes, offset);
+  RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse denali_endpoint.
   uint64_t denali_endpoint_ptr = bytes.At<uint64_t>(offset + header_size + (8 * 0));
 
@@ -392,15 +394,13 @@ glcr::Status DenaliInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t 
   return glcr::Status::Ok();
 }
 
-glcr::Status DenaliInfo::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  RETURN_ERROR(yunq::CheckHeader(bytes, offset));
-
-  yunq::MessageView view(bytes, offset);
+glcr::Status DenaliInfo::ParseFromBytesInternal(const yunq::MessageView& message) {
+  RETURN_ERROR(message.CheckHeader());
   // Parse denali_endpoint.
   // Parse device_id.
-  ASSIGN_OR_RETURN(device_id_, view.ReadField<uint64_t>(1));
+  ASSIGN_OR_RETURN(device_id_, message.ReadField<uint64_t>(1));
   // Parse lba_offset.
-  ASSIGN_OR_RETURN(lba_offset_, view.ReadField<uint64_t>(2));
+  ASSIGN_OR_RETURN(lba_offset_, message.ReadField<uint64_t>(2));
 
   return glcr::Status::Ok();
 }
