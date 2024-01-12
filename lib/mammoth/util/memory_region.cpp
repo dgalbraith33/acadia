@@ -71,4 +71,8 @@ z_cap_t OwnedMemoryRegion::DuplicateCap() {
   return cap;
 }
 
+OwnedMemoryRegion OwnedMemoryRegion::Duplicate() {
+  return OwnedMemoryRegion::FromCapability(DuplicateCap());
+}
+
 }  // namespace mmth

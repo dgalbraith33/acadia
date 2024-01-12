@@ -30,6 +30,7 @@ class OwnedMemoryRegion {
 
   z_cap_t cap() const { return vmmo_cap_; }
   z_cap_t DuplicateCap();
+  OwnedMemoryRegion Duplicate();
 
   bool empty() const { return vmmo_cap_ == 0; }
   explicit operator bool() const { return vmmo_cap_ != 0; }
