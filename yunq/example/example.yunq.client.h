@@ -22,7 +22,7 @@ class VFSClient {
 
 
   
-  [[nodiscard]] glcr::ErrorCode open(const OpenFileRequest& request, File& response);
+  [[nodiscard]] glcr::Status open(const OpenFileRequest& request, File& response);
   
 
  private:

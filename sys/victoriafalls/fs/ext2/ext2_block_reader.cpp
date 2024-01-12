@@ -9,8 +9,8 @@ glcr::ErrorOr<glcr::SharedPtr<Ext2BlockReader>> Ext2BlockReader::Init(
   DenaliClient client(denali_info.denali_endpoint());
   ReadRequest req;
   req.set_device_id(denali_info.device_id());
-  req.set_lba(denali_info.lba_offset() + 2);
-  req.set_size(2);
+  req.mutable_block().set_lba(denali_info.lba_offset() + 2);
+  req.mutable_block().set_size(2);
   ReadResponse resp;
   auto status = client.Read(req, resp);
   if (!status.ok()) {
@@ -71,8 +71,8 @@ glcr::ErrorOr<mmth::OwnedMemoryRegion> Ext2BlockReader::ReadBlocks(
     uint64_t block_number, uint64_t num_blocks) {
   ReadRequest req;
   req.set_device_id(device_id_);
-  req.set_lba(lba_offset_ + block_number * SectorsPerBlock());
-  req.set_size(num_blocks * SectorsPerBlock());
+  req.mutable_block().set_lba(lba_offset_ + block_number * SectorsPerBlock());
+  req.mutable_block().set_size(num_blocks * SectorsPerBlock());
   ReadResponse resp;
   auto status = denali_.Read(req, resp);
   if (!status.ok()) {

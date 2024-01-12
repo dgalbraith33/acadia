@@ -17,15 +17,16 @@ glcr::Status DenaliServer::HandleRead(const ReadRequest& req,
   ASSIGN_OR_RETURN(AhciPort * device, driver_.GetDevice(req.device_id()));
 
   uint64_t paddr;
-  mmth::OwnedMemoryRegion region =
-      mmth::OwnedMemoryRegion::ContiguousPhysical(req.size() * 512, &paddr);
+  mmth::OwnedMemoryRegion region = mmth::OwnedMemoryRegion::ContiguousPhysical(
+      req.block().size() * 512, &paddr);
 
-  ASSIGN_OR_RETURN(auto semaphore,
-                   device->IssueRead(req.lba(), req.size(), paddr));
+  ASSIGN_OR_RETURN(
+      auto semaphore,
+      device->IssueRead(req.block().lba(), req.block().size(), paddr));
   semaphore->Wait();
 
   resp.set_device_id(req.device_id());
-  resp.set_size(req.size());
+  resp.set_size(req.block().size());
   resp.set_memory(region.DuplicateCap());
   return glcr::Status::Ok();
 }

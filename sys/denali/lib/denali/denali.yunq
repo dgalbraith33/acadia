@@ -3,11 +3,16 @@ interface Denali {
   method ReadMany(ReadManyRequest) -> (ReadResponse);
 }
 
-message ReadRequest {
-  u64 device_id;
+message DiskBlock {
   u64 lba;
   u64 size;
 }
+
+message ReadRequest {
+  u64 device_id;
+  DiskBlock block;
+}
+
 
 message ReadManyRequest {
   u64 device_id;

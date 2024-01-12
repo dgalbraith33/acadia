@@ -34,6 +34,7 @@ def main():
     jinja_env = Environment(loader=FileSystemLoader(pathlib.Path(__file__).parent.resolve()))
 
     message_header_tmpl = jinja_env.get_template("message.h.jinja")
+    message_header_tmpl.globals['Type'] = Type
     with open(filename + '.h', mode='w') as f:
         message_header = message_header_tmpl.render(messages=messages, package=package)
         f.write(message_header)

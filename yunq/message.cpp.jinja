@@ -58,7 +58,15 @@ glcr::Status {{message.name}}::ParseFromBytesInternal(const yunq::MessageView& m
 
 {%- for field in message.fields %}
   // Parse {{field.name}}.
-{%- if field.type != Type.CAPABILITY %}
+{%- if field.type == Type.MESSAGE %}
+
+{%- if not field.repeated %}
+  message.ReadMessage<{{field.cpp_type()}}>({{field.number}}, {{field.name}}_);
+{%- else %}
+  message.ReadMessageRepeated<{{field.cpp_type()}}>({{field.number}}, {{field.name}}_);
+{% endif %}
+
+{%- elif field.type != Type.CAPABILITY %}
 
 {%- if not field.repeated %}
   ASSIGN_OR_RETURN({{field.name}}_, message.ReadField<{{field.cpp_type()}}>({{field.number}}));
@@ -87,10 +95,12 @@ uint64_t {{message.name}}::SerializeInternal(yunq::Serializer& serializer) const
   // Write {{field.name}}.
 {%- if not field.repeated %}
 
-{%- if field.type != Type.CAPABILITY %}
-  serializer.WriteField<{{field.cpp_type()}}>({{field.number}}, {{field.name}}_);
-{%- else %}
+{%- if field.type == Type.MESSAGE %}
+  serializer.WriteMessage<{{field.cpp_type()}}>({{field.number}}, {{field.name}}_);
+{%- elif field.type == Type.CAPABILITY %}
   serializer.WriteCapability({{field.number}}, {{field.name}}_);
+{%- else %}
+  serializer.WriteField<{{field.cpp_type()}}>({{field.number}}, {{field.name}}_);
 {%- endif %}
 
 {%- else %}

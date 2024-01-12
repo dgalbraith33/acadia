@@ -75,9 +75,10 @@ void VFSServerBase::ServerThread() {
     
     glcr::ErrorCode reply_err = glcr::OK;
     resp_cap.Reset();
-    glcr::ErrorCode err = HandleRequest(recv_buffer, recv_cap, resp_buffer, resp_length, resp_cap);
-    if (err != glcr::OK) {
-      WriteError(resp_buffer, err);
+    glcr::Status err = HandleRequest(recv_buffer, recv_cap, resp_buffer, resp_length, resp_cap);
+    if (!err) {
+      WriteError(resp_buffer, err.code());
+      dbgln("Responding Error {}", err.message());
       reply_err = static_cast<glcr::ErrorCode>(ZReplyPortSend(reply_port_cap, kHeaderSize, resp_buffer.RawPtr(), 0, nullptr));
     } else {
       WriteHeader(resp_buffer, resp_length);
@@ -90,12 +91,12 @@ void VFSServerBase::ServerThread() {
 
 }
 
-glcr::ErrorCode VFSServerBase::HandleRequest(const glcr::ByteBuffer& request,
-                                                            const glcr::CapBuffer& req_caps,
-                                                            glcr::ByteBuffer& response, uint64_t& resp_length,
-                                                            glcr::CapBuffer& resp_caps) {
+glcr::Status VFSServerBase::HandleRequest(const glcr::ByteBuffer& request,
+                                                         const glcr::CapBuffer& req_caps,
+                                                         glcr::ByteBuffer& response, uint64_t& resp_length,
+                                                         glcr::CapBuffer& resp_caps) {
   if (request.At<uint32_t>(0) != kSentinel) {
-    return glcr::INVALID_ARGUMENT;
+    return glcr::InvalidArgument("Request Not Valid");
   } 
   
   uint64_t method_select = request.At<uint64_t>(8);
@@ -105,7 +106,8 @@ glcr::ErrorCode VFSServerBase::HandleRequest(const glcr::ByteBuffer& request,
 
   
       OpenFileRequest yunq_request;
-      yunq_request.ParseFromBytes(request, kHeaderSize, req_caps);
+      yunq::MessageView request_view(request, kHeaderSize);
+      RETURN_ERROR(yunq_request.ParseFromBytes(request_view, req_caps));
   
 
   
@@ -113,7 +115,7 @@ glcr::ErrorCode VFSServerBase::HandleRequest(const glcr::ByteBuffer& request,
   
 
   
-      RET_ERR(Handleopen(yunq_request, yunq_response));
+      RETURN_ERROR(Handleopen(yunq_request, yunq_response));
   
 
   
@@ -122,10 +124,10 @@ glcr::ErrorCode VFSServerBase::HandleRequest(const glcr::ByteBuffer& request,
       break;
     }
     default: {
-      return glcr::UNIMPLEMENTED;
+      return glcr::Unimplemented("Method unimplemented by server.");
     }
   }
-  return glcr::OK;
+  return glcr::Status::Ok();
 }
 
 

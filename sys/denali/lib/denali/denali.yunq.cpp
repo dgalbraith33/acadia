@@ -15,6 +15,46 @@ struct ExtPointer {
 };
 
 }  // namespace
+glcr::Status DiskBlock::ParseFromBytes(const yunq::MessageView& message) {
+  RETURN_ERROR(ParseFromBytesInternal(message));
+  return glcr::Status::Ok();
+}
+
+glcr::Status DiskBlock::ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer& caps) {
+  RETURN_ERROR(ParseFromBytesInternal(message));
+  return glcr::Status::Ok();
+}
+
+glcr::Status DiskBlock::ParseFromBytesInternal(const yunq::MessageView& message) {
+  RETURN_ERROR(message.CheckHeader());
+  // Parse lba.
+  ASSIGN_OR_RETURN(lba_, message.ReadField<uint64_t>(0));
+  // Parse size.
+  ASSIGN_OR_RETURN(size_, message.ReadField<uint64_t>(1));
+
+  return glcr::Status::Ok();
+}
+
+uint64_t DiskBlock::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
+  yunq::Serializer serializer(bytes, offset, 2);
+  return SerializeInternal(serializer);
+}
+
+uint64_t DiskBlock::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
+  yunq::Serializer serializer(bytes, offset, 2, caps);
+  return SerializeInternal(serializer);
+}
+  
+uint64_t DiskBlock::SerializeInternal(yunq::Serializer& serializer) const {
+  // Write lba.
+  serializer.WriteField<uint64_t>(0, lba_);
+  // Write size.
+  serializer.WriteField<uint64_t>(1, size_);
+
+  serializer.WriteHeader();
+
+  return serializer.size();
+}
 glcr::Status ReadRequest::ParseFromBytes(const yunq::MessageView& message) {
   RETURN_ERROR(ParseFromBytesInternal(message));
   return glcr::Status::Ok();
@@ -29,31 +69,27 @@ glcr::Status ReadRequest::ParseFromBytesInternal(const yunq::MessageView& messag
   RETURN_ERROR(message.CheckHeader());
   // Parse device_id.
   ASSIGN_OR_RETURN(device_id_, message.ReadField<uint64_t>(0));
-  // Parse lba.
-  ASSIGN_OR_RETURN(lba_, message.ReadField<uint64_t>(1));
-  // Parse size.
-  ASSIGN_OR_RETURN(size_, message.ReadField<uint64_t>(2));
+  // Parse block.
+  message.ReadMessage<DiskBlock>(1, block_);
 
   return glcr::Status::Ok();
 }
 
 uint64_t ReadRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
-  yunq::Serializer serializer(bytes, offset, 3);
+  yunq::Serializer serializer(bytes, offset, 2);
   return SerializeInternal(serializer);
 }
 
 uint64_t ReadRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
-  yunq::Serializer serializer(bytes, offset, 3, caps);
+  yunq::Serializer serializer(bytes, offset, 2, caps);
   return SerializeInternal(serializer);
 }
   
 uint64_t ReadRequest::SerializeInternal(yunq::Serializer& serializer) const {
   // Write device_id.
   serializer.WriteField<uint64_t>(0, device_id_);
-  // Write lba.
-  serializer.WriteField<uint64_t>(1, lba_);
-  // Write size.
-  serializer.WriteField<uint64_t>(2, size_);
+  // Write block.
+  serializer.WriteMessage<DiskBlock>(1, block_);
 
   serializer.WriteHeader();
 

@@ -28,6 +28,9 @@ class MessageView {
   glcr::ErrorOr<uint64_t> ReadCapability(uint64_t field_index,
                                          const glcr::CapBuffer& caps) const;
 
+  template <typename T>
+  glcr::Status ReadMessage(uint64_t field_index, T& message) const;
+
  private:
   const glcr::ByteBuffer& buffer_;
   uint64_t offset_;
@@ -48,5 +51,14 @@ glcr::ErrorOr<glcr::String> MessageView::ReadField<glcr::String>(
 template <>
 glcr::ErrorOr<glcr::Vector<uint64_t>> MessageView::ReadRepeated<uint64_t>(
     uint64_t field_index) const;
+
+template <typename T>
+glcr::Status MessageView::ReadMessage(uint64_t field_index, T& message) const {
+  ExtensionPointer ptr =
+      buffer_.At<ExtensionPointer>(field_offset(field_index));
+
+  MessageView subview(buffer_, offset_ + ptr.offset);
+  return message.ParseFromBytes(subview);
+}
 
 }  // namespace yunq

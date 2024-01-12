@@ -106,6 +106,7 @@ class Type(Enum):
     STRING = 3
     BYTES = 4
     CAPABILITY = 5
+    MESSAGE = 6
 
 type_str_dict = {
         "u64": Type.U64,
@@ -124,12 +125,18 @@ type_to_cppstr = {
         }
 
 class Field():
-    def __init__(self, fieldtype: Type, name: str, repeated = False):
-        self.type = fieldtype
+    def __init__(self, field_type_str: str, name: str, repeated = False):
+        if field_type_str in type_str_dict.keys():
+          self.type = type_str_dict[field_type_str]
+        else: 
+          self.type = Type.MESSAGE
+        self.type_str = field_type_str
         self.name = name
         self.repeated = repeated
 
     def cpp_type(self):
+        if self.type == Type.MESSAGE:
+            return self.type_str
         return type_to_cppstr[self.type]
 
 class Message():
@@ -293,14 +300,10 @@ class Parser():
         if field_type_str == "repeated":
             repeated = True
             field_type_str = self.consume_identifier()
-            
-        if field_type_str not in type_str_dict.keys():
-            sys.exit("Expected type got '%s'" % field_type_str)
-        field_type = type_str_dict[field_type_str]
 
         name = self.consume_identifier()
         self.consume_check(LexemeType.SEMICOLON)
-        return Field(field_type, name, repeated)
+        return Field(field_type_str, name, repeated)
 
 def type_check(decls: list[Decl]):
     if sum(1 for decl in decls if type(decl) is Package) > 1:
@@ -320,6 +323,12 @@ def type_check(decls: list[Decl]):
                       sys.exit("Response type '%s' for '%s.%s' does not exist" % (method.response, decl.name, method.name))
                   if type(name_dict[method.response]) is not Message:
                       sys.exit("Response type '%s' for '%s.%s' should be a message" % (method.response, decl.name, method.name))
+        elif type(decl) is Message:
+            for field in decl.fields:
+                if field.type == Type.MESSAGE:
+                    if field.type_str not in name_dict.keys():
+                        sys.exit("Field type '%s' for field '%s' in message '%s' not found." %
+                                 (field.type_str, field.name, decl.name))
 
 def print_ast(decls: list[Decl]):
     for decl in decls:

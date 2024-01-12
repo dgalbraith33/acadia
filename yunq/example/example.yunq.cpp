@@ -1,6 +1,9 @@
 // Generated file -- DO NOT MODIFY.
 #include "example.yunq.h"
 
+#include <yunq/message_view.h>
+#include <yunq/serialize.h>
+
 
 namespace srv::file {
 
@@ -13,197 +16,94 @@ struct ExtPointer {
   uint32_t length;
 };
 
-void CheckHeader(const glcr::ByteBuffer& bytes) {
-  // TODO: Check ident.
-  // TODO: Parse core size.
-  // TODO: Parse extension size.
-  // TODO: Check CRC32
-  // TODO: Parse options.
-}
-
-void WriteHeader(glcr::ByteBuffer& bytes, uint64_t offset, uint32_t core_size, uint32_t extension_size) {
-  bytes.WriteAt<uint32_t>(offset + 0, 0xDEADBEEF);  // TODO: Chose a more unique ident sequence.
-  bytes.WriteAt<uint32_t>(offset + 4, core_size);
-  bytes.WriteAt<uint32_t>(offset + 8, extension_size);
-  bytes.WriteAt<uint32_t>(offset + 12, 0); // TODO: Calculate CRC32.
-  bytes.WriteAt<uint64_t>(offset + 16, 0); // TODO: Add options.
-}
-
 }  // namespace
-void OpenFileRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  ParseFromBytesInternal(bytes, offset);
+glcr::Status OpenFileRequest::ParseFromBytes(const yunq::MessageView& message) {
+  RETURN_ERROR(ParseFromBytesInternal(message));
+  return glcr::Status::Ok();
 }
 
-void OpenFileRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  ParseFromBytesInternal(bytes, offset);
+glcr::Status OpenFileRequest::ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer& caps) {
+  RETURN_ERROR(ParseFromBytesInternal(message));
+  return glcr::Status::Ok();
 }
 
-void OpenFileRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  CheckHeader(bytes);
+glcr::Status OpenFileRequest::ParseFromBytesInternal(const yunq::MessageView& message) {
+  RETURN_ERROR(message.CheckHeader());
   // Parse path.
-  auto path_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
-
-  set_path(bytes.StringAt(offset + path_pointer.offset, path_pointer.length));
+  ASSIGN_OR_RETURN(path_, message.ReadField<glcr::String>(0));
   // Parse options.
-  auto options_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 1));
-
-  options_.Resize(options_pointer.length / sizeof(uint64_t));
-  for (uint64_t i = offset + options_pointer.offset;
-       i < offset + options_pointer.offset + options_pointer.length;
-       i += sizeof(uint64_t)) {
-    options_.PushBack(bytes.At<uint64_t>(i));
-  }
+  ASSIGN_OR_RETURN(options_, message.ReadRepeated<uint64_t>(1));
 
 
+  return glcr::Status::Ok();
 }
 
 uint64_t OpenFileRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
-  uint32_t next_extension = header_size + 8 * 2;
-  const uint32_t core_size = next_extension;
-  // Write path.
-  ExtPointer path_ptr{
-    .offset = next_extension,
-    // FIXME: Check downcast of str length.
-    .length = (uint32_t)path().length(),
-  };
-
-  bytes.WriteStringAt(offset + next_extension, path());
-  next_extension += path_ptr.length;
-
-  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 0), path_ptr);
-  // Write options.
-  ExtPointer options_ptr{
-    .offset = next_extension,
-    .length = (uint32_t)(options().size() * sizeof(uint64_t)),
-  };
-
-  next_extension += options_ptr.length;
-  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 1), options_ptr);
-
-  for (uint64_t i = 0; i < options().size(); i++) {
-    uint32_t ext_offset = offset + options_ptr.offset + (i * sizeof(uint64_t));
-    bytes.WriteAt<uint64_t>(ext_offset, options().at(i));
-  }
-
-  // The next extension pointer is the length of the message. 
-  WriteHeader(bytes, offset, core_size, next_extension);
-
-  return next_extension;
+  yunq::Serializer serializer(bytes, offset, 2);
+  return SerializeInternal(serializer);
 }
 
 uint64_t OpenFileRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
-  uint32_t next_extension = header_size + 8 * 2;
-  const uint32_t core_size = next_extension;
-  uint64_t next_cap = 0;
+  yunq::Serializer serializer(bytes, offset, 2, caps);
+  return SerializeInternal(serializer);
+}
+  
+uint64_t OpenFileRequest::SerializeInternal(yunq::Serializer& serializer) const {
   // Write path.
-  ExtPointer path_ptr{
-    .offset = next_extension,
-    // FIXME: Check downcast of str length.
-    .length = (uint32_t)path().length(),
-  };
-
-  bytes.WriteStringAt(offset + next_extension, path());
-  next_extension += path_ptr.length;
-
-  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 0), path_ptr);
+  serializer.WriteField<glcr::String>(0, path_);
   // Write options.
-  ExtPointer options_ptr{
-    .offset = next_extension,
-    .length = (uint32_t)(options().size() * sizeof(uint64_t)),
-  };
+  serializer.WriteRepeated<uint64_t>(1, options_);
 
-  next_extension += options_ptr.length;
-  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 1), options_ptr);
+  serializer.WriteHeader();
 
-  for (uint64_t i = 0; i < options().size(); i++) {
-    uint32_t ext_offset = offset + options_ptr.offset + (i * sizeof(uint64_t));
-    bytes.WriteAt<uint64_t>(ext_offset, options().at(i));
-  }
-
-  // The next extension pointer is the length of the message. 
-  WriteHeader(bytes, offset, core_size, next_extension);
-
-  return next_extension;
+  return serializer.size();
 }
-void File::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  ParseFromBytesInternal(bytes, offset);
+glcr::Status File::ParseFromBytes(const yunq::MessageView& message) {
+  RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse mem_cap.
-  // FIXME: Implement in-buffer capabilities for inprocess serialization.
-  set_mem_cap(0);
+  ASSIGN_OR_RETURN(mem_cap_, message.ReadCapability(2));
+  return glcr::Status::Ok();
 }
 
-void File::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  ParseFromBytesInternal(bytes, offset);
+glcr::Status File::ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer& caps) {
+  RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse mem_cap.
-  uint64_t mem_cap_ptr = bytes.At<uint64_t>(offset + header_size + (8 * 2));
-
-  set_mem_cap(caps.At(mem_cap_ptr));
+  ASSIGN_OR_RETURN(mem_cap_, message.ReadCapability(2, caps));
+  return glcr::Status::Ok();
 }
 
-void File::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  CheckHeader(bytes);
+glcr::Status File::ParseFromBytesInternal(const yunq::MessageView& message) {
+  RETURN_ERROR(message.CheckHeader());
   // Parse path.
-  auto path_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
-
-  set_path(bytes.StringAt(offset + path_pointer.offset, path_pointer.length));
+  ASSIGN_OR_RETURN(path_, message.ReadField<glcr::String>(0));
   // Parse attrs.
-  set_attrs(bytes.At<uint64_t>(offset + header_size + (8 * 1)));
+  ASSIGN_OR_RETURN(attrs_, message.ReadField<uint64_t>(1));
   // Parse mem_cap.
-  // Skip Cap.
 
+  return glcr::Status::Ok();
 }
 
 uint64_t File::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
-  uint32_t next_extension = header_size + 8 * 3;
-  const uint32_t core_size = next_extension;
-  // Write path.
-  ExtPointer path_ptr{
-    .offset = next_extension,
-    // FIXME: Check downcast of str length.
-    .length = (uint32_t)path().length(),
-  };
-
-  bytes.WriteStringAt(offset + next_extension, path());
-  next_extension += path_ptr.length;
-
-  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 0), path_ptr);
-  // Write attrs.
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 1), attrs());
-  // Write mem_cap.
-  // FIXME: Implement inbuffer capabilities.
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 2), 0);
-
-  // The next extension pointer is the length of the message. 
-  WriteHeader(bytes, offset, core_size, next_extension);
-
-  return next_extension;
+  yunq::Serializer serializer(bytes, offset, 3);
+  return SerializeInternal(serializer);
 }
 
 uint64_t File::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
-  uint32_t next_extension = header_size + 8 * 3;
-  const uint32_t core_size = next_extension;
-  uint64_t next_cap = 0;
+  yunq::Serializer serializer(bytes, offset, 3, caps);
+  return SerializeInternal(serializer);
+}
+  
+uint64_t File::SerializeInternal(yunq::Serializer& serializer) const {
   // Write path.
-  ExtPointer path_ptr{
-    .offset = next_extension,
-    // FIXME: Check downcast of str length.
-    .length = (uint32_t)path().length(),
-  };
-
-  bytes.WriteStringAt(offset + next_extension, path());
-  next_extension += path_ptr.length;
-
-  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 0), path_ptr);
+  serializer.WriteField<glcr::String>(0, path_);
   // Write attrs.
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 1), attrs());
+  serializer.WriteField<uint64_t>(1, attrs_);
   // Write mem_cap.
-  caps.WriteAt(next_cap, mem_cap());
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 2), next_cap++);
+  serializer.WriteCapability(2, mem_cap_);
 
-  // The next extension pointer is the length of the message. 
-  WriteHeader(bytes, offset, core_size, next_extension);
+  serializer.WriteHeader();
 
-  return next_extension;
+  return serializer.size();
 }
 
 

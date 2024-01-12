@@ -11,6 +11,31 @@
 #include <ztypes.h>
 
 
+class DiskBlock {
+ public:
+  DiskBlock() {}
+  // Delete copy and move until implemented.
+  DiskBlock(const DiskBlock&) = delete;
+  DiskBlock(DiskBlock&&) = delete;
+
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer&);
+  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
+  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
+  const uint64_t& lba() const { return lba_; }
+  void set_lba(const uint64_t& value) { lba_ = value; } 
+  const uint64_t& size() const { return size_; }
+  void set_size(const uint64_t& value) { size_ = value; }
+
+ private:
+  uint64_t lba_;
+  uint64_t size_;
+
+  // Parses everything except for caps.
+  glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
+
+  uint64_t SerializeInternal(yunq::Serializer& serializer) const;
+};
 class ReadRequest {
  public:
   ReadRequest() {}
@@ -23,16 +48,13 @@ class ReadRequest {
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const uint64_t& device_id() const { return device_id_; }
-  void set_device_id(const uint64_t& value) { device_id_ = value; } 
-  const uint64_t& lba() const { return lba_; }
-  void set_lba(const uint64_t& value) { lba_ = value; } 
-  const uint64_t& size() const { return size_; }
-  void set_size(const uint64_t& value) { size_ = value; }
+  void set_device_id(const uint64_t& value) { device_id_ = value; }
+  const DiskBlock& block() const { return block_; }
+  DiskBlock& mutable_block() { return block_; }
 
  private:
   uint64_t device_id_;
-  uint64_t lba_;
-  uint64_t size_;
+  DiskBlock block_;
 
   // Parses everything except for caps.
   glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);

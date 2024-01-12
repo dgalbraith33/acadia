@@ -3,8 +3,11 @@
 
 #include <glacier/buffer/byte_buffer.h>
 #include <glacier/buffer/cap_buffer.h>
+#include <glacier/status/status.h>
 #include <glacier/container/vector.h>
 #include <glacier/string/string.h>
+#include <yunq/message_view.h>
+#include <yunq/serialize.h>
 #include <ztypes.h>
 
 
@@ -17,8 +20,8 @@ class OpenFileRequest {
   OpenFileRequest(const OpenFileRequest&) = delete;
   OpenFileRequest(OpenFileRequest&&) = delete;
 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const glcr::String& path() const { return path_; }
@@ -31,7 +34,9 @@ class OpenFileRequest {
   glcr::Vector<uint64_t> options_;
 
   // Parses everything except for caps.
-  void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
+
+  uint64_t SerializeInternal(yunq::Serializer& serializer) const;
 };
 class File {
  public:
@@ -40,8 +45,8 @@ class File {
   File(const File&) = delete;
   File(File&&) = delete;
 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset); 
-  void ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const glcr::String& path() const { return path_; }
@@ -57,7 +62,9 @@ class File {
   z_cap_t mem_cap_;
 
   // Parses everything except for caps.
-  void ParseFromBytesInternal(const glcr::ByteBuffer&, uint64_t offset);
+  glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
+
+  uint64_t SerializeInternal(yunq::Serializer& serializer) const;
 };
 
 

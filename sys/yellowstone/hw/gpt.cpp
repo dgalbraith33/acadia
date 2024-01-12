@@ -59,8 +59,8 @@ GptReader::GptReader(glcr::UniquePtr<DenaliClient> denali)
 glcr::Status GptReader::ParsePartitionTables() {
   ReadRequest req;
   req.set_device_id(0);
-  req.set_lba(0);
-  req.set_size(2);
+  req.mutable_block().set_lba(0);
+  req.mutable_block().set_size(2);
   ReadResponse resp;
   RETURN_ERROR(denali_->Read(req, resp));
   mmth::OwnedMemoryRegion lba_1_and_2 =
@@ -102,8 +102,8 @@ glcr::Status GptReader::ParsePartitionTables() {
 #endif
 
   req.set_device_id(0);
-  req.set_lba(header->lba_partition_entries);
-  req.set_size(num_blocks);
+  req.mutable_block().set_lba(header->lba_partition_entries);
+  req.mutable_block().set_size(num_blocks);
   RETURN_ERROR(denali_->Read(req, resp));
   mmth::OwnedMemoryRegion part_table =
       mmth::OwnedMemoryRegion::FromCapability(resp.memory());

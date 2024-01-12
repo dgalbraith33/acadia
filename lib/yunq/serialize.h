@@ -38,6 +38,9 @@ class Serializer {
   void WriteRepeatedCapability(uint64_t field_index,
                                const glcr::Vector<uint64_t>& value);
 
+  template <typename T>
+  void WriteMessage(uint64_t field_index, const T& value);
+
   void WriteHeader();
 
   uint64_t size() const { return next_extension_; }
@@ -66,5 +69,25 @@ void Serializer::WriteField<glcr::String>(uint64_t field_index,
 template <>
 void Serializer::WriteRepeated<uint64_t>(uint64_t field_index,
                                          const glcr::Vector<uint64_t>& value);
+
+template <typename T>
+void Serializer::WriteMessage(uint64_t field_index, const T& value) {
+  uint64_t length = 0;
+  if (caps_) {
+    length = value.SerializeToBytes(buffer_, offset_ + next_extension_,
+                                    caps_.value().get());
+  } else {
+    length = value.SerializeToBytes(buffer_, offset_ + next_extension_);
+  }
+
+  ExtensionPointer ptr{
+      .offset = (uint32_t)next_extension_,
+      .length = (uint32_t)length,
+  };
+
+  next_extension_ += length;
+
+  buffer_.WriteAt<ExtensionPointer>(field_offset(field_index), ptr);
+}
 
 }  // namespace yunq
