@@ -90,7 +90,8 @@ void DumpModules() {
   dbgln("[boot] Dumping bootloader modules.");
   for (uint64_t i = 0; i < resp.module_count; i++) {
     const limine_file& file = *resp.modules[i];
-    dbgln("    {},{x},{}", file.path, file.address, file.size);
+    dbgln("    {},{x},{x}", glcr::String(file.path), (uint64_t)file.address,
+          file.size);
   }
 #endif
 }
@@ -111,6 +112,8 @@ void WriteInitProgram(glcr::RefPtr<Port> port, glcr::String name, uint64_t id) {
   const limine_file& prog = GetInitProgram(name);
   glcr::RefPtr<VariableMemoryObject> prog_vmmo =
       glcr::MakeRefCounted<VariableMemoryObject>(prog.size);
+  // TODO: These seem to be page aligned we should just construct an object
+  // around them.
   prog_vmmo->CopyBytesToObject(reinterpret_cast<uint64_t>(prog.address),
                                prog.size);
   port->WriteKernel(id, MakeRefCounted<Capability>(prog_vmmo));
@@ -120,6 +123,10 @@ glcr::ErrorCode WritePciVmmo(glcr::RefPtr<Port> port, uint64_t id) {
   ASSIGN_OR_RETURN(PcieConfiguration config, GetPciExtendedConfiguration());
   auto vmmo =
       glcr::MakeRefCounted<ViewMemoryObject>(config.base, config.offset);
+
+#if K_INIT_DEBUG
+  dbgln("PCI Configuration found at: {x}:{x}", config.base, config.offset);
+#endif
 
   port->WriteKernel(id, MakeRefCounted<Capability>(vmmo));
 
