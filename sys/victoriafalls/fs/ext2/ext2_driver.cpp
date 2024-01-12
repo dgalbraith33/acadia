@@ -56,7 +56,7 @@ glcr::ErrorOr<glcr::Vector<DirEntry>> Ext2Driver::ReadDirectory(
     dbgln("Reading non directory.");
     return glcr::INVALID_ARGUMENT;
   }
-  ASSIGN_OR_RETURN(mmth::OwnedMemoryRegion dir, ReadInode(inode));
+  ASSIGN_OR_RETURN(mmth::OwnedMemoryRegion dir, ReadInode(inode_number, inode));
 
   glcr::Vector<DirEntry> directory;
 
@@ -90,10 +90,14 @@ glcr::ErrorOr<mmth::OwnedMemoryRegion> Ext2Driver::ReadFile(
     dbgln("Reading non file.");
     return glcr::INVALID_ARGUMENT;
   }
-  return ReadInode(inode);
+  return ReadInode(inode_number, inode);
 }
 
-glcr::ErrorOr<mmth::OwnedMemoryRegion> Ext2Driver::ReadInode(Inode* inode) {
+glcr::ErrorOr<mmth::OwnedMemoryRegion> Ext2Driver::ReadInode(uint64_t inode_num,
+                                                             Inode* inode) {
+  if (inode_cache_.Contains(inode_num)) {
+    return inode_cache_.at(inode_num).Duplicate();
+  }
   // This calculation is cursed.
   uint64_t real_block_cnt =
       (inode->blocks - 1) / (ext2_reader_->BlockSize() / 512) + 1;
@@ -150,5 +154,7 @@ glcr::ErrorOr<mmth::OwnedMemoryRegion> Ext2Driver::ReadInode(Inode* inode) {
     }
   }
 
-  return ext2_reader_->ReadBlocks(blocks_to_read);
+  ASSIGN_OR_RETURN(auto inode_mem, ext2_reader_->ReadBlocks(blocks_to_read));
+  RET_ERR(inode_cache_.Insert(glcr::Move(inode_num), inode_mem.Duplicate()));
+  return inode_mem;
 }

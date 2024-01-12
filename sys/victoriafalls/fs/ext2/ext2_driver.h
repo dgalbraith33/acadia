@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glacier/container/hash_map.h>
 #include <glacier/memory/move.h>
 #include <glacier/memory/unique_ptr.h>
 #include <yellowstone/yellowstone.yunq.h>
@@ -24,10 +25,12 @@ class Ext2Driver {
  private:
   glcr::SharedPtr<Ext2BlockReader> ext2_reader_;
   glcr::UniquePtr<InodeTable> inode_table_;
+  glcr::HashMap<uint64_t, mmth::OwnedMemoryRegion> inode_cache_;
 
   Ext2Driver(const glcr::SharedPtr<Ext2BlockReader>& reader,
              glcr::UniquePtr<InodeTable> inode_table)
       : ext2_reader_(reader), inode_table_(glcr::Move(inode_table)) {}
 
-  glcr::ErrorOr<mmth::OwnedMemoryRegion> ReadInode(Inode* inode);
+  glcr::ErrorOr<mmth::OwnedMemoryRegion> ReadInode(uint64_t inode_num,
+                                                   Inode* inode);
 };
