@@ -103,7 +103,7 @@ glcr::Status {{interface.name}}ServerBase::HandleRequest(const glcr::ByteBuffer&
 
   switch(method_select) {
 {%- for method in interface.methods %}
-    case {{loop.index0}}: {
+    case {{method.number}}: {
 
   {% if method.request != None %}
       {{method.request}} yunq_request;

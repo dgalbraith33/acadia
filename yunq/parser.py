@@ -215,8 +215,11 @@ class Parser():
 
         methods: list[Method] = []
         method_names = set()
+        next_method_number = 0
         while self.peektype() != LexemeType.RIGHT_BRACE:
             m = self.method()
+            m.number = next_method_number
+            next_method_number += 1
             if m.name in method_names:
                 sys.exit("Method %s declared twice on %s" % (m.name, name))
             method_names.add(m.name)

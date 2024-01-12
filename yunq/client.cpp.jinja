@@ -31,7 +31,7 @@ glcr::Status {{interface.name}}Client::{{method.name}}(const {{method.request}}&
 
   const uint32_t kSentinel = 0xBEEFDEAD;
   buffer_.WriteAt<uint32_t>(0, kSentinel);
-  buffer_.WriteAt<uint64_t>(8, {{loop.index0}});
+  buffer_.WriteAt<uint64_t>(8, {{method.number}});
 
   cap_buffer_.Reset();
 {% if method.request == None %}
