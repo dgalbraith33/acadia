@@ -38,36 +38,31 @@ glcr::Status ReadRequest::ParseFromBytesInternal(const yunq::MessageView& messag
 }
 
 uint64_t ReadRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
-  uint32_t next_extension = header_size + 8 * 3;
-  const uint32_t core_size = next_extension;
+  yunq::Serializer serializer(bytes, offset, 3);
   // Write device_id.
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 0), device_id());
+  serializer.WriteField<uint64_t>(0, device_id_);
   // Write lba.
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 1), lba());
+  serializer.WriteField<uint64_t>(1, lba_);
   // Write size.
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 2), size());
+  serializer.WriteField<uint64_t>(2, size_);
 
-  // The next extension pointer is the length of the message. 
-  yunq::WriteHeader(bytes, offset, core_size, next_extension);
+  serializer.WriteHeader();
 
-  return next_extension;
+  return serializer.size();
 }
 
 uint64_t ReadRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
-  uint32_t next_extension = header_size + 8 * 3;
-  const uint32_t core_size = next_extension;
-  uint64_t next_cap = 0;
+  yunq::Serializer serializer(bytes, offset, 3, caps);
   // Write device_id.
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 0), device_id());
+  serializer.WriteField<uint64_t>(0, device_id_);
   // Write lba.
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 1), lba());
+  serializer.WriteField<uint64_t>(1, lba_);
   // Write size.
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 2), size());
+  serializer.WriteField<uint64_t>(2, size_);
 
-  // The next extension pointer is the length of the message. 
-  yunq::WriteHeader(bytes, offset, core_size, next_extension);
+  serializer.WriteHeader();
 
-  return next_extension;
+  return serializer.size();
 }
 glcr::Status ReadManyRequest::ParseFromBytes(const yunq::MessageView& message) {
   RETURN_ERROR(ParseFromBytesInternal(message));
@@ -94,80 +89,31 @@ glcr::Status ReadManyRequest::ParseFromBytesInternal(const yunq::MessageView& me
 }
 
 uint64_t ReadManyRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
-  uint32_t next_extension = header_size + 8 * 3;
-  const uint32_t core_size = next_extension;
+  yunq::Serializer serializer(bytes, offset, 3);
   // Write device_id.
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 0), device_id());
+  serializer.WriteField<uint64_t>(0, device_id_);
   // Write lba.
-  ExtPointer lba_ptr{
-    .offset = next_extension,
-    .length = (uint32_t)(lba().size() * sizeof(uint64_t)),
-  };
-
-  next_extension += lba_ptr.length;
-  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 1), lba_ptr);
-
-  for (uint64_t i = 0; i < lba().size(); i++) {
-    uint32_t ext_offset = offset + lba_ptr.offset + (i * sizeof(uint64_t));
-    bytes.WriteAt<uint64_t>(ext_offset, lba().at(i));
-  }
+  serializer.WriteRepeated<uint64_t>(1, lba_);
   // Write sector_cnt.
-  ExtPointer sector_cnt_ptr{
-    .offset = next_extension,
-    .length = (uint32_t)(sector_cnt().size() * sizeof(uint64_t)),
-  };
+  serializer.WriteRepeated<uint64_t>(2, sector_cnt_);
 
-  next_extension += sector_cnt_ptr.length;
-  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 2), sector_cnt_ptr);
+  serializer.WriteHeader();
 
-  for (uint64_t i = 0; i < sector_cnt().size(); i++) {
-    uint32_t ext_offset = offset + sector_cnt_ptr.offset + (i * sizeof(uint64_t));
-    bytes.WriteAt<uint64_t>(ext_offset, sector_cnt().at(i));
-  }
-
-  // The next extension pointer is the length of the message. 
-  yunq::WriteHeader(bytes, offset, core_size, next_extension);
-
-  return next_extension;
+  return serializer.size();
 }
 
 uint64_t ReadManyRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
-  uint32_t next_extension = header_size + 8 * 3;
-  const uint32_t core_size = next_extension;
-  uint64_t next_cap = 0;
+  yunq::Serializer serializer(bytes, offset, 3, caps);
   // Write device_id.
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 0), device_id());
+  serializer.WriteField<uint64_t>(0, device_id_);
   // Write lba.
-  ExtPointer lba_ptr{
-    .offset = next_extension,
-    .length = (uint32_t)(lba().size() * sizeof(uint64_t)),
-  };
-
-  next_extension += lba_ptr.length;
-  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 1), lba_ptr);
-
-  for (uint64_t i = 0; i < lba().size(); i++) {
-    uint32_t ext_offset = offset + lba_ptr.offset + (i * sizeof(uint64_t));
-    bytes.WriteAt<uint64_t>(ext_offset, lba().at(i));
-  }
+  serializer.WriteRepeated<uint64_t>(1, lba_);
   // Write sector_cnt.
-  ExtPointer sector_cnt_ptr{
-    .offset = next_extension,
-    .length = (uint32_t)(sector_cnt().size() * sizeof(uint64_t)),
-  };
+  serializer.WriteRepeated<uint64_t>(2, sector_cnt_);
 
-  next_extension += sector_cnt_ptr.length;
-  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * 2), sector_cnt_ptr);
+  serializer.WriteHeader();
 
-  for (uint64_t i = 0; i < sector_cnt().size(); i++) {
-    uint32_t ext_offset = offset + sector_cnt_ptr.offset + (i * sizeof(uint64_t));
-    bytes.WriteAt<uint64_t>(ext_offset, sector_cnt().at(i));
-  }
-
-  // The next extension pointer is the length of the message. 
-  yunq::WriteHeader(bytes, offset, core_size, next_extension);
-
-  return next_extension;
+  return serializer.size();
 }
 glcr::Status ReadResponse::ParseFromBytes(const yunq::MessageView& message) {
   RETURN_ERROR(ParseFromBytesInternal(message));
@@ -195,37 +141,30 @@ glcr::Status ReadResponse::ParseFromBytesInternal(const yunq::MessageView& messa
 }
 
 uint64_t ReadResponse::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
-  uint32_t next_extension = header_size + 8 * 3;
-  const uint32_t core_size = next_extension;
+  yunq::Serializer serializer(bytes, offset, 3);
   // Write device_id.
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 0), device_id());
+  serializer.WriteField<uint64_t>(0, device_id_);
   // Write size.
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 1), size());
+  serializer.WriteField<uint64_t>(1, size_);
   // Write memory.
-  // FIXME: Implement inbuffer capabilities.
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 2), 0);
+  serializer.WriteCapability(2, memory_);
 
-  // The next extension pointer is the length of the message. 
-  yunq::WriteHeader(bytes, offset, core_size, next_extension);
+  serializer.WriteHeader();
 
-  return next_extension;
+  return serializer.size();
 }
 
 uint64_t ReadResponse::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
-  uint32_t next_extension = header_size + 8 * 3;
-  const uint32_t core_size = next_extension;
-  uint64_t next_cap = 0;
+  yunq::Serializer serializer(bytes, offset, 3, caps);
   // Write device_id.
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 0), device_id());
+  serializer.WriteField<uint64_t>(0, device_id_);
   // Write size.
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 1), size());
+  serializer.WriteField<uint64_t>(1, size_);
   // Write memory.
-  caps.WriteAt(next_cap, memory());
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 2), next_cap++);
+  serializer.WriteCapability(2, memory_);
 
-  // The next extension pointer is the length of the message. 
-  yunq::WriteHeader(bytes, offset, core_size, next_extension);
+  serializer.WriteHeader();
 
-  return next_extension;
+  return serializer.size();
 }
 

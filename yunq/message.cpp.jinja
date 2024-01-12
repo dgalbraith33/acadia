@@ -73,105 +73,63 @@ glcr::Status {{message.name}}::ParseFromBytesInternal(const yunq::MessageView& m
 }
 
 uint64_t {{message.name}}::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
-  uint32_t next_extension = header_size + 8 * {{ message.fields | length }};
-  const uint32_t core_size = next_extension;
-
+  yunq::Serializer serializer(bytes, offset, {{ message.fields | length }});
+  
 {%- for field in message.fields %}
   // Write {{field.name}}.
 {%- if not field.repeated %}
-{%- if field.type == Type.U64 %}
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * {{loop.index0}}), {{field.name}}());
-{%- elif field.type == Type.I64 %}
-  bytes.WriteAt<int64_t>(offset + header_size + (8 * {{loop.index0}}), {{field.name}}());
-{%- elif field.type == Type.STRING %}
-  ExtPointer {{field.name}}_ptr{
-    .offset = next_extension,
-    // FIXME: Check downcast of str length.
-    .length = (uint32_t){{field.name}}().length(),
-  };
 
-  bytes.WriteStringAt(offset + next_extension, {{field.name}}());
-  next_extension += {{field.name}}_ptr.length;
-
-  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * {{loop.index0}}), {{field.name}}_ptr);
-{%- elif field.type == Type.CAPABILITY %}
-  // FIXME: Implement inbuffer capabilities.
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * {{loop.index0}}), 0);
+{%- if field.type != Type.CAPABILITY %}
+  serializer.WriteField<{{field.cpp_type()}}>({{loop.index0}}, {{field.name}}_);
 {%- else %}
-  // TODO: Unimplemented serialization {{field.type}}
+  serializer.WriteCapability({{loop.index0}}, {{field.name}}_);
 {%- endif %}
+
 {%- else %}
-  ExtPointer {{field.name}}_ptr{
-    .offset = next_extension,
-    .length = (uint32_t)({{field.name}}().size() * sizeof({{field.cpp_type()}})),
-  };
 
-  next_extension += {{field.name}}_ptr.length;
-  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * {{loop.index0}}), {{field.name}}_ptr);
+{%- if field.type != Type.CAPABILITY %}
+  serializer.WriteRepeated<{{field.cpp_type()}}>({{loop.index0}}, {{field.name}}_);
+{%- else %}
+  serializer.WriteRepeatedCapability({{loop.index0}}, {{field.name}}_);
+{%- endif %}
 
-  for (uint64_t i = 0; i < {{field.name}}().size(); i++) {
-    uint32_t ext_offset = offset + {{field.name}}_ptr.offset + (i * sizeof({{field.cpp_type()}}));
-    bytes.WriteAt<{{field.cpp_type()}}>(ext_offset, {{field.name}}().at(i));
-  }
 {%- endif %}
 {%- endfor %}
 
-  // The next extension pointer is the length of the message. 
-  yunq::WriteHeader(bytes, offset, core_size, next_extension);
+  serializer.WriteHeader();
 
-  return next_extension;
+  return serializer.size();
 }
 
 uint64_t {{message.name}}::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
-  uint32_t next_extension = header_size + 8 * {{ message.fields | length}};
-  const uint32_t core_size = next_extension;
-  uint64_t next_cap = 0;
-
+  yunq::Serializer serializer(bytes, offset, {{ message.fields | length }}, caps);
+  
 {%- for field in message.fields %}
   // Write {{field.name}}.
 {%- if not field.repeated %}
-{%- if field.type == Type.U64 %}
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * {{loop.index0}}), {{field.name}}());
-{%- elif field.type == Type.I64 %}
-  bytes.WriteAt<int64_t>(offset + header_size + (8 * {{loop.index0}}), {{field.name}}());
-{%- elif field.type == Type.STRING %}
-  ExtPointer {{field.name}}_ptr{
-    .offset = next_extension,
-    // FIXME: Check downcast of str length.
-    .length = (uint32_t){{field.name}}().length(),
-  };
 
-  bytes.WriteStringAt(offset + next_extension, {{field.name}}());
-  next_extension += {{field.name}}_ptr.length;
-
-  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * {{loop.index0}}), {{field.name}}_ptr);
-{%- elif field.type == Type.CAPABILITY %}
-  caps.WriteAt(next_cap, {{field.name}}());
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * {{loop.index0}}), next_cap++);
+{%- if field.type != Type.CAPABILITY %}
+  serializer.WriteField<{{field.cpp_type()}}>({{loop.index0}}, {{field.name}}_);
 {%- else %}
-  // TODO: Unimplemented serialization {{field.type}}
+  serializer.WriteCapability({{loop.index0}}, {{field.name}}_);
 {%- endif %}
+
 {%- else %}
-  ExtPointer {{field.name}}_ptr{
-    .offset = next_extension,
-    .length = (uint32_t)({{field.name}}().size() * sizeof({{field.cpp_type()}})),
-  };
 
-  next_extension += {{field.name}}_ptr.length;
-  bytes.WriteAt<ExtPointer>(offset + header_size + (8 * {{loop.index0}}), {{field.name}}_ptr);
+{%- if field.type != Type.CAPABILITY %}
+  serializer.WriteRepeated<{{field.cpp_type()}}>({{loop.index0}}, {{field.name}}_);
+{%- else %}
+  serializer.WriteRepeatedCapability({{loop.index0}}, {{field.name}}_);
+{%- endif %}
 
-  for (uint64_t i = 0; i < {{field.name}}().size(); i++) {
-    uint32_t ext_offset = offset + {{field.name}}_ptr.offset + (i * sizeof({{field.cpp_type()}}));
-    bytes.WriteAt<{{field.cpp_type()}}>(ext_offset, {{field.name}}().at(i));
-  }
 {%- endif %}
 {%- endfor %}
 
-  // The next extension pointer is the length of the message. 
-  yunq::WriteHeader(bytes, offset, core_size, next_extension);
+  serializer.WriteHeader();
 
-  return next_extension;
+  return serializer.size();
 }
+
 {%- endfor %}
 
 {% if package != None %}

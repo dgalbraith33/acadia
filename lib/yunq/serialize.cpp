@@ -7,12 +7,38 @@ const uint64_t kIdentByte = 0x33441122;
 
 }  // namespace
 
-void WriteHeader(glcr::ByteBuffer& bytes, uint64_t offset, uint32_t core_size,
-                 uint32_t extension_size) {
-  bytes.WriteAt<uint32_t>(offset + 0, kIdentByte);
-  bytes.WriteAt<uint32_t>(offset + 4, core_size);
-  bytes.WriteAt<uint32_t>(offset + 8, extension_size);
-  bytes.WriteAt<uint32_t>(offset + 12, 0);  // TODO: Calculate CRC32.
+void Serializer::WriteHeader() {
+  buffer_.WriteAt<uint32_t>(offset_ + 0, kIdentByte);
+  buffer_.WriteAt<uint32_t>(offset_ + 4, core_size_);
+  buffer_.WriteAt<uint32_t>(offset_ + 8, next_extension_);
+  buffer_.WriteAt<uint32_t>(offset_ + 12, 0);  // TODO: Calculate CRC32.
 }
+
+template <>
+void Serializer::WriteField<glcr::String>(uint64_t field_index,
+                                          const glcr::String& value) {
+  ExtensionPointer ptr{
+      .offset = (uint32_t)next_extension_,
+      // FIXME: Check downcast of str length.
+      .length = (uint32_t)value.length(),
+  };
+
+  buffer_.WriteStringAt(offset_ + next_extension_, value);
+  next_extension_ += ptr.length;
+
+  buffer_.WriteAt<ExtensionPointer>(field_offset(field_index), ptr);
+}
+
+void Serializer::WriteCapability(uint64_t field_index, uint64_t value) {
+  if (caps_) {
+    buffer_.WriteAt<uint64_t>(field_offset(field_index), next_cap_);
+    caps_.value().get().WriteAt(next_cap_++, value);
+  } else {
+    WriteField<uint64_t>(field_index, value);
+  }
+}
+
+void Serializer::WriteRepeatedCapability(uint64_t field_index,
+                                         const glcr::Vector<uint64_t>& value) {}
 
 }  // namespace yunq

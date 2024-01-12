@@ -6,22 +6,9 @@
 #include <glacier/status/error_or.h>
 #include <glacier/status/status.h>
 
+#include "yunq/yunq.h"
+
 namespace yunq {
-
-const uint64_t kHeaderSize = 24;  // 4x uint32, 1x uint64
-
-struct MessageHeader {
-  uint32_t ident;
-  uint32_t core_length;
-  uint32_t length;
-  uint32_t crc32;
-  uint64_t options;
-} __attribute__((packed));
-
-struct ExtensionPointer {
-  uint32_t offset;
-  uint32_t length;
-};
 
 class MessageView {
  public:

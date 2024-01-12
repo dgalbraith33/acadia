@@ -37,29 +37,22 @@ glcr::Status KeyboardListener::ParseFromBytesInternal(const yunq::MessageView& m
 }
 
 uint64_t KeyboardListener::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
-  uint32_t next_extension = header_size + 8 * 1;
-  const uint32_t core_size = next_extension;
+  yunq::Serializer serializer(bytes, offset, 1);
   // Write port_capability.
-  // FIXME: Implement inbuffer capabilities.
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 0), 0);
+  serializer.WriteCapability(0, port_capability_);
 
-  // The next extension pointer is the length of the message. 
-  yunq::WriteHeader(bytes, offset, core_size, next_extension);
+  serializer.WriteHeader();
 
-  return next_extension;
+  return serializer.size();
 }
 
 uint64_t KeyboardListener::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
-  uint32_t next_extension = header_size + 8 * 1;
-  const uint32_t core_size = next_extension;
-  uint64_t next_cap = 0;
+  yunq::Serializer serializer(bytes, offset, 1, caps);
   // Write port_capability.
-  caps.WriteAt(next_cap, port_capability());
-  bytes.WriteAt<uint64_t>(offset + header_size + (8 * 0), next_cap++);
+  serializer.WriteCapability(0, port_capability_);
 
-  // The next extension pointer is the length of the message. 
-  yunq::WriteHeader(bytes, offset, core_size, next_extension);
+  serializer.WriteHeader();
 
-  return next_extension;
+  return serializer.size();
 }
 
