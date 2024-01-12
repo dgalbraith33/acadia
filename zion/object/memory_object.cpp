@@ -47,16 +47,16 @@ VariableMemoryObject::VariableMemoryObject(uint64_t size) : size_(size) {
   // FIXME: Do this lazily.
   uint64_t num_pages = size_ / 0x1000;
   phys_page_list_ = glcr::Array<uint64_t>(num_pages);
-  for (uint64_t i = 0; i < phys_page_list_.size(); i++) {
-    phys_page_list_[i] = 0;
+  for (uint64_t& page : phys_page_list_) {
+    page = 0;
   }
 }
 
 VariableMemoryObject::~VariableMemoryObject() {
-  for (uint64_t p = 0; p < phys_page_list_.size(); p++) {
-    if (phys_page_list_[p] != 0) {
+  for (uint64_t& page : phys_page_list_) {
+    if (page != 0) {
       // TODO: We may be able to do some sort of coalescing here.
-      phys_mem::FreePage(phys_page_list_[p]);
+      phys_mem::FreePage(page);
     }
   }
 }

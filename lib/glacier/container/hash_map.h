@@ -194,8 +194,7 @@ template <typename K, typename V, class H>
 void HashMap<K, V, H>::Resize(uint64_t new_size) {
   Array<LinkedList<Pair<K, V>>> new_data(new_size);
 
-  for (uint64_t i = 0; i < data_.size(); i++) {
-    auto& ll = data_[i];
+  for (auto& ll : data_) {
     while (!ll.empty()) {
       auto pair = ll.PopFront();
       uint64_t hc = H()(pair.first());

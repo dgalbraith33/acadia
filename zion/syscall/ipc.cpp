@@ -28,12 +28,12 @@ glcr::ErrorOr<IpcMessage> TranslateRequestToIpcMessage(const T& req) {
   glcr::ArrayView<const z_cap_t> caps(req.caps, req.num_caps);
 
   message.caps.Resize(caps.size());
-  for (uint64_t i = 0; i < caps.size(); i++) {
+  for (uint64_t capid : caps) {
     // FIXME: This would feel safer closer to the relevant syscall.
     // FIXME: Race conditions on get->check->release here. Would be better to
     // have that as a single call on the process. (This pattern repeats other
     // places too).
-    auto cap = gScheduler->CurrentProcess().GetCapability(caps[i]);
+    auto cap = gScheduler->CurrentProcess().GetCapability(capid);
     if (!cap) {
       return glcr::CAP_NOT_FOUND;
     }
@@ -41,7 +41,7 @@ glcr::ErrorOr<IpcMessage> TranslateRequestToIpcMessage(const T& req) {
       return glcr::CAP_PERMISSION_DENIED;
     }
     message.caps.PushBack(
-        gScheduler->CurrentProcess().ReleaseCapability(caps[i]));
+        gScheduler->CurrentProcess().ReleaseCapability(capid));
   }
 
   return message;
