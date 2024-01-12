@@ -15,6 +15,12 @@ void Serializer::WriteHeader() {
 }
 
 template <>
+void Serializer::WriteField<uint64_t>(uint64_t field_index,
+                                      const uint64_t& value) {
+  buffer_.WriteAt<uint64_t>(field_offset(field_index), value);
+}
+
+template <>
 void Serializer::WriteField<glcr::String>(uint64_t field_index,
                                           const glcr::String& value) {
   ExtensionPointer ptr{
@@ -27,6 +33,23 @@ void Serializer::WriteField<glcr::String>(uint64_t field_index,
   next_extension_ += ptr.length;
 
   buffer_.WriteAt<ExtensionPointer>(field_offset(field_index), ptr);
+}
+
+template <>
+void Serializer::WriteRepeated<uint64_t>(uint64_t field_index,
+                                         const glcr::Vector<uint64_t>& value) {
+  ExtensionPointer ptr{
+      .offset = (uint32_t)next_extension_,
+      .length = (uint32_t)(value.size() * sizeof(uint64_t)),
+  };
+
+  next_extension_ += ptr.length;
+  buffer_.WriteAt<ExtensionPointer>(field_offset(field_index), ptr);
+
+  for (uint64_t i = 0; i < value.size(); i++) {
+    uint32_t ext_offset = offset_ + ptr.offset + (i * sizeof(uint64_t));
+    buffer_.WriteAt<uint64_t>(ext_offset, value.at(i));
+  }
 }
 
 void Serializer::WriteCapability(uint64_t field_index, uint64_t value) {
