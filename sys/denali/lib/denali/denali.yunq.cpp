@@ -88,24 +88,10 @@ glcr::Status ReadManyRequest::ParseFromBytesInternal(const glcr::ByteBuffer& byt
   // Parse device_id.
   ASSIGN_OR_RETURN(device_id_, view.ReadField<uint64_t>(0));
   // Parse lba.
-  auto lba_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 1));
-
-  lba_.Resize(lba_pointer.length / sizeof(uint64_t));
-  for (uint64_t i = offset + lba_pointer.offset;
-       i < offset + lba_pointer.offset + lba_pointer.length;
-       i += sizeof(uint64_t)) {
-    lba_.PushBack(bytes.At<uint64_t>(i));
-  }
+  ASSIGN_OR_RETURN(lba_, view.ReadRepeated<uint64_t>(1));
 
   // Parse sector_cnt.
-  auto sector_cnt_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 2));
-
-  sector_cnt_.Resize(sector_cnt_pointer.length / sizeof(uint64_t));
-  for (uint64_t i = offset + sector_cnt_pointer.offset;
-       i < offset + sector_cnt_pointer.offset + sector_cnt_pointer.length;
-       i += sizeof(uint64_t)) {
-    sector_cnt_.PushBack(bytes.At<uint64_t>(i));
-  }
+  ASSIGN_OR_RETURN(sector_cnt_, view.ReadRepeated<uint64_t>(2));
 
 
   return glcr::Status::Ok();

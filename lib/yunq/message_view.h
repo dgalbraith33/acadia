@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glacier/buffer/byte_buffer.h>
+#include <glacier/container/vector.h>
 #include <glacier/status/error_or.h>
 
 namespace yunq {
@@ -21,6 +22,9 @@ class MessageView {
   template <typename T>
   glcr::ErrorOr<T> ReadField(uint64_t field_index);
 
+  template <typename T>
+  glcr::ErrorOr<glcr::Vector<T>> ReadRepeated(uint64_t field_index);
+
  private:
   const glcr::ByteBuffer& buffer_;
   uint64_t offset_;
@@ -35,6 +39,10 @@ glcr::ErrorOr<uint64_t> MessageView::ReadField<uint64_t>(uint64_t field_index);
 
 template <>
 glcr::ErrorOr<glcr::String> MessageView::ReadField<glcr::String>(
+    uint64_t field_index);
+
+template <>
+glcr::ErrorOr<glcr::Vector<uint64_t>> MessageView::ReadRepeated<uint64_t>(
     uint64_t field_index);
 
 }  // namespace yunq
