@@ -177,8 +177,7 @@ glcr::Status ReadResponse::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_
   yunq::MessageView message(bytes, offset);
   RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse memory.
-  // FIXME: Implement in-buffer capabilities for inprocess serialization.
-  set_memory(0);
+  ASSIGN_OR_RETURN(memory_, message.ReadCapability(2));
   return glcr::Status::Ok();
 }
 
@@ -186,9 +185,7 @@ glcr::Status ReadResponse::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_
   yunq::MessageView message(bytes, offset);
   RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse memory.
-  uint64_t memory_ptr = bytes.At<uint64_t>(offset + header_size + (8 * 2));
-
-  set_memory(caps.At(memory_ptr));
+  ASSIGN_OR_RETURN(memory_, message.ReadCapability(2, caps));
   return glcr::Status::Ok();
 }
 

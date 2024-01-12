@@ -21,8 +21,7 @@ glcr::Status RegisterEndpointRequest::ParseFromBytes(const glcr::ByteBuffer& byt
   yunq::MessageView message(bytes, offset);
   RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse endpoint_capability.
-  // FIXME: Implement in-buffer capabilities for inprocess serialization.
-  set_endpoint_capability(0);
+  ASSIGN_OR_RETURN(endpoint_capability_, message.ReadCapability(1));
   return glcr::Status::Ok();
 }
 
@@ -30,9 +29,7 @@ glcr::Status RegisterEndpointRequest::ParseFromBytes(const glcr::ByteBuffer& byt
   yunq::MessageView message(bytes, offset);
   RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse endpoint_capability.
-  uint64_t endpoint_capability_ptr = bytes.At<uint64_t>(offset + header_size + (8 * 1));
-
-  set_endpoint_capability(caps.At(endpoint_capability_ptr));
+  ASSIGN_OR_RETURN(endpoint_capability_, message.ReadCapability(1, caps));
   return glcr::Status::Ok();
 }
 
@@ -159,8 +156,7 @@ glcr::Status Endpoint::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t of
   yunq::MessageView message(bytes, offset);
   RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse endpoint.
-  // FIXME: Implement in-buffer capabilities for inprocess serialization.
-  set_endpoint(0);
+  ASSIGN_OR_RETURN(endpoint_, message.ReadCapability(0));
   return glcr::Status::Ok();
 }
 
@@ -168,9 +164,7 @@ glcr::Status Endpoint::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t of
   yunq::MessageView message(bytes, offset);
   RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse endpoint.
-  uint64_t endpoint_ptr = bytes.At<uint64_t>(offset + header_size + (8 * 0));
-
-  set_endpoint(caps.At(endpoint_ptr));
+  ASSIGN_OR_RETURN(endpoint_, message.ReadCapability(0, caps));
   return glcr::Status::Ok();
 }
 
@@ -211,8 +205,7 @@ glcr::Status AhciInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t of
   yunq::MessageView message(bytes, offset);
   RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse ahci_region.
-  // FIXME: Implement in-buffer capabilities for inprocess serialization.
-  set_ahci_region(0);
+  ASSIGN_OR_RETURN(ahci_region_, message.ReadCapability(0));
   return glcr::Status::Ok();
 }
 
@@ -220,9 +213,7 @@ glcr::Status AhciInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t of
   yunq::MessageView message(bytes, offset);
   RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse ahci_region.
-  uint64_t ahci_region_ptr = bytes.At<uint64_t>(offset + header_size + (8 * 0));
-
-  set_ahci_region(caps.At(ahci_region_ptr));
+  ASSIGN_OR_RETURN(ahci_region_, message.ReadCapability(0, caps));
   return glcr::Status::Ok();
 }
 
@@ -379,8 +370,7 @@ glcr::Status DenaliInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t 
   yunq::MessageView message(bytes, offset);
   RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse denali_endpoint.
-  // FIXME: Implement in-buffer capabilities for inprocess serialization.
-  set_denali_endpoint(0);
+  ASSIGN_OR_RETURN(denali_endpoint_, message.ReadCapability(0));
   return glcr::Status::Ok();
 }
 
@@ -388,9 +378,7 @@ glcr::Status DenaliInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t 
   yunq::MessageView message(bytes, offset);
   RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse denali_endpoint.
-  uint64_t denali_endpoint_ptr = bytes.At<uint64_t>(offset + header_size + (8 * 0));
-
-  set_denali_endpoint(caps.At(denali_endpoint_ptr));
+  ASSIGN_OR_RETURN(denali_endpoint_, message.ReadCapability(0, caps));
   return glcr::Status::Ok();
 }
 

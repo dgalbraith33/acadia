@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glacier/buffer/byte_buffer.h>
+#include <glacier/buffer/cap_buffer.h>
 #include <glacier/container/vector.h>
 #include <glacier/status/error_or.h>
 #include <glacier/status/status.h>
@@ -35,6 +36,10 @@ class MessageView {
 
   template <typename T>
   glcr::ErrorOr<glcr::Vector<T>> ReadRepeated(uint64_t field_index) const;
+
+  glcr::ErrorOr<uint64_t> ReadCapability(uint64_t field_index) const;
+  glcr::ErrorOr<uint64_t> ReadCapability(uint64_t field_index,
+                                         const glcr::CapBuffer& caps) const;
 
  private:
   const glcr::ByteBuffer& buffer_;

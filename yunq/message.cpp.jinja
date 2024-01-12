@@ -25,9 +25,13 @@ glcr::Status {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uin
 
 {%- for field in message.fields %}
 {%- if field.type == Type.CAPABILITY %}
+{%- if not field.repeated %}
   // Parse {{field.name}}.
-  // FIXME: Implement in-buffer capabilities for inprocess serialization.
-  set_{{field.name}}(0);
+  ASSIGN_OR_RETURN({{field.name}}_, message.ReadCapability({{loop.index0}}));
+  {%- else %}
+  // Parse {{field.name}}.
+  ASSIGN_OR_RETURN({{field.name}}_, message.ReadRepeatedCapability({{loop.index0}}));
+  {%- endif %}
 {%- endif %}
 {%- endfor %}
   return glcr::Status::Ok();
@@ -39,10 +43,13 @@ glcr::Status {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uin
 
 {%- for field in message.fields %}
 {%- if field.type == Type.CAPABILITY %}
+{%- if not field.repeated %}
   // Parse {{field.name}}.
-  uint64_t {{field.name}}_ptr = bytes.At<uint64_t>(offset + header_size + (8 * {{loop.index0}}));
-
-  set_{{field.name}}(caps.At({{field.name}}_ptr));
+  ASSIGN_OR_RETURN({{field.name}}_, message.ReadCapability({{loop.index0}}, caps));
+  {%- else %}
+  // Parse {{field.name}}.
+  ASSIGN_OR_RETURN({{field.name}}_, message.ReadRepeatedCapability({{loop.index0}}, caps));
+  {%- endif %}
 {%- endif %}
 {%- endfor %}
   return glcr::Status::Ok();

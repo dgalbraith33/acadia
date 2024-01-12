@@ -49,4 +49,14 @@ glcr::ErrorOr<glcr::Vector<uint64_t>> MessageView::ReadRepeated<uint64_t>(
   return v;
 }
 
+glcr::ErrorOr<uint64_t> MessageView::ReadCapability(
+    uint64_t field_index) const {
+  return buffer_.At<uint64_t>(field_offset(field_index));
+}
+
+glcr::ErrorOr<uint64_t> MessageView::ReadCapability(
+    uint64_t field_index, const glcr::CapBuffer& caps) const {
+  uint64_t offset = buffer_.At<uint64_t>(field_offset(field_index));
+  return caps.At(offset);
+}
 }  // namespace yunq

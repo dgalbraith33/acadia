@@ -19,8 +19,7 @@ glcr::Status KeyboardListener::ParseFromBytes(const glcr::ByteBuffer& bytes, uin
   yunq::MessageView message(bytes, offset);
   RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse port_capability.
-  // FIXME: Implement in-buffer capabilities for inprocess serialization.
-  set_port_capability(0);
+  ASSIGN_OR_RETURN(port_capability_, message.ReadCapability(0));
   return glcr::Status::Ok();
 }
 
@@ -28,9 +27,7 @@ glcr::Status KeyboardListener::ParseFromBytes(const glcr::ByteBuffer& bytes, uin
   yunq::MessageView message(bytes, offset);
   RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse port_capability.
-  uint64_t port_capability_ptr = bytes.At<uint64_t>(offset + header_size + (8 * 0));
-
-  set_port_capability(caps.At(port_capability_ptr));
+  ASSIGN_OR_RETURN(port_capability_, message.ReadCapability(0, caps));
   return glcr::Status::Ok();
 }
 
