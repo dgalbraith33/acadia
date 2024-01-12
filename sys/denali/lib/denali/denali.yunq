@@ -16,10 +16,7 @@ message ReadRequest {
 
 message ReadManyRequest {
   u64 device_id;
-  // FIXME: Add repeated message fields.
-  // Must be the same length.
-  repeated u64 lba;
-  repeated u64 sector_cnt;
+  repeated DiskBlock blocks;
 }
 
 message ReadResponse {

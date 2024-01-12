@@ -16,13 +16,16 @@ class KeyboardListener {
   KeyboardListener() {}
   // Delete copy and move until implemented.
   KeyboardListener(const KeyboardListener&) = delete;
-  KeyboardListener(KeyboardListener&&) = delete;
+  KeyboardListener(KeyboardListener&&) = default;
+  KeyboardListener& operator=(KeyboardListener&&) = default;
 
   [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message);
   [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
+
   const z_cap_t& port_capability() const { return port_capability_; }
+  z_cap_t& mutable_port_capability() { return port_capability_; }
   void set_port_capability(const z_cap_t& value) { port_capability_ = value; }
 
  private:

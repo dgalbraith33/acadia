@@ -16,6 +16,7 @@ class MessageView {
       : buffer_(buffer), offset_(offset) {}
 
   [[nodiscard]] glcr::Status CheckHeader() const;
+  uint32_t MessageLength() const;
 
   // TODO: Implement glcr::StatusOr
   template <typename T>
@@ -30,6 +31,10 @@ class MessageView {
 
   template <typename T>
   glcr::Status ReadMessage(uint64_t field_index, T& message) const;
+
+  template <typename T>
+  glcr::Status ReadRepeatedMessage(uint64_t field_index,
+                                   glcr::Vector<T>& messages) const;
 
  private:
   const glcr::ByteBuffer& buffer_;
@@ -59,6 +64,24 @@ glcr::Status MessageView::ReadMessage(uint64_t field_index, T& message) const {
 
   MessageView subview(buffer_, offset_ + ptr.offset);
   return message.ParseFromBytes(subview);
+}
+
+template <typename T>
+glcr::Status MessageView::ReadRepeatedMessage(uint64_t field_index,
+                                              glcr::Vector<T>& messages) const {
+  ExtensionPointer ptr =
+      buffer_.At<ExtensionPointer>(field_offset(field_index));
+
+  uint64_t ext_offset = ptr.offset;
+
+  while (ext_offset < ptr.offset + ptr.length) {
+    MessageView subview(buffer_, offset_ + ext_offset);
+    messages.EmplaceBack();
+    RETURN_ERROR(messages.PeekBack().ParseFromBytes(subview));
+    ext_offset += subview.MessageLength();
+  }
+
+  return glcr::Status::Ok();
 }
 
 }  // namespace yunq

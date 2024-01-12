@@ -94,8 +94,10 @@ glcr::ErrorOr<mmth::OwnedMemoryRegion> Ext2BlockReader::ReadBlocks(
       i++;
       curr_run_len++;
     }
-    req.add_lba(curr_start);
-    req.add_sector_cnt(curr_run_len * SectorsPerBlock());
+    DiskBlock block;
+    block.set_lba(curr_start);
+    block.set_size(curr_run_len * SectorsPerBlock());
+    req.add_blocks(glcr::Move(block));
   }
   ReadResponse resp;
   auto status = denali_.ReadMany(req, resp);

@@ -109,33 +109,28 @@ glcr::Status ReadManyRequest::ParseFromBytesInternal(const yunq::MessageView& me
   RETURN_ERROR(message.CheckHeader());
   // Parse device_id.
   ASSIGN_OR_RETURN(device_id_, message.ReadField<uint64_t>(0));
-  // Parse lba.
-  ASSIGN_OR_RETURN(lba_, message.ReadRepeated<uint64_t>(1));
-
-  // Parse sector_cnt.
-  ASSIGN_OR_RETURN(sector_cnt_, message.ReadRepeated<uint64_t>(2));
+  // Parse blocks.
+  message.ReadRepeatedMessage<DiskBlock>(1, blocks_);
 
 
   return glcr::Status::Ok();
 }
 
 uint64_t ReadManyRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
-  yunq::Serializer serializer(bytes, offset, 3);
+  yunq::Serializer serializer(bytes, offset, 2);
   return SerializeInternal(serializer);
 }
 
 uint64_t ReadManyRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
-  yunq::Serializer serializer(bytes, offset, 3, caps);
+  yunq::Serializer serializer(bytes, offset, 2, caps);
   return SerializeInternal(serializer);
 }
   
 uint64_t ReadManyRequest::SerializeInternal(yunq::Serializer& serializer) const {
   // Write device_id.
   serializer.WriteField<uint64_t>(0, device_id_);
-  // Write lba.
-  serializer.WriteRepeated<uint64_t>(1, lba_);
-  // Write sector_cnt.
-  serializer.WriteRepeated<uint64_t>(2, sector_cnt_);
+  // Write blocks.
+  serializer.WriteRepeatedMessage<DiskBlock>(1, blocks_);
 
   serializer.WriteHeader();
 

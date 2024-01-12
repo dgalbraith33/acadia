@@ -47,6 +47,7 @@ class Vector {
   template <typename... Args>
   void EmplaceBack(Args&&... args);
 
+  T& PeekBack();
   T&& PopBack();
 
   typedef ArrayIterator<T> Iterator;
@@ -128,6 +129,11 @@ void Vector<T>::EmplaceBack(Args&&... args) {
   }
 
   data_[size_++] = T(args...);
+}
+
+template <typename T>
+T& Vector<T>::PeekBack() {
+  return data_[size_ - 1];
 }
 
 template <typename T>

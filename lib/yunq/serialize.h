@@ -41,6 +41,9 @@ class Serializer {
   template <typename T>
   void WriteMessage(uint64_t field_index, const T& value);
 
+  template <typename T>
+  void WriteRepeatedMessage(uint64_t field_index, const glcr::Vector<T>& value);
+
   void WriteHeader();
 
   uint64_t size() const { return next_extension_; }
@@ -78,6 +81,34 @@ void Serializer::WriteMessage(uint64_t field_index, const T& value) {
                                     caps_.value().get());
   } else {
     length = value.SerializeToBytes(buffer_, offset_ + next_extension_);
+  }
+
+  ExtensionPointer ptr{
+      .offset = (uint32_t)next_extension_,
+      .length = (uint32_t)length,
+  };
+
+  next_extension_ += length;
+
+  buffer_.WriteAt<ExtensionPointer>(field_offset(field_index), ptr);
+}
+
+template <typename T>
+void Serializer::WriteRepeatedMessage(uint64_t field_index,
+                                      const glcr::Vector<T>& value) {
+  uint64_t next_offset = next_extension_;
+  uint64_t length = 0;
+
+  for (T& message : value) {
+    uint64_t msg_length = 0;
+    if (caps_) {
+      msg_length = message.SerializeToBytes(buffer_, offset_ + next_offset,
+                                            caps_.value().get());
+    } else {
+      msg_length = message.SerializeToBytes(buffer_, offset_ + next_offset);
+    }
+    length += msg_length;
+    next_offset += msg_length;
   }
 
   ExtensionPointer ptr{

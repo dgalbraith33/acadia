@@ -19,6 +19,10 @@ glcr::Status MessageView::CheckHeader() const {
   return glcr::Status::Ok();
 }
 
+uint32_t MessageView::MessageLength() const {
+  return buffer_.At<uint32_t>(offset_ + 8);
+}
+
 template <>
 glcr::ErrorOr<uint64_t> MessageView::ReadField<uint64_t>(
     uint64_t field_index) const {
