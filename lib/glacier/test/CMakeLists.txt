@@ -1,4 +1,6 @@
 find_package(Catch2 3 REQUIRED)
+find_program(MEMORYCHECK_COMMAND valgrind)
+set(MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full")
 
 add_subdirectory(container)
 

@@ -8,7 +8,7 @@ pushd "$DIR/.."
 cmake -B test-bin/ -G Ninja -D enable_testing=on
 pushd test-bin/
 ninja build_test
-ctest --output-on-failure
+ctest --output-on-failure -T memcheck
 popd
 popd
 
