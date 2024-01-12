@@ -87,7 +87,8 @@ glcr::Status YellowstoneClient::GetEndpoint(const GetEndpointRequest& request, E
   RET_ERR(buffer_.At<uint64_t>(8));
 
 
-  RETURN_ERROR(response.ParseFromBytes(buffer_, 16, cap_buffer_));
+  yunq::MessageView resp_view(buffer_, 16);
+  RETURN_ERROR(response.ParseFromBytes(resp_view, cap_buffer_));
 
 
   return glcr::OK;
@@ -126,7 +127,8 @@ glcr::Status YellowstoneClient::GetAhciInfo(AhciInfo& response) {
   RET_ERR(buffer_.At<uint64_t>(8));
 
 
-  RETURN_ERROR(response.ParseFromBytes(buffer_, 16, cap_buffer_));
+  yunq::MessageView resp_view(buffer_, 16);
+  RETURN_ERROR(response.ParseFromBytes(resp_view, cap_buffer_));
 
 
   return glcr::OK;
@@ -165,7 +167,8 @@ glcr::Status YellowstoneClient::GetFramebufferInfo(FramebufferInfo& response) {
   RET_ERR(buffer_.At<uint64_t>(8));
 
 
-  RETURN_ERROR(response.ParseFromBytes(buffer_, 16, cap_buffer_));
+  yunq::MessageView resp_view(buffer_, 16);
+  RETURN_ERROR(response.ParseFromBytes(resp_view, cap_buffer_));
 
 
   return glcr::OK;
@@ -204,7 +207,8 @@ glcr::Status YellowstoneClient::GetDenali(DenaliInfo& response) {
   RET_ERR(buffer_.At<uint64_t>(8));
 
 
-  RETURN_ERROR(response.ParseFromBytes(buffer_, 16, cap_buffer_));
+  yunq::MessageView resp_view(buffer_, 16);
+  RETURN_ERROR(response.ParseFromBytes(resp_view, cap_buffer_));
 
 
   return glcr::OK;

@@ -15,16 +15,14 @@ struct ExtPointer {
 };
 
 }  // namespace
-glcr::Status KeyboardListener::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  yunq::MessageView message(bytes, offset);
+glcr::Status KeyboardListener::ParseFromBytes(const yunq::MessageView& message) {
   RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse port_capability.
   ASSIGN_OR_RETURN(port_capability_, message.ReadCapability(0));
   return glcr::Status::Ok();
 }
 
-glcr::Status KeyboardListener::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  yunq::MessageView message(bytes, offset);
+glcr::Status KeyboardListener::ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer& caps) {
   RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse port_capability.
   ASSIGN_OR_RETURN(port_capability_, message.ReadCapability(0, caps));

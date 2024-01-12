@@ -104,7 +104,8 @@ glcr::Status VoyageursServerBase::HandleRequest(const glcr::ByteBuffer& request,
 
   
       KeyboardListener yunq_request;
-      RETURN_ERROR(yunq_request.ParseFromBytes(request, kHeaderSize, req_caps));
+      yunq::MessageView request_view(request, kHeaderSize);
+      RETURN_ERROR(yunq_request.ParseFromBytes(request_view, req_caps));
   
 
   

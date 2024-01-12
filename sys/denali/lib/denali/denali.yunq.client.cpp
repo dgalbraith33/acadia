@@ -48,7 +48,8 @@ glcr::Status DenaliClient::Read(const ReadRequest& request, ReadResponse& respon
   RET_ERR(buffer_.At<uint64_t>(8));
 
 
-  RETURN_ERROR(response.ParseFromBytes(buffer_, 16, cap_buffer_));
+  yunq::MessageView resp_view(buffer_, 16);
+  RETURN_ERROR(response.ParseFromBytes(resp_view, cap_buffer_));
 
 
   return glcr::OK;
@@ -87,7 +88,8 @@ glcr::Status DenaliClient::ReadMany(const ReadManyRequest& request, ReadResponse
   RET_ERR(buffer_.At<uint64_t>(8));
 
 
-  RETURN_ERROR(response.ParseFromBytes(buffer_, 16, cap_buffer_));
+  yunq::MessageView resp_view(buffer_, 16);
+  RETURN_ERROR(response.ParseFromBytes(resp_view, cap_buffer_));
 
 
   return glcr::OK;

@@ -56,7 +56,8 @@ glcr::Status {{interface.name}}Client::{{method.name}}(const {{method.request}}&
   RET_ERR(buffer_.At<uint64_t>(8));
 
 {% if method.response != None %}
-  RETURN_ERROR(response.ParseFromBytes(buffer_, 16, cap_buffer_));
+  yunq::MessageView resp_view(buffer_, 16);
+  RETURN_ERROR(response.ParseFromBytes(resp_view, cap_buffer_));
 {% endif %}
 
   return glcr::OK;

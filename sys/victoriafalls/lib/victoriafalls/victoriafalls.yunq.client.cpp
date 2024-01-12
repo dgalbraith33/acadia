@@ -48,7 +48,8 @@ glcr::Status VFSClient::OpenFile(const OpenFileRequest& request, OpenFileRespons
   RET_ERR(buffer_.At<uint64_t>(8));
 
 
-  RETURN_ERROR(response.ParseFromBytes(buffer_, 16, cap_buffer_));
+  yunq::MessageView resp_view(buffer_, 16);
+  RETURN_ERROR(response.ParseFromBytes(resp_view, cap_buffer_));
 
 
   return glcr::OK;
@@ -87,7 +88,8 @@ glcr::Status VFSClient::GetDirectory(const GetDirectoryRequest& request, Directo
   RET_ERR(buffer_.At<uint64_t>(8));
 
 
-  RETURN_ERROR(response.ParseFromBytes(buffer_, 16, cap_buffer_));
+  yunq::MessageView resp_view(buffer_, 16);
+  RETURN_ERROR(response.ParseFromBytes(resp_view, cap_buffer_));
 
 
   return glcr::OK;

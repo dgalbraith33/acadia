@@ -17,8 +17,8 @@ class OpenFileRequest {
   OpenFileRequest(const OpenFileRequest&) = delete;
   OpenFileRequest(OpenFileRequest&&) = delete;
 
-  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset);
-  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const glcr::String& path() const { return path_; }
@@ -37,8 +37,8 @@ class OpenFileResponse {
   OpenFileResponse(const OpenFileResponse&) = delete;
   OpenFileResponse(OpenFileResponse&&) = delete;
 
-  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset);
-  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const glcr::String& path() const { return path_; }
@@ -63,8 +63,8 @@ class GetDirectoryRequest {
   GetDirectoryRequest(const GetDirectoryRequest&) = delete;
   GetDirectoryRequest(GetDirectoryRequest&&) = delete;
 
-  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset);
-  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const glcr::String& path() const { return path_; }
@@ -83,8 +83,8 @@ class Directory {
   Directory(const Directory&) = delete;
   Directory(Directory&&) = delete;
 
-  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset);
-  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const glcr::String& filenames() const { return filenames_; }

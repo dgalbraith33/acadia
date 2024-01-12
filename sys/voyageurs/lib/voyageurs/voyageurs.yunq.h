@@ -17,8 +17,8 @@ class KeyboardListener {
   KeyboardListener(const KeyboardListener&) = delete;
   KeyboardListener(KeyboardListener&&) = delete;
 
-  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset);
-  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const z_cap_t& port_capability() const { return port_capability_; }

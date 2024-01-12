@@ -15,14 +15,12 @@ struct ExtPointer {
 };
 
 }  // namespace
-glcr::Status ReadRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  yunq::MessageView message(bytes, offset);
+glcr::Status ReadRequest::ParseFromBytes(const yunq::MessageView& message) {
   RETURN_ERROR(ParseFromBytesInternal(message));
   return glcr::Status::Ok();
 }
 
-glcr::Status ReadRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  yunq::MessageView message(bytes, offset);
+glcr::Status ReadRequest::ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer& caps) {
   RETURN_ERROR(ParseFromBytesInternal(message));
   return glcr::Status::Ok();
 }
@@ -71,14 +69,12 @@ uint64_t ReadRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset,
 
   return next_extension;
 }
-glcr::Status ReadManyRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  yunq::MessageView message(bytes, offset);
+glcr::Status ReadManyRequest::ParseFromBytes(const yunq::MessageView& message) {
   RETURN_ERROR(ParseFromBytesInternal(message));
   return glcr::Status::Ok();
 }
 
-glcr::Status ReadManyRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  yunq::MessageView message(bytes, offset);
+glcr::Status ReadManyRequest::ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer& caps) {
   RETURN_ERROR(ParseFromBytesInternal(message));
   return glcr::Status::Ok();
 }
@@ -173,16 +169,14 @@ uint64_t ReadManyRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t off
 
   return next_extension;
 }
-glcr::Status ReadResponse::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  yunq::MessageView message(bytes, offset);
+glcr::Status ReadResponse::ParseFromBytes(const yunq::MessageView& message) {
   RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse memory.
   ASSIGN_OR_RETURN(memory_, message.ReadCapability(2));
   return glcr::Status::Ok();
 }
 
-glcr::Status ReadResponse::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  yunq::MessageView message(bytes, offset);
+glcr::Status ReadResponse::ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer& caps) {
   RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse memory.
   ASSIGN_OR_RETURN(memory_, message.ReadCapability(2, caps));

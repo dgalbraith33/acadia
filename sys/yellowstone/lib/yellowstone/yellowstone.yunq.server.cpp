@@ -106,7 +106,8 @@ glcr::Status YellowstoneServerBase::HandleRequest(const glcr::ByteBuffer& reques
 
   
       RegisterEndpointRequest yunq_request;
-      RETURN_ERROR(yunq_request.ParseFromBytes(request, kHeaderSize, req_caps));
+      yunq::MessageView request_view(request, kHeaderSize);
+      RETURN_ERROR(yunq_request.ParseFromBytes(request_view, req_caps));
   
 
   
@@ -124,7 +125,8 @@ glcr::Status YellowstoneServerBase::HandleRequest(const glcr::ByteBuffer& reques
 
   
       GetEndpointRequest yunq_request;
-      RETURN_ERROR(yunq_request.ParseFromBytes(request, kHeaderSize, req_caps));
+      yunq::MessageView request_view(request, kHeaderSize);
+      RETURN_ERROR(yunq_request.ParseFromBytes(request_view, req_caps));
   
 
   

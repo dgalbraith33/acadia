@@ -19,8 +19,8 @@ class RegisterEndpointRequest {
   RegisterEndpointRequest(const RegisterEndpointRequest&) = delete;
   RegisterEndpointRequest(RegisterEndpointRequest&&) = delete;
 
-  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset);
-  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const glcr::String& endpoint_name() const { return endpoint_name_; }
@@ -42,8 +42,8 @@ class GetEndpointRequest {
   GetEndpointRequest(const GetEndpointRequest&) = delete;
   GetEndpointRequest(GetEndpointRequest&&) = delete;
 
-  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset);
-  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const glcr::String& endpoint_name() const { return endpoint_name_; }
@@ -62,8 +62,8 @@ class Endpoint {
   Endpoint(const Endpoint&) = delete;
   Endpoint(Endpoint&&) = delete;
 
-  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset);
-  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const z_cap_t& endpoint() const { return endpoint_; }
@@ -82,8 +82,8 @@ class AhciInfo {
   AhciInfo(const AhciInfo&) = delete;
   AhciInfo(AhciInfo&&) = delete;
 
-  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset);
-  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const z_cap_t& ahci_region() const { return ahci_region_; }
@@ -105,8 +105,8 @@ class FramebufferInfo {
   FramebufferInfo(const FramebufferInfo&) = delete;
   FramebufferInfo(FramebufferInfo&&) = delete;
 
-  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset);
-  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const uint64_t& address_phys() const { return address_phys_; }
@@ -158,8 +158,8 @@ class DenaliInfo {
   DenaliInfo(const DenaliInfo&) = delete;
   DenaliInfo(DenaliInfo&&) = delete;
 
-  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset);
-  [[nodiscard]] glcr::Status ParseFromBytes(const glcr::ByteBuffer&, uint64_t offset, const glcr::CapBuffer&);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer&);
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
   uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
   const z_cap_t& denali_endpoint() const { return denali_endpoint_; }

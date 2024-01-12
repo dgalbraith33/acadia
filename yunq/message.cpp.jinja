@@ -19,8 +19,7 @@ struct ExtPointer {
 }  // namespace
 
 {%- for message in messages %}
-glcr::Status {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  yunq::MessageView message(bytes, offset);
+glcr::Status {{message.name}}::ParseFromBytes(const yunq::MessageView& message) {
   RETURN_ERROR(ParseFromBytesInternal(message));
 
 {%- for field in message.fields %}
@@ -37,8 +36,7 @@ glcr::Status {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uin
   return glcr::Status::Ok();
 }
 
-glcr::Status {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  yunq::MessageView message(bytes, offset);
+glcr::Status {{message.name}}::ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer& caps) {
   RETURN_ERROR(ParseFromBytesInternal(message));
 
 {%- for field in message.fields %}

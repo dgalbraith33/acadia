@@ -107,7 +107,8 @@ glcr::Status {{interface.name}}ServerBase::HandleRequest(const glcr::ByteBuffer&
 
   {% if method.request != None %}
       {{method.request}} yunq_request;
-      RETURN_ERROR(yunq_request.ParseFromBytes(request, kHeaderSize, req_caps));
+      yunq::MessageView request_view(request, kHeaderSize);
+      RETURN_ERROR(yunq_request.ParseFromBytes(request_view, req_caps));
   {% endif %}
 
   {% if method.response != None %}

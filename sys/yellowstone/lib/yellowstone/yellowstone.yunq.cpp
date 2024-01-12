@@ -17,16 +17,14 @@ struct ExtPointer {
 };
 
 }  // namespace
-glcr::Status RegisterEndpointRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  yunq::MessageView message(bytes, offset);
+glcr::Status RegisterEndpointRequest::ParseFromBytes(const yunq::MessageView& message) {
   RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse endpoint_capability.
   ASSIGN_OR_RETURN(endpoint_capability_, message.ReadCapability(1));
   return glcr::Status::Ok();
 }
 
-glcr::Status RegisterEndpointRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  yunq::MessageView message(bytes, offset);
+glcr::Status RegisterEndpointRequest::ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer& caps) {
   RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse endpoint_capability.
   ASSIGN_OR_RETURN(endpoint_capability_, message.ReadCapability(1, caps));
@@ -90,14 +88,12 @@ uint64_t RegisterEndpointRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint
 
   return next_extension;
 }
-glcr::Status GetEndpointRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  yunq::MessageView message(bytes, offset);
+glcr::Status GetEndpointRequest::ParseFromBytes(const yunq::MessageView& message) {
   RETURN_ERROR(ParseFromBytesInternal(message));
   return glcr::Status::Ok();
 }
 
-glcr::Status GetEndpointRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  yunq::MessageView message(bytes, offset);
+glcr::Status GetEndpointRequest::ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer& caps) {
   RETURN_ERROR(ParseFromBytesInternal(message));
   return glcr::Status::Ok();
 }
@@ -152,16 +148,14 @@ uint64_t GetEndpointRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t 
 
   return next_extension;
 }
-glcr::Status Endpoint::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  yunq::MessageView message(bytes, offset);
+glcr::Status Endpoint::ParseFromBytes(const yunq::MessageView& message) {
   RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse endpoint.
   ASSIGN_OR_RETURN(endpoint_, message.ReadCapability(0));
   return glcr::Status::Ok();
 }
 
-glcr::Status Endpoint::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  yunq::MessageView message(bytes, offset);
+glcr::Status Endpoint::ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer& caps) {
   RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse endpoint.
   ASSIGN_OR_RETURN(endpoint_, message.ReadCapability(0, caps));
@@ -201,16 +195,14 @@ uint64_t Endpoint::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, gl
 
   return next_extension;
 }
-glcr::Status AhciInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  yunq::MessageView message(bytes, offset);
+glcr::Status AhciInfo::ParseFromBytes(const yunq::MessageView& message) {
   RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse ahci_region.
   ASSIGN_OR_RETURN(ahci_region_, message.ReadCapability(0));
   return glcr::Status::Ok();
 }
 
-glcr::Status AhciInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  yunq::MessageView message(bytes, offset);
+glcr::Status AhciInfo::ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer& caps) {
   RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse ahci_region.
   ASSIGN_OR_RETURN(ahci_region_, message.ReadCapability(0, caps));
@@ -256,14 +248,12 @@ uint64_t AhciInfo::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, gl
 
   return next_extension;
 }
-glcr::Status FramebufferInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  yunq::MessageView message(bytes, offset);
+glcr::Status FramebufferInfo::ParseFromBytes(const yunq::MessageView& message) {
   RETURN_ERROR(ParseFromBytesInternal(message));
   return glcr::Status::Ok();
 }
 
-glcr::Status FramebufferInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  yunq::MessageView message(bytes, offset);
+glcr::Status FramebufferInfo::ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer& caps) {
   RETURN_ERROR(ParseFromBytesInternal(message));
   return glcr::Status::Ok();
 }
@@ -366,16 +356,14 @@ uint64_t FramebufferInfo::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t off
 
   return next_extension;
 }
-glcr::Status DenaliInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset) {
-  yunq::MessageView message(bytes, offset);
+glcr::Status DenaliInfo::ParseFromBytes(const yunq::MessageView& message) {
   RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse denali_endpoint.
   ASSIGN_OR_RETURN(denali_endpoint_, message.ReadCapability(0));
   return glcr::Status::Ok();
 }
 
-glcr::Status DenaliInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t offset, const glcr::CapBuffer& caps) {
-  yunq::MessageView message(bytes, offset);
+glcr::Status DenaliInfo::ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer& caps) {
   RETURN_ERROR(ParseFromBytesInternal(message));
   // Parse denali_endpoint.
   ASSIGN_OR_RETURN(denali_endpoint_, message.ReadCapability(0, caps));
