@@ -145,3 +145,28 @@ TEST_CASE("Vector Move", "[vector]") {
   REQUIRE(ConstructRecorder::copy_cnt == copy);
   REQUIRE(ConstructRecorder::move_cnt == move);
 }
+
+TEST_CASE("Vector Iterator", "[vector]") {
+  Vector<uint64_t> v;
+  for (uint64_t i = 0; i < 100; i++) {
+    v.PushBack(42);
+  }
+
+  SECTION("For Range Loop") {
+    uint64_t iters = 0;
+    for (uint64_t i : v) {
+      REQUIRE(i == 42);
+      iters++;
+    }
+    REQUIRE(iters == 100);
+  }
+
+  SECTION("Raw Iter Loop") {
+    uint64_t iters = 0;
+    for (auto it = v.begin(); it != v.end(); ++it) {
+      REQUIRE(*it == 42);
+      iters++;
+    }
+    REQUIRE(iters == 100);
+  }
+}
