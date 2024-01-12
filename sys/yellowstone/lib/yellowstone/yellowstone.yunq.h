@@ -7,6 +7,7 @@
 #include <glacier/container/vector.h>
 #include <glacier/string/string.h>
 #include <yunq/message_view.h>
+#include <yunq/serialize.h>
 #include <ztypes.h>
 
 
@@ -34,6 +35,8 @@ class RegisterEndpointRequest {
 
   // Parses everything except for caps.
   glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
+
+  uint64_t SerializeInternal(yunq::Serializer& serializer) const;
 };
 class GetEndpointRequest {
  public:
@@ -54,6 +57,8 @@ class GetEndpointRequest {
 
   // Parses everything except for caps.
   glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
+
+  uint64_t SerializeInternal(yunq::Serializer& serializer) const;
 };
 class Endpoint {
  public:
@@ -74,6 +79,8 @@ class Endpoint {
 
   // Parses everything except for caps.
   glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
+
+  uint64_t SerializeInternal(yunq::Serializer& serializer) const;
 };
 class AhciInfo {
  public:
@@ -97,6 +104,8 @@ class AhciInfo {
 
   // Parses everything except for caps.
   glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
+
+  uint64_t SerializeInternal(yunq::Serializer& serializer) const;
 };
 class FramebufferInfo {
  public:
@@ -150,6 +159,8 @@ class FramebufferInfo {
 
   // Parses everything except for caps.
   glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
+
+  uint64_t SerializeInternal(yunq::Serializer& serializer) const;
 };
 class DenaliInfo {
  public:
@@ -176,6 +187,8 @@ class DenaliInfo {
 
   // Parses everything except for caps.
   glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
+
+  uint64_t SerializeInternal(yunq::Serializer& serializer) const;
 };
 
 

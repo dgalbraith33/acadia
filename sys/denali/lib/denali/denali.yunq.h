@@ -7,6 +7,7 @@
 #include <glacier/container/vector.h>
 #include <glacier/string/string.h>
 #include <yunq/message_view.h>
+#include <yunq/serialize.h>
 #include <ztypes.h>
 
 
@@ -35,6 +36,8 @@ class ReadRequest {
 
   // Parses everything except for caps.
   glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
+
+  uint64_t SerializeInternal(yunq::Serializer& serializer) const;
 };
 class ReadManyRequest {
  public:
@@ -61,6 +64,8 @@ class ReadManyRequest {
 
   // Parses everything except for caps.
   glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
+
+  uint64_t SerializeInternal(yunq::Serializer& serializer) const;
 };
 class ReadResponse {
  public:
@@ -87,5 +92,7 @@ class ReadResponse {
 
   // Parses everything except for caps.
   glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
+
+  uint64_t SerializeInternal(yunq::Serializer& serializer) const;
 };
 

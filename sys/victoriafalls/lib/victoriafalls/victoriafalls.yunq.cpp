@@ -35,16 +35,15 @@ glcr::Status OpenFileRequest::ParseFromBytesInternal(const yunq::MessageView& me
 
 uint64_t OpenFileRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
   yunq::Serializer serializer(bytes, offset, 1);
-  // Write path.
-  serializer.WriteField<glcr::String>(0, path_);
-
-  serializer.WriteHeader();
-
-  return serializer.size();
+  return SerializeInternal(serializer);
 }
 
 uint64_t OpenFileRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
   yunq::Serializer serializer(bytes, offset, 1, caps);
+  return SerializeInternal(serializer);
+}
+  
+uint64_t OpenFileRequest::SerializeInternal(yunq::Serializer& serializer) const {
   // Write path.
   serializer.WriteField<glcr::String>(0, path_);
 
@@ -79,20 +78,15 @@ glcr::Status OpenFileResponse::ParseFromBytesInternal(const yunq::MessageView& m
 
 uint64_t OpenFileResponse::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
   yunq::Serializer serializer(bytes, offset, 3);
-  // Write path.
-  serializer.WriteField<glcr::String>(0, path_);
-  // Write size.
-  serializer.WriteField<uint64_t>(1, size_);
-  // Write memory.
-  serializer.WriteCapability(2, memory_);
-
-  serializer.WriteHeader();
-
-  return serializer.size();
+  return SerializeInternal(serializer);
 }
 
 uint64_t OpenFileResponse::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
   yunq::Serializer serializer(bytes, offset, 3, caps);
+  return SerializeInternal(serializer);
+}
+  
+uint64_t OpenFileResponse::SerializeInternal(yunq::Serializer& serializer) const {
   // Write path.
   serializer.WriteField<glcr::String>(0, path_);
   // Write size.
@@ -124,16 +118,15 @@ glcr::Status GetDirectoryRequest::ParseFromBytesInternal(const yunq::MessageView
 
 uint64_t GetDirectoryRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
   yunq::Serializer serializer(bytes, offset, 1);
-  // Write path.
-  serializer.WriteField<glcr::String>(0, path_);
-
-  serializer.WriteHeader();
-
-  return serializer.size();
+  return SerializeInternal(serializer);
 }
 
 uint64_t GetDirectoryRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
   yunq::Serializer serializer(bytes, offset, 1, caps);
+  return SerializeInternal(serializer);
+}
+  
+uint64_t GetDirectoryRequest::SerializeInternal(yunq::Serializer& serializer) const {
   // Write path.
   serializer.WriteField<glcr::String>(0, path_);
 
@@ -161,16 +154,15 @@ glcr::Status Directory::ParseFromBytesInternal(const yunq::MessageView& message)
 
 uint64_t Directory::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
   yunq::Serializer serializer(bytes, offset, 1);
-  // Write filenames.
-  serializer.WriteField<glcr::String>(0, filenames_);
-
-  serializer.WriteHeader();
-
-  return serializer.size();
+  return SerializeInternal(serializer);
 }
 
 uint64_t Directory::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
   yunq::Serializer serializer(bytes, offset, 1, caps);
+  return SerializeInternal(serializer);
+}
+  
+uint64_t Directory::SerializeInternal(yunq::Serializer& serializer) const {
   // Write filenames.
   serializer.WriteField<glcr::String>(0, filenames_);
 

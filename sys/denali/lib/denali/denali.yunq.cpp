@@ -39,20 +39,15 @@ glcr::Status ReadRequest::ParseFromBytesInternal(const yunq::MessageView& messag
 
 uint64_t ReadRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
   yunq::Serializer serializer(bytes, offset, 3);
-  // Write device_id.
-  serializer.WriteField<uint64_t>(0, device_id_);
-  // Write lba.
-  serializer.WriteField<uint64_t>(1, lba_);
-  // Write size.
-  serializer.WriteField<uint64_t>(2, size_);
-
-  serializer.WriteHeader();
-
-  return serializer.size();
+  return SerializeInternal(serializer);
 }
 
 uint64_t ReadRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
   yunq::Serializer serializer(bytes, offset, 3, caps);
+  return SerializeInternal(serializer);
+}
+  
+uint64_t ReadRequest::SerializeInternal(yunq::Serializer& serializer) const {
   // Write device_id.
   serializer.WriteField<uint64_t>(0, device_id_);
   // Write lba.
@@ -90,20 +85,15 @@ glcr::Status ReadManyRequest::ParseFromBytesInternal(const yunq::MessageView& me
 
 uint64_t ReadManyRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
   yunq::Serializer serializer(bytes, offset, 3);
-  // Write device_id.
-  serializer.WriteField<uint64_t>(0, device_id_);
-  // Write lba.
-  serializer.WriteRepeated<uint64_t>(1, lba_);
-  // Write sector_cnt.
-  serializer.WriteRepeated<uint64_t>(2, sector_cnt_);
-
-  serializer.WriteHeader();
-
-  return serializer.size();
+  return SerializeInternal(serializer);
 }
 
 uint64_t ReadManyRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
   yunq::Serializer serializer(bytes, offset, 3, caps);
+  return SerializeInternal(serializer);
+}
+  
+uint64_t ReadManyRequest::SerializeInternal(yunq::Serializer& serializer) const {
   // Write device_id.
   serializer.WriteField<uint64_t>(0, device_id_);
   // Write lba.
@@ -142,20 +132,15 @@ glcr::Status ReadResponse::ParseFromBytesInternal(const yunq::MessageView& messa
 
 uint64_t ReadResponse::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
   yunq::Serializer serializer(bytes, offset, 3);
-  // Write device_id.
-  serializer.WriteField<uint64_t>(0, device_id_);
-  // Write size.
-  serializer.WriteField<uint64_t>(1, size_);
-  // Write memory.
-  serializer.WriteCapability(2, memory_);
-
-  serializer.WriteHeader();
-
-  return serializer.size();
+  return SerializeInternal(serializer);
 }
 
 uint64_t ReadResponse::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
   yunq::Serializer serializer(bytes, offset, 3, caps);
+  return SerializeInternal(serializer);
+}
+  
+uint64_t ReadResponse::SerializeInternal(yunq::Serializer& serializer) const {
   // Write device_id.
   serializer.WriteField<uint64_t>(0, device_id_);
   // Write size.

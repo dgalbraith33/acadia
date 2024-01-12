@@ -74,36 +74,15 @@ glcr::Status {{message.name}}::ParseFromBytesInternal(const yunq::MessageView& m
 
 uint64_t {{message.name}}::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
   yunq::Serializer serializer(bytes, offset, {{ message.fields | length }});
-  
-{%- for field in message.fields %}
-  // Write {{field.name}}.
-{%- if not field.repeated %}
-
-{%- if field.type != Type.CAPABILITY %}
-  serializer.WriteField<{{field.cpp_type()}}>({{loop.index0}}, {{field.name}}_);
-{%- else %}
-  serializer.WriteCapability({{loop.index0}}, {{field.name}}_);
-{%- endif %}
-
-{%- else %}
-
-{%- if field.type != Type.CAPABILITY %}
-  serializer.WriteRepeated<{{field.cpp_type()}}>({{loop.index0}}, {{field.name}}_);
-{%- else %}
-  serializer.WriteRepeatedCapability({{loop.index0}}, {{field.name}}_);
-{%- endif %}
-
-{%- endif %}
-{%- endfor %}
-
-  serializer.WriteHeader();
-
-  return serializer.size();
+  return SerializeInternal(serializer);
 }
 
 uint64_t {{message.name}}::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
   yunq::Serializer serializer(bytes, offset, {{ message.fields | length }}, caps);
+  return SerializeInternal(serializer);
+}
   
+uint64_t {{message.name}}::SerializeInternal(yunq::Serializer& serializer) const {
 {%- for field in message.fields %}
   // Write {{field.name}}.
 {%- if not field.repeated %}

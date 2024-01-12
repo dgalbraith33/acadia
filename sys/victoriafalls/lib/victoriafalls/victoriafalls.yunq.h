@@ -7,6 +7,7 @@
 #include <glacier/container/vector.h>
 #include <glacier/string/string.h>
 #include <yunq/message_view.h>
+#include <yunq/serialize.h>
 #include <ztypes.h>
 
 
@@ -29,6 +30,8 @@ class OpenFileRequest {
 
   // Parses everything except for caps.
   glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
+
+  uint64_t SerializeInternal(yunq::Serializer& serializer) const;
 };
 class OpenFileResponse {
  public:
@@ -55,6 +58,8 @@ class OpenFileResponse {
 
   // Parses everything except for caps.
   glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
+
+  uint64_t SerializeInternal(yunq::Serializer& serializer) const;
 };
 class GetDirectoryRequest {
  public:
@@ -75,6 +80,8 @@ class GetDirectoryRequest {
 
   // Parses everything except for caps.
   glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
+
+  uint64_t SerializeInternal(yunq::Serializer& serializer) const;
 };
 class Directory {
  public:
@@ -95,5 +102,7 @@ class Directory {
 
   // Parses everything except for caps.
   glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
+
+  uint64_t SerializeInternal(yunq::Serializer& serializer) const;
 };
 

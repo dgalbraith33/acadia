@@ -42,18 +42,15 @@ glcr::Status RegisterEndpointRequest::ParseFromBytesInternal(const yunq::Message
 
 uint64_t RegisterEndpointRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
   yunq::Serializer serializer(bytes, offset, 2);
-  // Write endpoint_name.
-  serializer.WriteField<glcr::String>(0, endpoint_name_);
-  // Write endpoint_capability.
-  serializer.WriteCapability(1, endpoint_capability_);
-
-  serializer.WriteHeader();
-
-  return serializer.size();
+  return SerializeInternal(serializer);
 }
 
 uint64_t RegisterEndpointRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
   yunq::Serializer serializer(bytes, offset, 2, caps);
+  return SerializeInternal(serializer);
+}
+  
+uint64_t RegisterEndpointRequest::SerializeInternal(yunq::Serializer& serializer) const {
   // Write endpoint_name.
   serializer.WriteField<glcr::String>(0, endpoint_name_);
   // Write endpoint_capability.
@@ -83,16 +80,15 @@ glcr::Status GetEndpointRequest::ParseFromBytesInternal(const yunq::MessageView&
 
 uint64_t GetEndpointRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
   yunq::Serializer serializer(bytes, offset, 1);
-  // Write endpoint_name.
-  serializer.WriteField<glcr::String>(0, endpoint_name_);
-
-  serializer.WriteHeader();
-
-  return serializer.size();
+  return SerializeInternal(serializer);
 }
 
 uint64_t GetEndpointRequest::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
   yunq::Serializer serializer(bytes, offset, 1, caps);
+  return SerializeInternal(serializer);
+}
+  
+uint64_t GetEndpointRequest::SerializeInternal(yunq::Serializer& serializer) const {
   // Write endpoint_name.
   serializer.WriteField<glcr::String>(0, endpoint_name_);
 
@@ -123,16 +119,15 @@ glcr::Status Endpoint::ParseFromBytesInternal(const yunq::MessageView& message) 
 
 uint64_t Endpoint::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
   yunq::Serializer serializer(bytes, offset, 1);
-  // Write endpoint.
-  serializer.WriteCapability(0, endpoint_);
-
-  serializer.WriteHeader();
-
-  return serializer.size();
+  return SerializeInternal(serializer);
 }
 
 uint64_t Endpoint::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
   yunq::Serializer serializer(bytes, offset, 1, caps);
+  return SerializeInternal(serializer);
+}
+  
+uint64_t Endpoint::SerializeInternal(yunq::Serializer& serializer) const {
   // Write endpoint.
   serializer.WriteCapability(0, endpoint_);
 
@@ -165,18 +160,15 @@ glcr::Status AhciInfo::ParseFromBytesInternal(const yunq::MessageView& message) 
 
 uint64_t AhciInfo::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
   yunq::Serializer serializer(bytes, offset, 2);
-  // Write ahci_region.
-  serializer.WriteCapability(0, ahci_region_);
-  // Write region_length.
-  serializer.WriteField<uint64_t>(1, region_length_);
-
-  serializer.WriteHeader();
-
-  return serializer.size();
+  return SerializeInternal(serializer);
 }
 
 uint64_t AhciInfo::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
   yunq::Serializer serializer(bytes, offset, 2, caps);
+  return SerializeInternal(serializer);
+}
+  
+uint64_t AhciInfo::SerializeInternal(yunq::Serializer& serializer) const {
   // Write ahci_region.
   serializer.WriteCapability(0, ahci_region_);
   // Write region_length.
@@ -228,38 +220,15 @@ glcr::Status FramebufferInfo::ParseFromBytesInternal(const yunq::MessageView& me
 
 uint64_t FramebufferInfo::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
   yunq::Serializer serializer(bytes, offset, 12);
-  // Write address_phys.
-  serializer.WriteField<uint64_t>(0, address_phys_);
-  // Write width.
-  serializer.WriteField<uint64_t>(1, width_);
-  // Write height.
-  serializer.WriteField<uint64_t>(2, height_);
-  // Write pitch.
-  serializer.WriteField<uint64_t>(3, pitch_);
-  // Write bpp.
-  serializer.WriteField<uint64_t>(4, bpp_);
-  // Write memory_model.
-  serializer.WriteField<uint64_t>(5, memory_model_);
-  // Write red_mask_size.
-  serializer.WriteField<uint64_t>(6, red_mask_size_);
-  // Write red_mask_shift.
-  serializer.WriteField<uint64_t>(7, red_mask_shift_);
-  // Write green_mask_size.
-  serializer.WriteField<uint64_t>(8, green_mask_size_);
-  // Write green_mask_shift.
-  serializer.WriteField<uint64_t>(9, green_mask_shift_);
-  // Write blue_mask_size.
-  serializer.WriteField<uint64_t>(10, blue_mask_size_);
-  // Write blue_mask_shift.
-  serializer.WriteField<uint64_t>(11, blue_mask_shift_);
-
-  serializer.WriteHeader();
-
-  return serializer.size();
+  return SerializeInternal(serializer);
 }
 
 uint64_t FramebufferInfo::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
   yunq::Serializer serializer(bytes, offset, 12, caps);
+  return SerializeInternal(serializer);
+}
+  
+uint64_t FramebufferInfo::SerializeInternal(yunq::Serializer& serializer) const {
   // Write address_phys.
   serializer.WriteField<uint64_t>(0, address_phys_);
   // Write width.
@@ -316,20 +285,15 @@ glcr::Status DenaliInfo::ParseFromBytesInternal(const yunq::MessageView& message
 
 uint64_t DenaliInfo::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
   yunq::Serializer serializer(bytes, offset, 3);
-  // Write denali_endpoint.
-  serializer.WriteCapability(0, denali_endpoint_);
-  // Write device_id.
-  serializer.WriteField<uint64_t>(1, device_id_);
-  // Write lba_offset.
-  serializer.WriteField<uint64_t>(2, lba_offset_);
-
-  serializer.WriteHeader();
-
-  return serializer.size();
+  return SerializeInternal(serializer);
 }
 
 uint64_t DenaliInfo::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
   yunq::Serializer serializer(bytes, offset, 3, caps);
+  return SerializeInternal(serializer);
+}
+  
+uint64_t DenaliInfo::SerializeInternal(yunq::Serializer& serializer) const {
   // Write denali_endpoint.
   serializer.WriteCapability(0, denali_endpoint_);
   // Write device_id.

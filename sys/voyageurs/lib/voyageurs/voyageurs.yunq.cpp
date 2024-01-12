@@ -38,16 +38,15 @@ glcr::Status KeyboardListener::ParseFromBytesInternal(const yunq::MessageView& m
 
 uint64_t KeyboardListener::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
   yunq::Serializer serializer(bytes, offset, 1);
-  // Write port_capability.
-  serializer.WriteCapability(0, port_capability_);
-
-  serializer.WriteHeader();
-
-  return serializer.size();
+  return SerializeInternal(serializer);
 }
 
 uint64_t KeyboardListener::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
   yunq::Serializer serializer(bytes, offset, 1, caps);
+  return SerializeInternal(serializer);
+}
+  
+uint64_t KeyboardListener::SerializeInternal(yunq::Serializer& serializer) const {
   // Write port_capability.
   serializer.WriteCapability(0, port_capability_);
 
