@@ -12,7 +12,7 @@ class PageAllocator {
  public:
   static uint64_t AllocatePagePair() {
     uint64_t mem_cap;
-    check(ZMemoryObjectCreate(0x2000, &mem_cap));
+    check(ZMemoryObjectCreate(0x4000, &mem_cap));
 
     uint64_t vaddr;
     check(ZAddressSpaceMap(gSelfVmasCap, 0, mem_cap, /* align= */ 0x2000,
@@ -60,8 +60,8 @@ class BuddyAllocator {
 
   void* Allocate(uint64_t size) {
     check(ZMutexLock(mutex_cap_));
-    if (size > (0x2000 - sizeof(BuddySlot))) {
-      crash("Can't allocate greater than one page", glcr::UNIMPLEMENTED);
+    if (size > (0x4000 - sizeof(BuddySlot))) {
+      crash("Can't allocate greater than four pages", glcr::UNIMPLEMENTED);
     }
     if (free_front_ == nullptr) {
       AddPage();
