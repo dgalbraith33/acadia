@@ -116,3 +116,32 @@ TEST_CASE("Data-Type Construction", "[vector]") {
     REQUIRE(ConstructRecorder::move_cnt == 2);
   }
 }
+
+TEST_CASE("Vector Move", "[vector]") {
+  ConstructRecorder::Reset();
+
+  Vector<ConstructRecorder> v;
+  v.PushBack({});
+  v.PushBack({});
+  v.PushBack({});
+
+  uint64_t construct = ConstructRecorder::construct_cnt;
+  uint64_t copy = ConstructRecorder::copy_cnt;
+  uint64_t move = ConstructRecorder::move_cnt;
+
+  Vector<ConstructRecorder> v2(glcr::Move(v));
+
+  REQUIRE(v2.size() == 3);
+  REQUIRE(v2.capacity() >= 3);
+  REQUIRE(ConstructRecorder::construct_cnt == construct);
+  REQUIRE(ConstructRecorder::copy_cnt == copy);
+  REQUIRE(ConstructRecorder::move_cnt == move);
+
+  Vector<ConstructRecorder> v3 = glcr::Move(v2);
+
+  REQUIRE(v3.size() == 3);
+  REQUIRE(v3.capacity() >= 3);
+  REQUIRE(ConstructRecorder::construct_cnt == construct);
+  REQUIRE(ConstructRecorder::copy_cnt == copy);
+  REQUIRE(ConstructRecorder::move_cnt == move);
+}
