@@ -1,6 +1,7 @@
 // Generated file -- DO NOT MODIFY.
 #include "denali.yunq.h"
 
+#include <yunq/message_view.h>
 #include <yunq/serialize.h>
 
 
@@ -26,12 +27,14 @@ glcr::Status ReadRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t
 
 glcr::Status ReadRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
   RETURN_ERROR(yunq::CheckHeader(bytes, offset));
+
+  yunq::MessageView view(bytes, offset);
   // Parse device_id.
-  set_device_id(bytes.At<uint64_t>(offset + header_size + (8 * 0)));
+  ASSIGN_OR_RETURN(device_id_, view.ReadField<uint64_t>(0));
   // Parse lba.
-  set_lba(bytes.At<uint64_t>(offset + header_size + (8 * 1)));
+  ASSIGN_OR_RETURN(lba_, view.ReadField<uint64_t>(1));
   // Parse size.
-  set_size(bytes.At<uint64_t>(offset + header_size + (8 * 2)));
+  ASSIGN_OR_RETURN(size_, view.ReadField<uint64_t>(2));
 
   return glcr::Status::Ok();
 }
@@ -80,8 +83,10 @@ glcr::Status ReadManyRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint
 
 glcr::Status ReadManyRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
   RETURN_ERROR(yunq::CheckHeader(bytes, offset));
+
+  yunq::MessageView view(bytes, offset);
   // Parse device_id.
-  set_device_id(bytes.At<uint64_t>(offset + header_size + (8 * 0)));
+  ASSIGN_OR_RETURN(device_id_, view.ReadField<uint64_t>(0));
   // Parse lba.
   auto lba_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 1));
 
@@ -201,12 +206,13 @@ glcr::Status ReadResponse::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_
 
 glcr::Status ReadResponse::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
   RETURN_ERROR(yunq::CheckHeader(bytes, offset));
+
+  yunq::MessageView view(bytes, offset);
   // Parse device_id.
-  set_device_id(bytes.At<uint64_t>(offset + header_size + (8 * 0)));
+  ASSIGN_OR_RETURN(device_id_, view.ReadField<uint64_t>(0));
   // Parse size.
-  set_size(bytes.At<uint64_t>(offset + header_size + (8 * 1)));
+  ASSIGN_OR_RETURN(size_, view.ReadField<uint64_t>(1));
   // Parse memory.
-  // Skip Cap.
 
   return glcr::Status::Ok();
 }

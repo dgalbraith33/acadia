@@ -1,6 +1,7 @@
 // Generated file -- DO NOT MODIFY.
 #include "victoriafalls.yunq.h"
 
+#include <yunq/message_view.h>
 #include <yunq/serialize.h>
 
 
@@ -26,10 +27,10 @@ glcr::Status OpenFileRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, uint
 
 glcr::Status OpenFileRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
   RETURN_ERROR(yunq::CheckHeader(bytes, offset));
-  // Parse path.
-  auto path_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
 
-  set_path(bytes.StringAt(offset + path_pointer.offset, path_pointer.length));
+  yunq::MessageView view(bytes, offset);
+  // Parse path.
+  ASSIGN_OR_RETURN(path_, view.ReadField<glcr::String>(0));
 
   return glcr::Status::Ok();
 }
@@ -95,14 +96,13 @@ glcr::Status OpenFileResponse::ParseFromBytes(const glcr::ByteBuffer& bytes, uin
 
 glcr::Status OpenFileResponse::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
   RETURN_ERROR(yunq::CheckHeader(bytes, offset));
-  // Parse path.
-  auto path_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
 
-  set_path(bytes.StringAt(offset + path_pointer.offset, path_pointer.length));
+  yunq::MessageView view(bytes, offset);
+  // Parse path.
+  ASSIGN_OR_RETURN(path_, view.ReadField<glcr::String>(0));
   // Parse size.
-  set_size(bytes.At<uint64_t>(offset + header_size + (8 * 1)));
+  ASSIGN_OR_RETURN(size_, view.ReadField<uint64_t>(1));
   // Parse memory.
-  // Skip Cap.
 
   return glcr::Status::Ok();
 }
@@ -171,10 +171,10 @@ glcr::Status GetDirectoryRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, 
 
 glcr::Status GetDirectoryRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
   RETURN_ERROR(yunq::CheckHeader(bytes, offset));
-  // Parse path.
-  auto path_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
 
-  set_path(bytes.StringAt(offset + path_pointer.offset, path_pointer.length));
+  yunq::MessageView view(bytes, offset);
+  // Parse path.
+  ASSIGN_OR_RETURN(path_, view.ReadField<glcr::String>(0));
 
   return glcr::Status::Ok();
 }
@@ -233,10 +233,10 @@ glcr::Status Directory::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t o
 
 glcr::Status Directory::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
   RETURN_ERROR(yunq::CheckHeader(bytes, offset));
-  // Parse filenames.
-  auto filenames_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
 
-  set_filenames(bytes.StringAt(offset + filenames_pointer.offset, filenames_pointer.length));
+  yunq::MessageView view(bytes, offset);
+  // Parse filenames.
+  ASSIGN_OR_RETURN(filenames_, view.ReadField<glcr::String>(0));
 
   return glcr::Status::Ok();
 }

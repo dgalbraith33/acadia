@@ -1,4 +1,5 @@
 set(yunq_files
+  message_view.cpp
   serialize.cpp
   )
 

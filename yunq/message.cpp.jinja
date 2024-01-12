@@ -1,6 +1,7 @@
 // Generated file -- DO NOT MODIFY.
 #include "{{file}}.h"
 
+#include <yunq/message_view.h>
 #include <yunq/serialize.h>
 
 {% if package != None %}
@@ -48,21 +49,13 @@ glcr::Status {{message.name}}::ParseFromBytes(const glcr::ByteBuffer& bytes, uin
 glcr::Status {{message.name}}::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
   RETURN_ERROR(yunq::CheckHeader(bytes, offset));
 
+  yunq::MessageView view(bytes, offset);
+
 {%- for field in message.fields %}
   // Parse {{field.name}}.
 {%- if not field.repeated %}
-{%- if field.type == Type.U64 %}
-  set_{{field.name}}(bytes.At<uint64_t>(offset + header_size + (8 * {{loop.index0}})));
-{%- elif field.type == Type.I64 %}
-  set_{{field.name}}(bytes.At<int64_t>(offset + header_size + (8 * {{loop.index0}})));
-{%- elif field.type == Type.STRING %}
-  auto {{field.name}}_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * {{loop.index0}}));
-
-  set_{{field.name}}(bytes.StringAt(offset + {{field.name}}_pointer.offset, {{field.name}}_pointer.length));
-{%- elif field.type == Type.CAPABILITY %}
-  // Skip Cap.
-{%- else %}
-  // TODO: Unimplemented parsing {{field.type}}
+{%- if field.type != Type.CAPABILITY %}
+  ASSIGN_OR_RETURN({{field.name}}_, view.ReadField<{{field.cpp_type()}}>({{loop.index0}}));
 {%- endif %}
 {%- else %}
   auto {{field.name}}_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * {{loop.index0}}));

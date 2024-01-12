@@ -1,6 +1,7 @@
 // Generated file -- DO NOT MODIFY.
 #include "voyageurs.yunq.h"
 
+#include <yunq/message_view.h>
 #include <yunq/serialize.h>
 
 
@@ -33,8 +34,9 @@ glcr::Status KeyboardListener::ParseFromBytes(const glcr::ByteBuffer& bytes, uin
 
 glcr::Status KeyboardListener::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
   RETURN_ERROR(yunq::CheckHeader(bytes, offset));
+
+  yunq::MessageView view(bytes, offset);
   // Parse port_capability.
-  // Skip Cap.
 
   return glcr::Status::Ok();
 }

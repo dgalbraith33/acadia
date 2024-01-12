@@ -1,6 +1,7 @@
 // Generated file -- DO NOT MODIFY.
 #include "yellowstone.yunq.h"
 
+#include <yunq/message_view.h>
 #include <yunq/serialize.h>
 
 
@@ -35,12 +36,11 @@ glcr::Status RegisterEndpointRequest::ParseFromBytes(const glcr::ByteBuffer& byt
 
 glcr::Status RegisterEndpointRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
   RETURN_ERROR(yunq::CheckHeader(bytes, offset));
-  // Parse endpoint_name.
-  auto endpoint_name_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
 
-  set_endpoint_name(bytes.StringAt(offset + endpoint_name_pointer.offset, endpoint_name_pointer.length));
+  yunq::MessageView view(bytes, offset);
+  // Parse endpoint_name.
+  ASSIGN_OR_RETURN(endpoint_name_, view.ReadField<glcr::String>(0));
   // Parse endpoint_capability.
-  // Skip Cap.
 
   return glcr::Status::Ok();
 }
@@ -105,10 +105,10 @@ glcr::Status GetEndpointRequest::ParseFromBytes(const glcr::ByteBuffer& bytes, u
 
 glcr::Status GetEndpointRequest::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
   RETURN_ERROR(yunq::CheckHeader(bytes, offset));
-  // Parse endpoint_name.
-  auto endpoint_name_pointer = bytes.At<ExtPointer>(offset + header_size + (8 * 0));
 
-  set_endpoint_name(bytes.StringAt(offset + endpoint_name_pointer.offset, endpoint_name_pointer.length));
+  yunq::MessageView view(bytes, offset);
+  // Parse endpoint_name.
+  ASSIGN_OR_RETURN(endpoint_name_, view.ReadField<glcr::String>(0));
 
   return glcr::Status::Ok();
 }
@@ -174,8 +174,9 @@ glcr::Status Endpoint::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t of
 
 glcr::Status Endpoint::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
   RETURN_ERROR(yunq::CheckHeader(bytes, offset));
+
+  yunq::MessageView view(bytes, offset);
   // Parse endpoint.
-  // Skip Cap.
 
   return glcr::Status::Ok();
 }
@@ -225,10 +226,11 @@ glcr::Status AhciInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t of
 
 glcr::Status AhciInfo::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
   RETURN_ERROR(yunq::CheckHeader(bytes, offset));
+
+  yunq::MessageView view(bytes, offset);
   // Parse ahci_region.
-  // Skip Cap.
   // Parse region_length.
-  set_region_length(bytes.At<uint64_t>(offset + header_size + (8 * 1)));
+  ASSIGN_OR_RETURN(region_length_, view.ReadField<uint64_t>(1));
 
   return glcr::Status::Ok();
 }
@@ -275,30 +277,32 @@ glcr::Status FramebufferInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint
 
 glcr::Status FramebufferInfo::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
   RETURN_ERROR(yunq::CheckHeader(bytes, offset));
+
+  yunq::MessageView view(bytes, offset);
   // Parse address_phys.
-  set_address_phys(bytes.At<uint64_t>(offset + header_size + (8 * 0)));
+  ASSIGN_OR_RETURN(address_phys_, view.ReadField<uint64_t>(0));
   // Parse width.
-  set_width(bytes.At<uint64_t>(offset + header_size + (8 * 1)));
+  ASSIGN_OR_RETURN(width_, view.ReadField<uint64_t>(1));
   // Parse height.
-  set_height(bytes.At<uint64_t>(offset + header_size + (8 * 2)));
+  ASSIGN_OR_RETURN(height_, view.ReadField<uint64_t>(2));
   // Parse pitch.
-  set_pitch(bytes.At<uint64_t>(offset + header_size + (8 * 3)));
+  ASSIGN_OR_RETURN(pitch_, view.ReadField<uint64_t>(3));
   // Parse bpp.
-  set_bpp(bytes.At<uint64_t>(offset + header_size + (8 * 4)));
+  ASSIGN_OR_RETURN(bpp_, view.ReadField<uint64_t>(4));
   // Parse memory_model.
-  set_memory_model(bytes.At<uint64_t>(offset + header_size + (8 * 5)));
+  ASSIGN_OR_RETURN(memory_model_, view.ReadField<uint64_t>(5));
   // Parse red_mask_size.
-  set_red_mask_size(bytes.At<uint64_t>(offset + header_size + (8 * 6)));
+  ASSIGN_OR_RETURN(red_mask_size_, view.ReadField<uint64_t>(6));
   // Parse red_mask_shift.
-  set_red_mask_shift(bytes.At<uint64_t>(offset + header_size + (8 * 7)));
+  ASSIGN_OR_RETURN(red_mask_shift_, view.ReadField<uint64_t>(7));
   // Parse green_mask_size.
-  set_green_mask_size(bytes.At<uint64_t>(offset + header_size + (8 * 8)));
+  ASSIGN_OR_RETURN(green_mask_size_, view.ReadField<uint64_t>(8));
   // Parse green_mask_shift.
-  set_green_mask_shift(bytes.At<uint64_t>(offset + header_size + (8 * 9)));
+  ASSIGN_OR_RETURN(green_mask_shift_, view.ReadField<uint64_t>(9));
   // Parse blue_mask_size.
-  set_blue_mask_size(bytes.At<uint64_t>(offset + header_size + (8 * 10)));
+  ASSIGN_OR_RETURN(blue_mask_size_, view.ReadField<uint64_t>(10));
   // Parse blue_mask_shift.
-  set_blue_mask_shift(bytes.At<uint64_t>(offset + header_size + (8 * 11)));
+  ASSIGN_OR_RETURN(blue_mask_shift_, view.ReadField<uint64_t>(11));
 
   return glcr::Status::Ok();
 }
@@ -390,12 +394,13 @@ glcr::Status DenaliInfo::ParseFromBytes(const glcr::ByteBuffer& bytes, uint64_t 
 
 glcr::Status DenaliInfo::ParseFromBytesInternal(const glcr::ByteBuffer& bytes, uint64_t offset) {
   RETURN_ERROR(yunq::CheckHeader(bytes, offset));
+
+  yunq::MessageView view(bytes, offset);
   // Parse denali_endpoint.
-  // Skip Cap.
   // Parse device_id.
-  set_device_id(bytes.At<uint64_t>(offset + header_size + (8 * 1)));
+  ASSIGN_OR_RETURN(device_id_, view.ReadField<uint64_t>(1));
   // Parse lba_offset.
-  set_lba_offset(bytes.At<uint64_t>(offset + header_size + (8 * 2)));
+  ASSIGN_OR_RETURN(lba_offset_, view.ReadField<uint64_t>(2));
 
   return glcr::Status::Ok();
 }
