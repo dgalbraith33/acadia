@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+#include "glacier/container/array_iter.h"
 #include "glacier/container/array_view.h"
 
 namespace glcr {
@@ -36,6 +37,13 @@ class Array {
 
   uint64_t size() const { return size_; }
   bool empty() const { return size_ == 0; }
+
+  typedef ArrayIterator<T> Iterator;
+
+  Iterator begin() { return {data_, size_}; }
+  const Iterator begin() const { return {data_, size_}; }
+  Iterator end() { return {nullptr, 0}; }
+  const Iterator end() const { return {nullptr, 0}; }
 
  private:
   T* data_;
