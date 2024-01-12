@@ -18,9 +18,8 @@ class HashMap {
   HashMap() = default;
   HashMap(const HashMap&) = delete;
   HashMap& operator=(const HashMap&) = delete;
-  // TODO: Implement Move.
-  HashMap(HashMap&&) = delete;
-  HashMap& operator=(HashMap&&) = delete;
+  HashMap(HashMap&&);
+  HashMap& operator=(HashMap&&);
 
   // Accessors.
   uint64_t size() { return size_; }
@@ -64,6 +63,21 @@ class HashMap {
 };
 
 template <typename K, typename V, class H>
+HashMap<K, V, H>::HashMap(HashMap&& other) {
+  data_ = glcr::Move(other.data_);
+  size_ = other.size_;
+  other.size_ = 0;
+}
+
+template <typename K, typename V, class H>
+HashMap<K, V, H>& HashMap<K, V, H>::operator=(HashMap&& other) {
+  data_ = glcr::Move(other.data_);
+  size_ = other.size_;
+  other.size_ = 0;
+  return *this;
+}
+
+template <typename K, typename V, class H>
 V& HashMap<K, V, H>::at(const K& key) {
   uint64_t hc = H()(key);
   auto& ll = data_[hc % data_.size()];
@@ -74,7 +88,8 @@ V& HashMap<K, V, H>::at(const K& key) {
     }
   }
   // TODO: Add a failure mode here instead of constructing an object.
-  ll.PushFront({key, {}});
+  K k2 = key;
+  ll.PushFront({glcr::Move(k2), {}});
   return ll.PeekFront().second();
 }
 
