@@ -29,3 +29,7 @@ target_include_directories(glacier_kernel
 
 set_target_properties(glacier_kernel PROPERTIES
   COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${BASE_COMPILE_FLAGS} -mcmodel=kernel -mgeneral-regs-only")
+
+if (enable_testing)
+  add_subdirectory(test)
+endif()
