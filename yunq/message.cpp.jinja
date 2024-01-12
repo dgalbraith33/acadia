@@ -26,10 +26,10 @@ glcr::Status {{message.name}}::ParseFromBytes(const yunq::MessageView& message) 
 {%- if field.type == Type.CAPABILITY %}
 {%- if not field.repeated %}
   // Parse {{field.name}}.
-  ASSIGN_OR_RETURN({{field.name}}_, message.ReadCapability({{loop.index0}}));
+  ASSIGN_OR_RETURN({{field.name}}_, message.ReadCapability({{field.number}}));
   {%- else %}
   // Parse {{field.name}}.
-  ASSIGN_OR_RETURN({{field.name}}_, message.ReadRepeatedCapability({{loop.index0}}));
+  ASSIGN_OR_RETURN({{field.name}}_, message.ReadRepeatedCapability({{field.number}}));
   {%- endif %}
 {%- endif %}
 {%- endfor %}
@@ -43,10 +43,10 @@ glcr::Status {{message.name}}::ParseFromBytes(const yunq::MessageView& message, 
 {%- if field.type == Type.CAPABILITY %}
 {%- if not field.repeated %}
   // Parse {{field.name}}.
-  ASSIGN_OR_RETURN({{field.name}}_, message.ReadCapability({{loop.index0}}, caps));
+  ASSIGN_OR_RETURN({{field.name}}_, message.ReadCapability({{field.number}}, caps));
   {%- else %}
   // Parse {{field.name}}.
-  ASSIGN_OR_RETURN({{field.name}}_, message.ReadRepeatedCapability({{loop.index0}}, caps));
+  ASSIGN_OR_RETURN({{field.name}}_, message.ReadRepeatedCapability({{field.number}}, caps));
   {%- endif %}
 {%- endif %}
 {%- endfor %}
@@ -61,9 +61,9 @@ glcr::Status {{message.name}}::ParseFromBytesInternal(const yunq::MessageView& m
 {%- if field.type != Type.CAPABILITY %}
 
 {%- if not field.repeated %}
-  ASSIGN_OR_RETURN({{field.name}}_, message.ReadField<{{field.cpp_type()}}>({{loop.index0}}));
+  ASSIGN_OR_RETURN({{field.name}}_, message.ReadField<{{field.cpp_type()}}>({{field.number}}));
 {%- else %}
-  ASSIGN_OR_RETURN({{field.name}}_, message.ReadRepeated<{{field.cpp_type()}}>({{loop.index0}}));
+  ASSIGN_OR_RETURN({{field.name}}_, message.ReadRepeated<{{field.cpp_type()}}>({{field.number}}));
 {% endif %}
 
 {%- endif %}
@@ -88,17 +88,17 @@ uint64_t {{message.name}}::SerializeInternal(yunq::Serializer& serializer) const
 {%- if not field.repeated %}
 
 {%- if field.type != Type.CAPABILITY %}
-  serializer.WriteField<{{field.cpp_type()}}>({{loop.index0}}, {{field.name}}_);
+  serializer.WriteField<{{field.cpp_type()}}>({{field.number}}, {{field.name}}_);
 {%- else %}
-  serializer.WriteCapability({{loop.index0}}, {{field.name}}_);
+  serializer.WriteCapability({{field.number}}, {{field.name}}_);
 {%- endif %}
 
 {%- else %}
 
 {%- if field.type != Type.CAPABILITY %}
-  serializer.WriteRepeated<{{field.cpp_type()}}>({{loop.index0}}, {{field.name}}_);
+  serializer.WriteRepeated<{{field.cpp_type()}}>({{field.number}}, {{field.name}}_);
 {%- else %}
-  serializer.WriteRepeatedCapability({{loop.index0}}, {{field.name}}_);
+  serializer.WriteRepeatedCapability({{field.number}}, {{field.name}}_);
 {%- endif %}
 
 {%- endif %}

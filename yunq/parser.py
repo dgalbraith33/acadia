@@ -17,6 +17,7 @@ class LexemeType(Enum):
     ARROW = 7
     SEMICOLON = 8
     DOT = 9
+    EQUALS = 10
 
 
 class Lexeme():
@@ -266,8 +267,11 @@ class Parser():
 
         fields: list[Field] = []
         field_names = set()
+        next_field_num = 0
         while self.peektype() != LexemeType.RIGHT_BRACE:
             f = self.field()
+            f.number = next_field_num
+            next_field_num += 1
             if f.name in field_names:
                 sys.exit("Field %s declared twice on %s" % (f.name, name))
             field_names.add(f.name)
