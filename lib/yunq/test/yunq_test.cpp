@@ -32,3 +32,21 @@ TEST_CASE("Types Setter/Getter", "[yunq]") {
   REQUIRE(t.signed_int() == -1);
   REQUIRE(t.str() == "test");
 }
+
+TEST_CASE("Types Serialization", "[yunq]") {
+  ex::Types a;
+  a.set_unsigned_int(1);
+  a.set_signed_int(-1);
+  a.set_str("test");
+
+  glcr::ByteBuffer buf(1024);
+  a.SerializeToBytes(buf, 0);
+
+  ex::Types b;
+  yunq::MessageView v(buf, 0);
+  REQUIRE(b.ParseFromBytes(v).ok() == true);
+
+  REQUIRE(b.unsigned_int() == 1);
+  REQUIRE(b.signed_int() == -1);
+  REQUIRE(b.str() == "test");
+}

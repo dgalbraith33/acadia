@@ -15,7 +15,7 @@ add_dependencies(build_test
     yunq_test)
 
 
-# Build the yunq manualy rather than using the generator
+# Build the yunq manually rather than using the generator
 # because we don't want to link against mammoth and overrite new.
 set(target example_yunq)
 add_library(example_yunq
