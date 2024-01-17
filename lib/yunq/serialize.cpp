@@ -21,6 +21,12 @@ void Serializer::WriteField<uint64_t>(uint64_t field_index,
 }
 
 template <>
+void Serializer::WriteField<int64_t>(uint64_t field_index,
+                                     const int64_t& value) {
+  buffer_.WriteAt<int64_t>(field_offset(field_index), value);
+}
+
+template <>
 void Serializer::WriteField<glcr::String>(uint64_t field_index,
                                           const glcr::String& value) {
   ExtensionPointer ptr{

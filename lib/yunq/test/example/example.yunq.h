@@ -38,6 +38,66 @@ class Basic {
 
   uint64_t SerializeInternal(yunq::Serializer& serializer) const;
 };
+class Types {
+ public:
+  Types() {}
+  // Delete copy and move until implemented.
+  Types(const Types&) = delete;
+  Types(Types&&) = default;
+  Types& operator=(Types&&) = default;
+
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer&);
+  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
+  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
+
+  const uint64_t& unsigned_int() const { return unsigned_int_; }
+  uint64_t& mutable_unsigned_int() { return unsigned_int_; }
+  void set_unsigned_int(const uint64_t& value) { unsigned_int_ = value; } 
+
+  const int64_t& signed_int() const { return signed_int_; }
+  int64_t& mutable_signed_int() { return signed_int_; }
+  void set_signed_int(const int64_t& value) { signed_int_ = value; } 
+
+  const glcr::String& str() const { return str_; }
+  glcr::String& mutable_str() { return str_; }
+  void set_str(const glcr::String& value) { str_ = value; }
+
+ private:
+  uint64_t unsigned_int_;
+  int64_t signed_int_;
+  glcr::String str_;
+
+  // Parses everything except for caps.
+  glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
+
+  uint64_t SerializeInternal(yunq::Serializer& serializer) const;
+};
+class Cap {
+ public:
+  Cap() {}
+  // Delete copy and move until implemented.
+  Cap(const Cap&) = delete;
+  Cap(Cap&&) = default;
+  Cap& operator=(Cap&&) = default;
+
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer&);
+  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
+  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
+
+  const z_cap_t& cap() const { return cap_; }
+  z_cap_t& mutable_cap() { return cap_; }
+  void set_cap(const z_cap_t& value) { cap_ = value; }
+
+ private:
+  z_cap_t cap_;
+
+  // Parses everything except for caps.
+  glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
+
+  uint64_t SerializeInternal(yunq::Serializer& serializer) const;
+};
 
 
 }  // namepace ex

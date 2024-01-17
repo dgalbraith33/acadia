@@ -36,7 +36,9 @@ set(PYTHON "${CMAKE_SOURCE_DIR}/yunq/venv/bin/python")
 set(YUNQ "${CMAKE_SOURCE_DIR}/yunq/yunq.py")
 
 add_custom_command(
- OUTPUT example/example.yunq.cpp
+  OUTPUT 
+    ${CMAKE_CURRENT_SOURCE_DIR}/example/example.yunq.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/example/example.yunq.h
  COMMAND ${PYTHON} ${YUNQ} ${CMAKE_CURRENT_SOURCE_DIR}/example/example.yunq
  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/example/example.yunq
 )

@@ -26,7 +26,6 @@ class Serializer {
         next_extension_(kHeaderSize + (8 * num_fields)),
         core_size_(next_extension_),
         caps_(caps) {}
-
   template <typename T>
   void WriteField(uint64_t field_index, const T& value);
 
@@ -64,6 +63,10 @@ class Serializer {
 template <>
 void Serializer::WriteField<uint64_t>(uint64_t field_index,
                                       const uint64_t& value);
+
+template <>
+void Serializer::WriteField<int64_t>(uint64_t field_index,
+                                     const int64_t& value);
 
 template <>
 void Serializer::WriteField<glcr::String>(uint64_t field_index,

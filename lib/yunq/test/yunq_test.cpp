@@ -21,3 +21,14 @@ TEST_CASE("Basic serialization", "[yunq]") {
 
   REQUIRE(b.field() == 1);
 }
+
+TEST_CASE("Types Setter/Getter", "[yunq]") {
+  ex::Types t;
+  t.set_unsigned_int(1);
+  t.set_signed_int(-1);
+  t.set_str("test");
+
+  REQUIRE(t.unsigned_int() == 1);
+  REQUIRE(t.signed_int() == -1);
+  REQUIRE(t.str() == "test");
+}

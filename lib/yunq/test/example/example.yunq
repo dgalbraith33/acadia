@@ -3,3 +3,13 @@ package ex;
 message Basic {
   u64 field;
 }
+
+message Types {
+  u64 unsigned_int;
+  i64 signed_int;
+  string str;
+}
+
+message Cap {
+  capability cap;
+}

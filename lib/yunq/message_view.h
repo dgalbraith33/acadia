@@ -50,6 +50,10 @@ glcr::ErrorOr<uint64_t> MessageView::ReadField<uint64_t>(
     uint64_t field_index) const;
 
 template <>
+glcr::ErrorOr<int64_t> MessageView::ReadField<int64_t>(
+    uint64_t field_index) const;
+
+template <>
 glcr::ErrorOr<glcr::String> MessageView::ReadField<glcr::String>(
     uint64_t field_index) const;
 

@@ -30,6 +30,12 @@ glcr::ErrorOr<uint64_t> MessageView::ReadField<uint64_t>(
 }
 
 template <>
+glcr::ErrorOr<int64_t> MessageView::ReadField<int64_t>(
+    uint64_t field_index) const {
+  return buffer_.At<int64_t>(field_offset(field_index));
+}
+
+template <>
 glcr::ErrorOr<glcr::String> MessageView::ReadField<glcr::String>(
     uint64_t field_index) const {
   ExtensionPointer ptr =
