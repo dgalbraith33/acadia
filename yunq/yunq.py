@@ -45,6 +45,9 @@ def main():
         message_impl =  message_impl_tmpl.render(file=filebase, messages=messages, package=package)
         f.write(message_impl)
 
+    if len(interfaces) == 0:
+        return
+
     client_header_tmpl = jinja_env.get_template("client.h.jinja")
     with open(filename + '.client.h', mode='w') as f:
         client_header = client_header_tmpl.render(file=filebase, interfaces=interfaces, package=package)
