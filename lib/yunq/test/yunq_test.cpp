@@ -86,3 +86,15 @@ TEST_CASE("Cap Serialization Sidebuffer", "[yunq]") {
 
   REQUIRE(b.cap() == 1234);
 }
+
+TEST_CASE("Repeated Setter/Getter", "[yunq]") {
+  ex::Repeated r;
+  r.mutable_unsigned_ints().PushBack(1);
+  r.add_unsigned_ints(2);
+  uint64_t c = 3;
+  r.add_unsigned_ints(glcr::Move(c));
+
+  REQUIRE(r.unsigned_ints()[0] == 1);
+  REQUIRE(r.unsigned_ints()[1] == 2);
+  REQUIRE(r.unsigned_ints()[2] == 3);
+}

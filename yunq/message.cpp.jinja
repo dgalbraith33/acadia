@@ -107,7 +107,7 @@ uint64_t {{message.name}}::SerializeInternal(yunq::Serializer& serializer) const
 
 {%- if field.type == Type.MESSAGE %}
   serializer.WriteRepeatedMessage<{{field.cpp_type()}}>({{field.number}}, {{field.name}}_);
-{%- elif field.type != Type.CAPABILITY %}
+{%- elif field.type == Type.CAPABILITY %}
   serializer.WriteRepeatedCapability({{field.number}}, {{field.name}}_);
 {%- else %}
   serializer.WriteRepeated<{{field.cpp_type()}}>({{field.number}}, {{field.name}}_);

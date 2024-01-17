@@ -13,3 +13,7 @@ message Types {
 message Cap {
   capability cap;
 }
+
+message Repeated {
+  repeated u64 unsigned_ints;
+}

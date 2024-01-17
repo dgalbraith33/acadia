@@ -98,6 +98,32 @@ class Cap {
 
   uint64_t SerializeInternal(yunq::Serializer& serializer) const;
 };
+class Repeated {
+ public:
+  Repeated() {}
+  // Delete copy and move until implemented.
+  Repeated(const Repeated&) = delete;
+  Repeated(Repeated&&) = default;
+  Repeated& operator=(Repeated&&) = default;
+
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer&);
+  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
+  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const;
+
+  const glcr::Vector<uint64_t>& unsigned_ints() const { return unsigned_ints_; }
+  glcr::Vector<uint64_t>& mutable_unsigned_ints() { return unsigned_ints_; }
+  void add_unsigned_ints(const uint64_t& value) { unsigned_ints_.PushBack(value); }
+  void add_unsigned_ints(uint64_t&& value) { unsigned_ints_.PushBack(glcr::Move(value)); }
+
+ private:
+  glcr::Vector<uint64_t> unsigned_ints_;
+
+  // Parses everything except for caps.
+  glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
+
+  uint64_t SerializeInternal(yunq::Serializer& serializer) const;
+};
 
 
 }  // namepace ex
