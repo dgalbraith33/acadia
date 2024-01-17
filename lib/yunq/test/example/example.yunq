@@ -1,0 +1,5 @@
+package ex;
+
+message Basic {
+  u64 field;
+}

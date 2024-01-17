@@ -16,3 +16,7 @@ target_include_directories(yunq
 
 set_target_properties(yunq PROPERTIES
   COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${BASE_COMPILE_FLAGS}")
+
+if (enable_testing)
+  add_subdirectory(test)
+endif()

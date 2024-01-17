@@ -19,6 +19,7 @@ macro(yunq_gen dir include_dir name)
     mammoth
     glacier
     yunq
+    zion_stub
     )
   set_target_properties(${target} PROPERTIES
     COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${BASE_COMPILE_FLAGS}"
