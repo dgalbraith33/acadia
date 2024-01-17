@@ -32,7 +32,7 @@ String::String(const String& other) : String(other.cstr_, other.length_) {}
 
 String& String::operator=(const String& other) {
   if (cstr_) {
-    delete cstr_;
+    delete[] cstr_;
   }
   length_ = other.length_;
   cstr_ = new char[length_ + 1];
@@ -51,7 +51,7 @@ String::String(String&& other) : cstr_(other.cstr_), length_(other.length_) {
 
 String& String::operator=(String&& other) {
   if (cstr_) {
-    delete cstr_;
+    delete[] cstr_;
   }
   cstr_ = other.cstr_;
   length_ = other.length_;
@@ -64,7 +64,7 @@ String& String::operator=(String&& other) {
 
 String::~String() {
   if (cstr_) {
-    delete cstr_;
+    delete[] cstr_;
   }
 }
 
