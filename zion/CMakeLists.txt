@@ -99,3 +99,10 @@ add_library(zion_stub STATIC
 target_include_directories(zion_stub
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+set_target_properties(zion_stub
+  PROPERTIES
+  COMPILE_FLAGS "${BASE_COMPILE_FLAGS} -nostdlib -c"
+  LINK_FLAGS "${BASE_LINK_FLAGS} -nostartfiles -static -lgcc"
+  )
+
