@@ -178,6 +178,49 @@ uint64_t AhciInfo::SerializeInternal(yunq::Serializer& serializer) const {
 
   return serializer.size();
 }
+glcr::Status XhciInfo::ParseFromBytes(const yunq::MessageView& message) {
+  RETURN_ERROR(ParseFromBytesInternal(message));
+  // Parse xhci_region.
+  ASSIGN_OR_RETURN(xhci_region_, message.ReadCapability(0));
+  return glcr::Status::Ok();
+}
+
+glcr::Status XhciInfo::ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer& caps) {
+  RETURN_ERROR(ParseFromBytesInternal(message));
+  // Parse xhci_region.
+  ASSIGN_OR_RETURN(xhci_region_, message.ReadCapability(0, caps));
+  return glcr::Status::Ok();
+}
+
+glcr::Status XhciInfo::ParseFromBytesInternal(const yunq::MessageView& message) {
+  RETURN_ERROR(message.CheckHeader());
+  // Parse xhci_region.
+  // Parse region_length.
+  ASSIGN_OR_RETURN(region_length_, message.ReadField<uint64_t>(1));
+
+  return glcr::Status::Ok();
+}
+
+uint64_t XhciInfo::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset) const {
+  yunq::Serializer serializer(bytes, offset, 2);
+  return SerializeInternal(serializer);
+}
+
+uint64_t XhciInfo::SerializeToBytes(glcr::ByteBuffer& bytes, uint64_t offset, glcr::CapBuffer& caps) const {
+  yunq::Serializer serializer(bytes, offset, 2, caps);
+  return SerializeInternal(serializer);
+}
+  
+uint64_t XhciInfo::SerializeInternal(yunq::Serializer& serializer) const {
+  // Write xhci_region.
+  serializer.WriteCapability(0, xhci_region_);
+  // Write region_length.
+  serializer.WriteField<uint64_t>(1, region_length_);
+
+  serializer.WriteHeader();
+
+  return serializer.size();
+}
 glcr::Status FramebufferInfo::ParseFromBytes(const yunq::MessageView& message) {
   RETURN_ERROR(ParseFromBytesInternal(message));
   return glcr::Status::Ok();

@@ -41,6 +41,10 @@ class YellowstoneServerBase {
 
 
 
+  [[nodiscard]] virtual glcr::Status HandleGetXhciInfo(XhciInfo&) = 0;
+
+
+
   [[nodiscard]] virtual glcr::Status HandleGetFramebufferInfo(FramebufferInfo&) = 0;
 
 

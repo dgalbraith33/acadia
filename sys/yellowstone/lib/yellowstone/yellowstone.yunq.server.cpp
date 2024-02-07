@@ -164,6 +164,23 @@ glcr::Status YellowstoneServerBase::HandleRequest(const glcr::ByteBuffer& reques
   
 
   
+      XhciInfo yunq_response;
+  
+
+  
+      RETURN_ERROR(HandleGetXhciInfo(yunq_response));
+  
+
+  
+      resp_length = yunq_response.SerializeToBytes(response, kHeaderSize, resp_caps);
+  
+      break;
+    }
+    case 4: {
+
+  
+
+  
       FramebufferInfo yunq_response;
   
 
@@ -176,7 +193,7 @@ glcr::Status YellowstoneServerBase::HandleRequest(const glcr::ByteBuffer& reques
   
       break;
     }
-    case 4: {
+    case 5: {
 
   
 

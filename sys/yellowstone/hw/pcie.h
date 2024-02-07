@@ -28,11 +28,13 @@ class PciReader {
   PciReader();
 
   z_cap_t GetAhciVmmo();
+  z_cap_t GetXhciVmmo();
 
  private:
   PciDeviceHeader* header_;
 
   uint64_t achi_device_offset_ = 0;
+  uint64_t xhci_device_offset_ = 0;
 
   void PciDump(uint64_t vaddr);
   void BusDump(uint64_t base, uint64_t bus);

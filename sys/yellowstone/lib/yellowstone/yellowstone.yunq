@@ -4,6 +4,7 @@ interface Yellowstone {
   method RegisterEndpoint(RegisterEndpointRequest) -> ();
   method GetEndpoint(GetEndpointRequest) -> (Endpoint);
   method GetAhciInfo() -> (AhciInfo);
+  method GetXhciInfo() -> (XhciInfo);
   method GetFramebufferInfo() -> (FramebufferInfo);
   method GetDenali() -> (DenaliInfo);
 }
@@ -23,6 +24,11 @@ message Endpoint {
 
 message AhciInfo {
   capability ahci_region;
+  u64 region_length;
+}
+
+message XhciInfo {
+  capability xhci_region;
   u64 region_length;
 }
 

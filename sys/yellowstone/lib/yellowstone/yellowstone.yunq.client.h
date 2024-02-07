@@ -34,6 +34,10 @@ class YellowstoneClient {
   
 
   
+  [[nodiscard]] glcr::Status GetXhciInfo(XhciInfo& response);
+  
+
+  
   [[nodiscard]] glcr::Status GetFramebufferInfo(FramebufferInfo& response);
   
 

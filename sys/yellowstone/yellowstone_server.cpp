@@ -52,6 +52,12 @@ glcr::Status YellowstoneServer::HandleGetAhciInfo(AhciInfo& info) {
   return glcr::Status::Ok();
 }
 
+glcr::Status YellowstoneServer::HandleGetXhciInfo(XhciInfo& info) {
+  info.set_xhci_region(pci_reader_.GetXhciVmmo());
+  info.set_region_length(kPcieConfigurationSize);
+  return glcr::Status::Ok();
+}
+
 glcr::Status YellowstoneServer::HandleGetFramebufferInfo(
     FramebufferInfo& info) {
   // FIXME: Don't do this for each request.

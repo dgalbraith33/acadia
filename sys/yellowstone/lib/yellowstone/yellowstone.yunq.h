@@ -123,6 +123,36 @@ class AhciInfo {
 
   uint64_t SerializeInternal(yunq::Serializer& serializer) const;
 };
+class XhciInfo {
+ public:
+  XhciInfo() {}
+  // Delete copy and move until implemented.
+  XhciInfo(const XhciInfo&) = delete;
+  XhciInfo(XhciInfo&&) = default;
+  XhciInfo& operator=(XhciInfo&&) = default;
+
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message);
+  [[nodiscard]] glcr::Status ParseFromBytes(const yunq::MessageView& message, const glcr::CapBuffer&);
+  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset) const;
+  uint64_t SerializeToBytes(glcr::ByteBuffer&, uint64_t offset, glcr::CapBuffer&) const; 
+
+  const z_cap_t& xhci_region() const { return xhci_region_; }
+  z_cap_t& mutable_xhci_region() { return xhci_region_; }
+  void set_xhci_region(const z_cap_t& value) { xhci_region_ = value; } 
+
+  const uint64_t& region_length() const { return region_length_; }
+  uint64_t& mutable_region_length() { return region_length_; }
+  void set_region_length(const uint64_t& value) { region_length_ = value; }
+
+ private:
+  z_cap_t xhci_region_;
+  uint64_t region_length_;
+
+  // Parses everything except for caps.
+  glcr::Status ParseFromBytesInternal(const yunq::MessageView& message);
+
+  uint64_t SerializeInternal(yunq::Serializer& serializer) const;
+};
 class FramebufferInfo {
  public:
   FramebufferInfo() {}

@@ -4,7 +4,7 @@
 #include <mammoth/util/init.h>
 #include <zcall.h>
 
-#define PCI_DEBUG 0
+#define PCI_DEBUG 1
 
 namespace {
 
@@ -32,6 +32,13 @@ z_cap_t PciReader::GetAhciVmmo() {
   return new_cap;
 }
 
+z_cap_t PciReader::GetXhciVmmo() {
+  uint64_t new_cap;
+  check(ZMemoryObjectDuplicate(gBootPciVmmoCap, xhci_device_offset_,
+                               kPcieConfigurationSize, &new_cap));
+  return new_cap;
+}
+
 void PciReader::FunctionDump(uint64_t base, uint64_t bus, uint64_t dev,
                              uint64_t fun) {
   PciDeviceHeader* hdr = PciHeader(base, bus, dev, fun);
@@ -54,6 +61,14 @@ void PciReader::FunctionDump(uint64_t base, uint64_t bus, uint64_t dev,
     dbgln("SATA Device at: {x}", reinterpret_cast<uint64_t>(hdr) - base);
 #endif
     achi_device_offset_ = reinterpret_cast<uint64_t>(hdr) - base;
+  }
+
+  if (hdr->class_code == 0xC && hdr->subclass == 0x3) {
+    if (hdr->prog_interface == 0x30) {
+      xhci_device_offset_ = reinterpret_cast<uint64_t>(hdr) - base;
+    } else {
+      dbgln("WARN: Non-XHCI USB Controller found");
+    }
   }
 }
 
