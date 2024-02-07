@@ -5,12 +5,17 @@
 
 #include "keyboard/keyboard_driver.h"
 #include "voyageurs_server.h"
+#include "xhci/xhci_driver.h"
 
 using yellowstone::RegisterEndpointRequest;
 using yellowstone::YellowstoneClient;
 
 uint64_t main(uint64_t init_port) {
   ParseInitPort(init_port);
+
+  YellowstoneClient yellowstone(gInitEndpointCap);
+
+  ASSIGN_OR_RETURN(XhciDriver xhci, XhciDriver::InitiateDriver(yellowstone));
 
   dbgln("Initializing PS/2 Driver.");
   KeyboardDriver driver;
@@ -23,8 +28,6 @@ uint64_t main(uint64_t init_port) {
                    VoyageursServer::Create(driver));
 
   Thread server_thread = server->RunServer();
-
-  YellowstoneClient yellowstone(gInitEndpointCap);
 
   RegisterEndpointRequest req;
   req.set_endpoint_name("voyageurs");
