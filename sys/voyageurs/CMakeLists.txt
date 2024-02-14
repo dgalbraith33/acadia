@@ -1,5 +1,7 @@
 add_executable(voyageurs
   keyboard/keyboard_driver.cpp
+  xhci/trb.cpp
+  xhci/trb_ring.cpp
   xhci/xhci_driver.cpp
   voyageurs_server.cpp
   voyageurs.cpp)

@@ -106,18 +106,11 @@ struct XhciDeviceContext {
   XhciEndpointContext endpoint_contexts[31];
 } __attribute__((packed));
 
-struct XhciCommandTrb {
-  uint64_t reserved1;
-  uint32_t reserved2;
+struct XhciTrb {
+  uint64_t parameter;
+  uint32_t status;
   uint16_t type_and_cycle;
-  uint16_t slot_type;
-} __attribute__((packed));
-
-struct XhciLinkTrb {
-  uint64_t link_address;
-  uint32_t interrupter_target;
-  uint16_t type_and_cycle;
-  uint16_t reserved;
+  uint16_t control;
 } __attribute__((packed));
 
 struct XhciEventRingSegmentTableEntry {

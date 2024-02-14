@@ -116,22 +116,7 @@ glcr::ErrorCode XhciDriver::ResetController() {
 }
 
 glcr::ErrorCode XhciDriver::InitiateCommandRing() {
-  uint64_t command_ring_phys;
-  command_ring_mem_ =
-      mmth::OwnedMemoryRegion::ContiguousPhysical(0x1000, &command_ring_phys);
-  command_trb_ = reinterpret_cast<XhciCommandTrb*>(command_ring_mem_.vaddr());
-
-  uint64_t number_trbs = 0x1000 / sizeof(XhciCommandTrb);
-
-  // Point the end of the command ring back to the start.
-  auto* link_trb =
-      reinterpret_cast<XhciLinkTrb*>(command_trb_ + number_trbs - 1);
-  link_trb->link_address = command_ring_phys;
-  // TODO: Cleaner interface for specifying a command type.
-  link_trb->type_and_cycle = 0x6 << 10;
-
-  operational_->command_ring_control = command_ring_phys;
-
+  operational_->command_ring_control = command_ring_.PhysicalAddress();
   return glcr::OK;
 }
 
@@ -165,15 +150,9 @@ glcr::ErrorCode XhciDriver::InitiateEventRingSegmentTable() {
   event_ring_segment_table_ = reinterpret_cast<XhciEventRingSegmentTableEntry*>(
       event_ring_segment_table_mem_.vaddr());
 
-  uint64_t ers_phys;
-  event_ring_segment_mem_ =
-      mmth::OwnedMemoryRegion::ContiguousPhysical(0x1000, &ers_phys);
-  uint64_t ers_size = 0x1000 / sizeof(XhciCommandTrb);
-
-  event_ring_segment_ =
-      reinterpret_cast<XhciCommandTrb*>(event_ring_segment_mem_.vaddr());
-
-  event_ring_segment_table_[0].ring_segment_base = ers_phys;
+  uint64_t ers_size = 0x1000 / sizeof(XhciTrb);
+  event_ring_segment_table_[0].ring_segment_base =
+      event_ring_.PhysicalAddress();
   event_ring_segment_table_[0].ring_segment_size = ers_size & 0xFFFF;
 
   runtime_->interrupters[0].event_ring_segment_table_base_address = erst_phys;

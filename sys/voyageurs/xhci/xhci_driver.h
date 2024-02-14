@@ -4,6 +4,7 @@
 #include <mammoth/util/memory_region.h>
 #include <yellowstone/yellowstone.yunq.client.h>
 
+#include "xhci/trb_ring.h"
 #include "xhci/xhci.h"
 
 class XhciDriver {
@@ -26,8 +27,7 @@ class XhciDriver {
   // TODO: Doorbell Array.
 
   // Host Memory Regions.
-  mmth::OwnedMemoryRegion command_ring_mem_;
-  XhciCommandTrb* command_trb_;
+  TrbRingWriter command_ring_;
 
   mmth::OwnedMemoryRegion device_context_base_array_mem_;
   uint64_t* device_context_base_array_;
@@ -35,8 +35,7 @@ class XhciDriver {
   mmth::OwnedMemoryRegion event_ring_segment_table_mem_;
   XhciEventRingSegmentTableEntry* event_ring_segment_table_;
 
-  mmth::OwnedMemoryRegion event_ring_segment_mem_;
-  XhciCommandTrb* event_ring_segment_;
+  TrbRing event_ring_;
 
   XhciDriver(mmth::OwnedMemoryRegion&& pci_space);
 
