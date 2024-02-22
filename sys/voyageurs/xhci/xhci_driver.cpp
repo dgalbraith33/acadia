@@ -45,10 +45,15 @@ void XhciDriver::InterruptLoop() {
       uint16_t type = trb.type_and_cycle >> 10;
       switch (type) {
         case 33:
-          dbgln("Command Completion Event. {x}", trb.parameter);
+          dbgln(
+              "Command Completion Event. TRB Ptr: {x}, Status: {x}, Param: {x} "
+              "Slot ID: {x}",
+              trb.parameter, trb.status >> 24, trb.status & 0xFFFFFF,
+              trb.control >> 8);
           break;
         case 34:
-          dbgln("Port Status Change Event, enabling slot.");
+          dbgln("Port Status Change Event on Port {x}, enabling slot.",
+                ((trb.parameter >> 24) & 0xFF) - 1);
           command_ring_.EnqueueTrb(CreateEnableSlotTrb());
           doorbells_->doorbell[0] = 0;
           break;
@@ -172,7 +177,6 @@ void XhciDriver::StartInterruptThread() {
 
 glcr::ErrorCode XhciDriver::InitiateCommandRing() {
   operational_->command_ring_control = command_ring_.PhysicalAddress();
-  dbgln("CRC: {x}", operational_->command_ring_control);
   return glcr::OK;
 }
 
