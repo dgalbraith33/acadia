@@ -15,7 +15,7 @@ uint64_t main(uint64_t init_port) {
 
   YellowstoneClient yellowstone(gInitEndpointCap);
 
-  ASSIGN_OR_RETURN(XhciDriver xhci, XhciDriver::InitiateDriver(yellowstone));
+  ASSIGN_OR_RETURN(auto xhci, XhciDriver::InitiateDriver(yellowstone));
 
   dbgln("Initializing PS/2 Driver.");
   KeyboardDriver driver;

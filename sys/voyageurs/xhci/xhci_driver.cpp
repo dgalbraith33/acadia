@@ -1,29 +1,67 @@
 #include "xhci/xhci_driver.h"
 
-#include <mammoth/proc/thread.h>
 #include <mammoth/util/debug.h>
 #include <mammoth/util/memory_region.h>
 #include <zcall.h>
 
+#include "xhci/trb.h"
 #include "xhci/xhci.h"
 
-glcr::ErrorOr<XhciDriver> XhciDriver::InitiateDriver(
+void interrupt_thread(void* void_driver) {
+  XhciDriver* driver = static_cast<XhciDriver*>(void_driver);
+
+  driver->InterruptLoop();
+
+  crash("Driver returned from interrupt loop", glcr::INTERNAL);
+}
+
+glcr::ErrorOr<glcr::UniquePtr<XhciDriver>> XhciDriver::InitiateDriver(
     yellowstone::YellowstoneClient& yellowstone) {
   yellowstone::XhciInfo info;
   check(yellowstone.GetXhciInfo(info));
 
   mmth::OwnedMemoryRegion pci_region =
       mmth::OwnedMemoryRegion::FromCapability(info.mutable_xhci_region());
-  XhciDriver driver(glcr::Move(pci_region));
-  driver.ParseMmioStructures();
-  driver.DumpDebugInfo();
-  driver.FreeExistingMemoryStructures();
-  driver.ResetController();
+  // Have to make this a heap object so that the reference passed to the
+  // interrupt loop remains valid.
+  glcr::UniquePtr<XhciDriver> driver(new XhciDriver(glcr::Move(pci_region)));
+  driver->ParseMmioStructures();
+  driver->FreeExistingMemoryStructures();
+  driver->ResetController();
+  driver->StartInterruptThread();
   dbgln("XHCI CONTROLLER RESET");
-  driver.DumpDebugInfo();
-  check(ZThreadSleep(100));
-  driver.DumpDebugInfo();
-  return driver;
+  driver->NoOpCommand();
+  driver->InitiateDevices();
+  return glcr::Move(driver);
+}
+
+void XhciDriver::InterruptLoop() {
+  while (true) {
+    while ((runtime_->interrupters[0].management & 0x1) != 0x1) {
+      check(ZThreadSleep(50));
+    }
+    while (event_ring_.HasNext()) {
+      XhciTrb trb = event_ring_.Read();
+      uint16_t type = trb.type_and_cycle >> 10;
+      switch (type) {
+        case 33:
+          dbgln("Command Completion Event. {x}", trb.parameter);
+          break;
+        case 34:
+          dbgln("Port Status Change Event, enabling slot.");
+          command_ring_.EnqueueTrb(CreateEnableSlotTrb());
+          doorbells_->doorbell[0] = 0;
+          break;
+        default:
+          dbgln("Unknown TRB Type {x} received.", type);
+          break;
+      }
+    }
+
+    runtime_->interrupters[0].event_ring_dequeue_pointer =
+        event_ring_.DequeuePtr() | 0x8;
+    runtime_->interrupters[0].management |= 0x1;
+  }
 }
 
 void XhciDriver::DumpDebugInfo() {
@@ -62,6 +100,7 @@ void XhciDriver::DumpDebugInfo() {
     if ((port->status_and_control & 0x3) == 0x1) {
       dbgln("Resetting: {x}", i);
       port->status_and_control |= 0x10;
+      doorbells_->doorbell[0] = 0;
     }
   }
 
@@ -88,10 +127,22 @@ glcr::ErrorCode XhciDriver::ParseMmioStructures() {
   runtime_ = reinterpret_cast<XhciRuntime*>(mmio_regions_.vaddr() +
                                             capabilities_->runtime_offset);
 
+  doorbells_ = reinterpret_cast<XhciDoorbells*>(mmio_regions_.vaddr() +
+                                                capabilities_->doorbell_offset);
+
   return glcr::OK;
 }
 
 glcr::ErrorCode XhciDriver::ResetController() {
+  // Stop the Host Controller.
+  // FIXME: Do this before freeing existing structures.
+  operational_->usb_command &= ~0x1;
+
+  while ((operational_->usb_status & 0x1) != 0x1) {
+    dbgln("Waiting XHCI Halt.");
+    RET_ERR(ZThreadSleep(50));
+  }
+
   // Host Controller Reset
   operational_->usb_command |= 0x2;
 
@@ -115,8 +166,13 @@ glcr::ErrorCode XhciDriver::ResetController() {
   return glcr::OK;
 }
 
+void XhciDriver::StartInterruptThread() {
+  interrupt_thread_ = Thread(interrupt_thread, this);
+}
+
 glcr::ErrorCode XhciDriver::InitiateCommandRing() {
   operational_->command_ring_control = command_ring_.PhysicalAddress();
+  dbgln("CRC: {x}", operational_->command_ring_control);
   return glcr::OK;
 }
 
@@ -155,11 +211,35 @@ glcr::ErrorCode XhciDriver::InitiateEventRingSegmentTable() {
       event_ring_.PhysicalAddress();
   event_ring_segment_table_[0].ring_segment_size = ers_size & 0xFFFF;
 
-  runtime_->interrupters[0].event_ring_segment_table_base_address = erst_phys;
-  runtime_->interrupters[0].event_ring_dequeue_pointer = erst_phys;
+  runtime_->interrupters[0].event_ring_dequeue_pointer =
+      event_ring_.PhysicalAddress() | 0x8;
   runtime_->interrupters[0].event_ring_segment_table_size = 1;
+  runtime_->interrupters[0].event_ring_segment_table_base_address = erst_phys;
+
   // Enable interrupts.
   runtime_->interrupters[0].management |= 0x2;
+  runtime_->interrupters[0].moderation = 4000;
   operational_->usb_command |= 0x4;
+  return glcr::OK;
+}
+
+glcr::ErrorCode XhciDriver::InitiateDevices() {
+  uint64_t max_ports = (capabilities_->hcs_params_1 & 0xFF00'0000) >> 24;
+  for (uint64_t i = 0; i < max_ports; i++) {
+    XhciPort* port = reinterpret_cast<XhciPort*>(
+        reinterpret_cast<uint64_t>(operational_) + 0x400 + (0x10 * i));
+    port->status_and_control &= ~0x10000;
+    dbgln("Port {x}: {x}", i, port->status_and_control);
+    if ((port->status_and_control & 0x3) == 0x1) {
+      dbgln("Resetting: {x}", i);
+      port->status_and_control |= 0x10;
+    }
+  }
+  return glcr::OK;
+}
+
+glcr::ErrorCode XhciDriver::NoOpCommand() {
+  command_ring_.EnqueueTrb(CreateNoOpCommandTrb());
+  doorbells_->doorbell[0] = 0;
   return glcr::OK;
 }

@@ -73,7 +73,10 @@ struct XhciRuntime {
   uint64_t reserved3;
   uint64_t reserved4;
   XhciInterrupter interrupters[1024];
+} __attribute__((packed));
 
+struct XhciDoorbells {
+  uint32_t doorbell[256];
 } __attribute__((packed));
 
 struct XhciPort {

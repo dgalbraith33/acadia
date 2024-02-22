@@ -24,3 +24,15 @@ class TrbRingWriter : public TrbRing {
  private:
   uint64_t enqueue_ptr_ = 0;
 };
+
+class TrbRingReader : public TrbRing {
+ public:
+  bool HasNext();
+  XhciTrb Read();
+
+  uint64_t DequeuePtr() { return phys_address_ + dequeue_ptr_; }
+
+ private:
+  uint64_t dequeue_ptr_ = 0;
+  uint8_t cycle_bit_ = 1;
+};
