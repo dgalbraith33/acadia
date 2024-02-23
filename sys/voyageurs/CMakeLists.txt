@@ -1,5 +1,6 @@
 add_executable(voyageurs
   keyboard/keyboard_driver.cpp
+  xhci/device_slot.cpp
   xhci/trb.cpp
   xhci/trb_ring.cpp
   xhci/xhci_driver.cpp

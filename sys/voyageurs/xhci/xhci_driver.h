@@ -1,11 +1,13 @@
 #pragma once
 
+#include <glacier/container/array.h>
 #include <glacier/memory/unique_ptr.h>
 #include <glacier/status/error_or.h>
 #include <mammoth/proc/thread.h>
 #include <mammoth/util/memory_region.h>
 #include <yellowstone/yellowstone.yunq.client.h>
 
+#include "xhci/device_slot.h"
 #include "xhci/trb_ring.h"
 #include "xhci/xhci.h"
 
@@ -45,6 +47,8 @@ class XhciDriver {
   TrbRingReader event_ring_;
   Thread interrupt_thread_;
 
+  glcr::Array<DeviceSlot> devices_;
+
   XhciDriver(mmth::OwnedMemoryRegion&& pci_space);
 
   glcr::ErrorCode ParseMmioStructures();
@@ -60,4 +64,8 @@ class XhciDriver {
   glcr::ErrorCode InitiateDevices();
 
   glcr::ErrorCode NoOpCommand();
+
+  void HandleCommandCompletion(const XhciTrb& command_completion_trb);
+
+  void InitializeSlot(uint8_t slot_index);
 };

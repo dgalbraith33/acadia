@@ -43,6 +43,13 @@ struct XhciCapabilities {
   uint32_t capabilities2;
 } __attribute__((packed));
 
+struct XhciPort {
+  uint32_t status_and_control;
+  uint32_t power_management;
+  uint32_t link_info;
+  uint32_t lpm_control;
+} __attribute__((packed));
+
 struct XhciOperational {
   uint32_t usb_command;
   uint32_t usb_status;
@@ -55,6 +62,7 @@ struct XhciOperational {
   uint64_t reserved4;
   uint64_t device_context_base;
   uint32_t configure;
+  XhciPort ports[255];
 } __attribute__((packed));
 
 struct XhciInterrupter {
@@ -79,13 +87,6 @@ struct XhciDoorbells {
   uint32_t doorbell[256];
 } __attribute__((packed));
 
-struct XhciPort {
-  uint32_t status_and_control;
-  uint32_t power_management;
-  uint32_t link_info;
-  uint32_t lpm_control;
-} __attribute__((packed));
-
 struct XhciSlotContext {
   uint32_t route_speed_entries;
   uint32_t latency_port_number;
@@ -105,6 +106,24 @@ struct XhciEndpointContext {
 } __attribute__((packed));
 
 struct XhciDeviceContext {
+  XhciSlotContext slot_context;
+  XhciEndpointContext endpoint_contexts[31];
+} __attribute__((packed));
+
+struct XhciInputControlContext {
+  uint32_t drop_contexts;
+  uint32_t add_contexts;
+  uint64_t reserved1;
+  uint64_t reserved2;
+  uint32_t reserved3;
+  uint8_t configuration_value;
+  uint8_t interface_number;
+  uint8_t alternate_setting;
+  uint8_t reserved4;
+} __attribute__((packed));
+
+struct XhciInputContext {
+  XhciInputControlContext input;
   XhciSlotContext slot_context;
   XhciEndpointContext endpoint_contexts[31];
 } __attribute__((packed));

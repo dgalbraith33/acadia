@@ -42,23 +42,18 @@ void XhciDriver::InterruptLoop() {
     }
     while (event_ring_.HasNext()) {
       XhciTrb trb = event_ring_.Read();
-      uint16_t type = trb.type_and_cycle >> 10;
-      switch (type) {
-        case 33:
-          dbgln(
-              "Command Completion Event. TRB Ptr: {x}, Status: {x}, Param: {x} "
-              "Slot ID: {x}",
-              trb.parameter, trb.status >> 24, trb.status & 0xFFFFFF,
-              trb.control >> 8);
+      switch (GetType(trb)) {
+        case TrbType::CommandCompletion:
+          HandleCommandCompletion(trb);
           break;
-        case 34:
+        case TrbType::PortStatusChange:
           dbgln("Port Status Change Event on Port {x}, enabling slot.",
                 ((trb.parameter >> 24) & 0xFF) - 1);
           command_ring_.EnqueueTrb(CreateEnableSlotTrb());
           doorbells_->doorbell[0] = 0;
           break;
         default:
-          dbgln("Unknown TRB Type {x} received.", type);
+          dbgln("Unknown TRB Type {x} received.", (uint8_t)GetType(trb));
           break;
       }
     }
@@ -124,6 +119,9 @@ glcr::ErrorCode XhciDriver::ParseMmioStructures() {
       pci_device_header_->bars[0] & ~0xFFF, 0x3000);
 
   capabilities_ = reinterpret_cast<XhciCapabilities*>(mmio_regions_.vaddr());
+
+  uint8_t max_device_slots = capabilities_->hcs_params_1 & 0xFF;
+  devices_ = glcr::Array<DeviceSlot>(max_device_slots);
 
   uint64_t op_base =
       mmio_regions_.vaddr() + (capabilities_->length_and_version & 0xFF);
@@ -246,4 +244,48 @@ glcr::ErrorCode XhciDriver::NoOpCommand() {
   command_ring_.EnqueueTrb(CreateNoOpCommandTrb());
   doorbells_->doorbell[0] = 0;
   return glcr::OK;
+}
+
+void XhciDriver::HandleCommandCompletion(
+    const XhciTrb& command_completion_trb) {
+  uint8_t status = command_completion_trb.status >> 24;
+  if (status != 1) {
+    dbgln("Command Completion Status: {x}", command_completion_trb.status);
+    check(glcr::INTERNAL);
+  }
+
+  XhciTrb orig_trb =
+      command_ring_.GetTrbFromPhysical(command_completion_trb.parameter);
+  uint8_t slot = command_completion_trb.control >> 8;
+  switch (GetType(orig_trb)) {
+    case TrbType::EnableSlot:
+      dbgln("Slot Enabled: {x}", slot);
+      InitializeSlot(slot);
+      break;
+    case TrbType::AddressDevice:
+      dbgln("Device Addressed: {x}", slot);
+      dbgln("State: {x}", devices_[slot - 1].State());
+      break;
+    case TrbType::NoOpCommand:
+      dbgln("No-op Command Completed");
+      break;
+    default:
+      dbgln("Unhandled Command Completion Type: {x}",
+            (uint8_t)(GetType(orig_trb)));
+  }
+}
+
+void XhciDriver::InitializeSlot(uint8_t slot_index) {
+  // TODO: Consider making this array one longer and ignore the first value.
+  devices_[slot_index - 1].EnableAndInitializeDataStructures(
+      slot_index, &(device_context_base_array_[slot_index]));
+  XhciPort* port =
+      reinterpret_cast<XhciPort*>(reinterpret_cast<uint64_t>(operational_) +
+                                  0x400 + (0x10 * (slot_index - 1)));
+  uint8_t port_speed = (port->status_and_control >> 10) & 0xF;
+  uint8_t max_packet_size = 8;
+  XhciTrb address_device = devices_[slot_index - 1].CreateAddressDeviceCommand(
+      0x5, 0, max_packet_size);
+  command_ring_.EnqueueTrb(address_device);
+  doorbells_->doorbell[0] = 0;
 }

@@ -10,6 +10,7 @@ class TrbRing {
   TrbRing();
 
   uint64_t PhysicalAddress() { return phys_address_; }
+  XhciTrb GetTrbFromPhysical(uint64_t address);
 
  protected:
   uint64_t phys_address_;

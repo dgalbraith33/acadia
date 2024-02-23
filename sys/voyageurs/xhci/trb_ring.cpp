@@ -20,6 +20,15 @@ TrbRing::TrbRing() {
   trb_list_[trb_list_.size() - 1] = CreateLinkTrb(phys_address_);
 }
 
+XhciTrb TrbRing::GetTrbFromPhysical(uint64_t address) {
+  uint64_t offset = address - phys_address_;
+  if (offset >= 0x1000) {
+    crash("Invalid offset in GetTrbFromPhysical", glcr::INVALID_ARGUMENT);
+  }
+  offset /= sizeof(XhciTrb);
+  return trb_list_[offset];
+}
+
 void TrbRingWriter::EnqueueTrb(const XhciTrb& trb) {
   uint64_t ptr = enqueue_ptr_++;
   if (enqueue_ptr_ == trb_list_.size()) {
