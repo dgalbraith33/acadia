@@ -36,7 +36,7 @@ uint64_t TrbRingWriter::EnqueueTrb(const XhciTrb& trb) {
   }
 
   trb_list_[ptr] = trb;
-  return phys_address_ + (ptr * sizeof(uint64_t));
+  return phys_address_ + (ptr * sizeof(XhciTrb));
 }
 
 bool TrbRingReader::HasNext() {
