@@ -3,6 +3,7 @@
 constexpr uint8_t kTrb_TypeOffset = 10;
 
 constexpr uint16_t kTrb_Cycle = 1;
+constexpr uint16_t kTrb_ToggleCycle = (1 << 1);
 constexpr uint16_t kTrb_BSR = (1 << 9);
 
 namespace {
@@ -21,7 +22,7 @@ XhciTrb CreateLinkTrb(uint64_t physical_address) {
   return {
       .parameter = physical_address,
       .status = 0,
-      .type_and_cycle = TypeToInt(TrbType::Link),
+      .type_and_cycle = (uint16_t)(TypeToInt(TrbType::Link) | kTrb_ToggleCycle),
       .control = 0,
   };
 }
