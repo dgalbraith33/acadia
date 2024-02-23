@@ -20,7 +20,7 @@ class TrbRing {
 
 class TrbRingWriter : public TrbRing {
  public:
-  void EnqueueTrb(const XhciTrb& trb);
+  uint64_t EnqueueTrb(const XhciTrb& trb);
 
  private:
   uint64_t enqueue_ptr_ = 0;

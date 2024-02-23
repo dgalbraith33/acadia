@@ -21,6 +21,7 @@ enum class TrbType : uint8_t {
   NoOpCommand = 23,
 
   // Events
+  Transfer = 32,
   CommandCompletion = 33,
   PortStatusChange = 34,
 };

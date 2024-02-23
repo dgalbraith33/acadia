@@ -66,6 +66,7 @@ class XhciDriver {
   glcr::ErrorCode NoOpCommand();
 
   void HandleCommandCompletion(const XhciTrb& command_completion_trb);
+  void HandleTransferCompletion(const XhciTrb& transfer_event_trb);
 
   void InitializeSlot(uint8_t slot_index);
 };

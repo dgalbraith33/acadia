@@ -1,11 +1,15 @@
 #include "xhci/device_slot.h"
 
+#include <glacier/status/error.h>
+#include <mammoth/util/debug.h>
+
 #include "xhci/trb.h"
 
-void DeviceSlot::EnableAndInitializeDataStructures(uint8_t slot_index,
-                                                   uint64_t* output_context) {
+void DeviceSlot::EnableAndInitializeDataStructures(
+    uint8_t slot_index, uint64_t* output_context, volatile uint32_t* doorbell) {
   enabled_ = true;
   slot_index_ = slot_index;
+  doorbell_ = doorbell;
 
   context_memory_ =
       mmth::OwnedMemoryRegion::ContiguousPhysical(0x1000, &context_phys_);
@@ -44,4 +48,18 @@ XhciTrb DeviceSlot::CreateAddressDeviceCommand(uint8_t root_port,
 
 uint8_t DeviceSlot::State() {
   return device_context_->slot_context.address_and_state >> 27;
+}
+
+void DeviceSlot::TransferComplete(uint8_t endpoint_index, uint64_t trb_phys) {
+  if (endpoint_index != 1) {
+    crash("Transfer complete on non control endpoint", glcr::UNIMPLEMENTED);
+  }
+
+  if (!control_completion_sempahores_.Contains(trb_phys)) {
+    // Skip this if we don't have a semaphore for it (Setup and Transfer Trbs).
+    return;
+  }
+
+  control_completion_sempahores_.at(trb_phys)->Signal();
+  check(control_completion_sempahores_.Delete(trb_phys));
 }

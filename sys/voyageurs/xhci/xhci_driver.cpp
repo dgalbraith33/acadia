@@ -1,9 +1,11 @@
 #include "xhci/xhci_driver.h"
 
+#include <mammoth/proc/thread.h>
 #include <mammoth/util/debug.h>
 #include <mammoth/util/memory_region.h>
 #include <zcall.h>
 
+#include "xhci/descriptors.h"
 #include "xhci/trb.h"
 #include "xhci/xhci.h"
 
@@ -13,6 +15,22 @@ void interrupt_thread(void* void_driver) {
   driver->InterruptLoop();
 
   crash("Driver returned from interrupt loop", glcr::INTERNAL);
+}
+
+void configure_device(void* void_device_slot) {
+  DeviceSlot* device_slot = static_cast<DeviceSlot*>(void_device_slot);
+
+  dbgln("Configuring device");
+
+  ReadControlCommand<DeviceDescriptor> command;
+
+  device_slot->ExecuteReadControlCommand(command);
+
+  DeviceDescriptor* descriptor = command.AwaitResult();
+
+  dbgln("Descriptor Type {x}, ({x})", descriptor->type, descriptor->usb_spec);
+  dbgln("Device Class/Sub/Protocol: {x}/{x}/{x}", descriptor->device_class,
+        descriptor->device_subclass, descriptor->device_protocol);
 }
 
 glcr::ErrorOr<glcr::UniquePtr<XhciDriver>> XhciDriver::InitiateDriver(
@@ -43,6 +61,9 @@ void XhciDriver::InterruptLoop() {
     while (event_ring_.HasNext()) {
       XhciTrb trb = event_ring_.Read();
       switch (GetType(trb)) {
+        case TrbType::Transfer:
+          HandleTransferCompletion(trb);
+          break;
         case TrbType::CommandCompletion:
           HandleCommandCompletion(trb);
           break;
@@ -52,6 +73,7 @@ void XhciDriver::InterruptLoop() {
           command_ring_.EnqueueTrb(CreateEnableSlotTrb());
           doorbells_->doorbell[0] = 0;
           break;
+
         default:
           dbgln("Unknown TRB Type {x} received.", (uint8_t)GetType(trb));
           break;
@@ -132,6 +154,7 @@ glcr::ErrorCode XhciDriver::ParseMmioStructures() {
 
   doorbells_ = reinterpret_cast<XhciDoorbells*>(mmio_regions_.vaddr() +
                                                 capabilities_->doorbell_offset);
+  dbgln("Doorbells: {x}", (uint64_t)doorbells_);
 
   return glcr::OK;
 }
@@ -265,6 +288,7 @@ void XhciDriver::HandleCommandCompletion(
     case TrbType::AddressDevice:
       dbgln("Device Addressed: {x}", slot);
       dbgln("State: {x}", devices_[slot - 1].State());
+      Thread(configure_device, &devices_[slot - 1]);
       break;
     case TrbType::NoOpCommand:
       dbgln("No-op Command Completed");
@@ -275,10 +299,18 @@ void XhciDriver::HandleCommandCompletion(
   }
 }
 
+void XhciDriver::HandleTransferCompletion(const XhciTrb& transfer_event_trb) {
+  uint8_t slot_id = transfer_event_trb.control >> 8;
+  uint8_t endpoint_id = transfer_event_trb.control & 0x1F;
+  uint64_t trb_phys = transfer_event_trb.parameter;
+  devices_[slot_id - 1].TransferComplete(endpoint_id, trb_phys);
+}
+
 void XhciDriver::InitializeSlot(uint8_t slot_index) {
   // TODO: Consider making this array one longer and ignore the first value.
   devices_[slot_index - 1].EnableAndInitializeDataStructures(
-      slot_index, &(device_context_base_array_[slot_index]));
+      slot_index, &(device_context_base_array_[slot_index]),
+      &doorbells_->doorbell[slot_index]);
   XhciPort* port =
       reinterpret_cast<XhciPort*>(reinterpret_cast<uint64_t>(operational_) +
                                   0x400 + (0x10 * (slot_index - 1)));

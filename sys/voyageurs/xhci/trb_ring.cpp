@@ -29,13 +29,14 @@ XhciTrb TrbRing::GetTrbFromPhysical(uint64_t address) {
   return trb_list_[offset];
 }
 
-void TrbRingWriter::EnqueueTrb(const XhciTrb& trb) {
+uint64_t TrbRingWriter::EnqueueTrb(const XhciTrb& trb) {
   uint64_t ptr = enqueue_ptr_++;
   if (enqueue_ptr_ == trb_list_.size()) {
     crash("Not implemented: queue wrapping", glcr::UNIMPLEMENTED);
   }
 
   trb_list_[ptr] = trb;
+  return phys_address_ + (ptr * sizeof(uint64_t));
 }
 
 bool TrbRingReader::HasNext() {
