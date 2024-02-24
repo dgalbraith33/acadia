@@ -21,7 +21,7 @@ class ReadControlCommand {
     uint64_t value = RequestConstants<Output>::Value() << 16;
     // TODO: May need to be non-0 for string descriptors.
     uint64_t index = (uint64_t)0 << 32;
-    uint64_t length = sizeof(Output) << 48;
+    uint64_t length = (uint64_t)0x1000 << 48;
     return {
         .parameter = request_type | request | value | index | length,
         .status = 8,
@@ -34,7 +34,7 @@ class ReadControlCommand {
   XhciTrb DataTrb() {
     return {
         .parameter = output_phys_,
-        .status = sizeof(Output),
+        .status = 0x1000,
         .type_and_cycle = 1 | (1 << 5) | (3 << 10),
         .control = 1,
     };

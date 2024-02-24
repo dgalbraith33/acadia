@@ -31,6 +31,45 @@ void configure_device(void* void_device_slot) {
   dbgln("Descriptor Type {x}, ({x})", descriptor->type, descriptor->usb_spec);
   dbgln("Device Class/Sub/Protocol: {x}/{x}/{x}", descriptor->device_class,
         descriptor->device_subclass, descriptor->device_protocol);
+  dbgln("Num Configurations: {}", descriptor->num_configurations);
+
+  ReadControlCommand<ConfigurationDescriptor> config_command;
+
+  device_slot->ExecuteReadControlCommand(config_command);
+
+  ConfigurationDescriptor* config_descriptor = config_command.AwaitResult();
+
+  dbgln("Configuration Value: {x}", config_descriptor->configuration_value);
+  dbgln("Num Interfaces: {x}", config_descriptor->num_interfaces);
+  dbgln("Size: {x}, Total Length: {x}", config_descriptor->length,
+        config_descriptor->total_length);
+
+  uint64_t next_vaddr =
+      reinterpret_cast<uint64_t>(config_descriptor) + config_descriptor->length;
+  for (auto i = config_descriptor->num_interfaces; i > 0; i--) {
+    InterfaceDescriptor* interface =
+        reinterpret_cast<InterfaceDescriptor*>(next_vaddr);
+    dbgln("Interface: {x}", interface->interface_number);
+    dbgln("Interface Class/Sub/Protocol: {x}/{x}/{x}",
+          interface->interface_class, interface->interface_subclass,
+          interface->interface_protocol);
+    dbgln("Num Endpoints: {x}", interface->num_endpoints);
+
+    next_vaddr += interface->length;
+    for (auto j = interface->num_endpoints; j > 0; j--) {
+      EndpointDescriptor* endpoint =
+          reinterpret_cast<EndpointDescriptor*>(next_vaddr);
+      if (endpoint->type != 5) {
+        dbgln("Descriptor type {x}, skipping", endpoint->type);
+        j++;
+        next_vaddr += endpoint->length;
+        continue;
+      }
+      dbgln("Endpoint Addr: {x}", endpoint->endpoint_address);
+      dbgln("Endpoint Attr: {x}", endpoint->attributes);
+      next_vaddr += endpoint->length;
+    }
+  }
 }
 
 glcr::ErrorOr<glcr::UniquePtr<XhciDriver>> XhciDriver::InitiateDriver(
@@ -300,6 +339,11 @@ void XhciDriver::HandleCommandCompletion(
 }
 
 void XhciDriver::HandleTransferCompletion(const XhciTrb& transfer_event_trb) {
+  uint8_t status = transfer_event_trb.status >> 24;
+  if (status != 1 && status != 0xD) {
+    dbgln("Unexpected Status {x}", status);
+    return;
+  }
   uint8_t slot_id = transfer_event_trb.control >> 8;
   uint8_t endpoint_id = transfer_event_trb.control & 0x1F;
   uint64_t trb_phys = transfer_event_trb.parameter;
