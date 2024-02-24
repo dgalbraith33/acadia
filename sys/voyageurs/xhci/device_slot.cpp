@@ -45,6 +45,8 @@ XhciTrb DeviceSlot::CreateAddressDeviceCommand(uint8_t root_port,
   input_context_->endpoint_contexts[0].tr_dequeue_ptr =
       control_endpoint_transfer_trb_->PhysicalAddress() | 0x1;
 
+  endpoints_ = glcr::Array<Endpoint>(32);
+
   return ::CreateAddressDeviceCommand(context_phys_ + kInputSlotContextOffset,
                                       slot_index_);
 }
@@ -54,8 +56,19 @@ uint8_t DeviceSlot::State() {
 }
 
 void DeviceSlot::TransferComplete(uint8_t endpoint_index, uint64_t trb_phys) {
+  if (endpoint_index >= 32) {
+    dbgln("ERROR: Received transfer for invalid endpoint {x}", endpoint_index);
+    return;
+  }
+
   if (endpoint_index != 1) {
-    crash("Transfer complete on non control endpoint", glcr::UNIMPLEMENTED);
+    if (!endpoints_[endpoint_index].Enabled()) {
+      dbgln("ERROR: XHCI received transfer for disabled endpoint {x}",
+            endpoint_index);
+      return;
+    }
+    endpoints_[endpoint_index].TransferComplete(trb_phys);
+    return;
   }
 
   if (!control_completion_sempahores_.Contains(trb_phys)) {
@@ -80,9 +93,7 @@ mmth::Semaphore DeviceSlot::IssueConfigureDeviceCommand(uint8_t config_value) {
   input_context_->slot_context.route_speed_entries |= (max_endpoint << 27);
 
   // TODO: Dont' hardcode this.
-  other_endpoint_transfer_trb_ = glcr::MakeUnique<TrbRingWriter>();
-  input_context_->endpoint_contexts[2].tr_dequeue_ptr =
-      other_endpoint_transfer_trb_->PhysicalAddress() | 0x1;
+  endpoints_[3].Initialize(input_context_->endpoint_contexts + 2);
 
   xhci_driver_->IssueCommand(CreateConfigureEndpointCommand(
       context_phys_ + kInputSlotContextOffset, slot_index_));

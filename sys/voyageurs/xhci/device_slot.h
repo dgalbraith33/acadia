@@ -8,6 +8,7 @@
 #include <mammoth/util/memory_region.h>
 
 #include "xhci/control_command.h"
+#include "xhci/endpoint.h"
 #include "xhci/trb_ring.h"
 #include "xhci/xhci.h"
 
@@ -59,7 +60,7 @@ class DeviceSlot {
 
   mmth::Semaphore configure_device_semaphore_;
 
-  glcr::UniquePtr<TrbRingWriter> other_endpoint_transfer_trb_;
+  glcr::Array<Endpoint> endpoints_;
 };
 
 template <typename T>

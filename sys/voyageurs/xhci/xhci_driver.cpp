@@ -205,6 +205,8 @@ glcr::ErrorCode XhciDriver::ParseMmioStructures() {
   runtime_ = reinterpret_cast<XhciRuntime*>(mmio_regions_.vaddr() +
                                             capabilities_->runtime_offset);
 
+  dbgln("INTTTT: {x}", (uint64_t)runtime_->interrupters);
+
   doorbells_ = reinterpret_cast<XhciDoorbells*>(mmio_regions_.vaddr() +
                                                 capabilities_->doorbell_offset);
   dbgln("Doorbells: {x}", (uint64_t)doorbells_);
