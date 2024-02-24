@@ -29,6 +29,7 @@ enum class TrbType : uint8_t {
 
 TrbType GetType(const XhciTrb& trb);
 
+XhciTrb CreateNormalTrb(uint64_t physical_address, uint8_t size);
 XhciTrb CreateLinkTrb(uint64_t physical_address);
 
 XhciTrb CreateEnableSlotTrb();

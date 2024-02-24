@@ -4,6 +4,8 @@ constexpr uint8_t kTrb_TypeOffset = 10;
 
 constexpr uint16_t kTrb_Cycle = 1;
 constexpr uint16_t kTrb_ToggleCycle = (1 << 1);
+constexpr uint16_t kTrb_InterruptShortPacket = (1 << 2);
+constexpr uint16_t kTrb_Interrupt = (1 << 5);
 constexpr uint16_t kTrb_BSR = (1 << 9);
 
 namespace {
@@ -16,6 +18,16 @@ uint16_t TypeToInt(TrbType type) {
 
 TrbType GetType(const XhciTrb& trb) {
   return TrbType(trb.type_and_cycle >> kTrb_TypeOffset);
+}
+
+XhciTrb CreateNormalTrb(uint64_t physical_address, uint8_t size) {
+  return {
+      .parameter = physical_address,
+      .status = size,
+      .type_and_cycle = (uint16_t)(TypeToInt(TrbType::Normal) | kTrb_Cycle |
+                                   kTrb_Interrupt | kTrb_InterruptShortPacket),
+      .control = 0,
+  };
 }
 
 XhciTrb CreateLinkTrb(uint64_t physical_address) {

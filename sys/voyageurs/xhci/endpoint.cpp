@@ -2,6 +2,8 @@
 
 #include <mammoth/util/debug.h>
 
+#include "xhci/trb.h"
+
 void Endpoint::Initialize(XhciEndpointContext* context) {
   enabled_ = true;
   context_ = context;
@@ -13,12 +15,7 @@ void Endpoint::Initialize(XhciEndpointContext* context) {
 
   context_->error_and_type = (0x3 << 1) | (0x7 << 3) | (0x8 << 16);
   for (uint64_t i = 0; i < 10; i++) {
-    trb_ring_->EnqueueTrb({
-        .parameter = recv_phys_ + offset_,
-        .status = 8,
-        .type_and_cycle = 1 | (1 << 2) | (1 << 5) | (1 << 10),
-        .control = 0,
-    });
+    trb_ring_->EnqueueTrb(CreateNormalTrb(recv_phys_ + offset_, 8));
     offset_ += 8;
   }
 }
@@ -27,11 +24,6 @@ void Endpoint::TransferComplete(uint64_t trb_phys) {
   uint64_t phys_offset =
       (trb_phys - trb_ring_->PhysicalAddress()) / sizeof(XhciTrb);
   dbgln("Data: {x}", *((uint64_t*)recv_mem_.vaddr() + phys_offset));
-  trb_ring_->EnqueueTrb({
-      .parameter = recv_phys_ + offset_,
-      .status = 8,
-      .type_and_cycle = 1 | (1 << 2) | (1 << 5) | (1 << 10),
-      .control = 0,
-  });
+  trb_ring_->EnqueueTrb(CreateNormalTrb(recv_phys_ + offset_, 8));
   offset_ += 8;
 }
