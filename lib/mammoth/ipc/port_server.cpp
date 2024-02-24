@@ -55,4 +55,12 @@ glcr::ErrorOr<char> PortServer::RecvChar() {
   return byte;
 }
 
+glcr::ErrorOr<uint16_t> PortServer::RecvUint16() {
+  uint64_t bytes = 2;
+  uint64_t caps = 0;
+  uint16_t data;
+  RET_ERR(ZPortRecv(port_cap_, &bytes, &data, &caps, nullptr));
+  return data;
+}
+
 }  // namespace mmth

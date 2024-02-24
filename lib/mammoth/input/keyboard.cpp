@@ -55,71 +55,54 @@ Thread KeyboardListenerBase::Listen() {
 
 void KeyboardListenerBase::ListenLoop() {
   while (true) {
-    auto scancode_or = server_.RecvChar();
+    auto scancode_or = server_.RecvUint16();
     if (!scancode_or.ok()) {
       check(scancode_or.error());
     }
-    uint8_t scancode = scancode_or.value();
+    uint16_t scancode = scancode_or.value();
 
-    if (scancode == 0xE0) {
-      extended_on_ = true;
-      continue;
-    }
-
-    Keycode k = ScancodeToKeycode(scancode);
-    Action a = ScancodeToAction(scancode);
-    HandleKeycode(k, a);
+    Keycode k = ScancodeToKeycode(scancode & 0xFF);
+    uint8_t modifiers = (scancode >> 8) & 0xFF;
+    HandleKeycode(k, modifiers);
   }
 }
 
-void KeyboardListenerBase::HandleKeycode(Keycode code, Action action) {
+void KeyboardListenerBase::HandleKeycode(Keycode code, uint8_t modifiers) {
   char c = '\0';
 
-  if (action == kPressed) {
-    if (code >= kA && code <= kZ) {
-      if (IsShift()) {
-        const char* alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        c = alpha[code - kA];
+  if (code >= kA && code <= kZ) {
+    if (IsShift(modifiers)) {
+      const char* alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      c = alpha[code - kA];
 
-      } else {
-        const char* alpha = "abcdefghijklmnopqrstuvwxyz";
-        c = alpha[code - kA];
-      }
-    } else if (code >= k1 && code <= k0) {
-      if (IsShift()) {
-        const char* num = "!@#$%^&*()";
-        c = num[code - k1];
-      } else {
-        const char* num = "1234567890";
-        c = num[code - k1];
-      }
-    } else if (code >= kMinus && code <= kBacktick) {
-      if (IsShift()) {
-        const char* sym = "_+{}|?:\"<>~";
-        c = sym[code - kMinus];
-      } else {
-        const char* sym = "-=[]\\/;',.`";
-        c = sym[code - kMinus];
-      }
-    } else if (code == kEnter) {
-      c = '\n';
-    } else if (code == kSpace) {
-      c = ' ';
-    } else if (code == kTab) {
-      c = '\t';
-    } else if (code == kBackspace) {
-      c = '\b';
-    } else if (code == kLShift) {
-      lshift_ = true;
-    } else if (code == kRShift) {
-      rshift_ = true;
+    } else {
+      const char* alpha = "abcdefghijklmnopqrstuvwxyz";
+      c = alpha[code - kA];
     }
-  } else if (action == kReleased) {
-    if (code == kLShift) {
-      lshift_ = false;
-    } else if (code == kRShift) {
-      rshift_ = false;
+  } else if (code >= k1 && code <= k0) {
+    if (IsShift(modifiers)) {
+      const char* num = "!@#$%^&*()";
+      c = num[code - k1];
+    } else {
+      const char* num = "1234567890";
+      c = num[code - k1];
     }
+  } else if (code >= kMinus && code <= kBacktick) {
+    if (IsShift(modifiers)) {
+      const char* sym = "_+{}|?:\"<>~";
+      c = sym[code - kMinus];
+    } else {
+      const char* sym = "-=[]\\/;',.`";
+      c = sym[code - kMinus];
+    }
+  } else if (code == kEnter) {
+    c = '\n';
+  } else if (code == kSpace) {
+    c = ' ';
+  } else if (code == kTab) {
+    c = '\t';
+  } else if (code == kBackspace) {
+    c = '\b';
   }
 
   if (c != '\0') {
@@ -127,35 +110,7 @@ void KeyboardListenerBase::HandleKeycode(Keycode code, Action action) {
   }
 }
 
-Keycode KeyboardListenerBase::ScancodeToKeycode(uint8_t scancode) {
-  // Cancel out the released bit.
-  scancode &= 0x7F;
-  if (extended_on_) {
-    extended_on_ = false;
-
-    switch (scancode) {
-      case 0x1D:
-        return kRCtrl;
-      case 0x38:
-        return kRAlt;
-      case 0x48:
-        return kUp;
-      case 0x4B:
-        return kLeft;
-      case 0x4D:
-        return kRight;
-      case 0x50:
-        return kDown;
-      case 0x53:
-        return kDelete;
-      case 0x5B:
-        return kSuper;
-    }
-    dbgln("Unknown extended scancode {x}", scancode);
-
-    return kUnknownKeycode;
-  }
-
+Keycode KeyboardListenerBase::ScancodeToKeycode(uint16_t scancode) {
   switch (scancode) {
     case 0x04:
       return kA;
@@ -257,8 +212,10 @@ Keycode KeyboardListenerBase::ScancodeToKeycode(uint8_t scancode) {
       return kBacktick;
     case 0x36:
       return kComma;
-    case 0x38:
+    case 0x37:
       return kPeriod;
+    case 0x38:
+      return kFSlash;
     case 0x39:
       return kEsc;  // Capslock
   }
@@ -266,10 +223,6 @@ Keycode KeyboardListenerBase::ScancodeToKeycode(uint8_t scancode) {
   dbgln("Unknown scancode {x}", scancode);
 
   return kUnknownKeycode;
-}
-
-Action KeyboardListenerBase::ScancodeToAction(uint8_t scancode) {
-  return (scancode & 0x80) ? kReleased : kPressed;
 }
 
 }  // namespace mmth

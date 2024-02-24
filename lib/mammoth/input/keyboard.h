@@ -78,12 +78,6 @@ enum Keycode {
   kRight = 0x5B,
 };
 
-enum Action {
-  kUnknownAction,
-  kPressed,
-  kReleased,
-};
-
 class KeyboardListenerBase {
  public:
   KeyboardListenerBase();
@@ -99,7 +93,7 @@ class KeyboardListenerBase {
   // Override this to recieve all raw keycodes. By default
   // this function will try to translate each keycode into
   // a printable character and call HandleCharacter.
-  virtual void HandleKeycode(Keycode code, Action action);
+  virtual void HandleKeycode(Keycode code, uint8_t modifiers);
 
   // This function is called by the default HandleKeycode
   // implementation if you do not override it. If it recieves
@@ -109,15 +103,11 @@ class KeyboardListenerBase {
  private:
   PortServer server_;
 
-  bool extended_on_ = false;
+  Keycode ScancodeToKeycode(uint16_t scancode);
 
-  bool lshift_ = false;
-  bool rshift_ = false;
-
-  Keycode ScancodeToKeycode(uint8_t scancode);
-  Action ScancodeToAction(uint8_t scancode);
-
-  bool IsShift() { return lshift_ || rshift_; }
+  bool IsShift(uint8_t modifiers) {
+    return (modifiers & 0x2) || (modifiers & 0x20);
+  }
 };
 
 }  // namespace mmth

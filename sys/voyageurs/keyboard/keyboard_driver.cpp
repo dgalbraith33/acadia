@@ -42,6 +42,7 @@ void KeyboardDriver::InterruptLoop() {
 }
 
 void KeyboardDriver::ProcessInput(uint64_t input) {
+  uint16_t modifiers = (input & 0xFF) << 8;
   uint64_t new_bitmap = 0;
   for (uint8_t i = 2; i < 8; i++) {
     uint8_t code = (input >> (8 * i)) & 0xFF;
@@ -54,15 +55,14 @@ void KeyboardDriver::ProcessInput(uint64_t input) {
     uint64_t bit = 1 << code;
     new_bitmap |= bit;
     if ((bitmap_ & bit) != bit) {
-      SendKeypress(code);
+      SendKeypress(modifiers | code);
     }
   }
   bitmap_ = new_bitmap;
 }
 
-void KeyboardDriver::SendKeypress(uint8_t scancode) {
-  dbgln("{x}", scancode);
+void KeyboardDriver::SendKeypress(uint16_t scancode) {
   for (mmth::PortClient& client : listeners_) {
-    client.WriteByte(scancode);
+    client.Write(scancode);
   }
 }

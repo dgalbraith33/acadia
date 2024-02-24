@@ -25,5 +25,5 @@ class KeyboardDriver {
   uint64_t bitmap_ = 0;
 
   void ProcessInput(uint64_t input);
-  void SendKeypress(uint8_t scancode);
+  void SendKeypress(uint16_t scancode);
 };

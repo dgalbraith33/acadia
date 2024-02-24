@@ -20,6 +20,11 @@ glcr::ErrorCode PortClient::WriteByte(uint8_t byte) {
       ZPortSend(port_cap_, 1, &byte, 0, nullptr));
 }
 
+glcr::ErrorCode PortClient::Write(uint16_t data) {
+  return static_cast<glcr::ErrorCode>(
+      ZPortSend(port_cap_, 2, &data, 0, nullptr));
+}
+
 glcr::ErrorCode PortClient::Write(uint64_t data) {
   return static_cast<glcr::ErrorCode>(
       ZPortSend(port_cap_, 8, &data, 0, nullptr));
