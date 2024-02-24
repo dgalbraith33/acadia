@@ -12,20 +12,26 @@ void Endpoint::Initialize(XhciEndpointContext* context) {
   context_->tr_dequeue_ptr = trb_ring_->PhysicalAddress() | 1;
 
   context_->error_and_type = (0x3 << 1) | (0x7 << 3) | (0x8 << 16);
-  trb_ring_->EnqueueTrb({
-      .parameter = recv_phys_,
-      .status = 8,
-      .type_and_cycle = 1 | (1 << 2) | (1 << 5) | (1 << 10),
-      .control = 0,
-  });
+  for (uint64_t i = 0; i < 10; i++) {
+    trb_ring_->EnqueueTrb({
+        .parameter = recv_phys_ + offset_,
+        .status = 8,
+        .type_and_cycle = 1 | (1 << 2) | (1 << 5) | (1 << 10),
+        .control = 0,
+    });
+    offset_ += 8;
+  }
 }
 
 void Endpoint::TransferComplete(uint64_t trb_phys) {
-  dbgln("Data: {x}", *(uint64_t*)recv_mem_.vaddr());
+  uint64_t phys_offset =
+      (trb_phys - trb_ring_->PhysicalAddress()) / sizeof(XhciTrb);
+  dbgln("Data: {x}", *((uint64_t*)recv_mem_.vaddr() + phys_offset));
   trb_ring_->EnqueueTrb({
-      .parameter = recv_phys_,
+      .parameter = recv_phys_ + offset_,
       .status = 8,
       .type_and_cycle = 1 | (1 << 2) | (1 << 5) | (1 << 10),
       .control = 0,
   });
+  offset_ += 8;
 }

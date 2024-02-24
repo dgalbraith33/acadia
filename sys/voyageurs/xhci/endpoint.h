@@ -23,4 +23,5 @@ class Endpoint {
 
   uint64_t recv_phys_;
   mmth::OwnedMemoryRegion recv_mem_;
+  uint64_t offset_ = 0;
 };
