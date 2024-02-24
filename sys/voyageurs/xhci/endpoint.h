@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glacier/memory/unique_ptr.h>
+#include <mammoth/ipc/port_client.h>
 
 #include "xhci/trb_ring.h"
 #include "xhci/xhci.h"
@@ -9,7 +10,8 @@ class Endpoint {
  public:
   Endpoint() {}
 
-  void Initialize(XhciEndpointContext* context);
+  void Initialize(XhciEndpointContext* context,
+                  glcr::UniquePtr<mmth::PortClient> client);
 
   bool Enabled() { return enabled_; }
 
@@ -24,4 +26,6 @@ class Endpoint {
   uint64_t recv_phys_;
   mmth::OwnedMemoryRegion recv_mem_;
   uint64_t offset_ = 0;
+
+  glcr::UniquePtr<mmth::PortClient> client_;
 };

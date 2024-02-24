@@ -28,7 +28,8 @@ class DeviceSlot {
   XhciTrb CreateAddressDeviceCommand(uint8_t root_port, uint32_t route_string,
                                      uint16_t max_packet_size);
 
-  mmth::Semaphore IssueConfigureDeviceCommand(uint8_t config_value);
+  mmth::Semaphore IssueConfigureDeviceCommand(
+      uint8_t config_value, glcr::UniquePtr<mmth::PortClient> client);
   void SignalConfigureDeviceCompleted();
 
   // Caller must keep the command in scope until it completes.

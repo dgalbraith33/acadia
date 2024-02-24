@@ -5,6 +5,7 @@
 #include <mammoth/util/memory_region.h>
 #include <zcall.h>
 
+#include "keyboard/keyboard_driver.h"
 #include "xhci/descriptors.h"
 #include "xhci/trb.h"
 #include "xhci/xhci.h"
@@ -75,7 +76,9 @@ void configure_device(void* void_device_slot) {
         config_descriptor->configuration_value);
 
   device_slot
-      ->IssueConfigureDeviceCommand(config_descriptor->configuration_value)
+      ->IssueConfigureDeviceCommand(
+          config_descriptor->configuration_value,
+          glcr::MakeUnique<mmth::PortClient>(KeyboardDriver::GetPortCap()))
       .Wait();
 
   dbgln("Configured!");

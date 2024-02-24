@@ -4,9 +4,11 @@
 
 #include "xhci/trb.h"
 
-void Endpoint::Initialize(XhciEndpointContext* context) {
+void Endpoint::Initialize(XhciEndpointContext* context,
+                          glcr::UniquePtr<mmth::PortClient> client) {
   enabled_ = true;
   context_ = context;
+  client_ = glcr::Move(client);
 
   trb_ring_ = glcr::MakeUnique<TrbRingWriter>();
   recv_mem_ = mmth::OwnedMemoryRegion::ContiguousPhysical(0x1000, &recv_phys_);
@@ -23,7 +25,8 @@ void Endpoint::Initialize(XhciEndpointContext* context) {
 void Endpoint::TransferComplete(uint64_t trb_phys) {
   uint64_t phys_offset =
       (trb_phys - trb_ring_->PhysicalAddress()) / sizeof(XhciTrb);
-  dbgln("Data: {x}", *((uint64_t*)recv_mem_.vaddr() + phys_offset));
+  uint64_t data = *((uint64_t*)recv_mem_.vaddr() + phys_offset);
+  client_->Write(data);
   trb_ring_->EnqueueTrb(CreateNormalTrb(recv_phys_ + offset_, 8));
   offset_ += 8;
 }

@@ -11,12 +11,19 @@ class KeyboardDriver {
   KeyboardDriver(const KeyboardDriver&) = delete;
   KeyboardDriver(KeyboardDriver&&) = delete;
 
+  static z_cap_t GetPortCap();
+
   void RegisterListener(uint64_t port_cap);
 
   Thread StartInterruptLoop();
   void InterruptLoop();
 
  private:
-  z_cap_t irq_cap_;
+  z_cap_t port_cap_;
   glcr::LinkedList<mmth::PortClient> listeners_;
+
+  uint64_t bitmap_ = 0;
+
+  void ProcessInput(uint64_t input);
+  void SendKeypress(uint8_t scancode);
 };

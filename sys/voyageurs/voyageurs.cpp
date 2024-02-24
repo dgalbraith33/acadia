@@ -15,10 +15,9 @@ uint64_t main(uint64_t init_port) {
 
   YellowstoneClient yellowstone(gInitEndpointCap);
 
-  ASSIGN_OR_RETURN(auto xhci, XhciDriver::InitiateDriver(yellowstone));
-
-  dbgln("Initializing PS/2 Driver.");
   KeyboardDriver driver;
+
+  ASSIGN_OR_RETURN(auto xhci, XhciDriver::InitiateDriver(yellowstone));
 
   dbgln("Starting PS/2 Thread.");
   Thread keyboard_thread = driver.StartInterruptLoop();

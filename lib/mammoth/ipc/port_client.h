@@ -10,6 +10,7 @@ namespace mmth {
 class PortClient {
  public:
   PortClient() {}
+  PortClient(z_cap_t port_cap);
   static PortClient AdoptPort(z_cap_t port_cap);
 
   template <typename T>
@@ -18,6 +19,7 @@ class PortClient {
   glcr::ErrorCode WriteString(glcr::String str, z_cap_t cap);
 
   glcr::ErrorCode WriteByte(uint8_t byte);
+  glcr::ErrorCode Write(uint64_t data);
 
   z_cap_t cap() { return port_cap_; }
 
@@ -25,8 +27,6 @@ class PortClient {
 
  private:
   z_cap_t port_cap_ = 0;
-
-  PortClient(z_cap_t port_cap);
 };
 
 template <typename T>

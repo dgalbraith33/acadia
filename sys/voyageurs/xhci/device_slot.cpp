@@ -80,7 +80,8 @@ void DeviceSlot::TransferComplete(uint8_t endpoint_index, uint64_t trb_phys) {
   check(control_completion_sempahores_.Delete(trb_phys));
 }
 
-mmth::Semaphore DeviceSlot::IssueConfigureDeviceCommand(uint8_t config_value) {
+mmth::Semaphore DeviceSlot::IssueConfigureDeviceCommand(
+    uint8_t config_value, glcr::UniquePtr<mmth::PortClient> client) {
   input_context_->input.add_contexts = (0x1 << 3) | 0x1;
   input_context_->input.configuration_value = config_value;
   // TODO: Maybe don't hardcode this.
@@ -93,7 +94,8 @@ mmth::Semaphore DeviceSlot::IssueConfigureDeviceCommand(uint8_t config_value) {
   input_context_->slot_context.route_speed_entries |= (max_endpoint << 27);
 
   // TODO: Dont' hardcode this.
-  endpoints_[3].Initialize(input_context_->endpoint_contexts + 2);
+  endpoints_[3].Initialize(input_context_->endpoint_contexts + 2,
+                           glcr::Move(client));
 
   xhci_driver_->IssueCommand(CreateConfigureEndpointCommand(
       context_phys_ + kInputSlotContextOffset, slot_index_));
