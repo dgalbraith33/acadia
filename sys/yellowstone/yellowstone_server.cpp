@@ -113,6 +113,8 @@ glcr::Status YellowstoneServer::HandleRegisterEndpoint(
     // transmit to other processes.
     mmth::SetVfsCap(req.endpoint_capability());
     has_victoriafalls_semaphore_.Signal();
+  } else if (req.endpoint_name() == "voyageurs") {
+    has_voyageurs_.Signal();
   } else {
     dbgln("[WARN] Got endpoint cap type: {}", req.endpoint_name().cstr());
   }
@@ -137,5 +139,7 @@ void YellowstoneServer::WaitDenaliRegistered() { has_denali_semaphore_.Wait(); }
 void YellowstoneServer::WaitVictoriaFallsRegistered() {
   has_victoriafalls_semaphore_.Wait();
 }
+
+void YellowstoneServer::WaitVoyageursRegistered() { has_voyageurs_.Wait(); }
 
 }  // namespace yellowstone

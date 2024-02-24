@@ -25,6 +25,7 @@ class YellowstoneServer : public YellowstoneServerBase {
 
   void WaitDenaliRegistered();
   void WaitVictoriaFallsRegistered();
+  void WaitVoyageursRegistered();
 
  private:
   glcr::HashMap<glcr::String, z_cap_t> endpoint_map_;
@@ -37,6 +38,7 @@ class YellowstoneServer : public YellowstoneServerBase {
 
   mmth::Semaphore has_denali_semaphore_;
   mmth::Semaphore has_victoriafalls_semaphore_;
+  mmth::Semaphore has_voyageurs_;
 
   YellowstoneServer(z_cap_t endpoint_cap);
 };

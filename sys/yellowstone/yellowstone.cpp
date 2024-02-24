@@ -49,6 +49,10 @@ uint64_t main(uint64_t port_cap) {
 
   for (glcr::StringView& file : files) {
     if (!file.empty()) {
+      // TODO: Implement startup dependencies.
+      if (file == "teton") {
+        server->WaitVoyageursRegistered();
+      }
       mmth::File binary = mmth::File::Open(glcr::StrFormat("/bin/{}", file));
 
       ASSIGN_OR_RETURN(client_cap, server->CreateClientCap());
