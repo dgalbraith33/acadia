@@ -70,6 +70,15 @@ void configure_device(void* void_device_slot) {
       next_vaddr += endpoint->length;
     }
   }
+
+  dbgln("---- Configuring with configuration: {x}",
+        config_descriptor->configuration_value);
+
+  device_slot
+      ->IssueConfigureDeviceCommand(config_descriptor->configuration_value)
+      .Wait();
+
+  dbgln("Configured!");
 }
 
 glcr::ErrorOr<glcr::UniquePtr<XhciDriver>> XhciDriver::InitiateDriver(
@@ -167,6 +176,11 @@ void XhciDriver::DumpDebugInfo() {
 
   dbgln("Int 0 ES: {x}",
         runtime_->interrupters[0].event_ring_segment_table_base_address);
+}
+
+void XhciDriver::IssueCommand(const XhciTrb& command) {
+  command_ring_.EnqueueTrb(command);
+  doorbells_->doorbell[0] = 0;
 }
 
 XhciDriver::XhciDriver(mmth::OwnedMemoryRegion&& pci_space)
@@ -329,6 +343,11 @@ void XhciDriver::HandleCommandCompletion(
       dbgln("State: {x}", devices_[slot - 1].State());
       Thread(configure_device, &devices_[slot - 1]);
       break;
+    case TrbType::ConfigureEndpoint:
+      dbgln("Device COnfigured: {x}", slot);
+      dbgln("State: {x}", devices_[slot - 1].State());
+      devices_[slot - 1].SignalConfigureDeviceCompleted();
+      break;
     case TrbType::NoOpCommand:
       dbgln("No-op Command Completed");
       break;
@@ -353,7 +372,7 @@ void XhciDriver::HandleTransferCompletion(const XhciTrb& transfer_event_trb) {
 void XhciDriver::InitializeSlot(uint8_t slot_index) {
   // TODO: Consider making this array one longer and ignore the first value.
   devices_[slot_index - 1].EnableAndInitializeDataStructures(
-      slot_index, &(device_context_base_array_[slot_index]),
+      this, slot_index, &(device_context_base_array_[slot_index]),
       &doorbells_->doorbell[slot_index]);
   XhciPort* port =
       reinterpret_cast<XhciPort*>(reinterpret_cast<uint64_t>(operational_) +

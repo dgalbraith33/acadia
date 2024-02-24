@@ -18,6 +18,7 @@ enum class TrbType : uint8_t {
   // Commands
   EnableSlot = 9,
   AddressDevice = 11,
+  ConfigureEndpoint = 12,
   NoOpCommand = 23,
 
   // Events
@@ -32,4 +33,5 @@ XhciTrb CreateLinkTrb(uint64_t physical_address);
 
 XhciTrb CreateEnableSlotTrb();
 XhciTrb CreateAddressDeviceCommand(uint64_t input_context, uint8_t slot_id);
+XhciTrb CreateConfigureEndpointCommand(uint64_t input_context, uint8_t slot_id);
 XhciTrb CreateNoOpCommandTrb();

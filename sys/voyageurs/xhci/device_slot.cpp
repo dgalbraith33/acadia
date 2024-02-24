@@ -4,10 +4,13 @@
 #include <mammoth/util/debug.h>
 
 #include "xhci/trb.h"
+#include "xhci/xhci_driver.h"
 
 void DeviceSlot::EnableAndInitializeDataStructures(
-    uint8_t slot_index, uint64_t* output_context, volatile uint32_t* doorbell) {
+    XhciDriver* driver, uint8_t slot_index, uint64_t* output_context,
+    volatile uint32_t* doorbell) {
   enabled_ = true;
+  xhci_driver_ = driver;
   slot_index_ = slot_index;
   doorbell_ = doorbell;
 
@@ -62,4 +65,30 @@ void DeviceSlot::TransferComplete(uint8_t endpoint_index, uint64_t trb_phys) {
 
   control_completion_sempahores_.at(trb_phys)->Signal();
   check(control_completion_sempahores_.Delete(trb_phys));
+}
+
+mmth::Semaphore DeviceSlot::IssueConfigureDeviceCommand(uint8_t config_value) {
+  input_context_->input.add_contexts = (0x1 << 3) | 0x1;
+  input_context_->input.configuration_value = config_value;
+  // TODO: Maybe don't hardcode this.
+  input_context_->input.interface_number = 0;
+
+  input_context_->slot_context.route_speed_entries &= 0xFFFFFF;
+
+  // TODO: Don't hardcode this.
+  uint8_t max_endpoint = 0x3;
+  input_context_->slot_context.route_speed_entries |= (max_endpoint << 27);
+
+  // TODO: Dont' hardcode this.
+  other_endpoint_transfer_trb_ = glcr::MakeUnique<TrbRingWriter>();
+  input_context_->endpoint_contexts[2].tr_dequeue_ptr =
+      other_endpoint_transfer_trb_->PhysicalAddress() | 0x1;
+
+  xhci_driver_->IssueCommand(CreateConfigureEndpointCommand(
+      context_phys_ + kInputSlotContextOffset, slot_index_));
+  return configure_device_semaphore_;
+}
+
+void DeviceSlot::SignalConfigureDeviceCompleted() {
+  configure_device_semaphore_.Signal();
 }

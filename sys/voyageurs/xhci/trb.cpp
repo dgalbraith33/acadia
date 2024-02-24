@@ -49,6 +49,17 @@ XhciTrb CreateAddressDeviceCommand(uint64_t input_context, uint8_t slot_id) {
   };
 }
 
+XhciTrb CreateConfigureEndpointCommand(uint64_t input_context,
+                                       uint8_t slot_id) {
+  return {
+      .parameter = input_context,
+      .status = 0,
+      .type_and_cycle =
+          (uint16_t)(TypeToInt(TrbType::ConfigureEndpoint) | kTrb_Cycle),
+      .control = (uint16_t)(slot_id << 8),
+  };
+}
+
 XhciTrb CreateNoOpCommandTrb() {
   return {
       .parameter = 0,

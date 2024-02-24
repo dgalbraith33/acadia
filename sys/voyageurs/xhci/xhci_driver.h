@@ -23,6 +23,8 @@ class XhciDriver {
 
   void InterruptLoop();
 
+  void IssueCommand(const XhciTrb& command);
+
  private:
   // MMIO Structures.
   mmth::OwnedMemoryRegion pci_region_;
