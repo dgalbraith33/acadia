@@ -69,7 +69,14 @@ uint64_t LoadElfProgram(uint64_t base, uint64_t as_cap) {
       reinterpret_cast<Elf64ProgramHeader*>(base + header->phoff);
   for (uint64_t i = 0; i < header->phnum; i++) {
     Elf64ProgramHeader& program = programs[i];
+    if (program.type != 1) {
+      // Only load loadable types.
+      // TODO: This may break if the stack is far away?
+      continue;
+    }
 #if MAM_PROC_DEBUG
+    dbgln(glcr::StrFormat("Program:\n\tType: {}\n\tFlags: {}\n\t", program.type,
+                          program.flags));
     dbgln("Create mem object");
 #endif
     uint64_t page_offset = program.vaddr & 0xFFF;
@@ -93,7 +100,8 @@ uint64_t LoadElfProgram(uint64_t base, uint64_t as_cap) {
     memcpy(base + program.offset, program.filesz, vaddr + page_offset);
 
 #if MAM_PROC_DEBUG
-    dbgln("Map Foreign");
+    dbgln(glcr::StrFormat("Map Foreign: {x} {x} {x}",
+                          program.vaddr - page_offset, size, vaddr));
 #endif
     check(ZAddressSpaceMap(as_cap, program.vaddr - page_offset, mem_cap, 0,
                            &vaddr));
@@ -123,6 +131,10 @@ glcr::ErrorOr<z_cap_t> SpawnProcessFromElfRegion(uint64_t program,
                         &foreign_port_id));
 
   uint64_t entry_point = LoadElfProgram(program, as_cap);
+
+  if (entry_point == 0) {
+    crash("Entry Point == 0", glcr::INTERNAL);
+  }
 
 #if MAM_PROC_DEBUG
   dbgln("Thread Create");

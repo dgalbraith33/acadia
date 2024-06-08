@@ -5,3 +5,6 @@ compile_commands.json
 
 sysroot/bin
 sysroot/usr/bin
+
+rust/target
+yunq/venv
