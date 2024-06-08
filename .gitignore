@@ -4,7 +4,7 @@ __pycache__/
 compile_commands.json
 
 sysroot/bin
-sysroot/usr/bin
+sysroot/usr
 
 rust/target
 yunq/venv

@@ -12,6 +12,13 @@ pushd $BUILD_DIR
 ninja 
 ninja install
 
+export CARGO_INSTALL_ROOT="${DIR}/../sysroot/usr/"
+
+# Need to pushd so rustup gets the toolchain from rust/rust_toolchain.toml
+pushd "${DIR}/../rust"
+cargo install --force --path "${DIR}/../rust/usr/testbed/"
+popd
+
 sudo sh ${DIR}/build_image.sh disk.img
 
 QEMU_ARGS=
