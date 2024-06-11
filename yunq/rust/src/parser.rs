@@ -1,12 +1,18 @@
+use std::collections::HashMap;
+use std::collections::HashSet;
 use std::fmt::Debug;
 use std::fmt::Display;
 
 use crate::lexer::Token;
 use crate::lexer::TokenType;
 
+#[derive(Clone)]
 pub enum Type {
     U64,
     I64,
+    String,
+    Bytes,
+    Capability,
     Message(String),
 }
 
@@ -18,6 +24,9 @@ impl Display for Type {
             match self {
                 Type::U64 => "u64",
                 Type::I64 => "i64",
+                Type::String => "string",
+                Type::Bytes => "bytes",
+                Type::Capability => "cap",
                 Type::Message(s) => s,
             }
         )
@@ -31,11 +40,15 @@ impl TryFrom<&String> for Type {
         match value.as_str() {
             "u64" => Ok(Type::U64),
             "i64" => Ok(Type::I64),
+            "string" => Ok(Type::String),
+            "bytes" => Ok(Type::Bytes),
+            "capability" => Ok(Type::Capability),
             _ => Ok(Type::Message(value.clone())),
         }
     }
 }
 
+#[derive(Clone)]
 pub struct Field {
     field_type: Type,
     name: String,
@@ -43,6 +56,7 @@ pub struct Field {
     repeated: bool,
 }
 
+#[derive(Clone)]
 pub struct Message {
     name: String,
     fields: Vec<Field>,
@@ -117,6 +131,7 @@ pub struct Parser<'a> {
     tokens: &'a Vec<Token>,
     current_index: usize,
     ast: Vec<Decl>,
+    type_map: HashMap<String, Message>,
 }
 
 impl<'a> Parser<'a> {
@@ -125,6 +140,7 @@ impl<'a> Parser<'a> {
             tokens,
             current_index: 0,
             ast: Vec::new(),
+            type_map: HashMap::new(),
         }
     }
 
@@ -289,5 +305,98 @@ impl<'a> Parser<'a> {
 
     pub fn ast(&'a mut self) -> &'a Vec<Decl> {
         &self.ast
+    }
+
+    fn ensure_message_and_interface_names_unique(&mut self) -> Result<(), String> {
+        let mut names = HashSet::new();
+        for decl in &self.ast {
+            match decl {
+                Decl::Message(m) => {
+                    if names.contains(&m.name) {
+                        // TODO: Keep token information for a better error message here.
+                        return Err(format!("Duplicate name {}", m.name));
+                    };
+                    names.insert(m.name.clone());
+                    self.type_map.insert(m.name.clone(), m.clone());
+                }
+                Decl::Interface(i) => {
+                    if names.contains(&i.name) {
+                        // TODO: Keep token information for a better error message here.
+                        return Err(format!("Duplicate name {}", i.name));
+                    };
+                    names.insert(i.name.clone());
+                }
+                _ => {}
+            }
+        }
+        Ok(())
+    }
+
+    fn type_check_message(&self, message: &Message) -> Result<(), String> {
+        let mut field_names = HashSet::new();
+
+        for field in &message.fields {
+            if field_names.contains(&field.name) {
+                return Err(format!(
+                    "Field name '{}' used twice in message '{}'",
+                    field.name, message.name
+                ));
+            }
+            field_names.insert(field.name.clone());
+
+            if let Type::Message(name) = &field.field_type {
+                if !self.type_map.contains_key(name) {
+                    return Err(format!(
+                        "Unknown type '{}' on field '{}' in message '{}'",
+                        name, field.name, message.name
+                    ));
+                }
+            }
+        }
+        Ok(())
+    }
+
+    fn type_check_interface(&self, interface: &Interface) -> Result<(), String> {
+        let mut method_names = HashSet::new();
+
+        for method in &interface.methods {
+            if method_names.contains(&method.name) {
+                return Err(format!(
+                    "Method name '{}' used twice in interface '{}'",
+                    method.name, interface.name
+                ));
+            }
+            method_names.insert(method.name.clone());
+
+            if let Some(name) = &method.request {
+                if !self.type_map.contains_key(name) {
+                    return Err(format!(
+                        "Unknown request type '{}' on method '{}' in interface '{}'",
+                        name, method.name, interface.name
+                    ));
+                }
+            }
+            if let Some(name) = &method.response {
+                if !self.type_map.contains_key(name) {
+                    return Err(format!(
+                        "Unknown response type '{}' on method '{}' in interface '{}'",
+                        name, method.name, interface.name
+                    ));
+                }
+            }
+        }
+        Ok(())
+    }
+
+    pub fn type_check(&mut self) -> Result<(), String> {
+        self.ensure_message_and_interface_names_unique()?;
+        for decl in &self.ast {
+            match decl {
+                Decl::Message(m) => self.type_check_message(m)?,
+                Decl::Interface(i) => self.type_check_interface(i)?,
+                _ => {}
+            }
+        }
+        Ok(())
     }
 }

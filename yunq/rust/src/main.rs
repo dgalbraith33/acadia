@@ -21,6 +21,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut ast_parser = parser::Parser::new(&tokens);
     ast_parser.parse_ast()?;
+    ast_parser.type_check()?;
 
     for decl in ast_parser.ast() {
         println!("{:?}", decl);
