@@ -1,3 +1,4 @@
+mod codegen;
 mod lexer;
 mod parser;
 
@@ -26,6 +27,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     for decl in ast_parser.ast() {
         println!("{:?}", decl);
     }
+
+    println!("{}", codegen::generate_code(ast_parser.ast())?);
 
     Ok(())
 }

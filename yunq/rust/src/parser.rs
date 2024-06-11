@@ -16,6 +16,19 @@ pub enum Type {
     Message(String),
 }
 
+impl Type {
+    pub fn rust_type(&self) -> &str {
+        match self {
+            Type::U64 => "u64",
+            Type::I64 => "i64",
+            Type::String => "String",
+            Type::Bytes => "Vec<u8>",
+            Type::Capability => "u64",
+            Type::Message(s) => s,
+        }
+    }
+}
+
 impl Display for Type {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
@@ -50,23 +63,23 @@ impl TryFrom<&String> for Type {
 
 #[derive(Clone)]
 pub struct Field {
-    field_type: Type,
-    name: String,
-    number: u64,
-    repeated: bool,
+    pub field_type: Type,
+    pub name: String,
+    pub number: u64,
+    pub repeated: bool,
 }
 
 #[derive(Clone)]
 pub struct Message {
-    name: String,
-    fields: Vec<Field>,
+    pub name: String,
+    pub fields: Vec<Field>,
 }
 
 pub struct Method {
-    name: String,
-    number: u64,
-    request: Option<String>,
-    response: Option<String>,
+    pub name: String,
+    pub number: u64,
+    pub request: Option<String>,
+    pub response: Option<String>,
 }
 
 impl Debug for Method {
@@ -303,7 +316,7 @@ impl<'a> Parser<'a> {
         Ok(())
     }
 
-    pub fn ast(&'a mut self) -> &'a Vec<Decl> {
+    pub fn ast(&'a self) -> &'a Vec<Decl> {
         &self.ast
     }
 
