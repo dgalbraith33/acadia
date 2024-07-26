@@ -32,7 +32,7 @@ pub fn parse_init_port(port_cap: syscall::zcap) {
             num_caps: &mut num_caps as *mut u64,
         };
         let resp = syscall::syscall(syscall::kZionPortPoll, &req);
-        if resp != 0 {
+        if let Err(_) = resp {
             break;
         }
         unsafe {
@@ -59,7 +59,7 @@ macro_rules! define_entry {
             unsafe {
                 let err = main();
                 let req = mammoth::syscall::ZProcessExitReq { code: err };
-                mammoth::syscall::syscall(mammoth::syscall::kZionProcessExit, &req);
+                let _ = mammoth::syscall::syscall(mammoth::syscall::kZionProcessExit, &req);
             }
             unreachable!()
         }

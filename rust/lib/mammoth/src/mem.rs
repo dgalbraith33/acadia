@@ -5,6 +5,8 @@ use linked_list_allocator::LockedHeap;
 #[global_allocator]
 static ALLOCATOR: LockedHeap = LockedHeap::empty();
 
+pub static mut CAN_ALLOC: bool = false;
+
 pub fn init_heap() {
     // 1 MiB
     let size = 0x10_0000;
@@ -13,7 +15,8 @@ pub fn init_heap() {
         size,
         vmmo_cap: &mut vmmo_cap as *mut u64,
     };
-    syscall::checked_syscall(syscall::kZionMemoryObjectCreate, &obj_req);
+    syscall::syscall(syscall::kZionMemoryObjectCreate, &obj_req)
+        .expect("Failed to create memory object");
 
     unsafe {
         let mut vaddr: u64 = 0;
@@ -25,7 +28,9 @@ pub fn init_heap() {
             vmas_offset: 0,
         };
 
-        syscall::checked_syscall(syscall::kZionAddressSpaceMap, &vmas_req);
+        syscall::syscall(syscall::kZionAddressSpaceMap, &vmas_req)
+            .expect("Failed to map memory object");
         ALLOCATOR.lock().init(vaddr as *mut u8, size as usize);
+        CAN_ALLOC = true;
     }
 }
