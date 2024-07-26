@@ -1,4 +1,9 @@
+extern crate alloc;
+
+use alloc::string::String;
+use alloc::vec::Vec;
 use core::ffi::c_void;
+use core::fmt;
 use core::panic::PanicInfo;
 
 include!("bindings.rs");
@@ -28,4 +33,49 @@ pub fn debug(msg: &str) {
         size: msg.len() as u64,
     };
     syscall(kZionDebug, &req);
+}
+
+pub struct Writer {
+    int_vec: Vec<u8>,
+}
+
+impl Writer {
+    pub fn new() -> Self {
+        Self {
+            int_vec: Vec::new(),
+        }
+    }
+}
+
+impl Into<String> for Writer {
+    fn into(self) -> String {
+        String::from_utf8(self.int_vec).expect("Failed to convert")
+    }
+}
+
+impl fmt::Write for Writer {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        for c in s.bytes() {
+            self.int_vec.push(c);
+        }
+        fmt::Result::Ok(())
+    }
+}
+
+#[macro_export]
+macro_rules! debug {
+    () => {
+        debug("");
+    };
+    ($fmt:literal) => {
+        debug($fmt);
+    };
+    ($fmt:literal, $($val:expr),+) => {{
+        use core::fmt::Write as _;
+        use alloc::string::String;
+        let mut w = mammoth::syscall::Writer::new();
+        write!(&mut w, $fmt, $($val),*).expect("Failed to format");
+        let s: String = w.into();
+        debug(&s);
+    }};
 }
