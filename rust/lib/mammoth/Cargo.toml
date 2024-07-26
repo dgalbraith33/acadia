@@ -7,5 +7,6 @@ edition = "2021"
 name = "mammoth"
 
 [dependencies]
+linked_list_allocator = "0.10.5"
 
 [build-dependencies]

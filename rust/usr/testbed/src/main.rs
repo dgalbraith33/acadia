@@ -1,14 +1,19 @@
 #![no_std]
 #![no_main]
 
-use mammoth::debug;
+extern crate alloc;
+
+use alloc::boxed::Box;
 use mammoth::define_entry;
-use mammoth::z_err_t;
+use mammoth::syscall::debug;
+use mammoth::syscall::z_err_t;
 
 define_entry!();
 
 #[no_mangle]
 pub extern "C" fn main() -> z_err_t {
     debug("Testing!");
+    let x = Box::new("Heap str");
+    debug(&x);
     0
 }
