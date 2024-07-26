@@ -72,9 +72,10 @@ glcr::Status GptReader::ParsePartitionTables() {
   }
   MbrPartition* first_partition =
       reinterpret_cast<MbrPartition*>(lba_1_and_2.vaddr() + 0x1BE);
+
   if (first_partition->boot_indicator != 0) {
-    return glcr::FailedPrecondition(glcr::StrFormat(
-        "Boot indicator set: {}", first_partition->boot_indicator));
+    // FIXME: This shouldn't be set but I can't figure out why it is.
+    dbgln("WARN: Boot indicator set: {}", first_partition->boot_indicator);
   }
   if (first_partition->os_type != 0xEE) {
     return glcr::FailedPrecondition(
