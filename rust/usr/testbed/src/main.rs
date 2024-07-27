@@ -4,6 +4,7 @@
 extern crate alloc;
 
 use alloc::boxed::Box;
+use alloc::string::ToString;
 use mammoth::debug;
 use mammoth::define_entry;
 use mammoth::syscall::debug;
@@ -25,5 +26,19 @@ pub extern "C" fn main() -> z_err_t {
     };
     mammoth::syscall::syscall(mammoth::syscall::kZionMemoryObjectCreate, &obj_req)
         .expect("Failed to create memory object");
+
+    let mut yellowstone;
+    unsafe {
+        yellowstone = yunq::YellowstoneClient::new(mammoth::INIT_ENDPOINT);
+    }
+
+    let endpoint = yellowstone
+        .get_endpoint(&yunq::GetEndpointRequest {
+            endpoint_name: "denali".to_string(),
+        })
+        .expect("Failed to get endpoint");
+
+    debug!("Got endpoint w/ cap: {:#x}", endpoint.endpoint);
+
     0
 }

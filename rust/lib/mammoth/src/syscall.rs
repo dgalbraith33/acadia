@@ -59,7 +59,18 @@ impl From<u64> for ZError {
 
 impl fmt::Debug for ZError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("ZError")
+        let str = match self {
+            ZError::INVALID_ARGUMENT => "INVALID_ARGUMENT",
+            ZError::BUFFER_SIZE => "BUFFER_SIZE",
+            ZError::INTERNAL => "INTERNAL",
+            ZError::UNIMPLEMENTED => "UNIMPLEMENTED",
+            ZError::INVALID_RESPONSE => "INVALID_RESPONSE",
+            ZError::CAP_NOT_FOUND => "CAP_NOT_FOUND",
+            ZError::CAP_WRONG_TYPE => "CAP_WRONG_TYPE",
+            ZError::CAP_PERMISSION_DENIED => "CAP_PERMISSION_DENIED",
+            _ => "ZError",
+        };
+        f.write_str(str)
     }
 }
 

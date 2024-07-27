@@ -15,7 +15,7 @@ const Z_INIT_ENDPOINT: u64 = 0x4100_0000;
 
 static mut SELF_PROC_CAP: syscall::zcap = 0;
 static mut SELF_VMAS_CAP: syscall::zcap = 0;
-static mut INIT_ENDPOINT: syscall::zcap = 0;
+pub static mut INIT_ENDPOINT: syscall::zcap = 0;
 
 pub fn parse_init_port(port_cap: syscall::zcap) {
     loop {
