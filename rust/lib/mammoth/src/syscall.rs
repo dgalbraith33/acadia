@@ -146,9 +146,7 @@ macro_rules! debug {
     ($fmt:literal, $($val:expr),+) => {{
         use core::fmt::Write as _;
         use alloc::string::String;
-        // TODO: Find a way to do this so we don't have to import writer.
-        // We can't fully qualify this if we want to use it in this crate.
-        let mut w = Writer::new();
+        let mut w = $crate::syscall::Writer::new();
         write!(&mut w, $fmt, $($val),*).expect("Failed to format");
         let s: String = w.into();
         debug(&s);

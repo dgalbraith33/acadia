@@ -9,7 +9,6 @@ use mammoth::debug;
 use mammoth::define_entry;
 use mammoth::syscall::debug;
 use mammoth::syscall::z_err_t;
-use mammoth::syscall::Writer;
 
 define_entry!();
 
