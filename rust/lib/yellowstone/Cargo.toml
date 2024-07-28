@@ -1,8 +1,10 @@
 [package]
-name = "yunq"
+name = "yellowstone"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-mammoth = {path = "../mammoth"}
+mammoth = { path = "../mammoth" }
+yunq = {path = "../yunq"}
 yunq-derive = {path = "../yunq-derive"}
+

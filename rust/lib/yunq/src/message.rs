@@ -4,6 +4,11 @@ use mammoth::syscall::z_cap_t;
 use mammoth::syscall::ZError;
 
 pub const MESSAGE_IDENT: u32 = 0x33441122;
+pub const MESSAGE_HEADER_SIZE: usize = 24; // 4x uint32, 1x uint64
+
+pub fn field_offset(offset: usize, field_index: usize) -> usize {
+    offset + MESSAGE_HEADER_SIZE + (8 * field_index)
+}
 
 pub trait YunqMessage {
     fn parse<const N: usize>(

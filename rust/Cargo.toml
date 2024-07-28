@@ -1,7 +1,7 @@
 [workspace]
 
 members = [
-  "lib/mammoth", "lib/yunq", "usr/testbed",
+  "lib/mammoth", "lib/yellowstone", "lib/yunq", "lib/yunq-derive", "usr/testbed",
 ]
 
 # the profile used for `cargo build`

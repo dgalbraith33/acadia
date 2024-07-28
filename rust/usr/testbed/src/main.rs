@@ -9,6 +9,8 @@ use mammoth::debug;
 use mammoth::define_entry;
 use mammoth::syscall::debug;
 use mammoth::syscall::z_err_t;
+use yellowstone::GetEndpointRequest;
+use yellowstone::YellowstoneClient;
 
 define_entry!();
 
@@ -28,11 +30,11 @@ pub extern "C" fn main() -> z_err_t {
 
     let mut yellowstone;
     unsafe {
-        yellowstone = yunq::YellowstoneClient::new(mammoth::INIT_ENDPOINT);
+        yellowstone = YellowstoneClient::new(mammoth::INIT_ENDPOINT);
     }
 
     let endpoint = yellowstone
-        .get_endpoint(&yunq::GetEndpointRequest {
+        .get_endpoint(&GetEndpointRequest {
             endpoint_name: "denali".to_string(),
         })
         .expect("Failed to get endpoint");
