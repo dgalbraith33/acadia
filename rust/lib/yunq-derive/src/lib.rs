@@ -26,6 +26,12 @@ fn serialize_field(name: &Ident, ind: usize, path: &Path) -> proc_macro2::TokenS
                 buf.write_at(yunq::message::field_offset(offset, #ind), cap_ind as u64)?;
             }
         }
+    } else if path.is_ident("u64") {
+        quote! {
+            {
+                buf.write_at(yunq::message::field_offset(offset, #ind), self.#name as u64)?;
+            }
+        }
     } else {
         panic!(
             "Serialization not implemented for: {}",
@@ -50,6 +56,10 @@ fn parse_field(name: &Ident, ind: usize, path: &Path) -> proc_macro2::TokenStrea
                 let cap_ind = buf.at::<u64>(yunq::message::field_offset(offset, #ind))?;
                 caps[cap_ind as usize]
             };
+        }
+    } else if path.is_ident("u64") {
+        quote! {
+            let #name = buf.at::<u64>(yunq::message::field_offset(offset, #ind))?;
         }
     } else {
         panic!("Parsing not implemented for: {}", path.into_token_stream());

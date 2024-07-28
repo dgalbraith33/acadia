@@ -23,7 +23,7 @@ impl Type {
             Type::I64 => "i64",
             Type::String => "String",
             Type::Bytes => "Vec<u8>",
-            Type::Capability => "u64",
+            Type::Capability => "z_cap_t",
             Type::Message(s) => s,
         }
     }
@@ -102,8 +102,8 @@ impl Debug for Method {
 }
 
 pub struct Interface {
-    name: String,
-    methods: Vec<Method>,
+    pub name: String,
+    pub methods: Vec<Method>,
 }
 
 pub enum Decl {

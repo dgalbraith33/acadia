@@ -26,3 +26,27 @@ pub trait YunqMessage {
         caps: &mut Vec<z_cap_t>,
     ) -> Result<usize, ZError>;
 }
+
+pub struct Empty {}
+
+impl YunqMessage for Empty {
+    fn parse<const N: usize>(
+        buf: &ByteBuffer<N>,
+        offset: usize,
+        caps: &Vec<z_cap_t>,
+    ) -> Result<Self, ZError>
+    where
+        Self: Sized,
+    {
+        todo!()
+    }
+
+    fn serialize<const N: usize>(
+        &self,
+        buf: &mut ByteBuffer<N>,
+        offset: usize,
+        caps: &mut Vec<z_cap_t>,
+    ) -> Result<usize, ZError> {
+        todo!()
+    }
+}
