@@ -74,7 +74,6 @@ fn generate_interface(interface: &Interface) -> TokenStream {
 
 pub fn generate_code(ast: &Vec<Decl>) -> String {
     let prelude = quote! {
-    #![no_std]
 
     extern crate alloc;
 
