@@ -1,7 +1,3 @@
-mod codegen;
-mod lexer;
-mod parser;
-
 use std::error::Error;
 use std::fs;
 
@@ -22,13 +18,8 @@ struct Args {
 fn main() -> Result<(), Box<dyn Error>> {
     let args = Args::parse();
     let input = fs::read_to_string(args.input_path)?;
-    let tokens = lexer::lex_input(&input)?;
 
-    let mut ast_parser = parser::Parser::new(&tokens);
-    ast_parser.parse_ast()?;
-    ast_parser.type_check()?;
-
-    let code = codegen::generate_code(ast_parser.ast());
+    let code = yunqc::codegen(&input)?;
 
     fs::write(args.output_path, code)?;
 

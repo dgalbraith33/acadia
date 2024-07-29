@@ -8,3 +8,6 @@ mammoth = { path = "../mammoth" }
 yunq = {path = "../yunq"}
 yunq-derive = {path = "../yunq-derive"}
 
+[build-dependencies]
+yunqc = {path = "../../../yunq/rust"}
+
