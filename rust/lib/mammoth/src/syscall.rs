@@ -138,10 +138,10 @@ impl fmt::Write for Writer {
 #[macro_export]
 macro_rules! debug {
     () => {
-        debug("");
+        $crate::syscall::debug("");
     };
     ($fmt:literal) => {
-        debug($fmt);
+        $crate::syscall::debug($fmt);
     };
     ($fmt:literal, $($val:expr),+) => {{
         use core::fmt::Write as _;
@@ -149,6 +149,6 @@ macro_rules! debug {
         let mut w = $crate::syscall::Writer::new();
         write!(&mut w, $fmt, $($val),*).expect("Failed to format");
         let s: String = w.into();
-        debug(&s);
+        $crate::syscall::debug(&s);
     }};
 }

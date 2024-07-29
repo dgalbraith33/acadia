@@ -3,10 +3,14 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 
+extern crate alloc;
+
 use core::ffi::c_void;
 
 pub mod mem;
+#[macro_use]
 pub mod syscall;
+pub mod thread;
 
 // From /zion/include/ztypes.h
 const Z_INIT_SELF_PROC: u64 = 0x4000_0000;

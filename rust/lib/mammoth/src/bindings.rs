@@ -351,9 +351,7 @@ pub struct ZThreadStartReq {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct ZThreadExitReq {
-    pub _address: u8,
-}
+pub struct ZThreadExitReq {}
 extern "C" {
     #[link_name = "\u{1}_Z11ZThreadExitv"]
     pub fn ZThreadExit() -> z_err_t;
