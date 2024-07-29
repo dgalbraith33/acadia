@@ -19,18 +19,17 @@ pub fn init_heap() {
     syscall::syscall(zion::kZionMemoryObjectCreate, &obj_req)
         .expect("Failed to create memory object");
 
-    unsafe {
-        let mut vaddr: u64 = 0;
-        let vmas_req = zion::ZAddressSpaceMapReq {
-            vmmo_cap,
-            vmas_cap: SELF_VMAS_CAP,
-            align: 0x2000,
-            vaddr: &mut vaddr as *mut u64,
-            vmas_offset: 0,
-        };
+    let mut vaddr: u64 = 0;
+    let vmas_req = zion::ZAddressSpaceMapReq {
+        vmmo_cap,
+        vmas_cap: unsafe { SELF_VMAS_CAP },
+        align: 0x2000,
+        vaddr: &mut vaddr as *mut u64,
+        vmas_offset: 0,
+    };
 
-        syscall::syscall(zion::kZionAddressSpaceMap, &vmas_req)
-            .expect("Failed to map memory object");
+    syscall::syscall(zion::kZionAddressSpaceMap, &vmas_req).expect("Failed to map memory object");
+    unsafe {
         ALLOCATOR.lock().init(vaddr as *mut u8, size as usize);
         CAN_ALLOC = true;
     }
