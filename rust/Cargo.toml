@@ -3,6 +3,7 @@
 members = [
   "lib/mammoth", "lib/yellowstone", "lib/yunq", "lib/yunq-derive", "usr/testbed",
 ]
+resolver = "2"
 
 # the profile used for `cargo build`
 [profile.dev]

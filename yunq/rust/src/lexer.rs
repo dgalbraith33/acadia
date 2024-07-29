@@ -13,6 +13,7 @@ pub enum TokenType {
 }
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct Token {
     pub token_type: TokenType,
     line: usize,
