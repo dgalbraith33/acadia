@@ -1,7 +1,5 @@
 use crate::syscall;
-use crate::zion;
 use crate::zion::z_cap_t;
-use core::ffi::c_void;
 
 // From /zion/include/ztypes.h
 const Z_INIT_SELF_PROC: u64 = 0x4000_0000;
@@ -14,22 +12,16 @@ pub static mut INIT_ENDPOINT: z_cap_t = 0;
 
 pub fn parse_init_port(port_cap: z_cap_t) {
     loop {
-        let mut num_bytes: u64 = 8;
-        let mut init_sig: u64 = 0;
+        let mut bytes: [u8; 8] = [0; 8];
         let mut caps: [u64; 1] = [0];
-        let mut num_caps: u64 = 1;
 
-        let req = zion::ZPortPollReq {
-            port_cap,
-            num_bytes: &mut num_bytes as *mut u64,
-            data: &mut init_sig as *mut u64 as *mut c_void,
-            caps: &mut caps as *mut u64,
-            num_caps: &mut num_caps as *mut u64,
-        };
-        let resp = syscall::syscall(zion::kZionPortPoll, &req);
+        let resp = syscall::port_poll(port_cap, &mut bytes, &mut caps);
         if let Err(_) = resp {
             break;
         }
+
+        let init_sig = u64::from_le_bytes(bytes);
+
         unsafe {
             match init_sig {
                 Z_INIT_SELF_PROC => SELF_PROC_CAP = caps[0],

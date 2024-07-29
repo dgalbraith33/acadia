@@ -72,3 +72,46 @@ pub fn thread_exit() -> ! {
     let _ = syscall(zion::kZionThreadExit, &zion::ZThreadExitReq {});
     unreachable!();
 }
+
+pub fn memory_object_create(size: u64) -> Result<z_cap_t, ZError> {
+    let mut vmmo_cap = 0;
+    let obj_req = zion::ZMemoryObjectCreateReq {
+        size,
+        vmmo_cap: &mut vmmo_cap as *mut u64,
+    };
+    syscall(zion::kZionMemoryObjectCreate, &obj_req)?;
+    Ok(vmmo_cap)
+}
+
+pub fn address_space_map(vmmo_cap: z_cap_t) -> Result<u64, ZError> {
+    let mut vaddr: u64 = 0;
+    // FIXME: Allow caller to pass these options.
+    let vmas_req = zion::ZAddressSpaceMapReq {
+        vmmo_cap,
+        vmas_cap: unsafe { crate::init::SELF_VMAS_CAP },
+        align: 0x2000,
+        vaddr: &mut vaddr as *mut u64,
+        vmas_offset: 0,
+    };
+
+    syscall(zion::kZionAddressSpaceMap, &vmas_req)?;
+    Ok(vaddr)
+}
+
+pub fn port_poll(
+    port_cap: z_cap_t,
+    bytes: &mut [u8],
+    caps: &mut [u64],
+) -> Result<(u64, u64), ZError> {
+    let mut num_bytes = bytes.len() as u64;
+    let mut num_caps = caps.len() as u64;
+    let req = zion::ZPortPollReq {
+        port_cap,
+        data: bytes.as_mut_ptr() as *mut c_void,
+        num_bytes: &mut num_bytes as *mut u64,
+        caps: caps.as_mut_ptr(),
+        num_caps: &mut num_caps as *mut u64,
+    };
+    syscall(zion::kZionPortPoll, &req)?;
+    Ok((num_bytes, num_caps))
+}
