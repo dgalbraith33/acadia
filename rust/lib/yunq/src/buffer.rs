@@ -15,12 +15,12 @@ impl<const N: usize> ByteBuffer<N> {
         N as u64
     }
 
-    pub fn raw_ptr(&self) -> *const u8 {
-        self.buffer.as_ptr()
+    pub fn slice(&self, len: usize) -> &[u8] {
+        &self.buffer[..len]
     }
 
-    pub fn mut_ptr(&mut self) -> *mut u8 {
-        self.buffer.as_mut_ptr()
+    pub fn mut_slice(&mut self) -> &mut [u8] {
+        &mut self.buffer[..]
     }
 
     pub fn write_at<T>(&mut self, offset: usize, obj: T) -> Result<(), ZError> {
