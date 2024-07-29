@@ -50,18 +50,13 @@ macro_rules! debug {
 macro_rules! define_entry {
     () => {
         #[no_mangle]
-        pub extern "C" fn _start(init_port: mammoth::zion::z_cap_t) -> ! {
-            extern "C" {
-                fn main() -> z_err_t;
-            }
-            mammoth::init::parse_init_port(init_port);
-            mammoth::mem::init_heap();
-            unsafe {
-                let err = main();
-                let req = mammoth::zion::ZProcessExitReq { code: err };
-                let _ = mammoth::syscall::syscall(mammoth::zion::kZionProcessExit, &req);
-            }
-            unreachable!()
+        pub extern "C" fn _start(init_port: $crate::zion::z_cap_t) -> ! {
+            $crate::init::parse_init_port(init_port);
+            $crate::mem::init_heap();
+
+            let resp = main();
+
+            $crate::syscall::process_exit(resp);
         }
     };
 }

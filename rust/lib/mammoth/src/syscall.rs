@@ -7,7 +7,7 @@ use core::ffi::c_void;
 use core::panic::PanicInfo;
 
 #[must_use]
-pub fn syscall<T>(id: u64, req: &T) -> Result<(), ZError> {
+fn syscall<T>(id: u64, req: &T) -> Result<(), ZError> {
     unsafe {
         let resp = zion::SysCall1(id, req as *const T as *const c_void);
         if resp != 0 {
@@ -38,6 +38,12 @@ pub fn debug(msg: &str) {
         size: msg.len() as u64,
     };
     syscall(zion::kZionDebug, &req).expect("Failed to write");
+}
+
+pub fn process_exit(code: u64) -> ! {
+    let _ = syscall(zion::kZionProcessExit, &zion::ZProcessExitReq { code });
+
+    unreachable!()
 }
 
 pub fn thread_create(proc_cap: z_cap_t) -> Result<z_cap_t, ZError> {
