@@ -1,5 +1,5 @@
 use alloc::boxed::Box;
-use mammoth::syscall::ZError;
+use mammoth::zion::ZError;
 
 pub struct ByteBuffer<const N: usize> {
     buffer: Box<[u8; N]>,

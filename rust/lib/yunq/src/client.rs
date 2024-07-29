@@ -2,8 +2,8 @@ use crate::buffer::ByteBuffer;
 use crate::message::YunqMessage;
 use alloc::vec::Vec;
 use core::ffi::c_void;
-use mammoth::syscall::z_cap_t;
-use mammoth::syscall::ZError;
+use mammoth::zion::z_cap_t;
+use mammoth::zion::ZError;
 
 const SENTINEL: u32 = 0xBEEFDEAD;
 
@@ -22,7 +22,7 @@ pub fn call_endpoint<Req: YunqMessage, Resp: YunqMessage, const N: usize>(
     byte_buffer.write_at(4, (16 + length) as u32)?;
 
     let mut reply_port_cap: u64 = 0;
-    let send_req = mammoth::syscall::ZEndpointSendReq {
+    let send_req = mammoth::zion::ZEndpointSendReq {
         caps: cap_buffer.as_ptr(),
         num_caps: cap_buffer.len() as u64,
         endpoint_cap,
@@ -31,13 +31,13 @@ pub fn call_endpoint<Req: YunqMessage, Resp: YunqMessage, const N: usize>(
         reply_port_cap: &mut reply_port_cap as *mut z_cap_t,
     };
 
-    mammoth::syscall::syscall(mammoth::syscall::kZionEndpointSend, &send_req)?;
+    mammoth::syscall::syscall(mammoth::zion::kZionEndpointSend, &send_req)?;
     // FIXME: Add a way to zero out the byte buffer.
 
     let mut buffer_size = byte_buffer.size();
     let mut num_caps: u64 = 10;
     cap_buffer = vec![0; num_caps as usize];
-    let recv_req = mammoth::syscall::ZReplyPortRecvReq {
+    let recv_req = mammoth::zion::ZReplyPortRecvReq {
         reply_port_cap,
         caps: cap_buffer.as_mut_ptr(),
         num_caps: &mut num_caps as *mut u64,
@@ -45,7 +45,7 @@ pub fn call_endpoint<Req: YunqMessage, Resp: YunqMessage, const N: usize>(
         num_bytes: &mut buffer_size as *mut u64,
     };
 
-    mammoth::syscall::syscall(mammoth::syscall::kZionReplyPortRecv, &recv_req)?;
+    mammoth::syscall::syscall(mammoth::zion::kZionReplyPortRecv, &recv_req)?;
 
     if byte_buffer.at::<u32>(0)? != SENTINEL {
         return Err(ZError::INVALID_RESPONSE);

@@ -79,8 +79,8 @@ pub fn generate_code(ast: &Vec<Decl>) -> String {
 
     use alloc::string::String;
     use alloc::string::ToString;
-    use mammoth::syscall::z_cap_t;
-    use mammoth::syscall::ZError;
+    use mammoth::zion::z_cap_t;
+    use mammoth::zion::ZError;
     use yunq::ByteBuffer;
     use yunq::YunqMessage;
     use yunq_derive::YunqMessage;

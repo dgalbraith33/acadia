@@ -1,5 +1,6 @@
 use crate::syscall;
-use crate::syscall::z_cap_t;
+use crate::zion;
+use crate::zion::z_cap_t;
 
 use core::ffi::c_void;
 
@@ -12,7 +13,7 @@ extern "C" fn entry_point(entry_ptr: *const ThreadEntry, arg1: *const c_void) ->
 
     entry(arg1);
 
-    let _ = syscall::syscall(syscall::kZionThreadExit, &syscall::ZThreadExitReq {});
+    let _ = syscall::syscall(zion::kZionThreadExit, &zion::ZThreadExitReq {});
 
     unreachable!();
 }
@@ -28,16 +29,16 @@ pub struct Thread<'a> {
 impl<'a> Thread<'a> {
     pub fn spawn(entry: &'a ThreadEntry, arg1: *const c_void) -> Self {
         let mut cap: z_cap_t = 0;
-        let req = syscall::ZThreadCreateReq {
-            proc_cap: unsafe { crate::SELF_PROC_CAP },
+        let req = zion::ZThreadCreateReq {
+            proc_cap: unsafe { crate::init::SELF_PROC_CAP },
             thread_cap: &mut cap as *mut z_cap_t,
         };
 
-        syscall::syscall(syscall::kZionThreadCreate, &req).expect("Failed to create thread.");
+        syscall::syscall(zion::kZionThreadCreate, &req).expect("Failed to create thread.");
 
         syscall::syscall(
-            syscall::kZionThreadStart,
-            &syscall::ZThreadStartReq {
+            zion::kZionThreadStart,
+            &zion::ZThreadStartReq {
                 thread_cap: cap,
                 entry: entry_point as u64,
                 arg1: entry as *const ThreadEntry as u64,
@@ -49,10 +50,10 @@ impl<'a> Thread<'a> {
         Self { cap, _entry: entry }
     }
 
-    pub fn join(&self) -> Result<(), syscall::ZError> {
+    pub fn join(&self) -> Result<(), zion::ZError> {
         syscall::syscall(
-            syscall::kZionThreadWait,
-            &syscall::ZThreadWaitReq {
+            zion::kZionThreadWait,
+            &zion::ZThreadWaitReq {
                 thread_cap: self.cap,
             },
         )

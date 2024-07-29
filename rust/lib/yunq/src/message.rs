@@ -1,7 +1,7 @@
 use crate::buffer::ByteBuffer;
 use alloc::vec::Vec;
-use mammoth::syscall::z_cap_t;
-use mammoth::syscall::ZError;
+use mammoth::zion::z_cap_t;
+use mammoth::zion::ZError;
 
 pub const MESSAGE_IDENT: u32 = 0x33441122;
 pub const MESSAGE_HEADER_SIZE: usize = 24; // 4x uint32, 1x uint64
