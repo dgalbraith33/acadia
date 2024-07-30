@@ -7,12 +7,13 @@ use mammoth::zion::ZError;
 const SENTINEL: u32 = 0xBEEFDEAD;
 
 pub fn call_endpoint<Req: YunqMessage, Resp: YunqMessage, const N: usize>(
+    request_id: u64,
     req: &Req,
     byte_buffer: &mut ByteBuffer<N>,
     endpoint_cap: z_cap_t,
 ) -> Result<Resp, ZError> {
     byte_buffer.write_at(0, SENTINEL)?;
-    byte_buffer.write_at(8, 1 as u64)?;
+    byte_buffer.write_at(8, request_id as u64)?;
 
     let mut cap_buffer = Vec::new();
 

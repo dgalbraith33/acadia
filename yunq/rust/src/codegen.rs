@@ -26,23 +26,24 @@ fn generate_message(message: &Message) -> TokenStream {
 }
 
 fn generate_method(method: &Method) -> TokenStream {
+    let id = proc_macro2::Literal::u64_suffixed(method.number);
     let name = ident(&method.name.to_case(Case::Snake));
     let maybe_req = method.request.clone().map(|r| ident(&r));
     let maybe_resp = method.response.clone().map(|r| ident(&r));
     match (maybe_req, maybe_resp) {
         (Some(req), Some(resp)) => quote! {
             pub fn #name (&mut self, req: & #req) -> Result<#resp, ZError> {
-                yunq::client::call_endpoint(req, &mut self.byte_buffer, self.endpoint_cap)
+                yunq::client::call_endpoint(#id, req, &mut self.byte_buffer, self.endpoint_cap)
             }
         },
         (Some(req), None) => quote! {
             pub fn #name (&mut self, req: & #req) -> Result<yunq::message::Empty, ZError> {
-                yunq::client::call_endpoint(req, &mut self.byte_buffer, self.endpoint_cap)
+                yunq::client::call_endpoint(#id, req, &mut self.byte_buffer, self.endpoint_cap)
             }
         },
         (None, Some(resp)) => quote! {
             pub fn #name (&mut self) -> Result<#resp, ZError> {
-                yunq::client::call_endpoint(&yunq::message::Empty{}, &mut self.byte_buffer, self.endpoint_cap)
+                yunq::client::call_endpoint(#id, &yunq::message::Empty{}, &mut self.byte_buffer, self.endpoint_cap)
             }
         },
         _ => unreachable!(),
