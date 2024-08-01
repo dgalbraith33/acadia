@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 mammoth = { path = "../../lib/mammoth" }
 yellowstone = { path = "../../lib/yellowstone" }
+yunq = { path = "../../lib/yunq" }

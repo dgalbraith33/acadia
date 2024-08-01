@@ -28,5 +28,11 @@ pub fn call_endpoint<Req: YunqMessage, Resp: YunqMessage, const N: usize>(
         cap_buffer.as_mut_slice(),
     )?;
 
+    let resp_code: u64 = byte_buffer.at(8)?;
+
+    if resp_code != 0 {
+        return Err(ZError::from(resp_code));
+    }
+
     Ok(Resp::parse_from_request(&byte_buffer, &cap_buffer)?)
 }

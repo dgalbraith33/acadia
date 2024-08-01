@@ -508,7 +508,7 @@ pub struct ZReplyPortSendReq {
     pub num_bytes: u64,
     pub data: *const ::core::ffi::c_void,
     pub num_caps: u64,
-    pub caps: *mut z_cap_t,
+    pub caps: *const z_cap_t,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]

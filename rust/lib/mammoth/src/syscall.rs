@@ -122,6 +122,17 @@ pub fn port_poll(
     Ok((num_bytes, num_caps))
 }
 
+pub fn endpoint_create() -> Result<z_cap_t, ZError> {
+    let mut endpoint_cap: z_cap_t = 0;
+    syscall(
+        zion::kZionEndpointCreate,
+        &zion::ZEndpointCreateReq {
+            endpoint_cap: &mut endpoint_cap,
+        },
+    )?;
+    Ok(endpoint_cap)
+}
+
 pub fn endpoint_send(
     endpoint_cap: z_cap_t,
     bytes: &[u8],
@@ -134,12 +145,51 @@ pub fn endpoint_send(
         endpoint_cap,
         data: bytes.as_ptr() as *const c_void,
         num_bytes: bytes.len() as u64,
-        reply_port_cap: &mut reply_port_cap as *mut z_cap_t,
+        reply_port_cap: &mut reply_port_cap,
     };
 
     syscall(zion::kZionEndpointSend, &send_req)?;
 
     Ok(reply_port_cap)
+}
+
+pub fn endpoint_recv(
+    endpoint_cap: z_cap_t,
+    bytes: &mut [u8],
+    caps: &mut [z_cap_t],
+) -> Result<(u64, u64, z_cap_t), ZError> {
+    let mut num_bytes = bytes.len() as u64;
+    let mut num_caps = caps.len() as u64;
+    let mut reply_port_cap = 0;
+    let recv_req = zion::ZEndpointRecvReq {
+        endpoint_cap,
+        data: bytes.as_mut_ptr() as *mut c_void,
+        num_bytes: &mut num_bytes,
+        caps: caps.as_mut_ptr(),
+        num_caps: &mut num_caps,
+        reply_port_cap: &mut reply_port_cap,
+    };
+
+    syscall(zion::kZionEndpointRecv, &recv_req)?;
+
+    Ok((num_bytes, num_caps, reply_port_cap))
+}
+
+pub fn reply_port_send(
+    reply_port_cap: z_cap_t,
+    bytes: &[u8],
+    caps: &[z_cap_t],
+) -> Result<(), ZError> {
+    syscall(
+        zion::kZionReplyPortSend,
+        &zion::ZReplyPortSendReq {
+            reply_port_cap,
+            data: bytes.as_ptr() as *const c_void,
+            num_bytes: bytes.len() as u64,
+            caps: caps.as_ptr(),
+            num_caps: caps.len() as u64,
+        },
+    )
 }
 
 pub fn reply_port_recv(
@@ -152,9 +202,9 @@ pub fn reply_port_recv(
     let recv_req = zion::ZReplyPortRecvReq {
         reply_port_cap,
         caps: caps.as_mut_ptr(),
-        num_caps: &mut num_caps as *mut u64,
+        num_caps: &mut num_caps,
         data: bytes.as_mut_ptr() as *mut c_void,
-        num_bytes: &mut num_bytes as *mut u64,
+        num_bytes: &mut num_bytes,
     };
 
     syscall(zion::kZionReplyPortRecv, &recv_req)?;

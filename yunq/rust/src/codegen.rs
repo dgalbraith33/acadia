@@ -50,7 +50,7 @@ fn generate_method(method: &Method) -> TokenStream {
     }
 }
 
-fn generate_interface(interface: &Interface) -> TokenStream {
+fn generate_client(interface: &Interface) -> TokenStream {
     let client_name = interface.name.clone() + "Client";
     let name = ident(&client_name);
     let methods = interface.methods.iter().map(|m| generate_method(&m));
@@ -73,17 +73,144 @@ fn generate_interface(interface: &Interface) -> TokenStream {
     }
 }
 
+fn generate_server_case(method: &Method) -> TokenStream {
+    let id = proc_macro2::Literal::u64_suffixed(method.number);
+    let name = ident(&method.name.to_case(Case::Snake));
+    let maybe_req = method.request.clone().map(|r| ident(&r));
+    let maybe_resp = method.response.clone().map(|r| ident(&r));
+    match (maybe_req, maybe_resp) {
+        (Some(req), Some(_)) => quote! {
+            #id => {
+                let req = #req::parse_from_request(byte_buffer, cap_buffer)?;
+                let resp = self.handler.#name(&req)?;
+                cap_buffer.resize(0, 0);
+                let resp_len = resp.serialize_as_request(0, byte_buffer, cap_buffer)?;
+                Ok(resp_len)
+            },
+        },
+        (Some(req), None) => quote! {
+            #id => {
+                let req = #req::parse_from_request(byte_buffer, cap_buffer)?;
+                self.handler.#name(&req)?;
+                cap_buffer.resize(0, 0);
+                // TODO: Implement serialization for EmptyMessage so this is less hacky.
+                yunq::message::serialize_error(byte_buffer, ZError::from(0));
+                Ok(0x10)
+            },
+        },
+        (None, Some(_)) => quote! {
+            #id => {
+                let resp = self.handler.#name()?;
+                cap_buffer.resize(0, 0);
+                let resp_len = resp.serialize_as_request(0, byte_buffer, cap_buffer)?;
+                Ok(resp_len)
+            },
+        },
+        _ => unreachable!(),
+    }
+}
+
+fn generate_server_method(method: &Method) -> TokenStream {
+    let name = ident(&method.name.to_case(Case::Snake));
+    let maybe_req = method.request.clone().map(|r| ident(&r));
+    let maybe_resp = method.response.clone().map(|r| ident(&r));
+    match (maybe_req, maybe_resp) {
+        (Some(req), Some(resp)) => quote! {
+            fn #name (&self, req: & #req) -> Result<#resp, ZError>;
+        },
+        (Some(req), None) => quote! {
+            fn #name (&self, req: & #req) -> Result<(), ZError>;
+        },
+        (None, Some(resp)) => quote! {
+            fn #name (&self) -> Result<#resp, ZError>;
+        },
+        _ => unreachable!(),
+    }
+}
+
+fn generate_server(interface: &Interface) -> TokenStream {
+    let server_name = ident(&(interface.name.clone() + "Server"));
+    let server_trait = ident(&(interface.name.clone() + "ServerHandler"));
+    let server_trait_methods = interface.methods.iter().map(|m| generate_server_method(&m));
+    let server_match_cases = interface.methods.iter().map(|m| generate_server_case(&m));
+    quote! {
+        pub trait #server_trait {
+            #(#server_trait_methods)*
+        }
+
+        pub struct #server_name<T: #server_trait> {
+            endpoint_cap: z_cap_t,
+            handler: T
+        }
+
+        impl<T: #server_trait> #server_name<T> {
+            pub fn new(handler: T) -> Result<Self, ZError> {
+                Ok(Self {
+                    endpoint_cap: syscall::endpoint_create()?,
+                    handler,
+                })
+            }
+
+            pub fn run_server(&self) -> Result<Box<thread::Thread>, ZError> {
+                let thread_entry = |server_ptr: *const c_void| {
+                    let server = unsafe { (server_ptr as *const #server_name<T>).as_ref().expect("Failed to convert to server") };
+                    server.server_loop();
+                };
+                thread::Thread::spawn(
+                    thread_entry,
+                    self as *const Self as *const core::ffi::c_void,
+                )
+            }
+        }
+
+        impl<T: #server_trait> yunq::server::YunqServer for #server_name<T> {
+            fn endpoint_cap(&self) -> z_cap_t {
+                self.endpoint_cap
+            }
+
+            fn handle_request(
+                &self,
+                method_number: u64,
+                byte_buffer: &mut ByteBuffer<1024>,
+                cap_buffer: &mut Vec<z_cap_t>,
+                ) -> Result<usize, ZError> {
+                match method_number {
+                    #(#server_match_cases)*
+
+                    _ => Err(ZError::UNIMPLEMENTED)
+                }
+            }
+        }
+    }
+}
+
+fn generate_interface(interface: &Interface) -> TokenStream {
+    let client = generate_client(interface);
+    let server = generate_server(interface);
+    quote! {
+        #client
+
+        #server
+    }
+}
+
 pub fn generate_code(ast: &Vec<Decl>) -> String {
     let prelude = quote! {
 
     extern crate alloc;
 
+    use alloc::boxed::Box;
     use alloc::string::String;
     use alloc::string::ToString;
+    use alloc::vec::Vec;
+    use core::ffi::c_void;
+    use mammoth::syscall;
+    use mammoth::thread;
     use mammoth::zion::z_cap_t;
     use mammoth::zion::ZError;
     use yunq::ByteBuffer;
     use yunq::YunqMessage;
+    use yunq::server::YunqServer;
     use yunq_derive::YunqMessage;
     };
 

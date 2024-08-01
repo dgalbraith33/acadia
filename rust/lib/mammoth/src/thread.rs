@@ -2,39 +2,40 @@ use crate::syscall;
 use crate::zion;
 use crate::zion::z_cap_t;
 
+use alloc::boxed::Box;
 use core::ffi::c_void;
 
 pub type ThreadEntry = fn(*const c_void) -> ();
 
 #[no_mangle]
-extern "C" fn internal_entry_point(entry_ptr: *const ThreadEntry, arg1: *const c_void) -> ! {
-    let entry = unsafe { *entry_ptr };
+extern "C" fn internal_entry_point(thread_ptr: *const Thread, arg1: *const c_void) -> ! {
+    let thread: &Thread = unsafe { thread_ptr.as_ref().expect("Failed to unwrap thread ref") };
 
-    entry(arg1);
+    (thread.entry)(arg1);
 
     syscall::thread_exit()
 }
 // TODO: Add a Drop implementation that kills this thread and drops its capability.
-pub struct Thread<'a> {
+pub struct Thread {
     cap: z_cap_t,
     // This field only exists to ensure that the entry reference will outlive the thread object
     // itself.
-    _entry: &'a ThreadEntry,
+    entry: ThreadEntry,
 }
 
-impl<'a> Thread<'a> {
-    pub fn spawn(entry: &'a ThreadEntry, arg1: *const c_void) -> Result<Self, zion::ZError> {
+impl Thread {
+    pub fn spawn(entry: ThreadEntry, arg1: *const c_void) -> Result<Box<Self>, zion::ZError> {
         let proc_cap = unsafe { crate::init::SELF_PROC_CAP };
         let cap = syscall::thread_create(proc_cap)?;
-
+        let thread = Box::new(Self { cap, entry });
         syscall::thread_start(
             cap,
             internal_entry_point as u64,
-            entry as *const ThreadEntry as u64,
+            thread.as_ref() as *const Thread as u64,
             arg1 as u64,
         )?;
 
-        Ok(Self { cap, _entry: entry })
+        Ok(thread)
     }
 
     pub fn join(&self) -> Result<(), zion::ZError> {
