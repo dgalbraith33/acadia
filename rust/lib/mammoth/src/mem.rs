@@ -1,4 +1,6 @@
 use crate::syscall;
+use crate::zion::{z_cap_t, ZError};
+use alloc::slice;
 use linked_list_allocator::LockedHeap;
 
 #[global_allocator]
@@ -14,5 +16,59 @@ pub fn init_heap() {
     unsafe {
         ALLOCATOR.lock().init(vaddr as *mut u8, size as usize);
         CAN_ALLOC = true;
+    }
+}
+
+pub struct MemoryRegion {
+    mem_cap: z_cap_t,
+    virt_addr: u64,
+    size: u64,
+}
+
+impl MemoryRegion {
+    pub fn direct_physical(paddr: u64, size: u64) -> Result<Self, ZError> {
+        let mem_cap = syscall::memory_object_direct_physical(paddr, size)?;
+        let virt_addr = syscall::address_space_map(mem_cap)?;
+        Ok(Self {
+            mem_cap,
+            virt_addr,
+            size,
+        })
+    }
+
+    pub fn from_cap(mem_cap: z_cap_t) -> Result<Self, ZError> {
+        let virt_addr = syscall::address_space_map(mem_cap)?;
+        let size = syscall::memory_object_inspect(mem_cap)?;
+        Ok(Self {
+            mem_cap,
+            virt_addr,
+            size,
+        })
+    }
+
+    pub fn slice<T>(&self) -> &[T] {
+        unsafe {
+            slice::from_raw_parts(
+                self.virt_addr as *const T,
+                self.size as usize / size_of::<T>(),
+            )
+        }
+    }
+
+    pub fn mut_slice<T>(&self) -> &mut [T] {
+        unsafe {
+            slice::from_raw_parts_mut(
+                self.virt_addr as *mut T,
+                self.size as usize / size_of::<T>(),
+            )
+        }
+    }
+}
+
+impl Drop for MemoryRegion {
+    fn drop(&mut self) {
+        syscall::address_space_unmap(self.virt_addr, self.virt_addr + self.size)
+            .expect("Failed to unmap memory");
+        syscall::cap_release(self.mem_cap).expect("Failed to release memory cap");
     }
 }

@@ -12,11 +12,19 @@ pushd $BUILD_DIR
 ninja 
 ninja install
 
-export CARGO_INSTALL_ROOT="${DIR}/../sysroot/usr/"
+CARGO_USR_ROOT="${DIR}/../sysroot/usr/"
+CARGO_SYS_ROOT="${DIR}/../sysroot/"
 
 # Need to pushd so rustup gets the toolchain from rust/rust_toolchain.toml
 pushd "${DIR}/../rust"
-cargo install --force --path "${DIR}/../rust/usr/testbed/"
+
+for BIN in ${DIR}/../rust/usr/*/; do
+  cargo install --force --path "${BIN}" --root $CARGO_USR_ROOT
+done
+
+for BIN in ${DIR}/../rust/sys/*/; do
+  cargo install --force --path "${BIN}" --root $CARGO_SYS_ROOT
+done
 popd
 
 sudo sh ${DIR}/build_image.sh disk.img

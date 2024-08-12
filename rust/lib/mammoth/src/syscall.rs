@@ -89,6 +89,31 @@ pub fn memory_object_create(size: u64) -> Result<z_cap_t, ZError> {
     Ok(vmmo_cap)
 }
 
+pub fn memory_object_direct_physical(paddr: u64, size: u64) -> Result<z_cap_t, ZError> {
+    let mut vmmo_cap = 0;
+    syscall(
+        zion::kZionMemoryObjectCreatePhysical,
+        &zion::ZMemoryObjectCreatePhysicalReq {
+            paddr,
+            size,
+            vmmo_cap: &mut vmmo_cap,
+        },
+    )?;
+    Ok(vmmo_cap)
+}
+
+pub fn memory_object_inspect(mem_cap: z_cap_t) -> Result<u64, ZError> {
+    let mut mem_size = 0;
+    syscall(
+        zion::kZionMemoryObjectInspect,
+        &zion::ZMemoryObjectInspectReq {
+            vmmo_cap: mem_cap,
+            size: &mut mem_size,
+        },
+    )?;
+    Ok(mem_size)
+}
+
 pub fn address_space_map(vmmo_cap: z_cap_t) -> Result<u64, ZError> {
     let mut vaddr: u64 = 0;
     // FIXME: Allow caller to pass these options.
@@ -102,6 +127,17 @@ pub fn address_space_map(vmmo_cap: z_cap_t) -> Result<u64, ZError> {
 
     syscall(zion::kZionAddressSpaceMap, &vmas_req)?;
     Ok(vaddr)
+}
+
+pub fn address_space_unmap(lower_addr: u64, upper_addr: u64) -> Result<(), ZError> {
+    syscall(
+        zion::kZionAddressSpaceUnmap,
+        &zion::ZAddressSpaceUnmapReq {
+            vmas_cap: unsafe { crate::init::SELF_VMAS_CAP },
+            lower_addr,
+            upper_addr,
+        },
+    )
 }
 
 pub fn port_poll(
@@ -210,4 +246,8 @@ pub fn reply_port_recv(
     syscall(zion::kZionReplyPortRecv, &recv_req)?;
 
     Ok((num_bytes, num_caps))
+}
+
+pub fn cap_release(cap: z_cap_t) -> Result<(), ZError> {
+    syscall(zion::kZionCapRelease, &zion::ZCapReleaseReq { cap })
 }

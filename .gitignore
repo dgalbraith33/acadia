@@ -5,6 +5,8 @@ compile_commands.json
 
 sysroot/bin
 sysroot/usr
+sysroot/.crates.toml
+sysroot/.crates2.json
 
 rust/target
 yunq/venv

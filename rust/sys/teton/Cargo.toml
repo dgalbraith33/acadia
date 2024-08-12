@@ -1,0 +1,9 @@
+[package]
+name = "teton"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+mammoth = { path = "../../lib/mammoth" }
+victoriafalls = { path = "../../lib/victoriafalls" }
+yellowstone = { path = "../../lib/yellowstone" }

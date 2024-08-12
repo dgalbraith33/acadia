@@ -79,7 +79,7 @@ impl YunqMessage for Empty {
     where
         Self: Sized,
     {
-        todo!()
+        Ok(Self {})
     }
 
     fn serialize<const N: usize>(
@@ -88,6 +88,6 @@ impl YunqMessage for Empty {
         _offset: usize,
         _caps: &mut Vec<z_cap_t>,
     ) -> Result<usize, ZError> {
-        todo!()
+        Ok(0)
     }
 }
