@@ -5,6 +5,7 @@ use alloc::{
     format,
     string::{String, ToString},
 };
+use victoriafalls::dir;
 use voyageurs::listener::KeyboardHandler;
 
 pub struct Terminal {
@@ -84,10 +85,33 @@ impl Terminal {
         self.curr_cmd.clear()
     }
 
-    fn execute_command_parsed(&mut self, cmd: &str, _args: Split<'_, char>) {
+    fn execute_command_parsed(&mut self, cmd: &str, mut args: Split<'_, char>) {
+        // TODO: Check that no extraneous params are provided.
         match cmd {
             "help" => self.write_line("Available commands are 'pwd', 'ls', 'cd', and 'exec'"),
             "pwd" => self.write_line(&self.cwd.clone()),
+            "cd" => match args.next() {
+                None => self.write_line("Specify a directory"),
+                Some(directory) => match dir::exists(directory) {
+                    Ok(true) => self.cwd = directory.to_string(),
+                    Ok(false) => self.write_line(&format!("Directory not found: {}", directory)),
+                    Err(e) => self.write_line(&format!("Error stating directory {:?}", e)),
+                },
+            },
+            "ls" => {
+                let use_dir = match args.next() {
+                    None => self.cwd.clone(),
+                    Some(d) => d.to_string(),
+                };
+                match dir::ls(&use_dir) {
+                    Err(e) => self.write_line(&format!("Error reading directory {:?}", e)),
+                    Ok(files) => {
+                        for file in files {
+                            self.write_line(&file);
+                        }
+                    }
+                }
+            }
             _ => self.write_line(&format!("Unrecognized command: {}", cmd)),
         }
     }
