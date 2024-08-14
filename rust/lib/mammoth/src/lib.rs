@@ -10,6 +10,7 @@ pub mod macros;
 
 pub mod init;
 pub mod mem;
+pub mod port;
 pub mod syscall;
 pub mod thread;
 pub mod zion;

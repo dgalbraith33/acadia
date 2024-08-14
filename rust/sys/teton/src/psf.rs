@@ -68,4 +68,12 @@ impl Psf {
         let len: usize = self.header.bytes_per_glyph as usize;
         &self.file.slice(offset, len)
     }
+
+    pub fn width(&self) -> u32 {
+        self.header.width
+    }
+
+    pub fn height(&self) -> u32 {
+        self.header.height
+    }
 }

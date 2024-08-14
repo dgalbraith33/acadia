@@ -35,4 +35,12 @@ impl Framebuffer {
             }
         }
     }
+
+    pub fn width(&self) -> u32 {
+        self.fb_info.width as u32
+    }
+
+    pub fn height(&self) -> u32 {
+        self.fb_info.height as u32
+    }
 }

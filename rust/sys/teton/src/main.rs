@@ -6,8 +6,13 @@ extern crate alloc;
 mod console;
 mod framebuffer;
 mod psf;
+mod terminal;
 
+use core::cell::RefCell;
+
+use alloc::rc::Rc;
 use mammoth::{debug, define_entry, zion::z_err_t};
+use voyageurs::listener::KeyboardListener;
 
 define_entry!();
 
@@ -33,18 +38,16 @@ extern "C" fn main() -> z_err_t {
         .expect("Failed to create framebuffer");
 
     let psf = psf::Psf::new("/default8x16.psfu").expect("Failed to open font file.");
-    let console = console::Console::new(framebuffer, psf);
+    let mut console = console::Console::new(framebuffer, psf);
     console.write_char('>');
 
-    /*
+    let terminal = Rc::new(RefCell::new(terminal::Terminal::new(console)));
 
-    Terminal terminal(console);
-    terminal.Register();
+    let kb_listener = KeyboardListener::new(terminal).expect("Failed to create keyboard listener");
 
-    Thread lthread = terminal.Listen();
-
-    check(lthread.Join());
-    */
+    kb_listener
+        .join()
+        .expect("Failed to wait on keyboard listener");
 
     0
 }

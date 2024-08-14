@@ -140,6 +140,37 @@ pub fn address_space_unmap(lower_addr: u64, upper_addr: u64) -> Result<(), ZErro
     )
 }
 
+pub fn port_create() -> Result<z_cap_t, ZError> {
+    let mut port_cap = 0;
+    syscall(
+        zion::kZionPortCreate,
+        &zion::ZPortCreateReq {
+            port_cap: &mut port_cap,
+        },
+    )?;
+    Ok(port_cap)
+}
+
+pub fn port_recv(
+    port_cap: z_cap_t,
+    bytes: &mut [u8],
+    caps: &mut [u64],
+) -> Result<(u64, u64), ZError> {
+    let mut num_bytes = bytes.len() as u64;
+    let mut num_caps = caps.len() as u64;
+    syscall(
+        zion::kZionPortRecv,
+        &zion::ZPortRecvReq {
+            port_cap,
+            data: bytes.as_mut_ptr() as *mut c_void,
+            num_bytes: &mut num_bytes as *mut u64,
+            caps: caps.as_mut_ptr(),
+            num_caps: &mut num_caps as *mut u64,
+        },
+    )?;
+    Ok((num_bytes, num_caps))
+}
+
 pub fn port_poll(
     port_cap: z_cap_t,
     bytes: &mut [u8],
@@ -246,6 +277,19 @@ pub fn reply_port_recv(
     syscall(zion::kZionReplyPortRecv, &recv_req)?;
 
     Ok((num_bytes, num_caps))
+}
+
+pub fn cap_duplicate(cap: z_cap_t, perm_mask: u64) -> Result<z_cap_t, ZError> {
+    let mut new_cap = 0;
+    syscall(
+        zion::kZionCapDuplicate,
+        &zion::ZCapDuplicateReq {
+            cap_in: cap,
+            perm_mask,
+            cap_out: &mut new_cap,
+        },
+    )?;
+    Ok(new_cap)
 }
 
 pub fn cap_release(cap: z_cap_t) -> Result<(), ZError> {
