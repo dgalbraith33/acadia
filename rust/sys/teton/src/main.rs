@@ -38,9 +38,7 @@ extern "C" fn main() -> z_err_t {
         .expect("Failed to create framebuffer");
 
     let psf = psf::Psf::new("/default8x16.psfu").expect("Failed to open font file.");
-    let mut console = console::Console::new(framebuffer, psf);
-    console.write_char('>');
-
+    let console = console::Console::new(framebuffer, psf);
     let terminal = Rc::new(RefCell::new(terminal::Terminal::new(console)));
 
     let kb_listener = KeyboardListener::new(terminal).expect("Failed to create keyboard listener");
