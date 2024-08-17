@@ -2,9 +2,9 @@ use crate::syscall;
 use crate::zion::z_cap_t;
 
 // From /zion/include/ztypes.h
-const Z_INIT_SELF_PROC: u64 = 0x4000_0000;
-const Z_INIT_SELF_VMAS: u64 = 0x4000_0001;
-const Z_INIT_ENDPOINT: u64 = 0x4100_0000;
+pub const Z_INIT_SELF_PROC: u64 = 0x4000_0000;
+pub const Z_INIT_SELF_VMAS: u64 = 0x4000_0001;
+pub const Z_INIT_ENDPOINT: u64 = 0x4100_0000;
 
 pub static mut SELF_PROC_CAP: z_cap_t = 0;
 pub static mut SELF_VMAS_CAP: z_cap_t = 0;

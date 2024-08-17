@@ -40,3 +40,31 @@ impl Drop for PortServer {
         cap_release(self.port_cap).expect("Failed to release port cap");
     }
 }
+
+pub struct PortClient {
+    port_cap: z_cap_t,
+}
+
+impl PortClient {
+    pub fn take_from(port_cap: z_cap_t) -> Self {
+        Self { port_cap }
+    }
+
+    pub fn copy_from(port_cap: z_cap_t) -> Result<Self, ZError> {
+        Ok(Self {
+            port_cap: cap_duplicate(port_cap, u64::MAX)?,
+        })
+    }
+
+    #[warn(unused_results)]
+    pub fn write_u64_and_cap(&self, bytes: u64, cap: z_cap_t) -> Result<(), ZError> {
+        let mut caps: [z_cap_t; 1] = [cap];
+        crate::syscall::port_send(self.port_cap, &bytes.to_le_bytes(), &mut caps)
+    }
+}
+
+impl Drop for PortClient {
+    fn drop(&mut self) {
+        cap_release(self.port_cap).expect("Failed to release port cap");
+    }
+}

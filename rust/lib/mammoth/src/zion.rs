@@ -55,7 +55,13 @@ impl fmt::Debug for ZError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let str = match self {
             ZError::INVALID_ARGUMENT => "INVALID_ARGUMENT",
+            ZError::NOT_FOUND => "NOT_FOUND",
+            ZError::PERMISSION_DENIED => "PERMISSION_DENIED",
+            ZError::NULL_PTR => "NULL_PTR",
+            ZError::EMPTY => "EMPTY",
+            ZError::ALREADY_EXISTS => "ALREADY_EXISTS",
             ZError::BUFFER_SIZE => "BUFFER_SIZE",
+            ZError::FAILED_PRECONDITION => "FAILED_PRECONDITION",
             ZError::INTERNAL => "INTERNAL",
             ZError::UNIMPLEMENTED => "UNIMPLEMENTED",
             ZError::INVALID_RESPONSE => "INVALID_RESPONSE",

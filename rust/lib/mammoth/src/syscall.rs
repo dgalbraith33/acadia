@@ -40,10 +40,44 @@ pub fn debug(msg: &str) {
     syscall(zion::kZionDebug, &req).expect("Failed to write");
 }
 
+pub fn process_spawn(
+    proc_cap: z_cap_t,
+    bootstrap_cap: z_cap_t,
+) -> Result<(z_cap_t, z_cap_t, z_cap_t), ZError> {
+    let mut new_proc_cap = 0;
+    let mut new_as_cap = 0;
+    let mut new_bootstrap_cap = 0;
+
+    syscall(
+        zion::kZionProcessSpawn,
+        &zion::ZProcessSpawnReq {
+            proc_cap,
+            bootstrap_cap,
+            new_proc_cap: &mut new_proc_cap,
+            new_vmas_cap: &mut new_as_cap,
+            new_bootstrap_cap: &mut new_bootstrap_cap,
+        },
+    )?;
+
+    Ok((new_proc_cap, new_as_cap, new_bootstrap_cap))
+}
+
 pub fn process_exit(code: u64) -> ! {
     let _ = syscall(zion::kZionProcessExit, &zion::ZProcessExitReq { code });
 
     unreachable!()
+}
+
+pub fn process_wait(proc_cap: z_cap_t) -> Result<u64, ZError> {
+    let mut err_code = 0;
+    syscall(
+        zion::kZionProcessWait,
+        &zion::ZProcessWaitReq {
+            proc_cap,
+            exit_code: &mut err_code,
+        },
+    )?;
+    Ok(err_code)
 }
 
 pub fn thread_create(proc_cap: z_cap_t) -> Result<z_cap_t, ZError> {
@@ -56,6 +90,10 @@ pub fn thread_create(proc_cap: z_cap_t) -> Result<z_cap_t, ZError> {
         },
     )?;
     Ok(cap)
+}
+
+pub fn thread_sleep(millis: u64) -> Result<(), ZError> {
+    syscall(zion::kZionThreadSleep, &zion::ZThreadSleepReq { millis })
 }
 
 pub fn thread_start(thread_cap: z_cap_t, entry: u64, arg1: u64, arg2: u64) -> Result<(), ZError> {
@@ -129,6 +167,24 @@ pub fn address_space_map(vmmo_cap: z_cap_t) -> Result<u64, ZError> {
     Ok(vaddr)
 }
 
+pub fn address_space_map_external(
+    vmas_cap: z_cap_t,
+    vmmo_cap: z_cap_t,
+    vaddr: u64,
+) -> Result<(), ZError> {
+    let mut vaddr_throw: u64 = 0;
+    let vmas_req = zion::ZAddressSpaceMapReq {
+        vmmo_cap,
+        vmas_cap,
+        align: 0,
+        vaddr: &mut vaddr_throw as *mut u64,
+        vmas_offset: vaddr,
+    };
+
+    syscall(zion::kZionAddressSpaceMap, &vmas_req)?;
+    Ok(())
+}
+
 pub fn address_space_unmap(lower_addr: u64, upper_addr: u64) -> Result<(), ZError> {
     syscall(
         zion::kZionAddressSpaceUnmap,
@@ -149,6 +205,20 @@ pub fn port_create() -> Result<z_cap_t, ZError> {
         },
     )?;
     Ok(port_cap)
+}
+
+pub fn port_send(port_cap: z_cap_t, bytes: &[u8], caps: &mut [z_cap_t]) -> Result<(), ZError> {
+    syscall(
+        zion::kZionPortSend,
+        &zion::ZPortSendReq {
+            port_cap,
+            num_bytes: bytes.len() as u64,
+            data: bytes.as_ptr() as *const c_void,
+            num_caps: caps.len() as u64,
+            // FIXME: This shouldn't need to be mutable.
+            caps: caps.as_mut_ptr(),
+        },
+    )
 }
 
 pub fn port_recv(

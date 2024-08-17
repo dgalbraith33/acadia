@@ -18,7 +18,7 @@ impl File {
         })
     }
 
-    pub fn slice(&self, offset: usize, len: usize) -> &[u8] {
-        &self.memory.slice()[offset..offset + len]
+    pub fn slice(&self) -> &[u8] {
+        self.memory.slice()
     }
 }

@@ -46,6 +46,16 @@ impl MemoryRegion {
         })
     }
 
+    pub fn new(size: u64) -> Result<Self, ZError> {
+        let mem_cap = syscall::memory_object_create(size)?;
+        let virt_addr = syscall::address_space_map(mem_cap)?;
+        Ok(Self {
+            mem_cap,
+            virt_addr,
+            size,
+        })
+    }
+
     pub fn slice<T>(&self) -> &[T] {
         unsafe {
             slice::from_raw_parts(
@@ -63,12 +73,20 @@ impl MemoryRegion {
             )
         }
     }
+
+    pub fn cap(&self) -> z_cap_t {
+        self.mem_cap
+    }
 }
 
 impl Drop for MemoryRegion {
     fn drop(&mut self) {
-        syscall::address_space_unmap(self.virt_addr, self.virt_addr + self.size)
-            .expect("Failed to unmap memory");
+        // FIXME: We shouldn't have to do this manual adjustment.
+        let mut max = self.virt_addr + self.size;
+        if (max & 0xFFF) != 0 {
+            max += 0x1000 - (max & 0xFFF);
+        }
+        syscall::address_space_unmap(self.virt_addr, max).expect("Failed to unmap memory");
         syscall::cap_release(self.mem_cap).expect("Failed to release memory cap");
     }
 }

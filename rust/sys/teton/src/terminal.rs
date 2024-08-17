@@ -112,6 +112,19 @@ impl Terminal {
                     }
                 }
             }
+            "exec" => match args.next() {
+                None => self.write_line("Specify a program"),
+                Some(prog) => {
+                    let file = victoriafalls::file::File::open(prog).expect("Failed to open file");
+                    let proc_cap = mammoth::elf::spawn_process_from_elf(file.slice())
+                        .expect("Faield to spawn process");
+
+                    let exit_code = mammoth::syscall::process_wait(proc_cap)
+                        .expect("Failed to wait on process.");
+
+                    self.write_line(&format!("Process exit code: {}", exit_code));
+                }
+            },
             _ => self.write_line(&format!("Unrecognized command: {}", cmd)),
         }
     }

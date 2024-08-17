@@ -25,8 +25,7 @@ impl Psf {
     pub fn new(path: &str) -> Result<Self, ZError> {
         let file = File::open(&path)?;
 
-        let header = file
-            .slice(0, core::mem::size_of::<PsfHeader>())
+        let header = file.slice()[0..core::mem::size_of::<PsfHeader>()]
             .as_ptr()
             .cast();
         let psf = Self {
@@ -66,7 +65,7 @@ impl Psf {
         let offset: usize =
             (self.header.headersize + (index * self.header.bytes_per_glyph)) as usize;
         let len: usize = self.header.bytes_per_glyph as usize;
-        &self.file.slice(offset, len)
+        &self.file.slice()[offset..offset + len]
     }
 
     pub fn width(&self) -> u32 {
