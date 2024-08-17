@@ -91,6 +91,11 @@ void* KernelHeap::Allocate(uint64_t size) {
   uint64_t address = next_addr_;
   alloc_count_ += 1;
   next_addr_ += size;
+
+  // Ensure alingment for these pointers.
+  if (next_addr_ & 0x7) {
+    next_addr_ = (next_addr_ & ~0x7) + 0x8;
+  }
   return reinterpret_cast<void*>(address);
 }
 
