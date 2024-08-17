@@ -45,11 +45,15 @@ glcr::ErrorCode MemoryMappingTree::FreeMemoryRange(uint64_t vaddr_base,
   }
   auto predecessor_or = mapping_tree_.Predecessor(vaddr_base);
   if (predecessor_or && predecessor_or.value().get().vaddr_limit > vaddr_base) {
+    dbgln("Free memory Predecessor check failed: {x} > {x}",
+          predecessor_or.value().get().vaddr_limit, vaddr_base);
     return glcr::FAILED_PRECONDITION;
   }
   auto last_predecessor_or = mapping_tree_.Predecessor(vaddr_limit);
   if (last_predecessor_or &&
       last_predecessor_or.value().get().vaddr_limit > vaddr_limit) {
+    dbgln("Free memory Last Predecessor check failed: {x} > {x}",
+          last_predecessor_or.value().get().vaddr_limit, vaddr_limit);
     return glcr::FAILED_PRECONDITION;
   }
 
