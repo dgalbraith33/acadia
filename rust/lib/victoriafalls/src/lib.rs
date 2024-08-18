@@ -23,3 +23,7 @@ fn get_client() -> &'static mut VFSClient {
         VFS_CLIENT.as_mut().unwrap()
     }
 }
+
+pub fn set_client(client: VFSClient) {
+    unsafe { VFS_CLIENT = Some(client) };
+}

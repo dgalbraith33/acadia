@@ -1,6 +1,7 @@
 use alloc::rc::Rc;
 use alloc::{collections::BTreeMap, string::String};
 use mammoth::{cap::Capability, mem::MemoryRegion, zion::ZError};
+use victoriafalls::VFSClient;
 use yellowstone_yunq::{
     AhciInfo, DenaliInfo, Endpoint, FramebufferInfo, GetEndpointRequest, RegisterEndpointRequest,
     XhciInfo, YellowstoneServerHandler,
@@ -51,14 +52,17 @@ impl YellowstoneServerHandler for YellowstoneServerImpl {
         let signal_denali = req.endpoint_name == "denali";
         let signal_vfs = req.endpoint_name == "victoriafalls";
 
+        let raw_cap = req.endpoint_capability;
+
         self.service_map
             .insert(req.endpoint_name, Capability::take(req.endpoint_capability));
 
         if signal_denali {
-            self.context.denali_semaphore.signal()?
+            self.context.denali_semaphore.signal()?;
         }
         if signal_vfs {
-            self.context.victoria_falls_semaphore.signal()?
+            self.context.victoria_falls_semaphore.signal()?;
+            victoriafalls::set_client(VFSClient::new(Capability::take_copy(raw_cap).unwrap()));
         }
         Ok(())
     }

@@ -4,6 +4,7 @@ use mammoth::{cap::Capability, zion::ZError};
 
 pub struct File {
     memory: mammoth::mem::MemoryRegion,
+    len: usize,
 }
 
 impl File {
@@ -15,10 +16,11 @@ impl File {
 
         Ok(Self {
             memory: mammoth::mem::MemoryRegion::from_cap(Capability::take(resp.memory))?,
+            len: resp.size as usize,
         })
     }
 
     pub fn slice(&self) -> &[u8] {
-        self.memory.slice()
+        &self.memory.slice()[..self.len]
     }
 }

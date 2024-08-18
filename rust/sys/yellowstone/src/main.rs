@@ -3,6 +3,7 @@
 
 extern crate alloc;
 
+use alloc::vec::Vec;
 use mammoth::{
     cap::Capability,
     define_entry, elf,
@@ -57,6 +58,20 @@ extern "C" fn main() -> z_err_t {
 
     context.wait_victoria_falls().unwrap();
     mammoth::debug!("VFS Registered");
+
+    let file = victoriafalls::file::File::open("/init.txt").unwrap();
+
+    let init_files: Vec<_> = core::str::from_utf8(file.slice())
+        .unwrap()
+        .trim()
+        .split('\n')
+        .collect();
+
+    mammoth::debug!("Init files: {:?}", init_files);
+
+    for bin_name in init_files {
+        let path = "/bin/" + bin_name;
+    }
 
     server_thread.join().expect("Failed to join thread");
     0
