@@ -13,7 +13,7 @@
 #include "scheduler/process_manager.h"
 #include "scheduler/scheduler.h"
 
-#define K_INIT_DEBUG 0
+#define K_INIT_DEBUG 1
 
 namespace {
 
@@ -67,6 +67,9 @@ uint64_t LoadElfProgram(Process& dest_proc, uint64_t base, uint64_t offset) {
       reinterpret_cast<Elf64ProgramHeader*>(base + header->phoff);
   for (uint64_t i = 0; i < header->phnum; i++) {
     Elf64ProgramHeader& program = programs[i];
+    if (program.type != 1) {
+      continue;
+    }
 #if K_INIT_DEBUG
     dbgln(
         "prog: type: {}, flags: {}, offset: {}\n  vaddr: {x}, paddr: {x}\n  "
@@ -74,12 +77,19 @@ uint64_t LoadElfProgram(Process& dest_proc, uint64_t base, uint64_t offset) {
         program.type, program.flags, program.offset, program.vaddr,
         program.paddr, program.filesz, program.memsz, program.align);
 #endif
-    auto mem_obj = glcr::MakeRefCounted<VariableMemoryObject>(program.memsz);
-    mem_obj->CopyBytesToObject(base + program.offset, program.filesz);
-    PANIC_ON_ERR(
-        dest_proc.vmas()->MapInMemoryObject(
-            program.vaddr, glcr::StaticCastRefPtr<MemoryObject>(mem_obj)),
-        "Couldn't map in init program.");
+    uint64_t page_offset = program.vaddr & 0xFFF;
+    auto mem_obj =
+        glcr::MakeRefCounted<VariableMemoryObject>(program.memsz + page_offset);
+
+    // Super hacky but if we adjust the offsets to handle a non-aligned page.
+    mem_obj->CopyBytesToObject(base + program.offset - page_offset,
+                               program.filesz + page_offset);
+    auto map_res = dest_proc.vmas()->MapInMemoryObject(
+        program.vaddr - page_offset,
+        glcr::StaticCastRefPtr<MemoryObject>(mem_obj));
+    if (map_res != glcr::OK) {
+      panic("Couldn't map in init program {}", map_res);
+    }
   }
   return header->entry;
 }
