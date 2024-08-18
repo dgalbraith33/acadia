@@ -18,6 +18,15 @@ impl PciReader {
         }
     }
 
+    pub fn get_xhci_region(&self) -> Result<Capability, ZError> {
+        match self.probe_pci(|class, subclass, prog_interface| {
+            class == 0xC && subclass == 0x3 && prog_interface == 0x30
+        }) {
+            Some(m) => Ok(m),
+            None => Err(ZError::NOT_FOUND),
+        }
+    }
+
     fn probe_pci(&self, pred: DevPredicate) -> Option<Capability> {
         let base_header = self.pci_header(0, 0, 0);
         if (base_header.header_type & 0x80) == 0 {

@@ -3,11 +3,11 @@
 
 extern crate alloc;
 
-use alloc::vec::Vec;
+use alloc::{string::ToString, vec::Vec};
 use mammoth::{
     cap::Capability,
     define_entry, elf,
-    init::BOOT_PCI_VMMO,
+    init::{BOOT_FRAMEBUFFER_INFO_VMMO, BOOT_PCI_VMMO},
     mem::MemoryRegion,
     zion::{z_cap_t, z_err_t, ZError},
 };
@@ -20,9 +20,17 @@ mod server;
 
 define_entry!();
 
+fn spawn_from_mem_region(
+    mem_region: &mammoth::mem::MemoryRegion,
+    server_cap: Capability,
+) -> Result<(), ZError> {
+    elf::spawn_process_from_elf_and_init(mem_region.slice(), server_cap)?;
+    Ok(())
+}
+
 fn spawn_from_vmmo(vmmo_cap: z_cap_t, server_cap: Capability) -> Result<(), ZError> {
     let region = mammoth::mem::MemoryRegion::from_cap(Capability::take(vmmo_cap))?;
-    elf::spawn_process_from_elf_and_init(region.slice(), server_cap)?;
+    spawn_from_mem_region(&region, server_cap)?;
     Ok(())
 }
 
@@ -30,8 +38,10 @@ fn spawn_from_vmmo(vmmo_cap: z_cap_t, server_cap: Capability) -> Result<(), ZErr
 extern "C" fn main() -> z_err_t {
     let pci_region = MemoryRegion::from_cap(Capability::take(unsafe { BOOT_PCI_VMMO }))
         .expect("Failed to create PCI region");
+    let fb_region = MemoryRegion::from_cap(Capability::take(unsafe { BOOT_FRAMEBUFFER_INFO_VMMO }))
+        .expect("Failed to create Framebuffer region");
     let context = alloc::rc::Rc::new(
-        server::YellowstoneServerContext::new(pci_region)
+        server::YellowstoneServerContext::new(pci_region, fb_region)
             .expect("Failed to create yellowstone context"),
     );
     let handler = server::YellowstoneServerImpl::new(context.clone());
@@ -47,7 +57,7 @@ extern "C" fn main() -> z_err_t {
     )
     .expect("Failed to spawn denali");
 
-    context.wait_denali().expect("Failed to wait for denali");
+    context.wait("denali").expect("Failed to wait for denali");
     mammoth::debug!("Denali registered.");
 
     spawn_from_vmmo(
@@ -56,7 +66,7 @@ extern "C" fn main() -> z_err_t {
     )
     .expect("Failed to spawn victoriafalls");
 
-    context.wait_victoria_falls().unwrap();
+    context.wait("victoriafalls").unwrap();
     mammoth::debug!("VFS Registered");
 
     let file = victoriafalls::file::File::open("/init.txt").unwrap();
@@ -70,7 +80,14 @@ extern "C" fn main() -> z_err_t {
     mammoth::debug!("Init files: {:?}", init_files);
 
     for bin_name in init_files {
-        let path = "/bin/" + bin_name;
+        // FIXME implement dependencies.
+        if bin_name == "teton" {
+            context.wait("voyageurs").unwrap();
+        }
+        let path = "/bin/".to_string() + bin_name;
+
+        let bin_file = victoriafalls::file::File::open(&path).unwrap();
+        spawn_from_mem_region(bin_file.memory(), server.create_client_cap().unwrap()).unwrap();
     }
 
     server_thread.join().expect("Failed to join thread");

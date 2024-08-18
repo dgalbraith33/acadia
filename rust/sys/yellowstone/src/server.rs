@@ -1,3 +1,5 @@
+use core::cell::RefCell;
+
 use alloc::rc::Rc;
 use alloc::{collections::BTreeMap, string::String};
 use mammoth::{cap::Capability, mem::MemoryRegion, zion::ZError};
@@ -10,65 +12,90 @@ use yellowstone_yunq::{
 use crate::pci::PciReader;
 
 pub struct YellowstoneServerContext {
-    denali_semaphore: mammoth::sync::Semaphore,
-    victoria_falls_semaphore: mammoth::sync::Semaphore,
+    registration_semaphore: mammoth::sync::Semaphore,
     pci_reader: PciReader,
+    framebuffer_info_region: MemoryRegion,
+    service_map: RefCell<BTreeMap<String, Capability>>,
 }
 
 impl YellowstoneServerContext {
-    pub fn new(pci_region: MemoryRegion) -> Result<Self, ZError> {
+    fn framebuffer_info(&self) -> yellowstone_yunq::FramebufferInfo {
+        let fb_info: &mammoth::zion::ZFramebufferInfo = unsafe {
+            self.framebuffer_info_region
+                .slice::<u8>()
+                .as_ptr()
+                .cast::<mammoth::zion::ZFramebufferInfo>()
+                .as_ref()
+                .unwrap()
+        };
+
+        yellowstone_yunq::FramebufferInfo {
+            address_phys: fb_info.address_phys,
+            width: fb_info.width,
+            height: fb_info.height,
+            pitch: fb_info.pitch,
+            bpp: fb_info.bpp as u64,
+            memory_model: fb_info.memory_model as u64,
+            red_mask_size: fb_info.red_mask_size as u64,
+            red_mask_shift: fb_info.red_mask_shift as u64,
+            blue_mask_size: fb_info.blue_mask_size as u64,
+            blue_mask_shift: fb_info.blue_mask_shift as u64,
+            green_mask_size: fb_info.green_mask_size as u64,
+            green_mask_shift: fb_info.green_mask_shift as u64,
+        }
+    }
+}
+
+impl YellowstoneServerContext {
+    pub fn new(pci_region: MemoryRegion, fb_region: MemoryRegion) -> Result<Self, ZError> {
         Ok(Self {
-            denali_semaphore: mammoth::sync::Semaphore::new()?,
-            victoria_falls_semaphore: mammoth::sync::Semaphore::new()?,
+            registration_semaphore: mammoth::sync::Semaphore::new()?,
             pci_reader: PciReader::new(pci_region),
+            framebuffer_info_region: fb_region,
+            service_map: BTreeMap::new().into(),
         })
     }
 
-    pub fn wait_denali(&self) -> Result<(), ZError> {
-        self.denali_semaphore.wait()
-    }
-
-    pub fn wait_victoria_falls(&self) -> Result<(), ZError> {
-        self.victoria_falls_semaphore.wait()
+    pub fn wait(&self, service: &str) -> Result<(), ZError> {
+        loop {
+            match self.service_map.borrow().get(service) {
+                Some(_) => return Ok(()),
+                None => {}
+            }
+            self.registration_semaphore.wait().unwrap();
+        }
     }
 }
 
 pub struct YellowstoneServerImpl {
     context: Rc<YellowstoneServerContext>,
-    service_map: BTreeMap<String, Capability>,
 }
 
 impl YellowstoneServerImpl {
     pub fn new(context: Rc<YellowstoneServerContext>) -> Self {
-        Self {
-            context,
-            service_map: BTreeMap::new(),
-        }
+        Self { context }
     }
 }
 
 impl YellowstoneServerHandler for YellowstoneServerImpl {
     fn register_endpoint(&mut self, req: RegisterEndpointRequest) -> Result<(), ZError> {
-        let signal_denali = req.endpoint_name == "denali";
-        let signal_vfs = req.endpoint_name == "victoriafalls";
+        if req.endpoint_name == "victoriafalls" {
+            victoriafalls::set_client(VFSClient::new(
+                Capability::take_copy(req.endpoint_capability).unwrap(),
+            ));
+        }
 
-        let raw_cap = req.endpoint_capability;
-
-        self.service_map
+        self.context
+            .service_map
+            .borrow_mut()
             .insert(req.endpoint_name, Capability::take(req.endpoint_capability));
 
-        if signal_denali {
-            self.context.denali_semaphore.signal()?;
-        }
-        if signal_vfs {
-            self.context.victoria_falls_semaphore.signal()?;
-            victoriafalls::set_client(VFSClient::new(Capability::take_copy(raw_cap).unwrap()));
-        }
+        self.context.registration_semaphore.signal()?;
         Ok(())
     }
 
     fn get_endpoint(&mut self, req: GetEndpointRequest) -> Result<Endpoint, ZError> {
-        match self.service_map.get(&req.endpoint_name) {
+        match self.context.service_map.borrow().get(&req.endpoint_name) {
             Some(cap) => Ok(Endpoint {
                 endpoint: cap.duplicate(Capability::PERMS_ALL)?.release(),
             }),
@@ -84,15 +111,18 @@ impl YellowstoneServerHandler for YellowstoneServerImpl {
     }
 
     fn get_xhci_info(&mut self) -> Result<XhciInfo, ZError> {
-        todo!()
+        Ok(XhciInfo {
+            xhci_region: self.context.pci_reader.get_xhci_region()?.release(),
+            region_length: 0x1000,
+        })
     }
 
     fn get_framebuffer_info(&mut self) -> Result<FramebufferInfo, ZError> {
-        todo!()
+        Ok(self.context.framebuffer_info())
     }
 
     fn get_denali(&mut self) -> Result<DenaliInfo, ZError> {
-        match self.service_map.get("denali") {
+        match self.context.service_map.borrow().get("denali") {
             Some(ep_cap) => crate::gpt::read_gpt(denali::DenaliClient::new(
                 ep_cap.duplicate(Capability::PERMS_ALL).unwrap(),
             ))
