@@ -8,7 +8,7 @@ use mammoth::debug;
 use mammoth::define_entry;
 use mammoth::thread;
 use mammoth::zion::z_err_t;
-use yellowstone::GetEndpointRequest;
+use yellowstone_yunq::GetEndpointRequest;
 
 define_entry!();
 
@@ -16,7 +16,7 @@ define_entry!();
 pub extern "C" fn main() -> z_err_t {
     debug!("Testing!");
 
-    let yellowstone = yellowstone::from_init_endpoint();
+    let yellowstone = yellowstone_yunq::from_init_endpoint();
 
     debug!("Get endpoint");
 

@@ -13,9 +13,7 @@ const ELF_IDENT_64BIT: u8 = 0x2;
 
 const ELF_ENDIAN_LITTLE: u8 = 0x1;
 const ELF_ENDIAN_BIG: u8 = 0x2;
-
 const ELF_VERSION_CURRENT: u8 = 0x1;
-
 const ELF_ABI_SYSV: u8 = 0x0;
 const ELF_ABI_LINUX: u8 = 0x3;
 
@@ -312,7 +310,10 @@ fn load_elf_program(elf_file: &[u8], vmas: &Capability) -> Result<u64, ZError> {
     Ok(header.entry)
 }
 
-pub fn spawn_process_from_elf(elf_file: &[u8]) -> Result<Capability, ZError> {
+pub fn spawn_process_from_elf_and_init(
+    elf_file: &[u8],
+    init_cap: Capability,
+) -> Result<Capability, ZError> {
     let self_cap = Capability::take_copy(unsafe { init::SELF_PROC_CAP })?;
     let port_cap = syscall::port_create()?;
 
@@ -328,12 +329,16 @@ pub fn spawn_process_from_elf(elf_file: &[u8]) -> Result<Capability, ZError> {
         new_proc_cap.duplicate(Capability::PERMS_ALL)?,
     )?;
     port.write_u64_and_cap(crate::init::Z_INIT_SELF_VMAS, new_as_cap)?;
-    let yellowstone = Capability::take_copy(unsafe { crate::init::INIT_ENDPOINT })?;
-    port.write_u64_and_cap(crate::init::Z_INIT_ENDPOINT, yellowstone)?;
+    port.write_u64_and_cap(crate::init::Z_INIT_ENDPOINT, init_cap)?;
 
     let thread_cap = syscall::thread_create(&new_proc_cap)?;
 
     syscall::thread_start(&thread_cap, entry_point, foreign_port_id, 0)?;
 
     Ok(new_proc_cap)
+}
+
+pub fn spawn_process_from_elf(elf_file: &[u8]) -> Result<Capability, ZError> {
+    let yellowstone = Capability::take_copy(unsafe { crate::init::INIT_ENDPOINT })?;
+    spawn_process_from_elf_and_init(elf_file, yellowstone)
 }

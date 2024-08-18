@@ -211,8 +211,8 @@ impl KeyboardListener {
             handler,
         });
 
-        let voyageur_endpoint = yellowstone::from_init_endpoint()
-            .get_endpoint(&yellowstone::GetEndpointRequest {
+        let voyageur_endpoint = yellowstone_yunq::from_init_endpoint()
+            .get_endpoint(&yellowstone_yunq::GetEndpointRequest {
                 endpoint_name: "voyageurs".to_string(),
             })?
             .endpoint;

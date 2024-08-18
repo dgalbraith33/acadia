@@ -18,6 +18,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "denali"
+version = "0.1.0"
+dependencies = [
+ "mammoth",
+ "yunq",
+ "yunq-derive",
+ "yunqc",
+]
+
+[[package]]
 name = "linked_list_allocator"
 version = "0.10.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -113,7 +123,7 @@ name = "testbed"
 version = "0.1.0"
 dependencies = [
  "mammoth",
- "yellowstone",
+ "yellowstone-yunq",
  "yunq",
 ]
 
@@ -124,7 +134,7 @@ dependencies = [
  "mammoth",
  "victoriafalls",
  "voyageurs",
- "yellowstone",
+ "yellowstone-yunq",
 ]
 
 [[package]]
@@ -144,7 +154,7 @@ name = "victoriafalls"
 version = "0.1.0"
 dependencies = [
  "mammoth",
- "yellowstone",
+ "yellowstone-yunq",
  "yunq",
  "yunq-derive",
  "yunqc",
@@ -155,7 +165,7 @@ name = "voyageurs"
 version = "0.1.0"
 dependencies = [
  "mammoth",
- "yellowstone",
+ "yellowstone-yunq",
  "yunq",
  "yunq-derive",
  "yunqc",
@@ -163,6 +173,18 @@ dependencies = [
 
 [[package]]
 name = "yellowstone"
+version = "0.1.0"
+dependencies = [
+ "denali",
+ "mammoth",
+ "victoriafalls",
+ "voyageurs",
+ "yellowstone-yunq",
+ "yunq",
+]
+
+[[package]]
+name = "yellowstone-yunq"
 version = "0.1.0"
 dependencies = [
  "mammoth",

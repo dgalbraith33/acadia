@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 mammoth = { path = "../mammoth" }
-yellowstone = { path = "../yellowstone" }
+yellowstone-yunq = { path = "../yellowstone" }
 yunq = {path = "../yunq"}
 yunq-derive = {path = "../yunq-derive"}
 

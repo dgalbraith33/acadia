@@ -1,10 +1,12 @@
 [package]
-name = "teton"
+name = "yellowstone"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
 mammoth = { path = "../../lib/mammoth" }
+denali = { path = "../../lib/denali" }
 victoriafalls = { path = "../../lib/victoriafalls" }
 voyageurs = { path = "../../lib/voyageurs" }
 yellowstone-yunq = { path = "../../lib/yellowstone" }
+yunq = { path = "../../lib/yunq" }

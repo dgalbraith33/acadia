@@ -14,6 +14,7 @@ pub mod elf;
 pub mod init;
 pub mod mem;
 pub mod port;
+pub mod sync;
 pub mod syscall;
 pub mod thread;
 pub mod zion;

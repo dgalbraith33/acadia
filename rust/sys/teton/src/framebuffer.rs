@@ -1,5 +1,5 @@
 use mammoth::{mem::MemoryRegion, zion::ZError};
-use yellowstone::FramebufferInfo;
+use yellowstone_yunq::FramebufferInfo;
 
 pub struct Framebuffer {
     fb_info: FramebufferInfo,

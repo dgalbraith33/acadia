@@ -363,3 +363,33 @@ pub fn reply_port_recv(
 
     Ok((num_bytes, num_caps))
 }
+
+pub fn semaphore_create() -> Result<Capability, ZError> {
+    let mut sem_cap: z_cap_t = 0;
+    syscall(
+        zion::kZionSemaphoreCreate,
+        &zion::ZSemaphoreCreateReq {
+            semaphore_cap: &mut sem_cap,
+        },
+    )?;
+
+    Ok(Capability::take(sem_cap))
+}
+
+pub fn semaphone_signal(sem_cap: &Capability) -> Result<(), ZError> {
+    syscall(
+        zion::kZionSemaphoreSignal,
+        &zion::ZSemaphoreSignalReq {
+            semaphore_cap: sem_cap.raw(),
+        },
+    )
+}
+
+pub fn semaphone_wait(sem_cap: &Capability) -> Result<(), ZError> {
+    syscall(
+        zion::kZionSemaphoreWait,
+        &zion::ZSemaphoreWaitReq {
+            semaphore_cap: sem_cap.raw(),
+        },
+    )
+}

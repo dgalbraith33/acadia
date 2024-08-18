@@ -20,7 +20,7 @@ define_entry!();
 extern "C" fn main() -> z_err_t {
     debug!("Teton Starting");
 
-    let yellowstone = yellowstone::from_init_endpoint();
+    let yellowstone = yellowstone_yunq::from_init_endpoint();
     let framebuffer_info = yellowstone
         .get_framebuffer_info()
         .expect("Failed to get framebuffer info.");
