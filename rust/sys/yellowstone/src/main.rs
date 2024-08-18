@@ -13,6 +13,7 @@ use mammoth::{
 use yellowstone_yunq::YellowstoneServer;
 use yunq::server::YunqServer;
 
+mod gpt;
 mod pci;
 mod server;
 

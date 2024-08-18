@@ -88,6 +88,19 @@ impl YellowstoneServerHandler for YellowstoneServerImpl {
     }
 
     fn get_denali(&mut self) -> Result<DenaliInfo, ZError> {
-        todo!()
+        match self.service_map.get("denali") {
+            Some(ep_cap) => crate::gpt::read_gpt(denali::DenaliClient::new(
+                ep_cap.duplicate(Capability::PERMS_ALL).unwrap(),
+            ))
+            .map(|lba| DenaliInfo {
+                denali_endpoint: ep_cap.duplicate(Capability::PERMS_ALL).unwrap().release(),
+                device_id: 0,
+                lba_offset: lba,
+            }),
+            None => {
+                mammoth::debug!("Denali not yet registered");
+                Err(ZError::FAILED_PRECONDITION)
+            }
+        }
     }
 }
