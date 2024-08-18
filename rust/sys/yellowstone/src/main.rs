@@ -6,11 +6,14 @@ extern crate alloc;
 use mammoth::{
     cap::Capability,
     define_entry, elf,
-    zion::{kZionPerm_Read, z_cap_t, z_err_t, ZError},
+    init::BOOT_PCI_VMMO,
+    mem::MemoryRegion,
+    zion::{z_cap_t, z_err_t, ZError},
 };
 use yellowstone_yunq::YellowstoneServer;
 use yunq::server::YunqServer;
 
+mod pci;
 mod server;
 
 define_entry!();
@@ -23,8 +26,11 @@ fn spawn_from_vmmo(vmmo_cap: z_cap_t, server_cap: Capability) -> Result<(), ZErr
 
 #[no_mangle]
 extern "C" fn main() -> z_err_t {
+    let pci_region = MemoryRegion::from_cap(Capability::take(unsafe { BOOT_PCI_VMMO }))
+        .expect("Failed to create PCI region");
     let context = alloc::rc::Rc::new(
-        server::YellowstoneServerContext::new().expect("Failed to create yellowstone context"),
+        server::YellowstoneServerContext::new(pci_region)
+            .expect("Failed to create yellowstone context"),
     );
     let handler = server::YellowstoneServerImpl::new(context.clone());
     let server = YellowstoneServer::new(handler).expect("Couldn't create yellowstone server");

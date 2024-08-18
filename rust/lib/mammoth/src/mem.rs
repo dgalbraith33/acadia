@@ -78,6 +78,10 @@ impl MemoryRegion {
     pub fn cap(&self) -> &Capability {
         &self.mem_cap
     }
+
+    pub fn duplicate(&self, offset: u64, length: u64) -> Result<Capability, ZError> {
+        syscall::memory_obj_duplicate(&self.mem_cap, offset, length)
+    }
 }
 
 impl Drop for MemoryRegion {

@@ -6,7 +6,7 @@ use mammoth::zion::z_cap_t;
 use mammoth::zion::ZError;
 
 pub trait YunqServer {
-    fn server_loop(&self) {
+    fn server_loop(&mut self) {
         loop {
             let mut byte_buffer = ByteBuffer::<1024>::new();
             let mut cap_buffer = vec![0; 10];
@@ -44,7 +44,7 @@ pub trait YunqServer {
             .duplicate(!mammoth::zion::kZionPerm_Read)
     }
     fn handle_request(
-        &self,
+        &mut self,
         method_number: u64,
         byte_buffer: &mut ByteBuffer<1024>,
         cap_buffer: &mut Vec<z_cap_t>,

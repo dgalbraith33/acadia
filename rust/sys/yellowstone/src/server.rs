@@ -1,18 +1,23 @@
 use alloc::rc::Rc;
-use mammoth::zion::ZError;
+use alloc::{collections::BTreeMap, string::String};
+use mammoth::{cap::Capability, mem::MemoryRegion, zion::ZError};
 use yellowstone_yunq::{
     AhciInfo, DenaliInfo, Endpoint, FramebufferInfo, GetEndpointRequest, RegisterEndpointRequest,
     XhciInfo, YellowstoneServerHandler,
 };
 
+use crate::pci::PciReader;
+
 pub struct YellowstoneServerContext {
     denali_semaphore: mammoth::sync::Semaphore,
+    pci_reader: PciReader,
 }
 
 impl YellowstoneServerContext {
-    pub fn new() -> Result<Self, ZError> {
+    pub fn new(pci_region: MemoryRegion) -> Result<Self, ZError> {
         Ok(Self {
             denali_semaphore: mammoth::sync::Semaphore::new()?,
+            pci_reader: PciReader::new(pci_region),
         })
     }
 
@@ -23,36 +28,50 @@ impl YellowstoneServerContext {
 
 pub struct YellowstoneServerImpl {
     context: Rc<YellowstoneServerContext>,
+    service_map: BTreeMap<String, Capability>,
 }
 
 impl YellowstoneServerImpl {
     pub fn new(context: Rc<YellowstoneServerContext>) -> Self {
-        Self { context }
+        Self {
+            context,
+            service_map: BTreeMap::new(),
+        }
     }
 }
 
 impl YellowstoneServerHandler for YellowstoneServerImpl {
-    fn register_endpoint(&self, req: &RegisterEndpointRequest) -> Result<(), ZError> {
+    fn register_endpoint(&mut self, req: RegisterEndpointRequest) -> Result<(), ZError> {
+        let signal_denali = req.endpoint_name == "denali";
+        self.service_map
+            .insert(req.endpoint_name, Capability::take(req.endpoint_capability));
+
+        if signal_denali {
+            self.context.denali_semaphore.signal()?
+        }
+        Ok(())
+    }
+
+    fn get_endpoint(&mut self, req: GetEndpointRequest) -> Result<Endpoint, ZError> {
         todo!()
     }
 
-    fn get_endpoint(&self, req: &GetEndpointRequest) -> Result<Endpoint, ZError> {
+    fn get_ahci_info(&mut self) -> Result<AhciInfo, ZError> {
+        Ok(AhciInfo {
+            ahci_region: self.context.pci_reader.get_ahci_region()?.release(),
+            region_length: 0x1000,
+        })
+    }
+
+    fn get_xhci_info(&mut self) -> Result<XhciInfo, ZError> {
         todo!()
     }
 
-    fn get_ahci_info(&self) -> Result<AhciInfo, ZError> {
+    fn get_framebuffer_info(&mut self) -> Result<FramebufferInfo, ZError> {
         todo!()
     }
 
-    fn get_xhci_info(&self) -> Result<XhciInfo, ZError> {
-        todo!()
-    }
-
-    fn get_framebuffer_info(&self) -> Result<FramebufferInfo, ZError> {
-        todo!()
-    }
-
-    fn get_denali(&self) -> Result<DenaliInfo, ZError> {
+    fn get_denali(&mut self) -> Result<DenaliInfo, ZError> {
         todo!()
     }
 }

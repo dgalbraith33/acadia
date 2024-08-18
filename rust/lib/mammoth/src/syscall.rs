@@ -167,6 +167,24 @@ pub fn memory_object_inspect(mem_cap: &Capability) -> Result<u64, ZError> {
     Ok(mem_size)
 }
 
+pub fn memory_obj_duplicate(
+    mem_cap: &Capability,
+    base_offset: u64,
+    length: u64,
+) -> Result<Capability, ZError> {
+    let mut new_cap = 0;
+    syscall(
+        zion::kZionMemoryObjectDuplicate,
+        &zion::ZMemoryObjectDuplicateReq {
+            vmmo_cap: mem_cap.raw(),
+            base_offset,
+            length,
+            new_vmmo_cap: &mut new_cap,
+        },
+    )?;
+    Ok(Capability::take(new_cap))
+}
+
 pub fn address_space_map(vmmo_cap: &Capability) -> Result<u64, ZError> {
     let mut vaddr: u64 = 0;
     // FIXME: Allow caller to pass these options.

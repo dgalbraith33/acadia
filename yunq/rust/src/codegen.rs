@@ -82,7 +82,7 @@ fn generate_server_case(method: &Method) -> TokenStream {
         (Some(req), Some(_)) => quote! {
             #id => {
                 let req = #req::parse_from_request(byte_buffer, cap_buffer)?;
-                let resp = self.handler.#name(&req)?;
+                let resp = self.handler.#name(req)?;
                 cap_buffer.resize(0, 0);
                 let resp_len = resp.serialize_as_request(0, byte_buffer, cap_buffer)?;
                 Ok(resp_len)
@@ -91,7 +91,7 @@ fn generate_server_case(method: &Method) -> TokenStream {
         (Some(req), None) => quote! {
             #id => {
                 let req = #req::parse_from_request(byte_buffer, cap_buffer)?;
-                self.handler.#name(&req)?;
+                self.handler.#name(req)?;
                 cap_buffer.resize(0, 0);
                 // TODO: Implement serialization for EmptyMessage so this is less hacky.
                 yunq::message::serialize_error(byte_buffer, ZError::from(0));
@@ -116,13 +116,13 @@ fn generate_server_method(method: &Method) -> TokenStream {
     let maybe_resp = method.response.clone().map(|r| ident(&r));
     match (maybe_req, maybe_resp) {
         (Some(req), Some(resp)) => quote! {
-            fn #name (&self, req: & #req) -> Result<#resp, ZError>;
+            fn #name (&mut self, req: #req) -> Result<#resp, ZError>;
         },
         (Some(req), None) => quote! {
-            fn #name (&self, req: & #req) -> Result<(), ZError>;
+            fn #name (&mut self, req: #req) -> Result<(), ZError>;
         },
         (None, Some(resp)) => quote! {
-            fn #name (&self) -> Result<#resp, ZError>;
+            fn #name (&mut self) -> Result<#resp, ZError>;
         },
         _ => unreachable!(),
     }
@@ -153,7 +153,7 @@ fn generate_server(interface: &Interface) -> TokenStream {
 
             pub fn run_server(&self) -> Result<Box<thread::Thread>, ZError> {
                 let thread_entry = |server_ptr: *const c_void| {
-                    let server = unsafe { (server_ptr as *const #server_name<T>).as_ref().expect("Failed to convert to server") };
+                    let server = unsafe { (server_ptr as *mut #server_name<T>).as_mut().expect("Failed to convert to server") };
                     server.server_loop();
                 };
                 thread::Thread::spawn(
@@ -169,7 +169,7 @@ fn generate_server(interface: &Interface) -> TokenStream {
             }
 
             fn handle_request(
-                &self,
+                &mut self,
                 method_number: u64,
                 byte_buffer: &mut ByteBuffer<1024>,
                 cap_buffer: &mut Vec<z_cap_t>,
