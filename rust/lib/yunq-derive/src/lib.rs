@@ -33,10 +33,16 @@ fn serialize_field(name: &Ident, ind: usize, path: &Path) -> proc_macro2::TokenS
             }
         }
     } else {
-        panic!(
-            "Serialization not implemented for: {}",
-            path.to_token_stream()
-        )
+        quote! {
+            {
+                let msg_offset = next_extension;
+                let msg_length = self.#name.serialize(buf, offset + next_extension as usize, caps)? as u32;
+                next_extension += msg_length;
+
+                buf.write_at(yunq::message::field_offset(offset, #ind), msg_offset)?;
+                buf.write_at(yunq::message::field_offset(offset, #ind) + 4, msg_length)?;
+            }
+        }
     }
 }
 
@@ -62,7 +68,13 @@ fn parse_field(name: &Ident, ind: usize, path: &Path) -> proc_macro2::TokenStrea
             let #name = buf.at::<u64>(yunq::message::field_offset(offset, #ind))?;
         }
     } else {
-        panic!("Parsing not implemented for: {}", path.into_token_stream());
+        quote! {
+            let #name = {
+                let msg_offset = buf.at::<u32>(yunq::message::field_offset(offset, #ind))? as usize;
+
+                #path::parse(buf, offset + msg_offset, caps)?
+            };
+        }
     }
 }
 
