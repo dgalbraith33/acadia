@@ -202,7 +202,7 @@ glcr::ErrorCode EndpointRecv(ZEndpointRecvReq* req) {
 glcr::ErrorCode ReplyPortSend(ZReplyPortSendReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto reply_port_cap = proc.GetCapability(req->reply_port_cap);
-  RET_ERR(ValidateCapability<ReplyPort>(reply_port_cap, kZionPerm_Read));
+  RET_ERR(ValidateCapability<ReplyPort>(reply_port_cap, kZionPerm_Write));
   auto reply_port = reply_port_cap->obj<ReplyPort>();
 
   ASSIGN_OR_RETURN(IpcMessage message, TranslateRequestToIpcMessage(*req));
