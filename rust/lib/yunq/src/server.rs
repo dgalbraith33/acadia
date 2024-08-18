@@ -38,6 +38,11 @@ pub trait YunqServer {
     }
 
     fn endpoint_cap(&self) -> &Capability;
+
+    fn create_client_cap(&self) -> Result<Capability, ZError> {
+        self.endpoint_cap()
+            .duplicate(!mammoth::zion::kZionPerm_Read)
+    }
     fn handle_request(
         &self,
         method_number: u64,
