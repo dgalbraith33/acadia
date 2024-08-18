@@ -46,8 +46,16 @@ extern "C" fn main() -> z_err_t {
     .expect("Failed to spawn denali");
 
     context.wait_denali().expect("Failed to wait for denali");
-
     mammoth::debug!("Denali registered.");
+
+    spawn_from_vmmo(
+        unsafe { mammoth::init::BOOT_VICTORIA_FALLS_VMMO },
+        server.create_client_cap().unwrap(),
+    )
+    .expect("Failed to spawn victoriafalls");
+
+    context.wait_victoria_falls().unwrap();
+    mammoth::debug!("VFS Registered");
 
     server_thread.join().expect("Failed to join thread");
     0
