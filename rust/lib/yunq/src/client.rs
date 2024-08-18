@@ -1,14 +1,14 @@
 use crate::buffer::ByteBuffer;
 use crate::message::YunqMessage;
 use alloc::vec::Vec;
-use mammoth::zion::z_cap_t;
+use mammoth::cap::Capability;
 use mammoth::zion::ZError;
 
 pub fn call_endpoint<Req: YunqMessage, Resp: YunqMessage, const N: usize>(
     request_id: u64,
     req: &Req,
     byte_buffer: &mut ByteBuffer<N>,
-    endpoint_cap: z_cap_t,
+    endpoint_cap: &Capability,
 ) -> Result<Resp, ZError> {
     let mut cap_buffer = Vec::new();
     let length = req.serialize_as_request(request_id, byte_buffer, &mut cap_buffer)?;

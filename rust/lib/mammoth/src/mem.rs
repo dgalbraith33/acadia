@@ -1,5 +1,6 @@
+use crate::cap::Capability;
 use crate::syscall;
-use crate::zion::{z_cap_t, ZError};
+use crate::zion::ZError;
 use alloc::slice;
 use linked_list_allocator::LockedHeap;
 
@@ -12,7 +13,7 @@ pub fn init_heap() {
     // 1 MiB
     let size = 0x10_0000;
     let vmmo_cap = syscall::memory_object_create(size).expect("Failed to create memory object");
-    let vaddr = syscall::address_space_map(vmmo_cap).expect("Failed to map memory object");
+    let vaddr = syscall::address_space_map(&vmmo_cap).expect("Failed to map memory object");
     unsafe {
         ALLOCATOR.lock().init(vaddr as *mut u8, size as usize);
         CAN_ALLOC = true;
@@ -20,7 +21,7 @@ pub fn init_heap() {
 }
 
 pub struct MemoryRegion {
-    mem_cap: z_cap_t,
+    mem_cap: Capability,
     virt_addr: u64,
     size: u64,
 }
@@ -28,7 +29,7 @@ pub struct MemoryRegion {
 impl MemoryRegion {
     pub fn direct_physical(paddr: u64, size: u64) -> Result<Self, ZError> {
         let mem_cap = syscall::memory_object_direct_physical(paddr, size)?;
-        let virt_addr = syscall::address_space_map(mem_cap)?;
+        let virt_addr = syscall::address_space_map(&mem_cap)?;
         Ok(Self {
             mem_cap,
             virt_addr,
@@ -36,9 +37,9 @@ impl MemoryRegion {
         })
     }
 
-    pub fn from_cap(mem_cap: z_cap_t) -> Result<Self, ZError> {
-        let virt_addr = syscall::address_space_map(mem_cap)?;
-        let size = syscall::memory_object_inspect(mem_cap)?;
+    pub fn from_cap(mem_cap: Capability) -> Result<Self, ZError> {
+        let virt_addr = syscall::address_space_map(&mem_cap)?;
+        let size = syscall::memory_object_inspect(&mem_cap)?;
         Ok(Self {
             mem_cap,
             virt_addr,
@@ -48,7 +49,7 @@ impl MemoryRegion {
 
     pub fn new(size: u64) -> Result<Self, ZError> {
         let mem_cap = syscall::memory_object_create(size)?;
-        let virt_addr = syscall::address_space_map(mem_cap)?;
+        let virt_addr = syscall::address_space_map(&mem_cap)?;
         Ok(Self {
             mem_cap,
             virt_addr,
@@ -74,8 +75,8 @@ impl MemoryRegion {
         }
     }
 
-    pub fn cap(&self) -> z_cap_t {
-        self.mem_cap
+    pub fn cap(&self) -> &Capability {
+        &self.mem_cap
     }
 }
 
@@ -87,6 +88,5 @@ impl Drop for MemoryRegion {
             max += 0x1000 - (max & 0xFFF);
         }
         syscall::address_space_unmap(self.virt_addr, max).expect("Failed to unmap memory");
-        syscall::cap_release(self.mem_cap).expect("Failed to release memory cap");
     }
 }

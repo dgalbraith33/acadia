@@ -8,6 +8,8 @@ extern crate alloc;
 #[macro_use]
 pub mod macros;
 
+pub mod cap;
+mod cap_syscall;
 pub mod elf;
 pub mod init;
 pub mod mem;

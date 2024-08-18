@@ -3,6 +3,7 @@ use core::cell::RefCell;
 use alloc::boxed::Box;
 use alloc::rc::Rc;
 use alloc::string::ToString;
+use mammoth::cap::Capability;
 use mammoth::port::PortServer;
 use mammoth::thread::Thread;
 use mammoth::zion::ZError;
@@ -216,7 +217,7 @@ impl KeyboardListener {
             })?
             .endpoint;
 
-        let mut voyageur_client = crate::VoyageursClient::new(voyageur_endpoint);
+        let mut voyageur_client = crate::VoyageursClient::new(Capability::take(voyageur_endpoint));
 
         voyageur_client.register_keyboard_listener(&crate::KeyboardListener {
             port_capability: listnr.listen_port.create_client_cap()?,

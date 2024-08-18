@@ -18,7 +18,7 @@ fn get_client() -> &'static mut VFSClient {
                 })
                 .expect("Failed to get VFS endpoint");
 
-            VFS_CLIENT = Some(VFSClient::new(endpoint_cap.endpoint));
+            VFS_CLIENT = Some(VFSClient::new(Capability::take(endpoint_cap.endpoint)));
         }
         VFS_CLIENT.as_mut().unwrap()
     }

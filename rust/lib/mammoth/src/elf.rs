@@ -1,7 +1,7 @@
+use crate::cap::Capability;
 use crate::debug;
 use crate::init;
 use crate::syscall;
-use crate::zion::z_cap_t;
 use crate::zion::ZError;
 
 use alloc::fmt::Debug;
@@ -225,7 +225,7 @@ impl Debug for Elf64ProgramHeader {
 fn load_program_segment(
     prog_header: &Elf64ProgramHeader,
     file: &[u8],
-    vmas: z_cap_t,
+    vmas: &Capability,
 ) -> Result<(), ZError> {
     debug!("{:?}", prog_header);
     match prog_header.prog_type {
@@ -282,7 +282,7 @@ fn load_program_segment(
     }
 }
 
-fn load_elf_program(elf_file: &[u8], vmas: z_cap_t) -> Result<u64, ZError> {
+fn load_elf_program(elf_file: &[u8], vmas: &Capability) -> Result<u64, ZError> {
     assert!(elf_file.len() > size_of::<Elf64Header>());
     let header: &Elf64Header = unsafe {
         elf_file
@@ -312,32 +312,28 @@ fn load_elf_program(elf_file: &[u8], vmas: z_cap_t) -> Result<u64, ZError> {
     Ok(header.entry)
 }
 
-pub fn spawn_process_from_elf(elf_file: &[u8]) -> Result<z_cap_t, ZError> {
-    let self_cap = unsafe { init::SELF_PROC_CAP };
+pub fn spawn_process_from_elf(elf_file: &[u8]) -> Result<Capability, ZError> {
+    let self_cap = Capability::take_copy(unsafe { init::SELF_PROC_CAP })?;
     let port_cap = syscall::port_create()?;
-    let port_cap_dup = syscall::cap_duplicate(port_cap, u64::MAX)?;
 
     let (new_proc_cap, new_as_cap, foreign_port_id) =
-        syscall::process_spawn(self_cap, port_cap_dup)?;
+        syscall::process_spawn(&self_cap, port_cap.duplicate(Capability::PERMS_ALL)?)?;
 
-    let entry_point = load_elf_program(elf_file, new_as_cap)?;
+    let entry_point = load_elf_program(elf_file, &new_as_cap)?;
 
     let port = crate::port::PortClient::take_from(port_cap);
 
     port.write_u64_and_cap(
         crate::init::Z_INIT_SELF_PROC,
-        syscall::cap_duplicate(new_proc_cap, u64::MAX)?,
+        new_proc_cap.duplicate(Capability::PERMS_ALL)?,
     )?;
     port.write_u64_and_cap(crate::init::Z_INIT_SELF_VMAS, new_as_cap)?;
-    port.write_u64_and_cap(
-        crate::init::Z_INIT_ENDPOINT,
-        self_cap.duplicate(Capability::PERMS_ALL)?,
-    )?;
+    let yellowstone = Capability::take_copy(unsafe { crate::init::INIT_ENDPOINT })?;
+    port.write_u64_and_cap(crate::init::Z_INIT_ENDPOINT, yellowstone)?;
 
-    let thread_cap = syscall::thread_create(new_proc_cap)?;
-    syscall::thread_start(thread_cap, entry_point, foreign_port_id, 0)?;
+    let thread_cap = syscall::thread_create(&new_proc_cap)?;
 
-    syscall::cap_release(thread_cap)?;
+    syscall::thread_start(&thread_cap, entry_point, foreign_port_id, 0)?;
 
     Ok(new_proc_cap)
 }

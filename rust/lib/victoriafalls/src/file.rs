@@ -1,6 +1,6 @@
 use crate::OpenFileRequest;
 use alloc::string::ToString;
-use mammoth::zion::ZError;
+use mammoth::{cap::Capability, zion::ZError};
 
 pub struct File {
     memory: mammoth::mem::MemoryRegion,
@@ -14,7 +14,7 @@ impl File {
         })?;
 
         Ok(Self {
-            memory: mammoth::mem::MemoryRegion::from_cap(resp.memory)?,
+            memory: mammoth::mem::MemoryRegion::from_cap(Capability::take(resp.memory))?,
         })
     }
 

@@ -33,17 +33,17 @@ fn generate_method(method: &Method) -> TokenStream {
     match (maybe_req, maybe_resp) {
         (Some(req), Some(resp)) => quote! {
             pub fn #name (&mut self, req: & #req) -> Result<#resp, ZError> {
-                yunq::client::call_endpoint(#id, req, &mut self.byte_buffer, self.endpoint_cap)
+                yunq::client::call_endpoint(#id, req, &mut self.byte_buffer, &self.endpoint_cap)
             }
         },
         (Some(req), None) => quote! {
             pub fn #name (&mut self, req: & #req) -> Result<yunq::message::Empty, ZError> {
-                yunq::client::call_endpoint(#id, req, &mut self.byte_buffer, self.endpoint_cap)
+                yunq::client::call_endpoint(#id, req, &mut self.byte_buffer, &self.endpoint_cap)
             }
         },
         (None, Some(resp)) => quote! {
             pub fn #name (&mut self) -> Result<#resp, ZError> {
-                yunq::client::call_endpoint(#id, &yunq::message::Empty{}, &mut self.byte_buffer, self.endpoint_cap)
+                yunq::client::call_endpoint(#id, &yunq::message::Empty{}, &mut self.byte_buffer, &self.endpoint_cap)
             }
         },
         _ => unreachable!(),
@@ -56,12 +56,12 @@ fn generate_client(interface: &Interface) -> TokenStream {
     let methods = interface.methods.iter().map(|m| generate_method(&m));
     quote! {
         pub struct #name {
-            endpoint_cap: z_cap_t,
+            endpoint_cap: Capability,
             byte_buffer: ByteBuffer<0x1000>,
         }
 
         impl #name {
-            pub fn new(endpoint_cap: z_cap_t) -> Self {
+            pub fn new(endpoint_cap: Capability) -> Self {
                 Self {
                     endpoint_cap,
                     byte_buffer: ByteBuffer::new(),
@@ -139,7 +139,7 @@ fn generate_server(interface: &Interface) -> TokenStream {
         }
 
         pub struct #server_name<T: #server_trait> {
-            endpoint_cap: z_cap_t,
+            endpoint_cap: Capability,
             handler: T
         }
 
@@ -164,8 +164,8 @@ fn generate_server(interface: &Interface) -> TokenStream {
         }
 
         impl<T: #server_trait> yunq::server::YunqServer for #server_name<T> {
-            fn endpoint_cap(&self) -> z_cap_t {
-                self.endpoint_cap
+            fn endpoint_cap(&self) -> &Capability {
+                &self.endpoint_cap
             }
 
             fn handle_request(
@@ -206,6 +206,7 @@ pub fn generate_code(ast: &Vec<Decl>) -> String {
     use core::ffi::c_void;
     use mammoth::syscall;
     use mammoth::thread;
+    use mammoth::cap::Capability;
     use mammoth::zion::z_cap_t;
     use mammoth::zion::ZError;
     use yunq::ByteBuffer;

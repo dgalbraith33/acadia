@@ -9,7 +9,6 @@ use mammoth::define_entry;
 use mammoth::thread;
 use mammoth::zion::z_err_t;
 use yellowstone::GetEndpointRequest;
-use yellowstone::YellowstoneClient;
 
 define_entry!();
 
@@ -17,10 +16,9 @@ define_entry!();
 pub extern "C" fn main() -> z_err_t {
     debug!("Testing!");
 
-    let mut yellowstone;
-    unsafe {
-        yellowstone = YellowstoneClient::new(mammoth::init::INIT_ENDPOINT);
-    }
+    let yellowstone = yellowstone::from_init_endpoint();
+
+    debug!("Get endpoint");
 
     let endpoint = yellowstone
         .get_endpoint(&GetEndpointRequest {

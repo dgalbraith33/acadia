@@ -1,5 +1,6 @@
 use crate::buffer::ByteBuffer;
 use alloc::vec::Vec;
+use mammoth::cap::Capability;
 use mammoth::syscall;
 use mammoth::zion::z_cap_t;
 use mammoth::zion::ZError;
@@ -36,7 +37,7 @@ pub trait YunqServer {
         }
     }
 
-    fn endpoint_cap(&self) -> z_cap_t;
+    fn endpoint_cap(&self) -> &Capability;
     fn handle_request(
         &self,
         method_number: u64,

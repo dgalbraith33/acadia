@@ -1,3 +1,4 @@
+use crate::cap::Capability;
 use crate::syscall;
 use crate::zion::z_cap_t;
 
@@ -11,11 +12,12 @@ pub static mut SELF_VMAS_CAP: z_cap_t = 0;
 pub static mut INIT_ENDPOINT: z_cap_t = 0;
 
 pub fn parse_init_port(port_cap: z_cap_t) {
+    let init_port = Capability::take(port_cap);
     loop {
         let mut bytes: [u8; 8] = [0; 8];
         let mut caps: [u64; 1] = [0];
 
-        let resp = syscall::port_poll(port_cap, &mut bytes, &mut caps);
+        let resp = syscall::port_poll(&init_port, &mut bytes, &mut caps);
         if let Err(_) = resp {
             break;
         }
