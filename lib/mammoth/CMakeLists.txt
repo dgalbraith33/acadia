@@ -1,14 +1,7 @@
 add_library(mammoth STATIC
-  file/file.cpp
-  input/keyboard.cpp
-  ipc/channel.cpp
-  ipc/endpoint_client.cpp
-  ipc/endpoint_server.cpp
   ipc/port_client.cpp
   ipc/port_server.cpp
-  proc/process.cpp
   proc/thread.cpp
-  sync/mutex.cpp
   sync/semaphore.cpp
   util/debug.cpp
   util/init.cpp
