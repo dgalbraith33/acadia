@@ -331,7 +331,7 @@ pub fn spawn_process_from_elf(elf_file: &[u8]) -> Result<z_cap_t, ZError> {
     port.write_u64_and_cap(crate::init::Z_INIT_SELF_VMAS, new_as_cap)?;
     port.write_u64_and_cap(
         crate::init::Z_INIT_ENDPOINT,
-        syscall::cap_duplicate(unsafe { crate::init::INIT_ENDPOINT }, u64::MAX)?,
+        self_cap.duplicate(Capability::PERMS_ALL)?,
     )?;
 
     let thread_cap = syscall::thread_create(new_proc_cap)?;

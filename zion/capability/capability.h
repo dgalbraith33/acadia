@@ -5,6 +5,7 @@
 #include <glacier/status/error.h>
 #include <stdint.h>
 
+#include "debug/debug.h"
 #include "include/ztypes.h"
 #include "object/kernel_object.h"
 
@@ -42,7 +43,10 @@ class Capability : public glcr::RefCounted<Capability> {
 template <typename T>
 glcr::RefPtr<T> Capability::obj() {
   if (obj_->TypeTag() != KernelObjectTag<T>::type) {
-    return nullptr;
+    uint64_t type = KernelObjectTag<T>::type;
+    dbgln("Mismatched type tag returning nullptr.");
+    dbgln("Expected {x} got {x}", type, obj_->TypeTag());
+    panic("Unhandled obj type mismatch");
   }
   return StaticCastRefPtr<T>(obj_);
 }

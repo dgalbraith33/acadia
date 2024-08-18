@@ -175,7 +175,7 @@ glcr::ErrorCode EndpointSend(ZEndpointSendReq* req) {
   auto& proc = gScheduler->CurrentProcess();
 
   auto endpoint_cap = proc.GetCapability(req->endpoint_cap);
-  ValidateCapability<Endpoint>(endpoint_cap, kZionPerm_Write);
+  RET_ERR(ValidateCapability<Endpoint>(endpoint_cap, kZionPerm_Write));
   auto endpoint = endpoint_cap->obj<Endpoint>();
 
   auto reply_port = ReplyPort::Create();
@@ -191,7 +191,7 @@ glcr::ErrorCode EndpointRecv(ZEndpointRecvReq* req) {
   auto& proc = gScheduler->CurrentProcess();
 
   auto endpoint_cap = proc.GetCapability(req->endpoint_cap);
-  ValidateCapability<Endpoint>(endpoint_cap, kZionPerm_Read);
+  RET_ERR(ValidateCapability<Endpoint>(endpoint_cap, kZionPerm_Read));
   auto endpoint = endpoint_cap->obj<Endpoint>();
 
   ASSIGN_OR_RETURN(IpcMessage msg,
@@ -202,7 +202,7 @@ glcr::ErrorCode EndpointRecv(ZEndpointRecvReq* req) {
 glcr::ErrorCode ReplyPortSend(ZReplyPortSendReq* req) {
   auto& proc = gScheduler->CurrentProcess();
   auto reply_port_cap = proc.GetCapability(req->reply_port_cap);
-  ValidateCapability<ReplyPort>(reply_port_cap, kZionPerm_Read);
+  RET_ERR(ValidateCapability<ReplyPort>(reply_port_cap, kZionPerm_Read));
   auto reply_port = reply_port_cap->obj<ReplyPort>();
 
   ASSIGN_OR_RETURN(IpcMessage message, TranslateRequestToIpcMessage(*req));
@@ -212,7 +212,7 @@ glcr::ErrorCode ReplyPortRecv(ZReplyPortRecvReq* req) {
   auto& proc = gScheduler->CurrentProcess();
 
   auto reply_port_cap = proc.GetCapability(req->reply_port_cap);
-  ValidateCapability<ReplyPort>(reply_port_cap, kZionPerm_Read);
+  RET_ERR(ValidateCapability<ReplyPort>(reply_port_cap, kZionPerm_Read));
   auto reply_port = reply_port_cap->obj<ReplyPort>();
 
   ASSIGN_OR_RETURN(IpcMessage msg,
