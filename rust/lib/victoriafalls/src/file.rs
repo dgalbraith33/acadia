@@ -1,9 +1,9 @@
 use crate::OpenFileRequest;
 use alloc::string::ToString;
-use mammoth::{cap::Capability, zion::ZError};
+use mammoth::{cap::Capability, mem::MemoryRegion, zion::ZError};
 
 pub struct File {
-    memory: mammoth::mem::MemoryRegion,
+    memory: MemoryRegion,
     len: usize,
 }
 
@@ -22,5 +22,9 @@ impl File {
 
     pub fn slice(&self) -> &[u8] {
         &self.memory.slice()[..self.len]
+    }
+
+    pub fn memory(&self) -> &MemoryRegion {
+        &self.memory
     }
 }
