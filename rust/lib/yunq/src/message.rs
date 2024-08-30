@@ -12,6 +12,57 @@ pub fn field_offset(offset: usize, field_index: usize) -> usize {
     offset + MESSAGE_HEADER_SIZE + (8 * field_index)
 }
 
+pub fn parse_repeated<T: Copy, const N: usize>(
+    buf: &ByteBuffer<N>,
+    offset: usize,
+    len: usize,
+) -> Result<Vec<T>, ZError> {
+    let mut repeated = Vec::new();
+    for i in 0..len {
+        repeated.push(buf.at::<T>(offset + (i * size_of::<T>()))?);
+    }
+    Ok(repeated)
+}
+
+pub fn parse_repeated_message<T: YunqMessage, const N: usize>(
+    buf: &ByteBuffer<N>,
+    mut offset: usize,
+    len: usize,
+    caps: &Vec<z_cap_t>,
+) -> Result<Vec<T>, ZError> {
+    let mut repeated = Vec::new();
+    for _ in 0..len {
+        // FIXME: This is a bad way to get the length.
+        let msg_len = buf.at::<u32>(offset + 8)? as usize;
+        repeated.push(T::parse(buf, offset, caps)?);
+        offset += msg_len;
+    }
+    Ok(repeated)
+}
+
+pub fn serialize_repeated<T: Copy, const N: usize>(
+    buf: &mut ByteBuffer<N>,
+    offset: usize,
+    data: &Vec<T>,
+) -> Result<usize, ZError> {
+    for i in 0..data.len() {
+        buf.write_at(offset + (i * size_of::<T>()), data[i])?;
+    }
+    Ok(offset + (data.len() * size_of::<T>()))
+}
+
+pub fn serialize_repeated_message<T: YunqMessage, const N: usize>(
+    buf: &mut ByteBuffer<N>,
+    mut offset: usize,
+    data: &Vec<T>,
+    caps: &mut Vec<z_cap_t>,
+) -> Result<usize, ZError> {
+    for item in data {
+        offset = item.serialize(buf, offset, caps)?;
+    }
+    Ok(offset)
+}
+
 pub fn serialize_error<const N: usize>(buf: &mut ByteBuffer<N>, err: ZError) {
     buf.write_at(0, SENTINEL)
         .expect("Failed to serialize SENTINEL");

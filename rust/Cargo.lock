@@ -23,7 +23,6 @@ version = "0.1.0"
 dependencies = [
  "mammoth",
  "yunq",
- "yunq-derive",
  "yunqc",
 ]
 
@@ -60,7 +59,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5f12335488a2f3b0a83b14edad48dca9879ce89b2edd10e80237e4e852dd645e"
 dependencies = [
  "proc-macro2",
- "syn 2.0.72",
+ "syn",
 ]
 
 [[package]]
@@ -94,17 +93,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5b9eb1a2f4c41445a3a0ff9abc5221c5fcd28e1f13cd7c0397706f9ac938ddb0"
 dependencies = [
  "lock_api",
-]
-
-[[package]]
-name = "syn"
-version = "1.0.109"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "72b64191b275b66ffe2469e8af2c1cfe3bafa67b529ead792a6d0160888b4237"
-dependencies = [
- "proc-macro2",
- "quote",
- "unicode-ident",
 ]
 
 [[package]]
@@ -156,7 +144,6 @@ dependencies = [
  "mammoth",
  "yellowstone-yunq",
  "yunq",
- "yunq-derive",
  "yunqc",
 ]
 
@@ -167,7 +154,6 @@ dependencies = [
  "mammoth",
  "yellowstone-yunq",
  "yunq",
- "yunq-derive",
  "yunqc",
 ]
 
@@ -189,7 +175,6 @@ version = "0.1.0"
 dependencies = [
  "mammoth",
  "yunq",
- "yunq-derive",
  "yunqc",
 ]
 
@@ -198,16 +183,6 @@ name = "yunq"
 version = "0.1.0"
 dependencies = [
  "mammoth",
- "yunq-derive",
-]
-
-[[package]]
-name = "yunq-derive"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
 ]
 
 [[package]]
@@ -216,7 +191,6 @@ version = "0.1.0"
 dependencies = [
  "mammoth",
  "yunq",
- "yunq-derive",
  "yunqc",
 ]
 
@@ -228,5 +202,5 @@ dependencies = [
  "prettyplease",
  "proc-macro2",
  "quote",
- "syn 2.0.72",
+ "syn",
 ]

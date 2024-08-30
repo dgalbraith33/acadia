@@ -17,24 +17,33 @@ pub enum Type {
 }
 
 impl Type {
-    pub fn rust_type(&self) -> &str {
+    pub fn rust_type(&self) -> String {
         match self {
-            Type::U64 => "u64",
-            Type::I64 => "i64",
-            Type::String => "String",
-            Type::Bytes => "Vec<u8>",
-            Type::Capability => "z_cap_t",
-            Type::Message(s) => s,
+            Type::U64 => "u64".to_string(),
+            Type::I64 => "i64".to_string(),
+            Type::String => "String".to_string(),
+            Type::Bytes => "Vec<u8>".to_string(),
+            Type::Capability => "z_cap_t".to_string(),
+            Type::Message(s) => s.clone(),
         }
     }
 }
 
-impl Display for Type {
+#[derive(Clone)]
+pub struct FieldType {
+    pub repeated: bool,
+    pub inner_type: Type,
+}
+
+impl Display for FieldType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if self.repeated {
+            write!(f, "repeated ")?;
+        }
         write!(
             f,
             "{}",
-            match self {
+            match &self.inner_type {
                 Type::U64 => "u64",
                 Type::I64 => "i64",
                 Type::String => "string",
@@ -63,10 +72,9 @@ impl TryFrom<&String> for Type {
 
 #[derive(Clone)]
 pub struct Field {
-    pub field_type: Type,
+    pub field_type: FieldType,
     pub name: String,
     pub number: u64,
-    pub repeated: bool,
 }
 
 #[derive(Clone)]
@@ -118,12 +126,11 @@ impl Debug for Decl {
             Decl::Message(m) => {
                 writeln!(f, "Message {}", m.name)?;
                 for field in &m.fields {
-                    let typestr = if field.repeated {
-                        format!("repeated {}", field.field_type)
-                    } else {
-                        field.field_type.to_string()
-                    };
-                    writeln!(f, "\t{}: {} ({})", field.number, field.name, typestr)?;
+                    writeln!(
+                        f,
+                        "\t{}: {} ({})",
+                        field.number, field.name, field.field_type
+                    )?;
                 }
             }
             Decl::Interface(i) => {
@@ -220,10 +227,12 @@ impl<'a> Parser<'a> {
         self.consume_token_type(TokenType::Semicolon)?;
 
         Ok(Field {
-            field_type: parsed_type,
+            field_type: FieldType {
+                inner_type: parsed_type,
+                repeated,
+            },
             name: name_identifier,
             number,
-            repeated,
         })
     }
 
@@ -357,7 +366,7 @@ impl<'a> Parser<'a> {
             }
             field_names.insert(field.name.clone());
 
-            if let Type::Message(name) = &field.field_type {
+            if let Type::Message(name) = &field.field_type.inner_type {
                 if !self.type_map.contains_key(name) {
                     return Err(format!(
                         "Unknown type '{}' on field '{}' in message '{}'",

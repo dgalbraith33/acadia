@@ -7,7 +7,6 @@ edition = "2021"
 mammoth = { path = "../mammoth" }
 yellowstone-yunq = { path = "../yellowstone" }
 yunq = {path = "../yunq"}
-yunq-derive = {path = "../yunq-derive"}
 
 [build-dependencies]
 yunqc = {path = "../../../yunq/rust"}

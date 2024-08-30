@@ -5,7 +5,6 @@ edition = "2021"
 
 [dependencies]
 mammoth = {path = "../mammoth", default-features = false}
-yunq-derive = {path = "../yunq-derive"}
 
 [features]
 default = ["hosted"]

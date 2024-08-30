@@ -7,6 +7,7 @@ mod tests {
     use super::*;
 
     extern crate std;
+    use std::println;
     use std::vec;
 
     #[test]
@@ -56,6 +57,23 @@ mod tests {
         let parsed = Cap::parse(&buf, 0, &caps)?;
 
         assert!(parsed == cap);
+
+        Ok(())
+    }
+
+    #[test]
+    fn repeated_serialization() -> Result<(), ZError> {
+        let rep = Repeated { unsigned_ints: vec![0, 1, 3],};
+
+        let mut buf = ByteBuffer::<1024>::new();
+        let mut caps = Vec::new();
+        rep.serialize(&mut buf, 0, &mut caps)?;
+        
+        let parsed = Repeated::parse(&buf, 0, &caps)?;
+
+        println!("{:?}", parsed.unsigned_ints);
+
+        assert!(parsed == rep);
 
         Ok(())
     }
