@@ -23,7 +23,7 @@ for BIN in ${DIR}/../rust/usr/*/; do
 done
 
 for BIN in ${DIR}/../rust/sys/*/; do
-  cargo install --force --path "${BIN}" --root $CARGO_SYS_ROOT
+  cargo install --all-features --force --path "${BIN}" --root $CARGO_SYS_ROOT
 done
 popd
 

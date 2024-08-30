@@ -40,7 +40,7 @@ cp ../zion/boot/limine.cfg efi/
 cp zion/zion efi/
 mkdir -p efi/sys
 cp ../sysroot/bin/yellowstone efi/sys/yellowstone
-cp sys/denali/denali efi/sys/denali
+cp ../sysroot/bin/denali efi/sys/denali
 cp sys/victoriafalls/victoriafalls efi/sys/victoriafalls
 
 mkdir -p sysroot

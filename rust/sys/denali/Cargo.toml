@@ -1,0 +1,21 @@
+[package]
+name = "denali"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+mammoth = { path = "../../lib/mammoth" }
+yunq = {path = "../../lib/yunq"}
+
+yellowstone-yunq = { path = "../../lib/yellowstone", optional = true }
+
+[[bin]]
+name = "denali"
+required-features = ["binary"]
+
+[build-dependencies]
+yunqc = {path = "../../../yunq/rust"}
+
+[features]
+default = ["binary"]
+binary = ["dep:yellowstone-yunq"]

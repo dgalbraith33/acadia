@@ -22,6 +22,7 @@ name = "denali"
 version = "0.1.0"
 dependencies = [
  "mammoth",
+ "yellowstone-yunq",
  "yunq",
  "yunqc",
 ]

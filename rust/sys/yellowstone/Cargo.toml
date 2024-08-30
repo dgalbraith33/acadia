@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 mammoth = { path = "../../lib/mammoth" }
-denali = { path = "../../lib/denali" }
+denali = { path = "../../sys/denali", default-features = false}
 victoriafalls = { path = "../../lib/victoriafalls" }
 voyageurs = { path = "../../lib/voyageurs" }
 yellowstone-yunq = { path = "../../lib/yellowstone" }
