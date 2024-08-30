@@ -71,10 +71,51 @@ mod tests {
         
         let parsed = Repeated::parse(&buf, 0, &caps)?;
 
-        println!("{:?}", parsed.unsigned_ints);
-
         assert!(parsed == rep);
 
         Ok(())
     }
+
+    #[test]
+    fn nested_serialization() -> Result<(), ZError> {
+        let nested = Nested {
+            basic:  Basic { unsigned_int: 82, signed_int: -1234, strn: "abc".to_string() },
+            cap1: Cap { cap: 37},
+            cap2: Cap { cap: 39},
+        };
+
+        let mut buf = ByteBuffer::<1024>::new();
+        let mut caps = Vec::new();
+        nested.serialize(&mut buf, 0, &mut caps)?;
+        
+        let parsed = Nested::parse(&buf, 0, &caps)?;
+
+
+        assert!(parsed == nested);
+
+        Ok(())
+    }
+
+    #[test]
+    fn repeated_nested_serialization() -> Result<(), ZError> {
+        let nested = RepeatedNested {
+            basics:  vec![Basic { unsigned_int: 82, signed_int: -1234, strn: "abc".to_string(),},
+            Basic { unsigned_int: 21, signed_int: -8, strn: "def".to_string(), },],
+            caps: vec![Cap{ cap: 123}, Cap {cap: 12343}],
+        };
+
+        let mut buf = ByteBuffer::<1024>::new();
+        let mut caps = Vec::new();
+        nested.serialize(&mut buf, 0, &mut caps)?;
+        
+        let parsed = RepeatedNested::parse(&buf, 0, &caps)?;
+
+
+        assert!(parsed == nested);
+
+
+        Ok(())
+    }
+
+
 }

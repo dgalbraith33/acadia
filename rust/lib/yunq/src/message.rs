@@ -58,7 +58,7 @@ pub fn serialize_repeated_message<T: YunqMessage, const N: usize>(
     caps: &mut Vec<z_cap_t>,
 ) -> Result<usize, ZError> {
     for item in data {
-        offset = item.serialize(buf, offset, caps)?;
+        offset += item.serialize(buf, offset, caps)?;
     }
     Ok(offset)
 }

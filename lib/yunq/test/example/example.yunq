@@ -13,3 +13,15 @@ message Cap {
 message Repeated {
   repeated u64 unsigned_ints;
 }
+
+
+message Nested {
+  Basic basic;
+  Cap cap1;
+  Cap cap2;
+}
+
+message RepeatedNested {
+  repeated Basic basics;
+  repeated Cap caps;
+}
