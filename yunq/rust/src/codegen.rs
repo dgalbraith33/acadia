@@ -413,33 +413,59 @@ fn generate_interface(interface: &Interface) -> TokenStream {
     }
 }
 
+fn any_strings(ast: &Vec<Decl>) -> bool {
+    ast.iter()
+        .filter_map(|decl| match decl {
+            Decl::Message(m) => Some(m),
+            _ => None,
+        })
+        .flat_map(|message| message.fields.iter())
+        .any(|field| field.field_type.inner_type == Type::String)
+}
+
+fn any_interfaces(ast: &Vec<Decl>) -> bool {
+    ast.iter().any(|decl| match decl {
+        Decl::Interface(_) => true,
+        _ => false,
+    })
+}
+
 pub fn generate_code(ast: &Vec<Decl>) -> String {
+    let str_imports = if any_strings(ast) {
+        quote! {
+            use alloc::string::String;
+            use alloc::string::ToString;
+        }
+    } else {
+        quote! {}
+    };
+
+    let interface_imports = if any_interfaces(ast) {
+        quote! {
+            use alloc::boxed::Box;
+            use core::ffi::c_void;
+            use mammoth::cap::Capability;
+            use mammoth::syscall;
+            use mammoth::thread;
+            use yunq::server::YunqServer;
+        }
+    } else {
+        quote! {}
+    };
+
     let prelude = quote! {
 
     extern crate alloc;
 
-    use alloc::string::String;
-    use alloc::string::ToString;
     use alloc::vec::Vec;
     use mammoth::zion::z_cap_t;
     use mammoth::zion::ZError;
     use yunq::ByteBuffer;
     use yunq::YunqMessage;
 
+    #str_imports
 
-    // Used only by modules with an interface.
-    #[allow(unused_imports)]
-    use alloc::boxed::Box;
-    #[allow(unused_imports)]
-    use core::ffi::c_void;
-    #[allow(unused_imports)]
-    use mammoth::cap::Capability;
-    #[allow(unused_imports)]
-    use mammoth::syscall;
-    #[allow(unused_imports)]
-    use mammoth::thread;
-    #[allow(unused_imports)]
-    use yunq::server::YunqServer;
+    #interface_imports
 
     };
 

@@ -6,7 +6,7 @@ use std::fmt::Display;
 use crate::lexer::Token;
 use crate::lexer::TokenType;
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub enum Type {
     U64,
     I64,

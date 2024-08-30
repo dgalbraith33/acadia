@@ -9,6 +9,7 @@ use mammoth::thread::Thread;
 use mammoth::zion::ZError;
 
 #[repr(u8)]
+#[allow(dead_code)]
 #[derive(PartialEq, Eq, PartialOrd, Ord, Copy, Clone)]
 enum Keycode {
     UnknownKeycode = 0x0,
