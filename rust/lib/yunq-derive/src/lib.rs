@@ -29,7 +29,13 @@ fn serialize_field(name: &Ident, ind: usize, path: &Path) -> proc_macro2::TokenS
     } else if path.is_ident("u64") {
         quote! {
             {
-                buf.write_at(yunq::message::field_offset(offset, #ind), self.#name as u64)?;
+                buf.write_at(yunq::message::field_offset(offset, #ind), self.#name)?;
+            }
+        }
+    } else if path.is_ident("i64") {
+        quote! {
+            {
+                buf.write_at(yunq::message::field_offset(offset, #ind), self.#name)?;
             }
         }
     } else {
@@ -66,6 +72,10 @@ fn parse_field(name: &Ident, ind: usize, path: &Path) -> proc_macro2::TokenStrea
     } else if path.is_ident("u64") {
         quote! {
             let #name = buf.at::<u64>(yunq::message::field_offset(offset, #ind))?;
+        }
+    } else if path.is_ident("i64") {
+        quote! {
+            let #name = buf.at::<i64>(yunq::message::field_offset(offset, #ind))?;
         }
     } else {
         quote! {

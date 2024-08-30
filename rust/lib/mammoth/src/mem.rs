@@ -2,13 +2,17 @@ use crate::cap::Capability;
 use crate::syscall;
 use crate::zion::ZError;
 use alloc::slice;
+
+#[cfg(feature = "hosted")]
 use linked_list_allocator::LockedHeap;
 
+#[cfg(feature = "hosted")]
 #[global_allocator]
 static ALLOCATOR: LockedHeap = LockedHeap::empty();
 
 pub static mut CAN_ALLOC: bool = false;
 
+#[cfg(feature = "hosted")]
 pub fn init_heap() {
     // 1 MiB
     let size = 0x10_0000;

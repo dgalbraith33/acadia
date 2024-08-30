@@ -17,7 +17,7 @@ fn generate_message(message: &Message) -> TokenStream {
         .iter()
         .map(|f| Ident::new(f.field_type.rust_type(), Span::call_site()));
     quote! {
-        #[derive(YunqMessage)]
+        #[derive(YunqMessage, PartialEq, Eq)]
         pub struct #name {
             #(pub #field_names: #field_types),*
         }

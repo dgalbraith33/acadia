@@ -1,0 +1,14 @@
+[package]
+name = "yunq-test"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+mammoth = { path = "../mammoth", default-features = false}
+yunq = {path = "../yunq", default-features = false}
+yunq-derive = {path = "../yunq-derive"}
+
+[build-dependencies]
+yunqc = {path = "../../../yunq/rust"}
+
+[dev-dependencies]

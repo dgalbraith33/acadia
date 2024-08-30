@@ -1,7 +1,7 @@
 [workspace]
 
 members = [ "lib/denali",
-  "lib/mammoth", "lib/victoriafalls", "lib/voyageurs", "lib/yellowstone", "lib/yunq", "lib/yunq-derive", "sys/teton", "sys/yellowstone", "usr/testbed",
+  "lib/mammoth", "lib/victoriafalls", "lib/voyageurs", "lib/yellowstone", "lib/yunq", "lib/yunq-derive", "lib/yunq-test", "sys/teton", "sys/yellowstone", "usr/testbed",
 ]
 resolver = "2"
 

@@ -211,6 +211,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "yunq-test"
+version = "0.1.0"
+dependencies = [
+ "mammoth",
+ "yunq",
+ "yunq-derive",
+ "yunqc",
+]
+
+[[package]]
 name = "yunqc"
 version = "0.1.0"
 dependencies = [

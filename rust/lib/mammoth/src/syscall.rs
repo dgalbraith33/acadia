@@ -5,6 +5,8 @@ use crate::zion;
 use crate::zion::z_cap_t;
 use crate::zion::ZError;
 use core::ffi::c_void;
+
+#[cfg(feature = "hosted")]
 use core::panic::PanicInfo;
 
 #[must_use]
@@ -18,6 +20,7 @@ fn syscall<T>(id: u64, req: &T) -> Result<(), ZError> {
     Ok(())
 }
 
+#[cfg(feature = "hosted")]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     unsafe {
