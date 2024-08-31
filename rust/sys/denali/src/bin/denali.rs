@@ -25,5 +25,6 @@ extern "C" fn main() -> z_err_t {
     );
 
     mammoth::debug!("AHCI ABAR {:#x}", ahci_controller.pci_header().abar as u64);
+    mammoth::debug!("AHCI Capabilities: {:?}", ahci_controller.ahci_hba());
     0
 }
