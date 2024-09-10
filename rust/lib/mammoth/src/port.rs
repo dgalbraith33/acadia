@@ -13,6 +13,10 @@ impl PortServer {
         })
     }
 
+    pub fn from_cap(port_cap: Capability) -> Self {
+        Self { port_cap }
+    }
+
     pub fn create_client_cap(&self) -> Result<z_cap_t, ZError> {
         self.port_cap
             .duplicate(!kZionPerm_Read)

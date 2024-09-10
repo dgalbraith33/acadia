@@ -1,3 +1,5 @@
+use bitfield_struct::bitfield;
+
 #[bitfield(u32)]
 struct AhciPortInterruptStatus {
     device_to_host_register_fis_interrupt: bool,
@@ -377,7 +379,7 @@ struct AhciDeviceSleep {
 }
 
 #[repr(C, packed)]
-struct AhciPortHba {
+pub struct AhciPortHba {
     command_list_base: u64,
     fis_base: u64,
     interrupt_status: AhciPortInterruptStatus,

@@ -295,6 +295,18 @@ pub fn port_poll(
     Ok((num_bytes, num_caps))
 }
 
+pub fn register_irq(irq_num: u64) -> Result<Capability, ZError> {
+    let mut port_cap: z_cap_t = 0;
+    syscall(
+        zion::kZionIrqRegister,
+        &zion::ZIrqRegisterReq {
+            irq_num,
+            port_cap: &mut port_cap,
+        },
+    )?;
+    Ok(Capability::take(port_cap))
+}
+
 pub fn endpoint_create() -> Result<Capability, ZError> {
     let mut endpoint_cap: z_cap_t = 0;
     syscall(
