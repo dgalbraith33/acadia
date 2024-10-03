@@ -40,6 +40,15 @@ impl PortServer {
 
         Ok(u16::from_le_bytes(bytes))
     }
+
+    pub fn recv_null(&self) -> Result<(), ZError> {
+        let mut caps: [z_cap_t; 0] = [];
+        let mut bytes: [u8; 0] = [];
+
+        port_recv(&self.port_cap, &mut bytes, &mut caps)?;
+
+        Ok(())
+    }
 }
 
 pub struct PortClient {

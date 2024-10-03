@@ -1,61 +1,61 @@
 use bitfield_struct::bitfield;
 
 #[bitfield(u32)]
-struct AhciPortInterruptStatus {
-    device_to_host_register_fis_interrupt: bool,
-    pio_setup_fis_interrupt: bool,
-    dma_setup_fis_interrupt: bool,
-    set_device_bits_interrupt: bool,
+pub struct AhciPortInterruptStatus {
+    pub device_to_host_register_fis_interrupt: bool,
+    pub pio_setup_fis_interrupt: bool,
+    pub dma_setup_fis_interrupt: bool,
+    pub set_device_bits_interrupt: bool,
     #[bits(access = RO)]
-    unknown_fis_interrupt: bool,
-    descriptor_prossed: bool,
+    pub unknown_fis_interrupt: bool,
+    pub descriptor_prossed: bool,
     #[bits(access = RO)]
-    port_connect_change_status: bool,
-    device_mechanical_presence_status: bool,
+    pub port_connect_change_status: bool,
+    pub device_mechanical_presence_status: bool,
 
     #[bits(14)]
     __: u32,
 
     #[bits(access = RO)]
-    phy_rdy_change_status: bool,
-    incorrect_port_multiplier_status: bool,
-    overflow_status: bool,
+    pub phy_rdy_change_status: bool,
+    pub incorrect_port_multiplier_status: bool,
+    pub overflow_status: bool,
 
     __: bool,
-    interface_non_fatal_error_status: bool,
-    interface_fatal_error_status: bool,
-    host_bus_data_error_status: bool,
-    host_bus_fatal_error_status: bool,
-    task_file_error_status: bool,
-    cold_port_detect_status: bool,
+    pub interface_non_fatal_error_status: bool,
+    pub interface_fatal_error_status: bool,
+    pub host_bus_data_error_status: bool,
+    pub host_bus_fatal_error_status: bool,
+    pub task_file_error_status: bool,
+    pub cold_port_detect_status: bool,
 }
 
 #[bitfield(u32)]
-struct AhciPortInterruptEnable {
-    device_to_host_register_fis_enable: bool,
-    pio_setup_fis_enable: bool,
-    dma_setup_fis_enable: bool,
-    set_device_bits_fis_enable: bool,
-    unknown_fis_enable: bool,
-    descriptor_processed_enable: bool,
-    port_change_enable: bool,
-    device_mechanical_presence_enable: bool,
+pub struct AhciPortInterruptEnable {
+    pub device_to_host_register_fis_enable: bool,
+    pub pio_setup_fis_enable: bool,
+    pub dma_setup_fis_enable: bool,
+    pub set_device_bits_fis_enable: bool,
+    pub unknown_fis_enable: bool,
+    pub descriptor_processed_enable: bool,
+    pub port_change_enable: bool,
+    pub device_mechanical_presence_enable: bool,
 
     #[bits(14)]
     __: u32,
 
-    phy_rdy_change_enable: bool,
-    incorrect_port_multiplier_enable: bool,
-    overflow_enable: bool,
+    pub phy_rdy_change_enable: bool,
+    pub incorrect_port_multiplier_enable: bool,
+    pub overflow_enable: bool,
 
     __: bool,
 
-    interface_non_fatal_error_enable: bool,
-    interface_fatal_error_enable: bool,
-    host_bus_data_error_enable: bool,
-    host_bust_fatal_error_enable: bool,
-    task_file_error_enable: bool,
-    cold_presence_detect_enable: bool,
+    pub interface_non_fatal_error_enable: bool,
+    pub interface_fatal_error_enable: bool,
+    pub host_bus_data_error_enable: bool,
+    pub host_bust_fatal_error_enable: bool,
+    pub task_file_error_enable: bool,
+    pub cold_presence_detect_enable: bool,
 }
 
 #[repr(u8)]
@@ -87,50 +87,50 @@ impl InterfaceCommunicationControl {
 }
 
 #[bitfield(u32)]
-struct AhciPortCommandAndStatus {
-    start: bool,
-    spin_up_device: bool,
-    power_on_device: bool,
-    command_list_overide: bool,
-    fis_recieve_enable: bool,
+pub struct AhciPortCommandAndStatus {
+    pub start: bool,
+    pub spin_up_device: bool,
+    pub power_on_device: bool,
+    pub command_list_overide: bool,
+    pub fis_recieve_enable: bool,
 
     #[bits(3)]
     __: u8,
 
     #[bits(5, access = RO)]
-    current_command_slot: u8,
+    pub current_command_slot: u8,
 
     #[bits(access = RO)]
-    mechanical_presence_switch_state: bool,
+    pub mechanical_presence_switch_state: bool,
     #[bits(access = RO)]
-    fis_receive_running: bool,
+    pub fis_receive_running: bool,
     #[bits(access = RO)]
-    command_list_running: bool,
+    pub command_list_running: bool,
     #[bits(access = RO)]
-    cold_presence_state: bool,
-    port_multipler_attached: bool,
+    pub cold_presence_state: bool,
+    pub port_multipler_attached: bool,
     #[bits(access = RO)]
-    hot_plug_capable_port: bool,
+    pub hot_plug_capable_port: bool,
     #[bits(access = RO)]
-    mechanical_presence_switch_attached_to_port: bool,
+    pub mechanical_presence_switch_attached_to_port: bool,
     #[bits(access = RO)]
-    cold_presence_detection: bool,
+    pub cold_presence_detection: bool,
     #[bits(access = RO)]
-    external_sata_port: bool,
+    pub external_sata_port: bool,
     #[bits(access = RO)]
-    fis_base_switch_capable: bool,
-    automatic_partial_to_slumber_transitions_enable: bool,
-    device_is_atapi: bool,
-    drive_led_on_atapi_enable: bool,
-    aggressive_power_link_management_enable: bool,
-    aggressive_slumber_partial: bool,
+    pub fis_base_switch_capable: bool,
+    pub automatic_partial_to_slumber_transitions_enable: bool,
+    pub device_is_atapi: bool,
+    pub drive_led_on_atapi_enable: bool,
+    pub aggressive_power_link_management_enable: bool,
+    pub aggressive_slumber_partial: bool,
 
     #[bits(4)]
-    interface_communication_control: InterfaceCommunicationControl,
+    pub interface_communication_control: InterfaceCommunicationControl,
 }
 
 #[bitfield(u32)]
-struct AhciPortTaskFileData {
+pub struct AhciPortTaskFileData {
     #[bits(access = RO)]
     err_status: bool,
     #[bits(2, access = RO)]
@@ -149,9 +149,9 @@ struct AhciPortTaskFileData {
     __: u16,
 }
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 #[repr(u8)]
-enum AhciDeviceDetection {
+pub enum AhciDeviceDetection {
     NoDevice = 0x0,
     NoCommunication = 0x1,
     CommunicationEstablished = 0x3,
@@ -171,9 +171,9 @@ impl AhciDeviceDetection {
     }
 }
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 #[repr(u8)]
-enum AhciCurrentInterfaceSpeed {
+pub enum AhciCurrentInterfaceSpeed {
     NoDevice = 0x0,
     Gen1 = 0x1,
     Gen2 = 0x2,
@@ -193,9 +193,9 @@ impl AhciCurrentInterfaceSpeed {
     }
 }
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 #[repr(u8)]
-enum AhciInterfacePowerManagement {
+pub enum AhciInterfacePowerManagement {
     NoDevice = 0x0,
     Active = 0x1,
     PartialPower = 0x2,
@@ -218,15 +218,16 @@ impl AhciInterfacePowerManagement {
 }
 
 #[bitfield(u32)]
-struct AhciSataStatus {
+#[derive(PartialEq)]
+pub struct AhciSataStatus {
     #[bits(4, access = RO)]
-    device_detection: AhciDeviceDetection,
+    pub device_detection: AhciDeviceDetection,
 
     #[bits(4, access = RO)]
-    current_interface_speed: AhciCurrentInterfaceSpeed,
+    pub current_interface_speed: AhciCurrentInterfaceSpeed,
 
     #[bits(4, access = RO)]
-    interface_power_management: AhciInterfacePowerManagement,
+    pub interface_power_management: AhciInterfacePowerManagement,
 
     #[bits(20)]
     __: u32,
@@ -283,7 +284,7 @@ impl AhciSpeedAllowed {
 }
 
 #[bitfield(u32)]
-struct AhciSataControl {
+pub struct AhciSataControl {
     #[bits(4)]
     device_detection_initialization: AhciDeviceDetectionInitialization,
 
@@ -301,39 +302,39 @@ struct AhciSataControl {
 }
 
 #[bitfield(u32)]
-struct AhciSataError {
-    recovered_data_integrity_error: bool,
-    recovered_communications_error: bool,
+pub struct AhciSataError {
+    pub recovered_data_integrity_error: bool,
+    pub recovered_communications_error: bool,
 
     #[bits(6)]
     __: u8,
 
-    transient_data_integrity_error: bool,
-    persisten_communication_or_data_integrity_error: bool,
-    protocol_error: bool,
-    internal_error: bool,
+    pub transient_data_integrity_error: bool,
+    pub persisten_communication_or_data_integrity_error: bool,
+    pub protocol_error: bool,
+    pub internal_error: bool,
 
     #[bits(4)]
     __: u8,
 
-    phy_ready_change: bool,
-    phy_internal_error: bool,
-    comm_wake: bool,
-    decode_error: bool,
+    pub phy_ready_change: bool,
+    pub phy_internal_error: bool,
+    pub comm_wake: bool,
+    pub decode_error: bool,
     __: bool,
-    crc_error: bool,
-    handshake_error: bool,
-    link_sequence_error: bool,
-    transport_state_transition_error: bool,
-    uknown_fis_type: bool,
-    exchanged: bool,
+    pub crc_error: bool,
+    pub handshake_error: bool,
+    pub link_sequence_error: bool,
+    pub transport_state_transition_error: bool,
+    pub uknown_fis_type: bool,
+    pub exchanged: bool,
 
     #[bits(5)]
     __: u8,
 }
 
 #[bitfield(u32)]
-struct AhciFisBasedSwitchingControl {
+pub struct AhciFisBasedSwitchingControl {
     enable: bool,
     device_error_clear: bool,
 
@@ -357,7 +358,7 @@ struct AhciFisBasedSwitchingControl {
 }
 
 #[bitfield(u32)]
-struct AhciDeviceSleep {
+pub struct AhciDeviceSleep {
     aggressive_device_sleep_enable: bool,
 
     #[bits(access = RO)]
@@ -378,22 +379,25 @@ struct AhciDeviceSleep {
     __: u8,
 }
 
+#[derive(Debug)]
 #[repr(C, packed)]
 pub struct AhciPortHba {
-    command_list_base: u64,
-    fis_base: u64,
-    interrupt_status: AhciPortInterruptStatus,
-    interrupt_enable: AhciPortInterruptEnable,
-    command: AhciPortCommandAndStatus,
+    pub command_list_base: u64,
+    pub fis_base: u64,
+    pub interrupt_status: AhciPortInterruptStatus,
+    pub interrupt_enable: AhciPortInterruptEnable,
+    pub command: AhciPortCommandAndStatus,
     __: u32,
-    task_file_data: AhciPortTaskFileData,
-    signature: u32,
-    sata_status: AhciSataStatus,
-    sata_control: AhciSataControl,
-    sata_error: AhciSataError,
-    sata_active: u32,
-    command_issue: u32,
-    sata_notification: u32,
-    fis_based_switching_ctl: AhciFisBasedSwitchingControl,
-    device_sleep: AhciDeviceSleep,
+    pub task_file_data: AhciPortTaskFileData,
+    pub signature: u32,
+    pub sata_status: AhciSataStatus,
+    pub sata_control: AhciSataControl,
+    pub sata_error: AhciSataError,
+    pub sata_active: u32,
+    pub command_issue: u32,
+    pub sata_notification: u32,
+    pub fis_based_switching_ctl: AhciFisBasedSwitchingControl,
+    pub device_sleep: AhciDeviceSleep,
 }
+
+const _: () = assert!(size_of::<AhciPortHba>() == 0x48);

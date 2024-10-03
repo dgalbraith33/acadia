@@ -41,6 +41,19 @@ impl MemoryRegion {
         })
     }
 
+    pub fn contiguous_physical(size: u64) -> Result<(Self, u64), ZError> {
+        let (mem_cap, paddr) = syscall::memory_object_contiguous_physical(size)?;
+        let virt_addr = syscall::address_space_map(&mem_cap)?;
+        Ok((
+            Self {
+                mem_cap,
+                virt_addr,
+                size,
+            },
+            paddr,
+        ))
+    }
+
     pub fn from_cap(mem_cap: Capability) -> Result<Self, ZError> {
         let virt_addr = syscall::address_space_map(&mem_cap)?;
         let size = syscall::memory_object_inspect(&mem_cap)?;

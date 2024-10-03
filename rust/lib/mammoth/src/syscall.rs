@@ -158,6 +158,21 @@ pub fn memory_object_direct_physical(paddr: u64, size: u64) -> Result<Capability
     Ok(Capability::take(vmmo_cap))
 }
 
+pub fn memory_object_contiguous_physical(size: u64) -> Result<(Capability, u64), ZError> {
+    let mut vmmo_cap = 0;
+    let mut paddr = 0;
+    syscall(
+        zion::kZionMemoryObjectCreateContiguous,
+        &zion::ZMemoryObjectCreateContiguousReq {
+            size,
+            paddr: &mut paddr,
+            vmmo_cap: &mut vmmo_cap,
+        },
+    )?;
+
+    Ok((Capability::take(vmmo_cap), paddr))
+}
+
 pub fn memory_object_inspect(mem_cap: &Capability) -> Result<u64, ZError> {
     let mut mem_size = 0;
     syscall(
