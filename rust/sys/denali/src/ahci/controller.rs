@@ -222,10 +222,12 @@ struct Command {
 
     #[allow(dead_code)] // We need to own this even if we never access it.
     memory_region: MemoryRegion,
+
+    callback: fn(&Self) -> (),
 }
 
 impl Command {
-    pub fn identify() -> Result<Self, ZError> {
+    pub fn identify(callback: fn(&Self) -> ()) -> Result<Self, ZError> {
         let (memory_region, paddr) = MemoryRegion::contiguous_physical(512)?;
 
         Ok(Self {
@@ -234,7 +236,12 @@ impl Command {
             sector_cnt: 1,
             paddr,
             memory_region,
+            callback,
         })
+    }
+
+    pub fn callback(&self) {
+        (self.callback)(self);
     }
 }
 
@@ -248,7 +255,6 @@ struct PortController<'a> {
     ahci_port_hba: &'a mut AhciPortHba,
     command_slots: [Option<Rc<Command>>; 32],
     command_structures: MemoryRegion,
-    command_paddr: u64,
 }
 
 impl<'a> PortController<'a> {
@@ -277,7 +283,6 @@ impl<'a> PortController<'a> {
             ahci_port_hba,
             command_slots: [const { None }; 32],
             command_structures,
-            command_paddr,
         };
 
         // This leaves space for 8 prdt entries.
@@ -291,7 +296,27 @@ impl<'a> PortController<'a> {
 
     pub fn identify(&mut self) -> Result<(), ZError> {
         if self.ahci_port_hba.signature == 0x101 {
-            self.issue_command(Rc::from(Command::identify()?))?;
+            let callback = |c: &Command| {
+                mammoth::debug!("TESTING");
+                let ident = c.memory_region.slice::<u16>();
+                let sector_size = if ident[106] & (1 << 12) != 0 {
+                    ident[117] as u32 | ((ident[118] as u32) << 16)
+                } else {
+                    512
+                };
+
+                let lba_count = if ident[83] & (1 << 10) != 0 {
+                    ident[100] as u64
+                        | (ident[101] as u64) << 16
+                        | (ident[102] as u64) << 32
+                        | (ident[103] as u64) << 48
+                } else {
+                    (ident[60] as u64 | (ident[61] as u64) << 16) as u64
+                };
+                mammoth::debug!("Sector size: {:#0x}", sector_size);
+                mammoth::debug!("LBA Count: {:#0x}", lba_count);
+            };
+            self.issue_command(Rc::from(Command::identify(callback)?))?;
         } else {
             let sig = self.ahci_port_hba.signature;
             mammoth::debug!("Skipping non-sata sig: {:#0x}", sig);
@@ -403,6 +428,6 @@ impl<'a> PortController<'a> {
     }
 
     fn finish_command(&self, slot: usize) {
-        mammoth::debug!("Finishing command in slot {}", slot);
+        self.command_slots[slot].as_ref().unwrap().callback()
     }
 }
